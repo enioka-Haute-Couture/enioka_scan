@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">EniokaScan</string>
+
+    <!-- Scanner status -->
+    <string name="scanner_status_idle">Scanner is idle</string>
+    <string name="scanner_status_scanning">Scanner is scanning</string>
+    <string name="scanner_status_waiting">Scanner is can scan on trigger press</string>
+    <string name="scanner_status_disabled">Scanner is disabled</string>
+
+    <!-- ZBar specific -->
+    <string name="scanner_zbar_open_error_title">Cannot connect to camera service</string>
+    <string name="scanner_zbar_open_error">"Please check that no other applications (including scan helpers like ScanWedge) are using the camera. Also check if the Android camera app is working.\nApplication will now crash."</string>
+    <string name="scanner_zbar_no_camera">No fallback camera available on device. Please plugin your laser barcode scanner and restart application. Application will now crash.</string>
+</resources>

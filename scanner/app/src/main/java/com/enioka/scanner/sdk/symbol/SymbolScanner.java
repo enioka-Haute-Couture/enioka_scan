@@ -384,6 +384,11 @@ public class SymbolScanner implements Scanner, EMDKManager.EMDKListener, com.sym
     }
 
     @Override
+    public void setDataCallBack(ScannerDataCallback cb) {
+        this.dataCb = cb;
+    }
+
+    @Override
     public void disconnect() {
         if (this.scanner != null) {
             try {

@@ -64,6 +64,10 @@ public class LaserScanner implements Scanner {
         Log.i(LOG_TAG, "Scanner was initialized with implementation " + this.scanner.getClass().getCanonicalName());
     }
 
+    @Override
+    public void setDataCallBack(ScannerDataCallback cb) {
+        this.scanner.setDataCallBack(cb);
+    }
 
     @Override
     public void disconnect() {

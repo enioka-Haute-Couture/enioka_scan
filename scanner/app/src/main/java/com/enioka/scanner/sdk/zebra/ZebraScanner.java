@@ -152,6 +152,11 @@ class ZebraScanner implements Scanner, IDcsSdkApiDelegate {
         });
     }
 
+    @Override
+    public void setDataCallBack(ScannerDataCallback cb) {
+        this.dataCb = cb;
+    }
+
     public boolean checkActiveScanners() {
         mScannerInfoList = new ArrayList<>();
 

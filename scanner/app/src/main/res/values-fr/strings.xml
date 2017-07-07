@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">EniokaScan</string>
     <string name="scanner_status_disabled">Scanner désactivé</string>
     <string name="scanner_status_idle">Scanner au repos</string>
     <string name="scanner_status_scanning">Scanner actif</string>

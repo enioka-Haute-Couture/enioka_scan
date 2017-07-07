@@ -75,6 +75,13 @@ public interface Scanner {
     void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode);
 
     /**
+     * Change ScannerDataCallback
+     *
+     * @param cb a callback to call when data is read.
+     */
+    void setDataCallBack(ScannerDataCallback cb);
+
+    /**
      * Disconnect scanner from the App (the app does not need the scanner anymore)
      */
     void disconnect();

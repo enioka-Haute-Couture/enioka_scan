@@ -62,6 +62,11 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
         cb0.onConnectionSuccessful();
     }
 
+    @Override
+    public void setDataCallBack(ScannerDataCallback cb) {
+        //
+    }
+
     public boolean checkActiveScanners() {
         return false;
     }

@@ -190,6 +190,11 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
     }
 
     @Override
+    public void setDataCallBack(ScannerDataCallback cb) {
+        this.dataCb = cb;
+    }
+
+    @Override
     public void disconnect() {
         Intent TriggerButtonIntent = new Intent();
         TriggerButtonIntent.setAction(DataWedge.SOFTSCANTRIGGER);

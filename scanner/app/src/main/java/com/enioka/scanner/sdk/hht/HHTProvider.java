@@ -14,6 +14,10 @@ public class HHTProvider implements ScannerProvider {
     @Override
     public Scanner getScanner(Context ctx) {
         // CHeck if SPA43
+        if(!android.os.Build.MODEL.equals("SPA43LTE")) {
+            return null;
+        }
+
         return new HHTScanner();
     }
 }

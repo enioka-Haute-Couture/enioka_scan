@@ -150,10 +150,6 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
         this.statusCb = cb2;
         this.mode = mode;
 
-        if(!android.os.Build.MODEL.equals("SPA43LTE")) {
-            cb0.onConnectionFailure();
-        }
-
         IntentFilter intentFilter = new IntentFilter("DATA_SCAN");
         ctx.registerReceiver(this, intentFilter);
 

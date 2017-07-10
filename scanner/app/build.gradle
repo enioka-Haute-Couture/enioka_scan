@@ -6,8 +6,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -19,14 +19,18 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:25.3.1'
+
     provided fileTree(include: ['com.symbol.emdk.jar'], dir: 'extlibs')
     compile fileTree(exclude: ['com.symbol.emdk.jar'], dir: 'extlibs')
+
     compile 'me.dm7.barcodescanner:zbar:1.8.3'
+
+    compile project(':barcode_scanner_library_v2.0.8.0')
+
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     testCompile 'junit:junit:4.12'
-    compile project(':barcode_scanner_library_v2.0.8.0')
 }

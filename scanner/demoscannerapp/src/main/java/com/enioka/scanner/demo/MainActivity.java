@@ -68,4 +68,12 @@ public class MainActivity extends AppCompatActivity implements Scanner.ScannerDa
     public void onStatusChanged(String newStatus) {
         ((TextView) findViewById(R.id.text_scanner_status)).setText(newStatus);
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        this.s.disconnect();
+    }
+
+
 }

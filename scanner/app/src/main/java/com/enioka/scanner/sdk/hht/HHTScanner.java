@@ -5,9 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.util.Log;
 
+import com.enioka.scanner.R;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.camera.ZbarScanView;
 import com.enioka.scanner.data.Barcode;
@@ -170,19 +169,25 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
         ctx.sendBroadcast(intent);
 
         // Set initial settings
-        for(String initialSetting : initialSettingsSoftScan) {
+        for (String initialSetting : initialSettingsSoftScan) {
             intent.setAction(DataWedge.SOFTSCANTRIGGER);
             intent.putExtra(DataWedge.EXTRA_PARAMETER, initialSetting);
             ctx.sendBroadcast(intent);
         }
 
-        for(String symbology : symbologies) {
+        for (String symbology : symbologies) {
             intent.setAction(DataWedge.SCANNERINPUTPLUGIN);
             intent.putExtra(DataWedge.EXTRA_PARAMETER, symbology);
             ctx.sendBroadcast(intent);
         }
 
-        cb0.onConnectionSuccessful();
+        if (cb0 != null) {
+            cb0.onConnectionSuccessful();
+        }
+
+        if (cb2 != null) {
+            cb2.onStatusChanged(ctx.getString(R.string.scanner_status_waiting));
+        }
     }
 
     @Override
@@ -258,6 +263,8 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
 
         List<Barcode> barcodes = new ArrayList<>();
         barcodes.add(new Barcode(barcode, barcodeTypesMapping.get(type)));
-        dataCb.onData(barcodes);
+        if (dataCb != null) {
+            dataCb.onData(barcodes);
+        }
     }
 }

@@ -10,6 +10,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/barcode_scanner_library_v2.0.8.0" />
+            <option value="$PROJECT_DIR$/demoscannerapp" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

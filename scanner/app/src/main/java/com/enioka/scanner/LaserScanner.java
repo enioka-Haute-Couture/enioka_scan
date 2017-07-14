@@ -57,9 +57,7 @@ public class LaserScanner implements Scanner {
     @Override
     public void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
         this.scanner = LaserScanner.getLaserScanner(ctx);
-        if (this.scanner == null) {
-            throw new IllegalStateException("there is no available barcode scanner on this device");
-        }
+
         this.scanner.initialize(ctx, cb0, cb1, cb2, mode);
         Log.i(LOG_TAG, "Scanner was initialized with implementation " + this.scanner.getClass().getCanonicalName());
     }

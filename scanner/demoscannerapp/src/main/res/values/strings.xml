@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">DemoScannerApp</string>
+    <string name="main_barcode_value_placeholder">10AL9271B2I8</string>
+    <string name="scanner_not_initialized">main_scanner_status_placeholder</string>
+</resources>

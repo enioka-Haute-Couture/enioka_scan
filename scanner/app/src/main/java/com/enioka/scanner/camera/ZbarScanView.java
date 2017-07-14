@@ -25,7 +25,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import com.geodis.mobicop.eniokascan.R;
+import com.enioka.scanner.R;
 
 import net.sourceforge.zbar.Image;
 import net.sourceforge.zbar.ImageScanner;
@@ -66,9 +66,8 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     protected Paint targetRectPaint, guideLinePaint, filterOutPaint, autoFocusPaint;
     protected int x1, y1, x2, y2, x3, y3, x4, y4; // 1 = top left, 2 = top right, 3 = bottom right, 4 = bottom left.
     private float camResRatio;
-    private boolean needsFocus = false;
+    private boolean manualAutoFocus = false;
     private boolean torchOn = false;
-    private boolean isAutofocus = false;
     private ZbarScanViewOverlay overlay;
     protected boolean scanningStarted = true;
     private boolean failed = false;
@@ -140,7 +139,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     /**
      * Default is simply CODE_128. Use the Symbol static fields to specify a symbology.
      *
-     * @param s
+     * @param s the ID of the symbology (ZBAR coding)
      */
     public void addSymbology(int s) {
         this.scanner.setConfig(s, 0, 1);
@@ -273,7 +272,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
                 prms.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
                 Log.d(TAG, "supportedFocusModes - auto supported and selected");
-                needsFocus = true;
+                manualAutoFocus = true;
             } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_MACRO)) {
                 prms.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
                 Log.d(TAG, "supportedFocusModes - macro supported and selected");
@@ -374,8 +373,10 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             this.cam.setDisplayOrientation(getCameraDisplayOrientation());
 
             // The view holding the preview
-            camView = new SurfaceView(context);
-            this.addView(camView);
+            if (this.camView == null) {
+                camView = new SurfaceView(context);
+                this.addView(camView);
+            }
             this.camHolder = camView.getHolder();
             this.camHolder.addCallback(this);
         }
@@ -396,6 +397,14 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             ly.height = ViewGroup.LayoutParams.MATCH_PARENT;
             ly.gravity = Gravity.CENTER;
             camView.setLayoutParams(ly);
+        }
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility == VISIBLE && this.cam != null) {
+            this.cam.cancelAutoFocus();
         }
     }
 
@@ -496,28 +505,28 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     /**
      * Force the camera to perform an autofocus
      */
-    public void forceAutoFocus() {
-        isAutofocus = true;
-        final ZbarScanView t = this;
-        overlay.invalidate();
-        try {
-            this.cam.autoFocus(new Camera.AutoFocusCallback() {
-                @Override
-                public void onAutoFocus(boolean success, Camera camera) {
-                    Log.v(TAG, "onAutoFocus: done");
-                    isAutofocus = false;
-                    overlay.invalidate();
-                    try {
-                        if (scanningStarted) {
-                            camera.setOneShotPreviewCallback(t);
+    public void triggerAutoFocus() {
+        if (manualAutoFocus) {
+            final ZbarScanView t = this;
+            overlay.invalidate();
+            try {
+                this.cam.autoFocus(new Camera.AutoFocusCallback() {
+                    @Override
+                    public void onAutoFocus(boolean success, Camera camera) {
+                        Log.v(TAG, "onAutoFocus: done");
+                        overlay.invalidate();
+                        try {
+                            if (scanningStarted) {
+                                camera.setOneShotPreviewCallback(t);
+                            }
+                        } catch (RuntimeException e) {
+                            // Can happen when the camera was released before this callback happens. Not an issue - the scan has already succeeded.
                         }
-                    } catch (RuntimeException e) {
-                        // Can happen when the camera was released before this callback happens. Not an issue - the scan has already succeeded.
                     }
-                }
-            });
-        } catch (Exception e) {
-            // Autofocus may fail from time to time (especially if called too soon)
+                });
+            } catch (Exception e) {
+                // Autofocus may fail from time to time (especially if called too soon)
+            }
         }
     }
     //
@@ -687,7 +696,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             final ZbarScanView t = this;
             Calendar limit = Calendar.getInstance();
             limit.add(Calendar.SECOND, -1);
-            if (needsFocus && focusTime.before(limit)) {
+            if (manualAutoFocus && focusTime.before(limit)) {
                 focusTime = now;
                 this.cam.autoFocus(new Camera.AutoFocusCallback() {
                     @Override
@@ -857,7 +866,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         // Guide horizontal line
         canvas.drawLine(0, y1 + (y3 - y1) / 2, this.getMeasuredWidth(), y1 + (y3 - y1) / 2, guideLinePaint);
 
-        if (isAutofocus) {
+        if (manualAutoFocus) {
             // Draw autofocus reticule
             canvas.drawRect(x1, y1, x3, y3, autoFocusPaint);
         }

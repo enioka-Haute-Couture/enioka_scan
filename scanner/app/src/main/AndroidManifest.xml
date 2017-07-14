@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.geodis.mobicop.eniokascan">
+    package="com.enioka.scanner">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="com.symbol.emdk.permission.EMDK" />

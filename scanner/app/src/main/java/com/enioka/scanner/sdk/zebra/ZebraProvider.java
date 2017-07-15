@@ -3,8 +3,8 @@ package com.enioka.scanner.sdk.zebra;
 import android.content.Context;
 import android.util.Log;
 
-import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
+import com.enioka.scanner.api.ScannerSearchOptions;
 import com.zebra.scannercontrol.DCSSDKDefs;
 import com.zebra.scannercontrol.DCSScannerInfo;
 import com.zebra.scannercontrol.SDKHandler;
@@ -17,9 +17,10 @@ import java.util.List;
  */
 public class ZebraProvider implements ScannerProvider {
     private static final String LOG_TAG = "ZebraProvider";
+    private static final String PROVIDER_NAME = "Zebra Bluetooth";
 
     @Override
-    public Scanner getScanner(Context ctx) {
+    public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
         SDKHandler sdkHandler = new SDKHandler(ctx);
         sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_BT_NORMAL);
 
@@ -28,9 +29,10 @@ public class ZebraProvider implements ScannerProvider {
         Log.i(LOG_TAG, "dcssdkGetAvailableScannersList :" + sdkHandler.dcssdkGetAvailableScannersList(mScannerInfoList));
 
         if (mScannerInfoList.size() == 0) {
-            return null;
+            cb.onProvided(PROVIDER_NAME, null, null);
+            sdkHandler.dcssdkClose(null);
         } else {
-            return new ZebraScanner(sdkHandler);
+            cb.onProvided(PROVIDER_NAME, "t", new ZebraScanner(sdkHandler));
         }
     }
 }

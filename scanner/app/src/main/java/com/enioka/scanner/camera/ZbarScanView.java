@@ -184,6 +184,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         // Camera pane init
         if (this.cam == null && !this.isInEditMode()) {
             try {
+                Log.i(TAG, "Camera is being opened");
                 this.cam = Camera.open();
             } catch (final Exception e) {
                 failed = true;
@@ -802,8 +803,10 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     // Clean up methods
     public void cleanUp() {
         if (this.cam != null) {
+            Log.i(TAG, "Removing all camera callbacks and stopping it");
             this.cam.setOneShotPreviewCallback(null);
             this.cam.setPreviewCallback(null);
+            this.cam.stopPreview();
             this.setOnClickListener(null);
             this.lastPreviewData = null;
         }
@@ -814,6 +817,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (this.cam == null) {
             return;
         }
+        Log.i(TAG, "Camera is being released");
         this.cam.release();
         this.cam = null;
     }

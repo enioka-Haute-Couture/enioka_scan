@@ -38,8 +38,18 @@ public final class Common {
      * @return true if a handler exists.
      */
     public static boolean checkIntentListener(String url, Context a) {
-        PackageManager packageManager = a.getPackageManager();
         Intent i = new Intent(url);
-        return packageManager.queryIntentServices(i, 0).size() > 0 || packageManager.queryIntentActivities(i, 0).size() > 0;
+        return checkIntentListener(i, a);
+    }
+
+    /**
+     * Returns true if there is a handler for this intent.
+     *
+     * @param i the intent to check.
+     * @return true if a handler exists.
+     */
+    public static boolean checkIntentListener(Intent i, Context a) {
+        PackageManager packageManager = a.getPackageManager();
+        return packageManager.queryIntentServices(i, 0).size() > 0 || packageManager.queryIntentActivities(i, 0).size() > 0 || packageManager.queryBroadcastReceivers(i, PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).size() > 0;
     }
 }

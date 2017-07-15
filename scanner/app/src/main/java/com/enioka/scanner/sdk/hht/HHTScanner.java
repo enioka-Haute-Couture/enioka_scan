@@ -152,18 +152,7 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
         IntentFilter intentFilter = new IntentFilter("DATA_SCAN");
         ctx.registerReceiver(this, intentFilter);
 
-        Intent intent;
-
-        /* FIXME
-        PackageManager packageManager = ctx.getApplication().getPackageManager();
-        intent = new Intent();
-        intent.setAction(DataWedge.SCANNERINPUTPLUGIN);
-        Log.i(LOG_TAG, "queryBroadcastReceivers " + packageManager. queryBroadcastReceivers(intent, 0));
-        if (packageManager. queryBroadcastReceivers(intent, 0).size() == 0) {
-            cb0.onConnectionFailure();
-        }*/
-
-        intent = new Intent();
+        Intent intent = new Intent();
         intent.setAction(DataWedge.SCANNERINPUTPLUGIN);
         intent.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.ENABLE_PLUGIN);
         ctx.sendBroadcast(intent);

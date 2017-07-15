@@ -84,7 +84,7 @@ public final class LaserScanner {
                         handler.scannerConnectionProgress(providerKey, null, "No " + providerKey + " scanners available.");
 
                         // Remove the provider for ever - that way future searches are faster.
-                        synchronized (laserProviders) {
+                        synchronized (LaserScanner.laserProviders) {
                             LaserScanner.laserProviders.remove(sp);
                             if (LaserScanner.laserProviders.isEmpty()) {
                                 Log.i(LOG_TAG, "There are no laser scanners available at all");

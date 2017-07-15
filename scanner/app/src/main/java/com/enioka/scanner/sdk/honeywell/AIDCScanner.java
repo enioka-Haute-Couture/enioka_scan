@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Scanner implementation for Honeywell AIDC SDK.
+ * Scanner implementation for Honeywell/Intermec AIDC SDK.
  */
 public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
     private final static String LOG_TAG = "ScannerHoneywellAidc";
@@ -176,6 +176,6 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
 
     @Override
     public void onFailureEvent(BarcodeFailureEvent barcodeFailureEvent) {
-        Log.e(LOG_TAG, "New barcode failure event");
+        Log.e(LOG_TAG, "New barcode failure event: " + barcodeFailureEvent.toString());
     }
 }

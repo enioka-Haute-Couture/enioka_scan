@@ -1,5 +1,9 @@
 package com.enioka.scanner.helpers;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+
 import com.enioka.scanner.camera.ZbarScanView;
 
 /**
@@ -25,5 +29,17 @@ public final class Common {
      */
     public static void beepPairingCompleted() {
         ZbarScanView.beepWaiting();
+    }
+
+    /**
+     * Returns true if there is a handler for this intent.
+     *
+     * @param url the intent to check.
+     * @return true if a handler exists.
+     */
+    public static boolean checkIntentListener(String url, Context a) {
+        PackageManager packageManager = a.getPackageManager();
+        Intent i = new Intent(url);
+        return packageManager.queryIntentServices(i, 0).size() > 0 || packageManager.queryIntentActivities(i, 0).size() > 0;
     }
 }

@@ -12,6 +12,7 @@ import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.sdk.hht.HHTProvider;
+import com.enioka.scanner.sdk.honeywell.AIDCProvider;
 import com.enioka.scanner.sdk.symbol.SymbolProvider;
 import com.enioka.scanner.sdk.zebra.ZebraProvider;
 
@@ -28,7 +29,7 @@ public final class LaserScanner {
     /**
      * The list of available scanner providers. (manual for now => no useless complicated plugin system)
      */
-    private static final List<ScannerProvider> laserProviders = new ArrayList<>(Arrays.asList(new SymbolProvider(), new ZebraProvider(), new HHTProvider()));
+    private static final List<ScannerProvider> laserProviders = new ArrayList<>(Arrays.asList(new SymbolProvider(), new ZebraProvider(), new HHTProvider(), new AIDCProvider()));
     private static Boolean scannerFound = false;
 
     /**
@@ -69,7 +70,7 @@ public final class LaserScanner {
                 @Override
                 public void onProvided(String providerKey, String scannerKey, Scanner s) {
                     if (s != null) {
-                        Log.i(LOG_TAG, providerKey + "scanner found. Id " + scannerKey);
+                        Log.i(LOG_TAG, providerKey + " scanner found. Id " + scannerKey);
                         handler.scannerConnectionProgress(providerKey, scannerKey, "scanner found.");
 
                         synchronized (LaserScanner.class) {

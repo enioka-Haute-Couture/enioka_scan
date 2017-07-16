@@ -7,4 +7,8 @@
     <string name="scanner_zbar_no_camera">Aucune caméra disponible. Veuillez brancher votre lecteur laser. L\'application va s\'arrêter.</string>
     <string name="scanner_zbar_open_error">Veuillez vérifier qu\'aucune autre application n\'utilise la caméra (comme ScanWedge, DataWedge...). Vérifiez aussi que la caméra fnction dans l\'application idoine.</string>
     <string name="scanner_zbar_open_error_title">Impossible de se connecter à la caméra</string>
+    <string name="activity_scan_barcode_value_placeholder">10AL9271B2I8</string>
+    <string name="activity_scan_scanner_not_initialized">placeholder</string>
+    <string name="app_name">EniokaScan</string>
+    <string name="scanner_using_bt_keyboard">Utilisation d\'un clavier ou lecteur Bluetooth</string>
 </resources>

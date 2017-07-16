@@ -11,4 +11,9 @@
     <string name="scanner_zbar_open_error_title">Cannot connect to camera service</string>
     <string name="scanner_zbar_open_error">"Please check that no other applications (including scan helpers like ScanWedge) are using the camera. Also check if the Android camera app is working.\nApplication will now crash."</string>
     <string name="scanner_zbar_no_camera">No fallback camera available on device. Please plugin your laser barcode scanner and restart application. Application will now crash.</string>
+
+    <!-- Helper activities -->
+    <string name="activity_scan_barcode_value_placeholder">10AL9271B2I8</string>
+    <string name="activity_scan_scanner_not_initialized">main_scanner_status_placeholder</string>
+    <string name="scanner_using_bt_keyboard">Using Bluetooth scanner or keyboard</string>
 </resources>

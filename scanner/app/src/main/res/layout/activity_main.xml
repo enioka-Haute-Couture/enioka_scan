@@ -4,15 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".activities.ScannerCompatActivity">
 
     <TextView
-        android:id="@+id/text_last_scan"
+        android:id="@+id/scanner_text_last_scan"
         android:layout_width="368dp"
         android:layout_height="wrap_content"
         android:background="#59ffffff"
         android:gravity="center_horizontal|center_vertical"
-        android:text="@string/main_barcode_value_placeholder"
+        android:text="@string/activity_scan_barcode_value_placeholder"
         android:textColor="@android:color/black"
         android:textSize="22sp"
         android:textStyle="bold"
@@ -20,18 +20,18 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/text_scanner_status"
+        android:id="@+id/scanner_text_scanner_status"
         android:layout_width="368dp"
         android:layout_height="wrap_content"
-        android:text="@string/main_barcode_value_placeholder"
+        android:text="@string/activity_scan_barcode_value_placeholder"
         android:textColor="@android:color/darker_gray"
         android:textSize="15sp"
         android:textStyle="normal"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_last_scan" />
+        app:layout_constraintTop_toBottomOf="@+id/scanner_text_last_scan" />
 
     <ImageButton
-        android:id="@+id/photo"
+        android:id="@+id/scanner_bt_camera"
         android:layout_width="wrap_content"
         android:layout_height="45dp"
         android:background="@null"

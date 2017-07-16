@@ -1,11 +1,14 @@
 package com.enioka.scanner.activities;
 
 import android.content.res.Configuration;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.R;
@@ -15,6 +18,7 @@ import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.camera.ZbarScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.helpers.Common;
 import com.enioka.scanner.sdk.zbar.ScannerZbarViewImpl;
 
 import java.util.ArrayList;
@@ -53,6 +57,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Common.askForPermission(this);
+    }
+
+    @Override
     protected void onResume() {
         Log.i(LOG_TAG, "Resuming scanner activity - scanner will be connected");
         super.onResume();
@@ -82,6 +92,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     @Override
     protected void onPause() {
+        Log.i(LOG_TAG, "Scanner activity is being paused");
         if (s != null) {
             Log.i(LOG_TAG, "Scanner is being disconnected");
             this.s.disconnect();
@@ -126,6 +137,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     protected void initCamera() {
         Log.i(LOG_TAG, "Giving up on laser, going to camera");
+        if (!Common.hasCamera(this)) {
+            Log.i(LOG_TAG, "No camera available on device");
+            Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (this.s != null) {
             this.s.disconnect();
             this.s = null;
@@ -189,6 +205,4 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         }
         return true;
     }
-
-
 }

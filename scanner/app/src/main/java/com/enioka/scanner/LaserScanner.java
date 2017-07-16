@@ -1,10 +1,6 @@
 package com.enioka.scanner;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
@@ -38,8 +34,6 @@ public final class LaserScanner {
     private LaserScanner() {
     }
 
-    // TODO: verb without options.
-
     /**
      * Get a new laser scanner. The scanner is provided through a callback. There is a specific callback when no scanner is available.
      *
@@ -48,15 +42,6 @@ public final class LaserScanner {
      * @param options parameters for scanner search.
      */
     public static void getLaserScanner(Activity ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
-        // Ask for permissions.
-        boolean arePermissionsGranted = ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(ctx, "com.symbol.emdk.permission.EMDK") == PackageManager.PERMISSION_GRANTED;
-        if (!arePermissionsGranted) {
-            ActivityCompat.requestPermissions(ctx, new String[]{Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, "com.symbol.emdk.permission.EMDK"}, 1789);
-        }
-
         // Trivial
         if (laserProviders.isEmpty()) {
             Log.i(LOG_TAG, "There are no laser scanners available at all");

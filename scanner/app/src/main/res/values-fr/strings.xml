@@ -11,4 +11,7 @@
     <string name="activity_scan_scanner_not_initialized">placeholder</string>
     <string name="app_name">EniokaScan</string>
     <string name="scanner_using_bt_keyboard">Utilisation d\'un clavier ou lecteur Bluetooth</string>
+    <string name="scanner_status_initialization_failure">Un scanner a été trouvé mais n\'a pu s\'initialiser</string>
+    <string name="scanner_status_initialized">Un scanner s\'est initialisé avec succès</string>
+    <string name="scanner_status_no_camera">Aucune caméra disponible</string>
 </resources>

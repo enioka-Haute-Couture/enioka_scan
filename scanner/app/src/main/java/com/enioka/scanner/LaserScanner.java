@@ -11,7 +11,7 @@ import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
-import com.enioka.scanner.sdk.hht.HHTProvider;
+import com.enioka.scanner.sdk.athesi.HHTProvider;
 import com.enioka.scanner.sdk.honeywell.AIDCProvider;
 import com.enioka.scanner.sdk.zebra.BtZebraProvider;
 import com.enioka.scanner.sdk.zebra.EmdkZebraProvider;

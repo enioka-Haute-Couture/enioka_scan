@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.hht;
+package com.enioka.scanner.sdk.athesi;
 
 /**
  * HHT wrapper layer constants

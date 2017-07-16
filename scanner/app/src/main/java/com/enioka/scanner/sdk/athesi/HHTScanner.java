@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.hht;
+package com.enioka.scanner.sdk.athesi;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;

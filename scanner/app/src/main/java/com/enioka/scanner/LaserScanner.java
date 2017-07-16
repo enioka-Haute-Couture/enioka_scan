@@ -13,8 +13,8 @@ import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.sdk.hht.HHTProvider;
 import com.enioka.scanner.sdk.honeywell.AIDCProvider;
-import com.enioka.scanner.sdk.symbol.SymbolProvider;
-import com.enioka.scanner.sdk.zebra.ZebraProvider;
+import com.enioka.scanner.sdk.zebra.BtZebraProvider;
+import com.enioka.scanner.sdk.zebra.EmdkZebraProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +29,7 @@ public final class LaserScanner {
     /**
      * The list of available scanner providers. (manual for now => no useless complicated plugin system)
      */
-    private static final List<ScannerProvider> laserProviders = new ArrayList<>(Arrays.asList(new SymbolProvider(), new ZebraProvider(), new HHTProvider(), new AIDCProvider()));
+    private static final List<ScannerProvider> laserProviders = new ArrayList<>(Arrays.asList(new EmdkZebraProvider(), new BtZebraProvider(), new HHTProvider(), new AIDCProvider()));
     private static Boolean scannerFound = false;
 
     /**
@@ -51,9 +51,10 @@ public final class LaserScanner {
         // Ask for permissions.
         boolean arePermissionsGranted = ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED;
+                && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(ctx, "com.symbol.emdk.permission.EMDK") == PackageManager.PERMISSION_GRANTED;
         if (!arePermissionsGranted) {
-            ActivityCompat.requestPermissions(ctx, new String[]{Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN}, 1789);
+            ActivityCompat.requestPermissions(ctx, new String[]{Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, "com.symbol.emdk.permission.EMDK"}, 1789);
         }
 
         // Trivial

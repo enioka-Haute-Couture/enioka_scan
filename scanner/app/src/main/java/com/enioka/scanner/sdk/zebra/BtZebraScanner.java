@@ -25,8 +25,8 @@ import java.util.Map;
 /**
  * Scanner provider for external BT Zebra (real Zebra, not Symbol) devices.
  */
-class ZebraScanner implements Scanner, IDcsSdkApiDelegate {
-    private static final String LOG_TAG = "ZebraScanner";
+class BtZebraScanner implements Scanner, IDcsSdkApiDelegate {
+    private static final String LOG_TAG = "BtZebraScanner";
 
     private static final Map<Integer, BarcodeType> barcodeTypesMapping;
 
@@ -108,7 +108,7 @@ class ZebraScanner implements Scanner, IDcsSdkApiDelegate {
     private Scanner.ScannerStatusCallback statusCb = null;
     private Scanner.Mode mode;
 
-    ZebraScanner(SDKHandler h) {
+    BtZebraScanner(SDKHandler h) {
         this.sdkHandler = h;
     }
 
@@ -183,7 +183,7 @@ class ZebraScanner implements Scanner, IDcsSdkApiDelegate {
             Log.i(LOG_TAG, "Available scanner :");
             Log.i(LOG_TAG, " ScannerID :" + scannerId);
             Log.i(LOG_TAG, " ScannerName :" + scannerInfo.getScannerName());
-            new ConnectScannerAsync(
+            new BtConnectScannerAsync(
                     callback
                     , sdkHandler
                     , scannerId)

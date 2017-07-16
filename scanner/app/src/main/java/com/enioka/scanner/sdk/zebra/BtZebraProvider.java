@@ -15,8 +15,8 @@ import java.util.List;
 /**
  * Provider for the BT Zebra SDK.
  */
-public class ZebraProvider implements ScannerProvider {
-    private static final String LOG_TAG = "ZebraProvider";
+public class BtZebraProvider implements ScannerProvider {
+    private static final String LOG_TAG = "BtZebraProvider";
     private static final String PROVIDER_NAME = "Zebra Bluetooth";
 
     @Override
@@ -35,11 +35,12 @@ public class ZebraProvider implements ScannerProvider {
                 // The stupid API actually lists all BT devices. Only Zebra devices should have a model.
                 continue;
             }
-            cb.onProvided(PROVIDER_NAME, "" + s.getScannerID(), new ZebraScanner(sdkHandler));
+            cb.onProvided(PROVIDER_NAME, "" + s.getScannerID(), new BtZebraScanner(sdkHandler));
             scannerFound = true;
         }
 
         if (!scannerFound) {
+            Log.i(LOG_TAG, "Not Zebra BT devices connected to this device");
             cb.onProvided(PROVIDER_NAME, null, null);
             sdkHandler.dcssdkClose(null);
         }

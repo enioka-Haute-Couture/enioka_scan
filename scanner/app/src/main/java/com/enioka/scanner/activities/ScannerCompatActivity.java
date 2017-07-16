@@ -28,7 +28,7 @@ import java.util.List;
  * By default, a basic test layout is provided.<br>
  * Also, {@link #zbarViewId} points to the ZBar view inside your Camera layout.
  */
-public class ScannerCompatActivity extends AppCompatActivity implements Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerConnectionHandler {
+public class ScannerCompatActivity extends AppCompatActivity implements Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerConnectionHandler, Scanner.ScannerInitCallback {
     protected final static String LOG_TAG = "ScannerActivity";
 
     protected Scanner s;
@@ -99,7 +99,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
         Log.d(LOG_TAG, "View has received a new scanner - key is: " + scannerKey);
         this.s = s;
-        s.initialize(this, null, this, this, Scanner.Mode.BATCH);
+        s.initialize(this, this, this, this, Scanner.Mode.BATCH);
+    }
+
+    @Override
+    public void onConnectionSuccessful() {
+        onStatusChanged(getResources().getString(R.string.scanner_status_initialized));
+    }
+
+    @Override
+    public void onConnectionFailure() {
+        onStatusChanged(getResources().getString(R.string.scanner_status_initialization_failure));
     }
 
     @Override
@@ -179,4 +189,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         }
         return true;
     }
+
+
 }

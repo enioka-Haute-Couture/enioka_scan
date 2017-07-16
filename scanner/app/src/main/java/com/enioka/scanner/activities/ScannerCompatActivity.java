@@ -3,10 +3,12 @@ package com.enioka.scanner.activities;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -151,6 +153,18 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         ZbarScanView zbarView = (ZbarScanView) findViewById(zbarViewId);
         s = new ScannerZbarViewImpl(zbarView, this);
         ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
+
+        if (s.supportsIllumination()) {
+            final ImageButton flashlight = (ImageButton) findViewById(R.id.scanner_flashlight);
+            flashlight.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    s.toggleIllumination();
+                    displayTorch(s, flashlight);
+                }
+            });
+            displayTorch(s, flashlight);
+        }
     }
 
 
@@ -204,5 +218,18 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             this.keyboardInput += (char) event.getKeyCharacterMap().get(event.getKeyCode(), event.getMetaState());
         }
         return true;
+    }
+
+    /**
+     * Display the torch button "on" or "off" is the device have capability.
+     **/
+    void displayTorch(Scanner scanner, ImageButton flashlight) {
+        if (!scanner.supportsIllumination()) {
+            flashlight.setVisibility(View.GONE);
+        }
+
+        boolean isOn = scanner.isIlluminationOn();
+        int iconId = isOn ? R.drawable.icn_flash_off_on : R.drawable.icn_flash_off;
+        flashlight.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), iconId));
     }
 }

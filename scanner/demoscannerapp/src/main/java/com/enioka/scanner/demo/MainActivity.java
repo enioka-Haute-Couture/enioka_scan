@@ -13,6 +13,7 @@ import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.camera.ZbarScanView;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.sdk.zbar.ScannerZbarViewImpl;
 
 import java.util.ArrayList;
@@ -35,6 +36,15 @@ public class MainActivity extends AppCompatActivity implements Scanner.ScannerDa
         // Set content immediately - that way our callbacks can draw on the layout.
         setContentView(R.layout.activity_main);
 
+        ((TextView) findViewById(R.id.text_last_scan)).setText(null);
+        ((TextView) findViewById(R.id.text_scanner_status)).setText(null);
+        ((ImageButton) findViewById(R.id.photo)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                initCamera();
+            }
+        });
+
         // init laser scanner search. If none found this will go to the camera.
         LaserScanner.getLaserScanner(this, this, new ScannerSearchOptions());
     }
@@ -50,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements Scanner.ScannerDa
 
     @Override
     public void scannerConnectionProgress(String providerKey, String scannerKey, String message) {
-        ((TextView) findViewById(R.id.text_scanner_status)).setText(providerKey + " reports " + message);
+        onStatusChanged(providerKey + " reports " + message);
     }
 
     @Override
@@ -97,7 +107,8 @@ public class MainActivity extends AppCompatActivity implements Scanner.ScannerDa
 
     @Override
     public void onStatusChanged(String newStatus) {
-        ((TextView) findViewById(R.id.text_scanner_status)).setText(newStatus);
+        TextView tv = (TextView) findViewById(R.id.text_scanner_status);
+        tv.setText(newStatus + "\n" + tv.getText());
     }
 
 
@@ -109,10 +120,9 @@ public class MainActivity extends AppCompatActivity implements Scanner.ScannerDa
     public void onData(List<Barcode> data) {
         String res = "";
         for (Barcode b : data) {
-            res += b.getBarcode() + "\n" + (b.getBarcodeType() != null ? b.getBarcodeType().code : "keyboard") + "\n";
+            res += b.getBarcode() + "\n" + b.getBarcodeType().code + "\n";
         }
         ((TextView) findViewById(R.id.text_last_scan)).setText(res);
-        //Common.beepScanSuccessful();
     }
 
 
@@ -124,10 +134,10 @@ public class MainActivity extends AppCompatActivity implements Scanner.ScannerDa
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
             // The ending CR is most often a simple UP without DOWN.
-            Barcode b = new Barcode(this.keyboardInput, null);
+            Barcode b = new Barcode(this.keyboardInput, BarcodeType.UNKNOWN);
             this.onData(new ArrayList<>(Arrays.asList(b)));
             this.keyboardInput = "";
-        } else if (event.getAction() == KeyEvent.ACTION_UP && !event.isPrintingKey()) {
+        } else if (!event.isPrintingKey()) {
             // Skip un-printable characters.
             return super.onKeyDown(event.getKeyCode(), event);
         } else if (event.getAction() == KeyEvent.ACTION_DOWN) {

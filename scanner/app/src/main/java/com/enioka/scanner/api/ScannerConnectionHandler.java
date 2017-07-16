@@ -15,7 +15,7 @@ public interface ScannerConnectionHandler {
     public void scannerConnectionProgress(String providerKey, String scannerKey, String message);
 
     /**
-     * Called when a scanner was found and created. Depending on {@link LaserScanner.ScannerSearchOptions#returnOnlyFirst} may be called multiple times.
+     * Called when a scanner was found and created. Depending on {@link ScannerSearchOptions#returnOnlyFirst} may be called multiple times.
      *
      * @param scannerKey a unique identifier for the scanner being connected.
      * @param s          the new scanner. Never null.

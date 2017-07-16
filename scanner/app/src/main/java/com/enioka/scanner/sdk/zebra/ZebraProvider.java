@@ -21,18 +21,27 @@ public class ZebraProvider implements ScannerProvider {
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
+        Log.i(LOG_TAG, "Starting scanner search");
         SDKHandler sdkHandler = new SDKHandler(ctx);
         sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_BT_NORMAL);
 
-        // Connect to first available scanner
+        // Connect to available scanner
         List<DCSScannerInfo> mScannerInfoList = new ArrayList<>();
-        Log.i(LOG_TAG, "dcssdkGetAvailableScannersList :" + sdkHandler.dcssdkGetAvailableScannersList(mScannerInfoList));
+        Log.i(LOG_TAG, "dcssdkGetAvailableScannersList :" + sdkHandler.dcssdkGetAvailableScannersList(mScannerInfoList) + " " + mScannerInfoList.size());
 
-        if (mScannerInfoList.size() == 0) {
+        boolean scannerFound = false;
+        for (DCSScannerInfo s : mScannerInfoList) {
+            if (s.getScannerModel() == null) {
+                // The stupid API actually lists all BT devices. Only Zebra devices should have a model.
+                continue;
+            }
+            cb.onProvided(PROVIDER_NAME, "" + s.getScannerID(), new ZebraScanner(sdkHandler));
+            scannerFound = true;
+        }
+
+        if (!scannerFound) {
             cb.onProvided(PROVIDER_NAME, null, null);
             sdkHandler.dcssdkClose(null);
-        } else {
-            cb.onProvided(PROVIDER_NAME, "t", new ZebraScanner(sdkHandler));
         }
     }
 }

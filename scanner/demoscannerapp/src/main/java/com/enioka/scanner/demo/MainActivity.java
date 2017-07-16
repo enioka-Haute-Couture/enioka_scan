@@ -1,6 +1,8 @@
 package com.enioka.scanner.demo;
 
+import android.content.res.Configuration;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -13,10 +15,14 @@ import com.enioka.scanner.camera.ZbarScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.zbar.ScannerZbarViewImpl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerConnectionHandler {
     private Scanner s;
+    private String keyboardInput = "";
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Init and destruction
@@ -68,8 +74,13 @@ public class MainActivity extends AppCompatActivity implements Scanner.ScannerDa
 
     @Override
     public void noScannerAvailable() {
-        // In that case try to connect to a camera.
-        initCamera();
+        if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) {
+            // We may have a BT keyboard connected
+            onStatusChanged("Using Bluetooth scanner or keyboard");
+        } else {
+            // In that case try to connect to a camera.
+            initCamera();
+        }
     }
 
     private void initCamera() {
@@ -98,9 +109,31 @@ public class MainActivity extends AppCompatActivity implements Scanner.ScannerDa
     public void onData(List<Barcode> data) {
         String res = "";
         for (Barcode b : data) {
-            res += b.getBarcode() + "\n" + b.getBarcodeType().code + "\n";
+            res += b.getBarcode() + "\n" + (b.getBarcodeType() != null ? b.getBarcodeType().code : "keyboard") + "\n";
         }
         ((TextView) findViewById(R.id.text_last_scan)).setText(res);
-        s.beepScanSuccessful();
+        //Common.beepScanSuccessful();
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Keyboard input
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+            // The ending CR is most often a simple UP without DOWN.
+            Barcode b = new Barcode(this.keyboardInput, null);
+            this.onData(new ArrayList<>(Arrays.asList(b)));
+            this.keyboardInput = "";
+        } else if (event.getAction() == KeyEvent.ACTION_UP && !event.isPrintingKey()) {
+            // Skip un-printable characters.
+            return super.onKeyDown(event.getKeyCode(), event);
+        } else if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            // Only use DOWN event - UP events are not synchronized with SHIFT events.
+            this.keyboardInput += (char) event.getKeyCharacterMap().get(event.getKeyCode(), event.getMetaState());
+        }
+        return true;
     }
 }

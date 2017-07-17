@@ -2,8 +2,6 @@ package com.enioka.scanner.api;
 
 import android.content.Context;
 
-import com.enioka.scanner.api.Scanner;
-
 /**
  * Methods to implement to be able to provide a Scanner instance.
  */
@@ -12,5 +10,25 @@ public interface ScannerProvider {
      * Return a new Scanner if the device is compatible with the type of scanners handled by this provider. Null otherwise.<br>
      * Must be callable from any device, even if not compatible - so beware of library loading (you may want to use reflection inside this method).
      */
-    Scanner getScanner(Context ctx);
+    void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options);
+
+    interface ProviderCallback {
+        /**
+         * Called when the provider has finished creating a scanner, or has determined it cannot create a scanner.
+         *
+         * @param providerKey a unique key identifying the provider.
+         * @param scannerKey  a unique key identifying the connected scanner. Never empty. Only null if s is null.
+         * @param s           the new scanner, or null if the provider is not compatible with the device or if no scanner found.
+         */
+        void onProvided(String providerKey, String scannerKey, Scanner s);
+
+        /**
+         * Send a localized status message to the end user.
+         *
+         * @param providerKey a unique key identifying the provider.
+         * @param scannerKey  a unique key identifying the scanner being connected. Can be null if the message is about the provider as a whole and not a specific scanner.
+         * @param message     the message (localized)
+         */
+        void connectionProgress(String providerKey, String scannerKey, String message);
+    }
 }

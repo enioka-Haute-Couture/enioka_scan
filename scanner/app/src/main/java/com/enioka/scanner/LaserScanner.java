@@ -1,120 +1,90 @@
 package com.enioka.scanner;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
-import com.enioka.scanner.exc.NoLaserScanner;
-import com.enioka.scanner.sdk.hht.HHTProvider;
-import com.enioka.scanner.sdk.symbol.SymbolProvider;
-import com.enioka.scanner.sdk.zebra.ZebraProvider;
+import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.sdk.athesi.HHTProvider;
+import com.enioka.scanner.sdk.honeywell.AIDCProvider;
+import com.enioka.scanner.sdk.zebra.BtZebraProvider;
+import com.enioka.scanner.sdk.zebra.EmdkZebraProvider;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
- * A proxy class - it will route the API calls to SDK-specific implementations.
+ * The factory for laser scanners.
  */
-public class LaserScanner implements Scanner {
+public final class LaserScanner {
     private static final String LOG_TAG = "LaserScanner";
 
     /**
      * The list of available scanner providers. (manual for now => no useless complicated plugin system)
      */
-    private static ScannerProvider[] laserProviders = new ScannerProvider[]{new SymbolProvider(), new ZebraProvider(), new HHTProvider()};
+    private static final List<ScannerProvider> laserProviders = new ArrayList<>(Arrays.asList(new EmdkZebraProvider(), new BtZebraProvider(), new HHTProvider(), new AIDCProvider()));
+    private static Boolean scannerFound = false;
 
     /**
-     * The SDK-specific scanner.
+     * Private constructor to prevent ever creating an object from this class.
      */
-    private Scanner scanner = null;
+    private LaserScanner() {
+    }
 
     /**
-     * Throws {@link com.enioka.scanner.exc.ScannerException} if no external scanner present.
+     * Get a new laser scanner. The scanner is provided through a callback. There is a specific callback when no scanner is available.
+     *
+     * @param ctx     the activity wishing to retrieve a scanner. Must be an actual activity, not simply the application context.
+     * @param handler the callback.
+     * @param options parameters for scanner search.
      */
-    private static Scanner getLaserScanner(Activity ctx) {
-        // Ask for permissions.
-        boolean arePermissionsGranted = ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED;
-        if (!arePermissionsGranted) {
-            ActivityCompat.requestPermissions(ctx, new String[]{Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN}, 1789);
+    public static void getLaserScanner(Activity ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+        // Trivial
+        if (laserProviders.isEmpty()) {
+            Log.i(LOG_TAG, "There are no laser scanners available at all");
+            handler.noScannerAvailable();
+            return;
         }
 
-        // Now create a scanner.
-        Scanner res;
-        for (ScannerProvider sp : laserProviders) {
-            res = sp.getScanner(ctx);
-            if (res != null) {
-                return res;
-            }
+        // Now create a scanner. (iterate on a copy to avoid concurrent list modifications)
+        scannerFound = false;
+        for (final ScannerProvider sp : new ArrayList<>(laserProviders)) {
+            sp.getScanner(ctx, new ScannerProvider.ProviderCallback() {
+                @Override
+                public void onProvided(String providerKey, String scannerKey, Scanner s) {
+                    if (s != null) {
+                        Log.i(LOG_TAG, providerKey + " scanner found. Id " + scannerKey);
+                        handler.scannerConnectionProgress(providerKey, scannerKey, "scanner found.");
+
+                        synchronized (LaserScanner.class) {
+                            if (!scannerFound || !options.returnOnlyFirst) {
+                                handler.scannerCreated(providerKey, scannerKey, s);
+                                scannerFound = true;
+                            }
+                        }
+                    } else {
+                        Log.i(LOG_TAG, "Scanner provider " + providerKey + " reports there is no available scanner compatible with it");
+                        handler.scannerConnectionProgress(providerKey, null, "No " + providerKey + " scanners available.");
+
+                        // Remove the provider for ever - that way future searches are faster.
+                        synchronized (LaserScanner.laserProviders) {
+                            LaserScanner.laserProviders.remove(sp);
+                            if (LaserScanner.laserProviders.isEmpty()) {
+                                Log.i(LOG_TAG, "There are no laser scanners available at all");
+                                handler.noScannerAvailable();
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void connectionProgress(String providerKey, String scannerKey, String message) {
+                    handler.scannerConnectionProgress(providerKey, scannerKey, message);
+                }
+            }, options);
         }
-        throw new NoLaserScanner();
-    }
-
-
-    @Override
-    public void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
-        this.scanner = LaserScanner.getLaserScanner(ctx);
-        if (this.scanner == null) {
-            throw new IllegalStateException("there is no available barcode scanner on this device");
-        }
-        this.scanner.initialize(ctx, cb0, cb1, cb2, mode);
-        Log.i(LOG_TAG, "Scanner was initialized with implementation " + this.scanner.getClass().getCanonicalName());
-    }
-
-    @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
-        this.scanner.setDataCallBack(cb);
-    }
-
-    @Override
-    public void disconnect() {
-        try {
-            this.scanner.disconnect();
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "could not disconnect scanner", e);
-        }
-    }
-
-    @Override
-    public void beepScanSuccessful() {
-        this.scanner.beepScanSuccessful();
-    }
-
-    @Override
-    public void beepScanFailure() {
-        this.scanner.beepScanFailure();
-    }
-
-    @Override
-    public void beepPairingCompleted() {
-        this.scanner.beepPairingCompleted();
-    }
-
-    @Override
-    public void enableIllumination() {
-        this.scanner.enableIllumination();
-    }
-
-    @Override
-    public void disableIllumination() {
-        this.scanner.disableIllumination();
-    }
-
-    @Override
-    public void toggleIllumination() {
-        this.scanner.toggleIllumination();
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return this.scanner.isIlluminationOn();
-    }
-
-    @Override
-    public boolean supportsIllumination() {
-        return this.scanner.supportsIllumination();
     }
 }

@@ -10,14 +10,14 @@ import com.zebra.scannercontrol.SDKHandler;
 
 /**
  */
-class ConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
-    private static final String LOG_TAG = "ConnectScannerAsync";
+class BtConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
+    private static final String LOG_TAG = "BtConnectScannerAsync";
 
     private Scanner.ScannerInitCallback callback;
     private SDKHandler sdkHandler;
     private int scannerId;
 
-    public ConnectScannerAsync(Scanner.ScannerInitCallback callback, SDKHandler sdkHandler, int scannerId) {
+    public BtConnectScannerAsync(Scanner.ScannerInitCallback callback, SDKHandler sdkHandler, int scannerId) {
         this.callback = callback;
         this.sdkHandler = sdkHandler;
         this.scannerId = scannerId;
@@ -44,28 +44,28 @@ class ConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
                     "<value>" + RMDAttributes.RMD_ATTR_VALUE_BEEPER_FREQ_MEDIUM + "</value></attribute>"
                     + "</attrib_list></arg-xml></cmdArgs></inArgs>";
 
-            ZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
+            BtZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
 
             inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-xml><attrib_list>" +
                     "<attribute><id>" + RMDAttributes.RMD_ATTR_BEEPER_VOLUME + "</id><datatype>B</datatype>" +
                     "<value>" + RMDAttributes.RMD_ATTR_VALUE_BEEPER_VOLUME_HIGH + "</value></attribute>" +
                     "</attrib_list></arg-xml></cmdArgs></inArgs>";
 
-            ZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
+            BtZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
 
             // Set authorized symbologies
-            for (int unauthorizedSymbology : ZebraScanner.unauthorizedSymbologies) {
+            for (int unauthorizedSymbology : BtZebraScanner.unauthorizedSymbologies) {
                 inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-xml><attrib_list>";
                 inXML += "<attribute><id>" + unauthorizedSymbology + "</id><datatype>F</datatype><value>" + false + "</value></attribute>";
                 inXML += "</attrib_list></arg-xml></cmdArgs></inArgs>";
-                ZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
+                BtZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
             }
 
-            for (int authorizedSymbology : ZebraScanner.authorizedSymobolgies) {
+            for (int authorizedSymbology : BtZebraScanner.authorizedSymobolgies) {
                 inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-xml><attrib_list>";
                 inXML += "<attribute><id>" + authorizedSymbology + "</id><datatype>F</datatype><value>" + true + "</value></attribute>";
                 inXML += "</attrib_list></arg-xml></cmdArgs></inArgs>";
-                ZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
+                BtZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
             }
 
             return true;

@@ -50,7 +50,7 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 Log.v(LOG_TAG, "Autofocus");
-                scanner.forceAutoFocus();
+                scanner.triggerAutoFocus();
                 return false;
             }
         });

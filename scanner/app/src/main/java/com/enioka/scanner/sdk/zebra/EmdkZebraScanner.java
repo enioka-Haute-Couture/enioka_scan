@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.symbol;
+package com.enioka.scanner.sdk.zebra;
 
 import android.app.Activity;
 import android.content.Context;
@@ -6,13 +6,12 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.enioka.scanner.R;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
-import com.geodis.mobicop.eniokascan.R;
 import com.symbol.emdk.EMDKManager;
 import com.symbol.emdk.EMDKResults;
 import com.symbol.emdk.barcode.BarcodeManager;
@@ -30,7 +29,7 @@ import java.util.Map;
 /**
  * Zebra implementation for internal SYMBOL (not real Zebra) scanners.
  */
-public class SymbolScanner implements Scanner, EMDKManager.EMDKListener, com.symbol.emdk.barcode.Scanner.StatusListener, com.symbol.emdk.barcode.Scanner.DataListener {
+public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.symbol.emdk.barcode.Scanner.StatusListener, com.symbol.emdk.barcode.Scanner.DataListener {
     private final static String LOG_TAG = "ScannerZebra";
 
     private boolean waitingForResult = false;
@@ -103,7 +102,9 @@ public class SymbolScanner implements Scanner, EMDKManager.EMDKListener, com.sym
         }
 
         // Toast to indicate that the user can now start scanning
-        Toast.makeText(ctx, "Press Hard Scan Button to start scanning...", Toast.LENGTH_SHORT).show();
+        if (statusCb != null) {
+            statusCb.onStatusChanged("Press Hard Scan Button to start scanning...");
+        }
     }
 
     @Override
@@ -194,12 +195,14 @@ public class SymbolScanner implements Scanner, EMDKManager.EMDKListener, com.sym
             cfg.decoderParams.usPostNet.enabled = false;
             cfg.decoderParams.webCode.enabled = false;
 
-            //scanner.setConfig(cfg);
+            scanner.setConfig(cfg);
 
             // First read - ready to scan after these calls.
             waitingForResult = true;
-            scanner.read();
-            initCb.onConnectionSuccessful();
+             scanner.read();
+            if (initCb != null) {
+                initCb.onConnectionSuccessful();
+            }
         }
     }
 
@@ -237,8 +240,9 @@ public class SymbolScanner implements Scanner, EMDKManager.EMDKListener, com.sym
                         // Happens when the user has pressed the button, then did not scan anything. Rearm.
                         try {
                             scanner.read();
-                        } catch (ScannerException e) {
-                            e.printStackTrace();
+                        } catch (ScannerException | NullPointerException e) {
+                            Log.w(LOG_TAG, "A scan was interrupted because (if null, means scanner has paused)", e);
+                            statusStr = "Failed";
                         }
                     }
                     break;
@@ -269,7 +273,6 @@ public class SymbolScanner implements Scanner, EMDKManager.EMDKListener, com.sym
         @Override
         protected void onPostExecute(String result) {
             if (statusCb != null) {
-                Toast.makeText(ctx, "Scanner changed status: " + result, Toast.LENGTH_SHORT);
                 statusCb.onStatusChanged(result);
             }
         }

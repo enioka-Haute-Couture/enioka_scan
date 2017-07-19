@@ -48,7 +48,6 @@ import me.dm7.barcodescanner.core.DisplayUtils;
  */
 @SuppressWarnings("deprecation")
 public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback, SurfaceHolder.Callback {
-
     protected static final int RECT_HEIGHT = 10;
     protected static final float MM_INSIDE_INCH = 25.4f;
     private static final String TAG = "BARCODE";
@@ -297,6 +296,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             Camera.Size prevSize = prms.getPreferredPreviewSizeForVideo();
             // Prefer 4/3 ratio is portrait mode, 16/9 in landscape.
             float preferredRatio = DisplayUtils.getScreenOrientation(this.getContext()) == 1 ? 4f / 3f : 16f / 9f;
+            Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio);
             boolean goodMatchFound = false;
 
             // Simple debug display
@@ -323,9 +323,21 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 }
             }
             prms.setPreviewSize(prevSize.width, prevSize.height);
-            if (android.os.Build.MODEL.equals("LG-H340n")) // COMPAT HACK
+
+            // COMPAT HACKS
+            if (android.os.Build.MODEL.equals("LG-H340n")) {
                 prms.setPreviewSize(1600, 1200);
-            Log.d(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
+                Log.d(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+            } else if (android.os.Build.MODEL.equals("SPA43LTE")) {
+                if (preferredRatio < 1.5) {
+                    prms.setPreviewSize(1440, 1080); // Actual working max, 1.33 ratio. No higher rez works.
+                } else {
+                    prms.setPreviewSize(1280, 720);
+                }
+                Log.d(TAG, "SPA43LTE specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+            } else {
+                Log.d(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
+            }
 
             this.previewSize = prms.getPreviewSize();
             this.usePreviewForPicture = previewSize.height >= 1080;
@@ -577,6 +589,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (!scanningStarted) {
             return;
         }
+        Log.i(TAG, "Starting analysis on " + data.length + " bytes of camera data");
 
         Calendar now = Calendar.getInstance();
         long msSinceLast = now.getTimeInMillis() - last.getTimeInMillis();

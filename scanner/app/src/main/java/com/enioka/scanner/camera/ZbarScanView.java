@@ -589,7 +589,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (!scanningStarted) {
             return;
         }
-        Log.i(TAG, "Starting analysis on " + data.length + " bytes of camera data");
+        //Log.i(TAG, "Starting analysis on " + data.length + " bytes of camera data");
 
         Calendar now = Calendar.getInstance();
         long msSinceLast = now.getTimeInMillis() - last.getTimeInMillis();
@@ -669,6 +669,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                     Symbol sym = (Symbol) i$.next();
                     symData = sym.getData();
                     symType = sym.getType();
+                    beepOk();
 
                     if (msSinceLast < MS_SINCE_LAST) {
                         break;

@@ -152,9 +152,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         setContentView(layoutIdCamera);
         ZbarScanView zbarView = (ZbarScanView) findViewById(zbarViewId);
         s = new ScannerZbarViewImpl(zbarView, this);
-        ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
+        if (findViewById(R.id.scanner_text_last_scan) != null) {
+            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
+        }
 
-        if (s.supportsIllumination()) {
+        if (s.supportsIllumination() && findViewById(R.id.scanner_flashlight) != null) {
             final ImageButton flashlight = (ImageButton) findViewById(R.id.scanner_flashlight);
             flashlight.setOnClickListener(new View.OnClickListener() {
                 @Override

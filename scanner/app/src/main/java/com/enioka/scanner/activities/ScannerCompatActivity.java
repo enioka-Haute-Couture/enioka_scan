@@ -109,10 +109,22 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     }
 
     @Override
-    public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
+    public void scannerCreated(String providerKey, String scannerKey, final Scanner s) {
         Log.d(LOG_TAG, "View has received a new scanner - key is: " + scannerKey);
         this.s = s;
         s.initialize(this, this, this, this, Scanner.Mode.BATCH);
+
+        if (s.supportsIllumination() && findViewById(R.id.scanner_flashlight) != null) {
+            final ImageButton flashlight = (ImageButton) findViewById(R.id.scanner_flashlight);
+            flashlight.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    s.toggleIllumination();
+                    displayTorch(s, flashlight);
+                }
+            });
+            displayTorch(s, flashlight);
+        }
     }
 
     @Override
@@ -150,22 +162,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         }
 
         setContentView(layoutIdCamera);
+
         ZbarScanView zbarView = (ZbarScanView) findViewById(zbarViewId);
         s = new ScannerZbarViewImpl(zbarView, this);
+        scannerCreated("camera", "camera", s);
+
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
-        }
-
-        if (s.supportsIllumination() && findViewById(R.id.scanner_flashlight) != null) {
-            final ImageButton flashlight = (ImageButton) findViewById(R.id.scanner_flashlight);
-            flashlight.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    s.toggleIllumination();
-                    displayTorch(s, flashlight);
-                }
-            });
-            displayTorch(s, flashlight);
         }
     }
 

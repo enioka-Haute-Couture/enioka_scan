@@ -779,9 +779,11 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     }
 
     public void resumeCamera() {
-        this.cam.startPreview();
-        if (scanningStarted) {
-            this.cam.setOneShotPreviewCallback(this);
+        if (this.cam != null) {
+            this.cam.startPreview();
+            if (scanningStarted) {
+                this.cam.setOneShotPreviewCallback(this);
+            }
         }
     }
 

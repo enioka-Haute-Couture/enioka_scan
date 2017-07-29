@@ -137,7 +137,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             bt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //ScannerCompatActivity.this.s.pauseCamera();
+                    ScannerCompatActivity.this.s.pause();
                     df = ManualInputFragment.newInstance();
                     df.show(getSupportFragmentManager(), "manual");
                 }
@@ -218,6 +218,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         }
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(res);
+        }
+        if (df != null) {
+            df = null;
+            this.s.resume();
         }
     }
 

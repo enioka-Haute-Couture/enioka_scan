@@ -199,7 +199,7 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
 
             // First read - ready to scan after these calls.
             waitingForResult = true;
-             scanner.read();
+            scanner.read();
             if (initCb != null) {
                 initCb.onConnectionSuccessful();
             }
@@ -407,6 +407,30 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
         }
     }
 
+    @Override
+    public void pause() {
+        waitingForResult = false;
+        try {
+            if (scanner.isReadPending()) {
+                scanner.cancelRead();
+            }
+        } catch (ScannerException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void resume() {
+        waitingForResult = true;
+        try {
+            if (!scanner.isReadPending()) {
+                scanner.read();
+            }
+        } catch (ScannerException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // BEEPS
@@ -455,17 +479,6 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
     @Override
     public boolean isIlluminationOn() {
         return false;
-    }
-
-    public void resume() {
-        waitingForResult = true;
-        try {
-            if (!scanner.isReadPending()) {
-                scanner.read();
-            }
-        } catch (ScannerException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
 

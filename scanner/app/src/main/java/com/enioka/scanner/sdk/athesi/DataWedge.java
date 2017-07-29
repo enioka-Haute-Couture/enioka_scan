@@ -25,6 +25,7 @@ public class DataWedge {
     public static final String DATA_STRING = "com.hht.emdk.datawedge.data_string";
     public static final String DATA_TYPE = "com.hht.emdk.datawedge.data_type";
     public static final String DATA_LENGTH = "com.hht.emdk.datawedge.data_length";
+
     // action SOFTSCANTRIGGER
     public static final String SOFTSCANTRIGGER = "com.hht.emdk.datawedge.api.ACTION_SOFTSCANTRIGGER";
     public static final String EXTRA_PARAMETER = "com.hht.emdk.datawedge.api.EXTRA_PARAMETER";

@@ -109,6 +109,16 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
     }
 
     @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
     public void beepScanSuccessful() {
 
     }

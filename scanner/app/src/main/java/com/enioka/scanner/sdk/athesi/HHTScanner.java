@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Scanner;
@@ -198,6 +199,27 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
 
         ctx.unregisterReceiver(this);
     }
+
+    @Override
+    public void pause() {
+        Log.d(LOG_TAG, "Sending intent to scanner to disable the trigger");
+        Intent i = new Intent();
+        i.setAction(DataWedge.SOFTSCANTRIGGER);
+        i.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_TRIGGERBUTTON);
+        i.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.STOP_SCANNING);
+        ctx.sendBroadcast(i);
+    }
+
+    @Override
+    public void resume() {
+        Log.d(LOG_TAG, "Sending intent to scanner to enable the trigger");
+        Intent i = new Intent();
+        i.setAction(DataWedge.SOFTSCANTRIGGER);
+        i.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.ENABLE_TRIGGERBUTTON);
+        i.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.START_SCANNING);
+        ctx.sendBroadcast(i);
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // BEEPS

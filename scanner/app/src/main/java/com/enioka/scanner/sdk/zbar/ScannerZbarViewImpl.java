@@ -79,6 +79,16 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
     public void disconnect() {
     }
 
+    @Override
+    public void pause() {
+        scanner.pauseCamera();
+    }
+
+    @Override
+    public void resume() {
+        scanner.resumeCamera();
+    }
+
     public void beepScanSuccessful() {
         ZbarScanView.beepOk();
     }

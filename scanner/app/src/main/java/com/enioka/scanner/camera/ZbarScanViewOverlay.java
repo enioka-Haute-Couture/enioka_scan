@@ -36,15 +36,17 @@ class ZbarScanViewOverlay extends View {
             return;
         }
 
-        SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
-        float y = p.getFloat("y", dad.y1);
-        if (y != dad.y1 && y > 0 && y < this.getHeight()) {
-            float dy = dad.y1 - y;
-            dad.y1 -= dy;
-            dad.y2 -= dy;
-            dad.y3 -= dy;
-            dad.y4 -= dy;
-            invalidate();
+        if (changed) {
+            SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
+            float y = p.getFloat("y", dad.y1);
+            if (y != dad.y1 && y > 0 && y < this.getHeight()) {
+                float dy = dad.y1 - y;
+                dad.y1 -= dy;
+                dad.y2 -= dy;
+                dad.y3 -= dy;
+                dad.y4 -= dy;
+                invalidate();
+            }
         }
     }
 

@@ -53,6 +53,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
      */
     protected int zbarViewId = R.id.zbar_scan_view;
 
+    /**
+     * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
+     */
+    protected int flashlightViewId = R.id.scanner_flashlight;
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Init and destruction
@@ -114,8 +119,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         this.s = s;
         s.initialize(this, this, this, this, Scanner.Mode.BATCH);
 
-        if (s.supportsIllumination() && findViewById(R.id.scanner_flashlight) != null) {
-            final ImageButton flashlight = (ImageButton) findViewById(R.id.scanner_flashlight);
+        if (s.supportsIllumination() && findViewById(flashlightViewId) != null) {
+            final ImageButton flashlight = (ImageButton) findViewById(flashlightViewId);
             flashlight.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

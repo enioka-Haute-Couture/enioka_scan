@@ -19,4 +19,10 @@
     <string name="activity_scan_barcode_value_placeholder">10AL9271B2I8</string>
     <string name="activity_scan_scanner_not_initialized">main_scanner_status_placeholder</string>
     <string name="scanner_using_bt_keyboard">Using Bluetooth scanner or keyboard</string>
+
+    <!-- Helper manual scan fragment -->
+    <string name="fragment_scan_manual_title">Manual input</string>
+    <string name="fragment_scan_manual_invite">Please enter the barcode value</string>
+    <string name="fragment_scan_manual_hint">0000000000</string>
+    <string name="fragment_scan_manual_ok">Send</string>
 </resources>

@@ -39,4 +39,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="parent" />
 
+    <ImageButton
+        android:id="@+id/scanner_bt_keyboard"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:background="@null"
+        android:src="@drawable/icn_keyboard"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

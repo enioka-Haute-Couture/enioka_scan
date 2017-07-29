@@ -39,6 +39,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     protected Scanner s;
     private String keyboardInput = "";
+    protected ManualInputFragment df;
 
     /**
      * The layout to use when using a laser or external keyboard.
@@ -129,6 +130,18 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                 }
             });
             displayTorch(s, flashlight);
+        }
+
+        if (findViewById(R.id.scanner_bt_keyboard) != null) {
+            final ImageButton bt = (ImageButton) findViewById(R.id.scanner_bt_keyboard);
+            bt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //ScannerCompatActivity.this.s.pauseCamera();
+                    df = ManualInputFragment.newInstance();
+                    df.show(getSupportFragmentManager(), "manual");
+                }
+            });
         }
     }
 

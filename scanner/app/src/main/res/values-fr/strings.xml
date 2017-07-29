@@ -14,4 +14,8 @@
     <string name="scanner_status_initialization_failure">Un scanner a été trouvé mais n\'a pu s\'initialiser</string>
     <string name="scanner_status_initialized">Un scanner s\'est initialisé avec succès</string>
     <string name="scanner_status_no_camera">Aucune caméra disponible</string>
+    <string name="fragment_scan_manual_hint">00000000</string>
+    <string name="fragment_scan_manual_invite">Veuillez saisir la valeur du code barre</string>
+    <string name="fragment_scan_manual_ok">Envoyer</string>
+    <string name="fragment_scan_manual_title">Saisie manuelle</string>
 </resources>

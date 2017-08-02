@@ -120,20 +120,23 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         this.s = s;
         s.initialize(this, this, this, this, Scanner.Mode.BATCH);
 
-        if (s.supportsIllumination() && findViewById(flashlightViewId) != null) {
+        if (findViewById(flashlightViewId) != null) {
             final ImageButton flashlight = (ImageButton) findViewById(flashlightViewId);
-            flashlight.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    s.toggleIllumination();
-                    displayTorch(s, flashlight);
-                }
-            });
             displayTorch(s, flashlight);
+
+            if (s.supportsIllumination()) {
+                flashlight.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        s.toggleIllumination();
+                        displayTorch(s, flashlight);
+                    }
+                });
+            }
         }
 
         if (findViewById(R.id.scanner_bt_keyboard) != null) {
-            final ImageButton bt = (ImageButton) findViewById(R.id.scanner_bt_keyboard);
+            final View bt = findViewById(R.id.scanner_bt_keyboard);
             bt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -253,6 +256,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     void displayTorch(Scanner scanner, ImageButton flashlight) {
         if (!scanner.supportsIllumination()) {
             flashlight.setVisibility(View.GONE);
+        } else {
+            flashlight.setVisibility(View.VISIBLE);
         }
 
         boolean isOn = scanner.isIlluminationOn();

@@ -421,10 +421,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         }
     }
 
-    public boolean isUsePreviewForPicture() {
-        return usePreviewForPicture;
-    }
-
     /**
      * Indicate if the torch mode is handled or not
      *
@@ -925,6 +921,33 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         void validateResultAsync(String result, int type);
     }
 
-//
-////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Camera as a camera!
+
+    public boolean isUsePreviewForPicture() {
+        return usePreviewForPicture;
+    }
+
+    public void takePicture(final Camera.PictureCallback callback) {
+        if (usePreviewForPicture && lastPreviewData != null) {
+            Log.d(TAG, "Picture from preview");
+            final Camera camera = this.cam;
+            new ConvertPreviewAsync(lastPreviewData, previewSize, new ConvertPreviewAsync.Callback() {
+                @Override
+                public void onDone(byte[] jpeg) {
+                    callback.onPictureTaken(jpeg, camera);
+                }
+            }).execute();
+        } else {
+            Log.d(TAG, "Picture from camera");
+            this.cam.takePicture(null, null, callback);
+        }
+    }
+
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 }

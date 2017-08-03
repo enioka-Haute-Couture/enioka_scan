@@ -67,16 +67,9 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
         //
     }
 
-    public boolean checkActiveScanners() {
-        return false;
-    }
-
-    // Not used.
-    public boolean connectToAvailableScanner(ScannerInitCallback callback) {
-        return false;
-    }
-
+    @Override
     public void disconnect() {
+        scanner.cleanUp();
     }
 
     @Override
@@ -89,14 +82,17 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
         scanner.resumeCamera();
     }
 
+    @Override
     public void beepScanSuccessful() {
         ZbarScanView.beepOk();
     }
 
+    @Override
     public void beepScanFailure() {
         ZbarScanView.beepKo();
     }
 
+    @Override
     public void beepPairingCompleted() {
         ZbarScanView.beepWaiting();
     }

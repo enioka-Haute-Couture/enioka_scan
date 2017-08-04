@@ -2,9 +2,12 @@ package com.enioka.scanner.sdk.athesi;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 
 import com.enioka.scanner.R;
@@ -14,27 +17,17 @@ import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
- * Scanner provider for HTT Wrapper Layer (i.e. SPA43)
+ * Scanner provider for HHT Wrapper Layer (i.e. SPA43)
  */
 public class HHTScanner extends BroadcastReceiver implements Scanner {
     private static final String LOG_TAG = "HHTScanner";
 
-    private static final Map<Integer, BarcodeType> barcodeTypesMapping;
-
-    static {
-        barcodeTypesMapping = new HashMap<>();
-        barcodeTypesMapping.put(1, BarcodeType.CODE39);
-        barcodeTypesMapping.put(3, BarcodeType.CODE128);
-        barcodeTypesMapping.put(4, BarcodeType.DIS25);
-        barcodeTypesMapping.put(6, BarcodeType.INT25);
-        barcodeTypesMapping.put(11, BarcodeType.EAN13);
-    }
-
+    // Initial parameters for SOFTSCANTRIGGER action.
     private static final List<String> initialSettingsSoftScan;
 
     static {
@@ -44,94 +37,17 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
         initialSettingsSoftScan.add(DataWedge.ENABLE_BEEP);
     }
 
-    private static final List<String> symbologies;
+    // Initial symbology parameters.
+    private static final List<HHTSymbology> activeSymbologies = new ArrayList<>();
 
     static {
-        symbologies = new ArrayList<>();
-        symbologies.add(DataWedge.ENABLE_CODE39);
-        symbologies.add(DataWedge.ENABLE_CODE128);
-        symbologies.add(DataWedge.ENABLE_D25);
-        symbologies.add(DataWedge.ENABLE_I25);
-        symbologies.add(DataWedge.ENABLE_EAN13);
-
-        symbologies.add(DataWedge.DISABLE_CNVT_CODE39_TO_32);
-        symbologies.add(DataWedge.DISABLE_CODE32_PREFIX);
-        symbologies.add(DataWedge.DISABLE_CODE39_VER_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_CODE39_REPORT_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_CODE39_FULL_ASCII);
-        symbologies.add(DataWedge.DISABLE_TRIOPTIC);
-        symbologies.add(DataWedge.DISABLE_CODABAR);
-        symbologies.add(DataWedge.DISABLE_CODABAR_CLSI);
-        symbologies.add(DataWedge.DISABLE_CODABAR_NOTIS);
-        symbologies.add(DataWedge.DISABLE_EAN128);
-        symbologies.add(DataWedge.DISABLE_ISBT_128);
-        symbologies.add(DataWedge.DISABLE_ISBT_CONCAT);
-        symbologies.add(DataWedge.DISABLE_ISBT_TABLE);
-        symbologies.add(DataWedge.DISABLE_CODE11);
-        symbologies.add(DataWedge.DISABLE_CODE11_VER_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_CODE11_REPORT_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_NEC25);
-        symbologies.add(DataWedge.DISABLE_S25IATA);
-        symbologies.add(DataWedge.DISABLE_S25INDUSTRIAL);
-        symbologies.add(DataWedge.DISABLE_I25_VER_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_I25_REPORT_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_CNVT_I25_TO_EAN13);
-        symbologies.add(DataWedge.DISABLE_CODE93);
-        symbologies.add(DataWedge.DISABLE_UPCA);
-        symbologies.add(DataWedge.DISABLE_UPCA_REPORT_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_UPCA_PREAMBLE);
-        symbologies.add(DataWedge.DISABLE_UPCA_PREAMBLE);
-        symbologies.add(DataWedge.DISABLE_UPCE);
-        symbologies.add(DataWedge.DISABLE_UPCE_REPORT_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_UPCE_PREAMBLE);
-        symbologies.add(DataWedge.DISABLE_CNVT_UPCE_TO_UPCA);
-        symbologies.add(DataWedge.DISABLE_UPCE1);
-        symbologies.add(DataWedge.DISABLE_UPCE1_REPORT_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_UPCE1_PREAMBLE);
-        symbologies.add(DataWedge.DISABLE_CNVT_UPCE1_TO_UPCA);
-        symbologies.add(DataWedge.DISABLE_EAN8);
-        symbologies.add(DataWedge.DISABLE_EAN8_ZEROEXTEND);
-        symbologies.add(DataWedge.DISABLE_EAN13_SUPP);
-        symbologies.add(DataWedge.DISABLE_BOOKLAND_ISBN);
-        symbologies.add(DataWedge.DISABLE_BOOKLAND_EAN);
-        symbologies.add(DataWedge.DISABLE_UCC_EXT_CODE);
-        symbologies.add(DataWedge.DISABLE_ISSN_EAN);
-        symbologies.add(DataWedge.DISABLE_MSI);
-        symbologies.add(DataWedge.DISABLE_MSI_REPORT_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_RSS_14);
-        symbologies.add(DataWedge.DISABLE_RSS_LIM);
-        symbologies.add(DataWedge.DISABLE_RSS_EXP);
-        symbologies.add(DataWedge.DISABLE_RSS_TO_UPC);
-        symbologies.add(DataWedge.DISABLE_COMPOSITE_CCC);
-        symbologies.add(DataWedge.DISABLE_COMPOSITE_CCAB);
-        symbologies.add(DataWedge.DISABLE_COMPOSITE_TLC39);
-        symbologies.add(DataWedge.DISABLE_COMPOSITE_RSS);
-        symbologies.add(DataWedge.DISABLE_CHINA);
-        symbologies.add(DataWedge.DISABLE_KOREAN35);
-        symbologies.add(DataWedge.DISABLE_MATRIX25);
-        symbologies.add(DataWedge.DISABLE_MATRIX25_REDUN);
-        symbologies.add(DataWedge.DISABLE_MATRIX25_VER_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_MATRIX25_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_US_POSTNET);
-        symbologies.add(DataWedge.DISABLE_US_PLANET);
-        symbologies.add(DataWedge.DISABLE_US_POSTAL_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_UK_POSTAL);
-        symbologies.add(DataWedge.DISABLE_UK_POSTAL_CHK_DGT);
-        symbologies.add(DataWedge.DISABLE_JAPAN_POSTAL);
-        symbologies.add(DataWedge.DISABLE_AUSTRALIA_POST);
-        symbologies.add(DataWedge.DISABLE_KIX_CODE);
-        symbologies.add(DataWedge.DISABLE_ONE_CODE);
-        symbologies.add(DataWedge.DISABLE_UPU_FICS_POSTAL);
-        symbologies.add(DataWedge.DISABLE_PDF417);
-        symbologies.add(DataWedge.DISABLE_MICROPDF417);
-        symbologies.add(DataWedge.DISABLE_CODE128EML);
-        symbologies.add(DataWedge.DISABLE_DATAMATRIX);
-        symbologies.add(DataWedge.DISABLE_MAXICODE);
-        symbologies.add(DataWedge.DISABLE_QRCODE);
-        symbologies.add(DataWedge.DISABLE_MICROQR);
-        symbologies.add(DataWedge.DISABLE_AZTEC);
-        symbologies.add(DataWedge.DISABLE_HAN_XIN);
+        activeSymbologies.add(HHTSymbology.CODE39);
+        activeSymbologies.add(HHTSymbology.CODE128);
+        activeSymbologies.add(HHTSymbology.INT25);
+        activeSymbologies.add(HHTSymbology.EAN13);
     }
+
+    private static final Uri scannerSettingsUri = Uri.parse("content://com.oem.startup.ScannerParaProvider/settings");
 
     private Activity ctx;
 
@@ -142,6 +58,7 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
     private Scanner.ScannerDataCallback dataCb = null;
     private Scanner.ScannerStatusCallback statusCb = null;
     private Scanner.Mode mode;
+
 
     @Override
     public void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
@@ -158,19 +75,17 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
         intent.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.ENABLE_PLUGIN);
         ctx.sendBroadcast(intent);
 
-        // Set initial settings
+        // Set trigger and buzzer settings
         for (String initialSetting : initialSettingsSoftScan) {
             intent.setAction(DataWedge.SOFTSCANTRIGGER);
             intent.putExtra(DataWedge.EXTRA_PARAMETER, initialSetting);
             ctx.sendBroadcast(intent);
         }
 
-        for (String symbology : symbologies) {
-            intent.setAction(DataWedge.SCANNERINPUTPLUGIN);
-            intent.putExtra(DataWedge.EXTRA_PARAMETER, symbology);
-            ctx.sendBroadcast(intent);
-        }
+        // Set symbologies
+        syncConfig();
 
+        // Done - signal client.
         if (cb0 != null) {
             cb0.onConnectionSuccessful();
         }
@@ -205,8 +120,7 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
         Log.d(LOG_TAG, "Sending intent to scanner to disable the trigger");
         Intent i = new Intent();
         i.setAction(DataWedge.SOFTSCANTRIGGER);
-        i.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_TRIGGERBUTTON);
-        i.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.STOP_SCANNING);
+        i.putExtra(DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.DISABLE_TRIGGERBUTTON, DataWedge.STOP_SCANNING});
         ctx.sendBroadcast(i);
     }
 
@@ -215,9 +129,59 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
         Log.d(LOG_TAG, "Sending intent to scanner to enable the trigger");
         Intent i = new Intent();
         i.setAction(DataWedge.SOFTSCANTRIGGER);
-        i.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.ENABLE_TRIGGERBUTTON);
-        i.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.START_SCANNING);
+        i.putExtra(DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.ENABLE_TRIGGERBUTTON, DataWedge.START_SCANNING});
         ctx.sendBroadcast(i);
+    }
+
+    private void syncConfig() {
+        ContentResolver r = ctx.getContentResolver();
+        Cursor c = r.query(scannerSettingsUri, null, null, null, null);
+        if (c == null) {
+            Log.e(LOG_TAG, "Cannot find the shared scanner settings");
+            throw new RuntimeException("scanner settings exception");
+        }
+
+        Set<String> confChanges = new HashSet<>();
+        Set<String> ignored = new HashSet<>();
+        int numRow = c.getCount();
+        String name;
+        Boolean enabled;
+        HHTSymbology sym;
+        c.moveToFirst();
+
+        while (numRow > 0) {
+            name = c.getString(c.getColumnIndex("scanner_name"));
+            enabled = c.getString(c.getColumnIndex("scanner_para")).equals("enabled");
+
+            //Log.d(LOG_TAG, "Configuration item " + name + " - " + c.getString(c.getColumnIndex("scanner_para")));
+            if (name.startsWith("Scanner_")) {
+                sym = HHTSymbology.getSymbology(name);
+                if (sym == null && enabled && !ignored.contains(name)) {
+                    Log.w(LOG_TAG, "Scanner reports a symbology unknown to the lib is enabled - cannot disable it. Add it to the lib. " + name);
+                    ignored.add(name);
+                }
+                if (sym != null && activeSymbologies.contains(sym) && !enabled) {
+                    // Bad. Symbology should be enabled.
+                    // Log.i(LOG_TAG, "Enabling symbology " + sym.type.code);
+                    confChanges.add(sym.activation);
+                } else if (sym != null && !activeSymbologies.contains(sym) && enabled) {
+                    // Bad. Should be disabled.
+                    // Log.i(LOG_TAG, "Disabling symbology " + sym.type.code);
+                    confChanges.add(sym.deactivation);
+                }
+            }
+
+            c.moveToNext();
+            numRow--;
+        }
+
+        c.close();
+
+        // Apply changes.
+        Intent intent = new Intent();
+        intent.setAction(DataWedge.SCANNERINPUTPLUGIN);
+        intent.putExtra(DataWedge.EXTRA_PARAMETERS, confChanges.toArray(new String[0]));
+        ctx.sendBroadcast(intent);
     }
 
 
@@ -272,8 +236,16 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
         String barcode = intent.getStringExtra(DataWedge.DATA_STRING);
         int type = intent.getIntExtra(DataWedge.DATA_TYPE, 0);
 
+        HHTSymbology s = HHTSymbology.getSymbology(type);
+        BarcodeType bt;
+        if (s == null) {
+            bt = BarcodeType.UNKNOWN;
+        } else {
+            bt = s.type;
+        }
+
         List<Barcode> barcodes = new ArrayList<>();
-        barcodes.add(new Barcode(barcode, barcodeTypesMapping.get(type)));
+        barcodes.add(new Barcode(barcode, bt));
         if (dataCb != null) {
             dataCb.onData(barcodes);
         }

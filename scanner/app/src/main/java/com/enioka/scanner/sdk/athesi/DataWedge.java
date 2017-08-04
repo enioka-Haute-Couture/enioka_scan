@@ -171,7 +171,7 @@ public class DataWedge {
     public static final String DISABLE_UPCA_REPORT_CHK_DGT = "DISABLE_UPCA_REPORT_CHK_DGT";
     public static final String ENABLE_UPCA_REPORT_CHK_DGT = "ENABLE_UPCA_REPORT_CHK_DGT";
 
-    public static final String DISABLE_UPCA_PREAMBLE = "DISABLE_UPCA_PREAMBLE";                        //Disable Preamble
+        public static final String DISABLE_UPCA_PREAMBLE = "DISABLE_UPCA_PREAMBLE";                        //Disable Preamble
     public static final String ENABLE_UPCA_PREAMBLE = "ENABLE_UPCA_PREAMBLE";                        //Enable Preamble - Sys Char ONLY
     public static final String ENABLE_UPCA_PREAMBLE_COUNTSYS = "ENABLE_UPCA_PREAMBLE_COUNTSYS";            //Enable Preamble - Country Code and Sys Char
     public static final String UPCA_PREAMBLE_ENABLED = "UPCA_PREAMBLE_ENABLED";

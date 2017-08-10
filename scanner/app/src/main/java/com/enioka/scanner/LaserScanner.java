@@ -2,6 +2,7 @@ package com.enioka.scanner;
 
 import android.app.Activity;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerConnectionHandler;
@@ -42,6 +43,10 @@ public final class LaserScanner {
      * @param options parameters for scanner search.
      */
     public static void getLaserScanner(Activity ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+        if (options.keepScreenOn) {
+            ctx.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+
         // Trivial
         if (laserProviders.isEmpty()) {
             Log.i(LOG_TAG, "There are no laser scanners available at all");

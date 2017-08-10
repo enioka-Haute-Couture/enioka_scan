@@ -1,7 +1,6 @@
 package com.enioka.scanner.api;
 
 import android.app.Activity;
-import android.content.Context;
 
 import com.enioka.scanner.data.Barcode;
 
@@ -85,6 +84,16 @@ public interface Scanner {
      * Disconnect scanner from the App (the app does not need the scanner anymore)
      */
     void disconnect();
+
+    /**
+     * The app keeps the scanner for itself but does not need it immediately. It may free whatever resources it has, or ignore this call.
+     */
+    void pause();
+
+    /**
+     * Reverse the effects of {@link #pause()}. The scanner is once again ready to scan after this call. Status callback should be called if needed. Idempotent.
+     */
+    void resume();
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

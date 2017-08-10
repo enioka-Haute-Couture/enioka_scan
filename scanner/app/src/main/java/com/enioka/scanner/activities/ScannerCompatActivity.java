@@ -39,6 +39,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     protected Scanner s;
     private String keyboardInput = "";
+    protected ManualInputFragment df;
 
     /**
      * The layout to use when using a laser or external keyboard.
@@ -52,6 +53,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
      * The ID of the {@link ZbarScanView} inside the {@link #layoutIdCamera} layout.
      */
     protected int zbarViewId = R.id.zbar_scan_view;
+
+    /**
+     * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
+     */
+    protected int flashlightViewId = R.id.scanner_flashlight;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,10 +115,37 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     }
 
     @Override
-    public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
+    public void scannerCreated(String providerKey, String scannerKey, final Scanner s) {
         Log.d(LOG_TAG, "View has received a new scanner - key is: " + scannerKey);
         this.s = s;
         s.initialize(this, this, this, this, Scanner.Mode.BATCH);
+
+        if (findViewById(flashlightViewId) != null) {
+            final ImageButton flashlight = (ImageButton) findViewById(flashlightViewId);
+            displayTorch(s, flashlight);
+
+            if (s.supportsIllumination()) {
+                flashlight.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        s.toggleIllumination();
+                        displayTorch(s, flashlight);
+                    }
+                });
+            }
+        }
+
+        if (findViewById(R.id.scanner_bt_keyboard) != null) {
+            final View bt = findViewById(R.id.scanner_bt_keyboard);
+            bt.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ScannerCompatActivity.this.s.pause();
+                    df = ManualInputFragment.newInstance();
+                    df.show(getSupportFragmentManager(), "manual");
+                }
+            });
+        }
     }
 
     @Override
@@ -150,20 +183,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         }
 
         setContentView(layoutIdCamera);
+
         ZbarScanView zbarView = (ZbarScanView) findViewById(zbarViewId);
         s = new ScannerZbarViewImpl(zbarView, this);
-        ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
+        scannerCreated("camera", "camera", s);
 
-        if (s.supportsIllumination()) {
-            final ImageButton flashlight = (ImageButton) findViewById(R.id.scanner_flashlight);
-            flashlight.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    s.toggleIllumination();
-                    displayTorch(s, flashlight);
-                }
-            });
-            displayTorch(s, flashlight);
+        if (findViewById(R.id.scanner_text_last_scan) != null) {
+            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
         }
     }
 
@@ -196,6 +222,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(res);
         }
+        if (df != null) {
+            df = null;
+            this.s.resume();
+        }
     }
 
 
@@ -226,6 +256,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     void displayTorch(Scanner scanner, ImageButton flashlight) {
         if (!scanner.supportsIllumination()) {
             flashlight.setVisibility(View.GONE);
+        } else {
+            flashlight.setVisibility(View.VISIBLE);
         }
 
         boolean isOn = scanner.isIlluminationOn();

@@ -25,6 +25,7 @@ public class DataWedge {
     public static final String DATA_STRING = "com.hht.emdk.datawedge.data_string";
     public static final String DATA_TYPE = "com.hht.emdk.datawedge.data_type";
     public static final String DATA_LENGTH = "com.hht.emdk.datawedge.data_length";
+
     // action SOFTSCANTRIGGER
     public static final String SOFTSCANTRIGGER = "com.hht.emdk.datawedge.api.ACTION_SOFTSCANTRIGGER";
     public static final String EXTRA_PARAMETER = "com.hht.emdk.datawedge.api.EXTRA_PARAMETER";
@@ -170,7 +171,7 @@ public class DataWedge {
     public static final String DISABLE_UPCA_REPORT_CHK_DGT = "DISABLE_UPCA_REPORT_CHK_DGT";
     public static final String ENABLE_UPCA_REPORT_CHK_DGT = "ENABLE_UPCA_REPORT_CHK_DGT";
 
-    public static final String DISABLE_UPCA_PREAMBLE = "DISABLE_UPCA_PREAMBLE";                        //Disable Preamble
+        public static final String DISABLE_UPCA_PREAMBLE = "DISABLE_UPCA_PREAMBLE";                        //Disable Preamble
     public static final String ENABLE_UPCA_PREAMBLE = "ENABLE_UPCA_PREAMBLE";                        //Enable Preamble - Sys Char ONLY
     public static final String ENABLE_UPCA_PREAMBLE_COUNTSYS = "ENABLE_UPCA_PREAMBLE_COUNTSYS";            //Enable Preamble - Country Code and Sys Char
     public static final String UPCA_PREAMBLE_ENABLED = "UPCA_PREAMBLE_ENABLED";

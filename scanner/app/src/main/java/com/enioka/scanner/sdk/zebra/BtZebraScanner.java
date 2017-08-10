@@ -206,6 +206,16 @@ class BtZebraScanner implements Scanner, IDcsSdkApiDelegate {
     }
 
     @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
     public void beepScanSuccessful() {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" +
                 +BEEP_HIGH_SHORT_1 + "</arg-int></cmdArgs></inArgs>";

@@ -13,4 +13,19 @@ public class ScannerSearchOptions {
      * If true, will only return the first scanner available (or reporting it may become available if {@link #waitDisconnected} is true). If false, all scanners available are returned.
      */
     public boolean returnOnlyFirst = true;
+
+    /**
+     * If true (the default) will try to prevent a screen shutdown. If false, system or activity defaults are used.
+     */
+    public boolean keepScreenOn = true;
+
+    public ScannerSearchOptions keepScreenOn() {
+        keepScreenOn = true;
+        return this;
+    }
+
+    public ScannerSearchOptions keepScreenOn(boolean b) {
+        keepScreenOn = b;
+        return this;
+    }
 }

@@ -48,7 +48,6 @@ import me.dm7.barcodescanner.core.DisplayUtils;
  */
 @SuppressWarnings("deprecation")
 public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback, SurfaceHolder.Callback {
-
     protected static final int RECT_HEIGHT = 10;
     protected static final float MM_INSIDE_INCH = 25.4f;
     private static final String TAG = "BARCODE";
@@ -297,6 +296,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             Camera.Size prevSize = prms.getPreferredPreviewSizeForVideo();
             // Prefer 4/3 ratio is portrait mode, 16/9 in landscape.
             float preferredRatio = DisplayUtils.getScreenOrientation(this.getContext()) == 1 ? 4f / 3f : 16f / 9f;
+            Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio);
             boolean goodMatchFound = false;
 
             // Simple debug display
@@ -323,9 +323,21 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 }
             }
             prms.setPreviewSize(prevSize.width, prevSize.height);
-            if (android.os.Build.MODEL.equals("LG-H340n")) // COMPAT HACK
+
+            // COMPAT HACKS
+            if (android.os.Build.MODEL.equals("LG-H340n")) {
                 prms.setPreviewSize(1600, 1200);
-            Log.d(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
+                Log.d(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+            } else if (android.os.Build.MODEL.equals("SPA43LTE")) {
+                if (preferredRatio < 1.5) {
+                    prms.setPreviewSize(1440, 1080); // Actual working max, 1.33 ratio. No higher rez works.
+                } else {
+                    prms.setPreviewSize(1280, 720);
+                }
+                Log.d(TAG, "SPA43LTE specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+            } else {
+                Log.d(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
+            }
 
             this.previewSize = prms.getPreviewSize();
             this.usePreviewForPicture = previewSize.height >= 1080;
@@ -407,10 +419,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (visibility == VISIBLE && this.cam != null) {
             this.cam.cancelAutoFocus();
         }
-    }
-
-    public boolean isUsePreviewForPicture() {
-        return usePreviewForPicture;
     }
 
     /**
@@ -570,6 +578,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private static Calendar last = Calendar.getInstance();
     private Integer waitingForValidations = 0;
     private Calendar focusTime = Calendar.getInstance();
+    private String latestBarcodeValue = "";
 
     // THE main method.
     @Override
@@ -577,6 +586,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (!scanningStarted) {
             return;
         }
+        //Log.i(TAG, "Starting analysis on " + data.length + " bytes of camera data");
 
         Calendar now = Calendar.getInstance();
         long msSinceLast = now.getTimeInMillis() - last.getTimeInMillis();
@@ -657,9 +667,12 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                     symData = sym.getData();
                     symType = sym.getType();
 
-                    if (msSinceLast < MS_SINCE_LAST) {
+                    if (msSinceLast < MS_SINCE_LAST && symData.equals(latestBarcodeValue)) {
+                        // Same as the last (and very recent) barcode read
                         break;
                     } else if (!TextUtils.isEmpty(symData) && !foundStrings.contains(symData)) {
+                        beepOk();
+                        latestBarcodeValue = symData;
                         last = now;
                         foundStrings.add(symData);
 
@@ -765,9 +778,11 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     }
 
     public void resumeCamera() {
-        this.cam.startPreview();
-        if (scanningStarted) {
-            this.cam.setOneShotPreviewCallback(this);
+        if (this.cam != null) {
+            this.cam.startPreview();
+            if (scanningStarted) {
+                this.cam.setOneShotPreviewCallback(this);
+            }
         }
     }
 
@@ -909,6 +924,33 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         void validateResultAsync(String result, int type);
     }
 
-//
-////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Camera as a camera!
+
+    public boolean isUsePreviewForPicture() {
+        return usePreviewForPicture;
+    }
+
+    public void takePicture(final Camera.PictureCallback callback) {
+        if (usePreviewForPicture && lastPreviewData != null) {
+            Log.d(TAG, "Picture from preview");
+            final Camera camera = this.cam;
+            new ConvertPreviewAsync(lastPreviewData, previewSize, new ConvertPreviewAsync.Callback() {
+                @Override
+                public void onDone(byte[] jpeg) {
+                    callback.onPictureTaken(jpeg, camera);
+                }
+            }).execute();
+        } else {
+            Log.d(TAG, "Picture from camera");
+            this.cam.takePicture(null, null, callback);
+        }
+    }
+
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 }

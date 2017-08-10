@@ -578,6 +578,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private static Calendar last = Calendar.getInstance();
     private Integer waitingForValidations = 0;
     private Calendar focusTime = Calendar.getInstance();
+    private String latestBarcodeValue = "";
 
     // THE main method.
     @Override
@@ -665,11 +666,13 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                     Symbol sym = (Symbol) i$.next();
                     symData = sym.getData();
                     symType = sym.getType();
-                    beepOk();
 
-                    if (msSinceLast < MS_SINCE_LAST) {
+                    if (msSinceLast < MS_SINCE_LAST && symData.equals(latestBarcodeValue)) {
+                        // Same as the last (and very recent) barcode read
                         break;
                     } else if (!TextUtils.isEmpty(symData) && !foundStrings.contains(symData)) {
+                        beepOk();
+                        latestBarcodeValue = symData;
                         last = now;
                         foundStrings.add(symData);
 

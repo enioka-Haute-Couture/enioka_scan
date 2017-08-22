@@ -37,7 +37,7 @@ class ZbarScanViewOverlay extends View {
             return;
         }
 
-        if (changed) {
+        if (changed && dad.allowTargetDrag) {
             this.orientationOnDraw = dad.getCameraDisplayOrientation();
             SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
             float y = p.getFloat("y" + this.orientationOnDraw, dad.y1);
@@ -60,6 +60,10 @@ class ZbarScanViewOverlay extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!dad.allowTargetDrag) {
+            return super.onTouchEvent(event);
+        }
+
         if (dragStartX == 0 && !(event.getX() > dad.x1 - 50 && event.getX() < dad.x2 + 50 && event.getY() > dad.y1 - 50 && event.getY() < dad.y3 + 50)) {
             // We only care about touch events inside the rectangle.
             return super.onTouchEvent(event);

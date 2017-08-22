@@ -17,6 +17,7 @@ class ZbarScanViewOverlay extends View {
     public ZbarScanView dad;
     float dragStartX = 0, dragStartY = 0;
     private Context ctx;
+    private int orientationOnDraw = 0;
 
     public ZbarScanViewOverlay(Context context, ZbarScanView dad) {
         super(context);
@@ -37,8 +38,9 @@ class ZbarScanViewOverlay extends View {
         }
 
         if (changed) {
+            this.orientationOnDraw = dad.getCameraDisplayOrientation();
             SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
-            float y = p.getFloat("y", dad.y1);
+            float y = p.getFloat("y" + this.orientationOnDraw, dad.y1);
             if (y != dad.y1 && y > 0 && y < this.getHeight()) {
                 float dy = dad.y1 - y;
                 dad.y1 -= dy;
@@ -113,7 +115,7 @@ class ZbarScanViewOverlay extends View {
 
         SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor e = p.edit();
-        e.putFloat("y", y);
+        e.putFloat("y" + this.orientationOnDraw, y);
         e.commit();
     }
 

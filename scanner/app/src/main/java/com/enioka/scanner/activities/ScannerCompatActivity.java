@@ -42,9 +42,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
      */
     protected boolean willScan = true;
 
-    protected Scanner s;
-    private String keyboardInput = "";
-    protected ManualInputFragment df;
+    /**
+     * Scanner instance ; if none is set, activity will instantiate one
+     */
+    protected Scanner scanner;
 
     /**
      * The layout to use when using a laser or external keyboard.
@@ -65,6 +66,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     protected int flashlightViewId = R.id.scanner_flashlight;
 
 
+    private String keyboardInput = "";
+    protected ManualInputFragment df;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Init and destruction
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -72,7 +76,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(willScan) {
+        if (willScan) {
             Common.askForPermission(this);
         }
     }
@@ -82,7 +86,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         Log.i(LOG_TAG, "Resuming scanner activity - scanner will be connected");
         super.onResume();
 
-        if(willScan) {
+        if (willScan) {
             // Set content immediately - that way our callbacks can draw on the layout.
             setContentView(layoutIdLaser);
 
@@ -102,18 +106,23 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                 });
             }
 
-            // init laser scanner search. If none found this will go to the camera.
-            LaserScanner.getLaserScanner(this, this, new ScannerSearchOptions());
+            // If no scanner instance exists, create one
+            if (scanner == null) {
+                // init laser scanner search. If none found this will go to the camera.
+                LaserScanner.getLaserScanner(this, this, new ScannerSearchOptions());
+            } else {
+                // TODO
+            }
         }
     }
 
     @Override
     protected void onPause() {
         Log.i(LOG_TAG, "Scanner activity is being paused");
-        if (willScan && s != null) {
+        if (willScan && scanner != null) {
             Log.i(LOG_TAG, "Scanner is being disconnected");
-            this.s.disconnect();
-            this.s = null;
+            this.scanner.disconnect();
+            this.scanner = null;
         }
         super.onPause();
     }
@@ -126,7 +135,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     public void scannerCreated(String providerKey, String scannerKey, final Scanner s) {
         Log.d(LOG_TAG, "View has received a new scanner - key is: " + scannerKey);
-        this.s = s;
+        this.scanner = s;
         s.initialize(this, this, this, this, Scanner.Mode.BATCH);
 
         if (findViewById(flashlightViewId) != null) {
@@ -149,7 +158,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             bt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ScannerCompatActivity.this.s.pause();
+                    ScannerCompatActivity.this.scanner.pause();
                     df = ManualInputFragment.newInstance();
                     df.show(getSupportFragmentManager(), "manual");
                 }
@@ -186,16 +195,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (this.s != null) {
-            this.s.disconnect();
-            this.s = null;
+        if (this.scanner != null) {
+            this.scanner.disconnect();
+            this.scanner = null;
         }
 
         setContentView(layoutIdCamera);
 
         ZbarScanView zbarView = (ZbarScanView) findViewById(zbarViewId);
-        s = new ScannerZbarViewImpl(zbarView, this);
-        scannerCreated("camera", "camera", s);
+        scanner = new ScannerZbarViewImpl(zbarView, this);
+        scannerCreated("camera", "camera", scanner);
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
@@ -233,7 +242,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         }
         if (df != null) {
             df = null;
-            this.s.resume();
+            this.scanner.resume();
         }
     }
 
@@ -244,7 +253,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if(!willScan) {
+        if (!willScan) {
             return false;
         }
 

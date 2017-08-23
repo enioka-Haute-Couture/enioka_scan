@@ -37,6 +37,11 @@ import java.util.List;
 public class ScannerCompatActivity extends AppCompatActivity implements Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerConnectionHandler, Scanner.ScannerInitCallback {
     protected final static String LOG_TAG = "ScannerActivity";
 
+    /**
+     * If set to false, ScannerCompatActivity will behave like an standard AppCompatActivity
+     */
+    protected boolean willScan = true;
+
     protected Scanner s;
     private String keyboardInput = "";
     protected ManualInputFragment df;
@@ -67,7 +72,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Common.askForPermission(this);
+        if(willScan) {
+            Common.askForPermission(this);
+        }
     }
 
     @Override
@@ -75,33 +82,35 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         Log.i(LOG_TAG, "Resuming scanner activity - scanner will be connected");
         super.onResume();
 
-        // Set content immediately - that way our callbacks can draw on the layout.
-        setContentView(layoutIdLaser);
+        if(willScan) {
+            // Set content immediately - that way our callbacks can draw on the layout.
+            setContentView(layoutIdLaser);
 
-        if (findViewById(R.id.scanner_text_last_scan) != null) {
-            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
-        }
-        if (findViewById(R.id.scanner_text_scanner_status) != null) {
-            ((TextView) findViewById(R.id.scanner_text_scanner_status)).setText(null);
-        }
+            if (findViewById(R.id.scanner_text_last_scan) != null) {
+                ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
+            }
+            if (findViewById(R.id.scanner_text_scanner_status) != null) {
+                ((TextView) findViewById(R.id.scanner_text_scanner_status)).setText(null);
+            }
 
-        if (findViewById(R.id.scanner_bt_camera) != null) {
-            findViewById(R.id.scanner_bt_camera).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    initCamera();
-                }
-            });
-        }
+            if (findViewById(R.id.scanner_bt_camera) != null) {
+                findViewById(R.id.scanner_bt_camera).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        initCamera();
+                    }
+                });
+            }
 
-        // init laser scanner search. If none found this will go to the camera.
-        LaserScanner.getLaserScanner(this, this, new ScannerSearchOptions());
+            // init laser scanner search. If none found this will go to the camera.
+            LaserScanner.getLaserScanner(this, this, new ScannerSearchOptions());
+        }
     }
 
     @Override
     protected void onPause() {
         Log.i(LOG_TAG, "Scanner activity is being paused");
-        if (s != null) {
+        if (willScan && s != null) {
             Log.i(LOG_TAG, "Scanner is being disconnected");
             this.s.disconnect();
             this.s = null;
@@ -235,6 +244,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if(!willScan) {
+            return false;
+        }
+
         if (event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
             // The ending CR is most often a simple UP without DOWN.
             Barcode b = new Barcode(this.keyboardInput, BarcodeType.UNKNOWN);
@@ -247,6 +260,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             // Only use DOWN event - UP events are not synchronized with SHIFT events.
             this.keyboardInput += (char) event.getKeyCharacterMap().get(event.getKeyCode(), event.getMetaState());
         }
+
         return true;
     }
 

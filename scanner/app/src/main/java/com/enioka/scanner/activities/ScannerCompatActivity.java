@@ -183,7 +183,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             Log.i(LOG_TAG, "No real scanner available but BT keyboard connected");
             onStatusChanged(getResources().getString(R.string.scanner_using_bt_keyboard));
         } else {
-            if(!laserModeOnly) {
+            if (!laserModeOnly) {
                 // In that case try to connect to a camera.
                 initCamera();
             }
@@ -256,7 +256,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (!enableScan) {
-            return false;
+            return super.dispatchKeyEvent(event);
         }
 
         if (event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
@@ -264,9 +264,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             Barcode b = new Barcode(this.keyboardInput, BarcodeType.UNKNOWN);
             this.onData(new ArrayList<>(Collections.singleton(b)));
             this.keyboardInput = "";
-        } else if (!event.isPrintingKey()) {
+        }else if (!event.isPrintingKey()) {
             // Skip un-printable characters.
-            return super.onKeyDown(event.getKeyCode(), event);
+            return super.dispatchKeyEvent(event);
         } else if (event.getAction() == KeyEvent.ACTION_DOWN) {
             // Only use DOWN event - UP events are not synchronized with SHIFT events.
             this.keyboardInput += (char) event.getKeyCharacterMap().get(event.getKeyCode(), event.getMetaState());

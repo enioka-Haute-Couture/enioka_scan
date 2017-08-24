@@ -17,6 +17,8 @@ class BtConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
     private SDKHandler sdkHandler;
     private int scannerId;
 
+    private static boolean isConfigured = false;
+
     public BtConnectScannerAsync(Scanner.ScannerInitCallback callback, SDKHandler sdkHandler, int scannerId) {
         this.callback = callback;
         this.sdkHandler = sdkHandler;
@@ -35,7 +37,7 @@ class BtConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
         if (sdkHandler != null) {
             result = sdkHandler.dcssdkEstablishCommunicationSession(scannerId);
         }
-        if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS) {
+        if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS && !isConfigured) {
             String inXML;
             // Set initial settings
             // High volume and medium frequency
@@ -68,6 +70,7 @@ class BtConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
                 BtZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
             }
 
+            isConfigured = true;
             return true;
         } else if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_FAILURE) {
             return false;

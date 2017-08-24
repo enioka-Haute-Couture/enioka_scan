@@ -31,7 +31,7 @@ public class BtZebraProvider implements ScannerProvider {
 
         boolean scannerFound = false;
         for (DCSScannerInfo s : mScannerInfoList) {
-            /*if (scanner.getScannerModel() == null) {
+            /*if (s.getScannerModel() == null) {
                 // The stupid API actually lists all BT devices. Only Zebra devices should have a model.
                 continue;
             }*/

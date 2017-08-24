@@ -38,9 +38,14 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     protected final static String LOG_TAG = "ScannerActivity";
 
     /**
+     * Don't start camera mode, even if no laser are available
+     */
+    protected boolean laserModeOnly = false;
+
+    /**
      * If set to false, ScannerCompatActivity will behave like an standard AppCompatActivity
      */
-    protected boolean willScan = true;
+    protected boolean enableScan = true;
 
     /**
      * Scanner instance ; if none is set, activity will instantiate one
@@ -76,7 +81,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (willScan) {
+        if (enableScan) {
             Common.askForPermission(this);
         }
     }
@@ -86,7 +91,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         Log.i(LOG_TAG, "Resuming scanner activity - scanner will be connected");
         super.onResume();
 
-        if (willScan) {
+        if (enableScan) {
             // Set content immediately - that way our callbacks can draw on the layout.
             setContentView(layoutIdLaser);
 
@@ -106,20 +111,15 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                 });
             }
 
-            // If no scanner instance exists, create one
-            if (scanner == null) {
-                // init laser scanner search. If none found this will go to the camera.
-                LaserScanner.getLaserScanner(this, this, new ScannerSearchOptions());
-            } else {
-                // TODO
-            }
+            // init laser scanner search. If none found this will go to the camera.
+            LaserScanner.getLaserScanner(this, this, new ScannerSearchOptions());
         }
     }
 
     @Override
     protected void onPause() {
         Log.i(LOG_TAG, "Scanner activity is being paused");
-        if (willScan && scanner != null) {
+        if (enableScan && scanner != null) {
             Log.i(LOG_TAG, "Scanner is being disconnected");
             this.scanner.disconnect();
             this.scanner = null;
@@ -183,8 +183,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             Log.i(LOG_TAG, "No real scanner available but BT keyboard connected");
             onStatusChanged(getResources().getString(R.string.scanner_using_bt_keyboard));
         } else {
-            // In that case try to connect to a camera.
-            initCamera();
+            if(!laserModeOnly) {
+                // In that case try to connect to a camera.
+                initCamera();
+            }
         }
     }
 
@@ -253,7 +255,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (!willScan) {
+        if (!enableScan) {
             return false;
         }
 

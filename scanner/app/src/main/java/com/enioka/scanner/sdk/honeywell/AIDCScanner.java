@@ -58,7 +58,7 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
             this.reader.setProperty(BarcodeReader.PROPERTY_TRIGGER_CONTROL_MODE,
                     BarcodeReader.TRIGGER_CONTROL_MODE_AUTO_CONTROL);
         } catch (UnsupportedPropertyException e) {
-            cb0.onConnectionFailure();
+            cb0.onConnectionFailure(this);
         }
 
 
@@ -86,7 +86,7 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
             reader.claim();
         } catch (ScannerUnavailableException e) {
             Log.e(LOG_TAG, "Connection error to scanner", e);
-            cb0.onConnectionFailure();
+            cb0.onConnectionFailure(this);
         }
 
         if (this.statusCb != null) {
@@ -187,5 +187,10 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
     @Override
     public void onFailureEvent(BarcodeFailureEvent barcodeFailureEvent) {
         Log.e(LOG_TAG, "New barcode failure event: " + barcodeFailureEvent.toString());
+    }
+
+    @Override
+    public String getProviderKey() {
+        return AIDCProvider.PROVIDER_NAME;
     }
 }

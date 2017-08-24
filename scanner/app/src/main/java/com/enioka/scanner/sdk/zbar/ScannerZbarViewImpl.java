@@ -59,7 +59,7 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
     @Override
     public void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
         // Do nothing. The Zbar implementation is special, as it is built directly and not through the LaserScanner.
-        cb0.onConnectionSuccessful();
+        cb0.onConnectionSuccessful(this);
     }
 
     @Override
@@ -140,5 +140,10 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
     @Override
     public boolean isIlluminationOn() {
         return scanner.getTorchOn();
+    }
+
+    @Override
+    public String getProviderKey() {
+        return "ZBAR";
     }
 }

@@ -19,6 +19,10 @@ public class ScannerSearchOptions {
      */
     public boolean keepScreenOn = true;
 
+    public static ScannerSearchOptions defaultOptions() {
+        return new ScannerSearchOptions();
+    }
+
     public ScannerSearchOptions keepScreenOn() {
         keepScreenOn = true;
         return this;
@@ -26,6 +30,11 @@ public class ScannerSearchOptions {
 
     public ScannerSearchOptions keepScreenOn(boolean b) {
         keepScreenOn = b;
+        return this;
+    }
+
+    public ScannerSearchOptions getAllAvailableScanners() {
+        returnOnlyFirst = false;
         return this;
     }
 }

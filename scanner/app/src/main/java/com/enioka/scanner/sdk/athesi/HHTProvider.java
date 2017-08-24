@@ -10,7 +10,7 @@ import com.enioka.scanner.api.ScannerSearchOptions;
  */
 public class HHTProvider implements ScannerProvider {
     private static final String LOG_TAG = "HHTProvider";
-    private static final String PROVIDER_NAME = "Athesi HHT internal scanner";
+    static final String PROVIDER_NAME = "Athesi HHT internal scanner";
 
     @Override
     public void getScanner(Context ctx, final ProviderCallback cb, final ScannerSearchOptions options) {
@@ -21,5 +21,10 @@ public class HHTProvider implements ScannerProvider {
         }
 
         cb.onProvided(PROVIDER_NAME, "internal", new HHTScanner());
+    }
+
+    @Override
+    public String getKey() {
+        return PROVIDER_NAME;
     }
 }

@@ -26,4 +26,9 @@ public interface ScannerConnectionHandler {
      * Called when there is no scanner available on the device.
      */
     void noScannerAvailable();
+
+    /**
+     * Called when the search for scanners in the different providers is over
+     */
+    void endOfScannerSearch();
 }

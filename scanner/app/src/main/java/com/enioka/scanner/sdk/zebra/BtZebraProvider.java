@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class BtZebraProvider implements ScannerProvider {
     private static final String LOG_TAG = "BtZebraProvider";
-    private static final String PROVIDER_NAME = "Zebra Bluetooth";
+    static final String PROVIDER_NAME = "Zebra Bluetooth";
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
@@ -44,5 +44,10 @@ public class BtZebraProvider implements ScannerProvider {
             cb.onProvided(PROVIDER_NAME, null, null);
             sdkHandler.dcssdkClose(null);
         }
+    }
+
+    @Override
+    public String getKey() {
+        return PROVIDER_NAME;
     }
 }

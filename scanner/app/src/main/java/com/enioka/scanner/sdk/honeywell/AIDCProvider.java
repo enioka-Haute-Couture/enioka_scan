@@ -13,7 +13,7 @@ import com.honeywell.aidc.BarcodeReaderInfo;
  * For the Honeywell PDA "Android data collection (AIDC)" SDK. This is actually the Intermec SDK.
  */
 public class AIDCProvider implements ScannerProvider {
-    private static final String PROVIDER_NAME = "HONEYWELL_AIDC";
+    static final String PROVIDER_NAME = "HONEYWELL_AIDC";
     private static final String LOG_TAG = "AIDCProvider";
 
     @Override
@@ -48,5 +48,10 @@ public class AIDCProvider implements ScannerProvider {
             }
         });
         Log.i(LOG_TAG, "End scanner search");
+    }
+
+    @Override
+    public String getKey() {
+        return PROVIDER_NAME;
     }
 }

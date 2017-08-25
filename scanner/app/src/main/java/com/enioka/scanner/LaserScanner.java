@@ -15,7 +15,9 @@ import com.enioka.scanner.sdk.zebra.EmdkZebraProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The factory for laser scanners.
@@ -51,17 +53,20 @@ public final class LaserScanner {
         if (laserProviders.isEmpty()) {
             Log.i(LOG_TAG, "There are no laser scanners available at all");
             handler.noScannerAvailable();
+            handler.endOfScannerSearch();
             return;
         }
 
         // Now create a scanner. (iterate on a copy to avoid concurrent list modifications)
         scannerFound = false;
+        final Set<String> compatibleProviders = new HashSet<>();
         for (final ScannerProvider sp : new ArrayList<>(laserProviders)) {
             sp.getScanner(ctx, new ScannerProvider.ProviderCallback() {
                 @Override
                 public void onProvided(String providerKey, String scannerKey, Scanner s) {
                     if (s != null) {
                         Log.i(LOG_TAG, providerKey + " scanner found. Id " + scannerKey);
+                        compatibleProviders.add(providerKey);
                         handler.scannerConnectionProgress(providerKey, scannerKey, "scanner found.");
 
                         synchronized (LaserScanner.class) {
@@ -71,7 +76,7 @@ public final class LaserScanner {
                             }
                         }
                     } else {
-                        Log.i(LOG_TAG, "Scanner provider " + providerKey + " reports there is no available scanner compatible with it");
+                        Log.i(LOG_TAG, "Scanner provider " + providerKey + " reports there is no available scanner compatible with it and will be disabled");
                         handler.scannerConnectionProgress(providerKey, null, "No " + providerKey + " scanners available.");
 
                         // Remove the provider for ever - that way future searches are faster.
@@ -83,6 +88,13 @@ public final class LaserScanner {
                             }
                         }
                     }
+
+                    // The end?
+                    synchronized (LaserScanner.class) {
+                        if (compatibleProviders.size() == LaserScanner.laserProviders.size()) {
+                            handler.endOfScannerSearch();
+                        }
+                    }
                 }
 
                 @Override
@@ -90,6 +102,20 @@ public final class LaserScanner {
                     handler.scannerConnectionProgress(providerKey, scannerKey, message);
                 }
             }, options);
+        }
+    }
+
+    /**
+     * Optional. Call this to only load the specified provider on next search.
+     *
+     * @param providerKeys the provider keys (from {@link Scanner#getProviderKey()})
+     */
+    public static void actuallyUsedProviders(List<String> providerKeys) {
+        synchronized (LaserScanner.laserProviders) {
+            for (ScannerProvider provider : new ArrayList<>(laserProviders))
+                if (!providerKeys.contains(provider.getKey())) {
+                    LaserScanner.laserProviders.remove(provider);
+                }
         }
     }
 }

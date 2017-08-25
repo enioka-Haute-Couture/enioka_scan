@@ -141,13 +141,13 @@ class BtZebraScanner implements Scanner, IDcsSdkApiDelegate {
 
         connectToAvailableScanner(new ScannerInitCallback() {
             @Override
-            public void onConnectionSuccessful() {
-                cb0.onConnectionSuccessful();
+            public void onConnectionSuccessful(Scanner s) {
+                cb0.onConnectionSuccessful(s);
             }
 
             @Override
-            public void onConnectionFailure() {
-                cb0.onConnectionFailure();
+            public void onConnectionFailure(Scanner s) {
+                cb0.onConnectionFailure(s);
             }
         });
     }
@@ -186,7 +186,8 @@ class BtZebraScanner implements Scanner, IDcsSdkApiDelegate {
             new BtConnectScannerAsync(
                     callback
                     , sdkHandler
-                    , scannerId)
+                    , scannerId
+                    , this)
                     .execute();
             return true;
         } else {
@@ -392,5 +393,10 @@ class BtZebraScanner implements Scanner, IDcsSdkApiDelegate {
     @Override
     public boolean isIlluminationOn() {
         return false;
+    }
+
+    @Override
+    public String getProviderKey() {
+        return BtZebraProvider.PROVIDER_NAME;
     }
 }

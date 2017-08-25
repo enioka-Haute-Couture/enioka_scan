@@ -12,6 +12,13 @@ public interface ScannerProvider {
      */
     void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options);
 
+    /**
+     * The unique key which identifies this provider.
+     *
+     * @return the key
+     */
+    String getKey();
+
     interface ProviderCallback {
         /**
          * Called when the provider has finished creating a scanner, or has determined it cannot create a scanner.

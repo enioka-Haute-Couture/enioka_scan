@@ -34,9 +34,9 @@ public interface Scanner {
      * Callback handling scanner init events
      */
     interface ScannerInitCallback {
-        void onConnectionSuccessful();
+        void onConnectionSuccessful(Scanner s);
 
-        void onConnectionFailure();
+        void onConnectionFailure(Scanner s);
     }
 
     /**
@@ -149,4 +149,6 @@ public interface Scanner {
      * True if at least one method of illumination (torch, laser...) is supported).
      */
     boolean supportsIllumination();
+
+    String getProviderKey();
 }

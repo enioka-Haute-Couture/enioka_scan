@@ -26,6 +26,7 @@ import com.enioka.scanner.sdk.zbar.ScannerZbarViewImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A helper activity which implements all scan functions: laser, camera, HID.<br><br>Basic usage is trivial : just inherit this class, and that's all.<br>
@@ -50,7 +51,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     /**
      * Scanner instance ; if none is set, activity will instantiate one
      */
-    protected Scanner scanner;
+    protected final List<Scanner> scanners = new ArrayList<>(10);
 
     /**
      * The layout to use when using a laser or external keyboard.
@@ -73,6 +74,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     private String keyboardInput = "";
     protected ManualInputFragment df;
+    private AtomicInteger intializingScannersCount = new AtomicInteger(0);
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Init and destruction
@@ -88,12 +91,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     @Override
     protected void onResume() {
-        Log.i(LOG_TAG, "Resuming scanner activity - scanner will be connected");
         super.onResume();
 
+        // Actual init.
         if (enableScan) {
+            Log.i(LOG_TAG, "Resuming scanner activity - scanner will be connected");
+
             // Set content immediately - that way our callbacks can draw on the layout.
             setContentView(layoutIdLaser);
+
+            intializingScannersCount.set(0);
+            scanners.clear();
 
             if (findViewById(R.id.scanner_text_last_scan) != null) {
                 ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
@@ -112,17 +120,19 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             }
 
             // init laser scanner search. If none found this will go to the camera.
-            LaserScanner.getLaserScanner(this, this, new ScannerSearchOptions());
+            LaserScanner.getLaserScanner(this, this, ScannerSearchOptions.defaultOptions().getAllAvailableScanners());
         }
     }
 
     @Override
     protected void onPause() {
         Log.i(LOG_TAG, "Scanner activity is being paused");
-        if (enableScan && scanner != null) {
-            Log.i(LOG_TAG, "Scanner is being disconnected");
-            this.scanner.disconnect();
-            this.scanner = null;
+        if (enableScan) {
+            for (Scanner scanner : this.scanners) {
+                Log.i(LOG_TAG, "Scanner is being disconnected");
+                scanner.disconnect();
+            }
+            this.scanners.clear();
         }
         super.onPause();
     }
@@ -135,7 +145,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     public void scannerCreated(String providerKey, String scannerKey, final Scanner s) {
         Log.d(LOG_TAG, "View has received a new scanner - key is: " + scannerKey);
-        this.scanner = s;
+        intializingScannersCount.incrementAndGet();
+
         s.initialize(this, this, this, this, Scanner.Mode.BATCH);
 
         if (findViewById(flashlightViewId) != null) {
@@ -158,7 +169,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             bt.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ScannerCompatActivity.this.scanner.pause();
+                    for (Scanner scanner : ScannerCompatActivity.this.scanners) {
+                        scanner.pause();
+                    }
                     df = ManualInputFragment.newInstance();
                     df.show(getSupportFragmentManager(), "manual");
                 }
@@ -167,13 +180,20 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     }
 
     @Override
-    public void onConnectionSuccessful() {
+    public void onConnectionSuccessful(Scanner s) {
+        Log.i(LOG_TAG, "A scanner has successfully initialized");
+        this.scanners.add(s);
         onStatusChanged(getResources().getString(R.string.scanner_status_initialized));
+        intializingScannersCount.decrementAndGet();
+        checkInitializationEnd();
     }
 
     @Override
-    public void onConnectionFailure() {
+    public void onConnectionFailure(Scanner s) {
+        Log.i(LOG_TAG, "A scanner has failed to initialize");
         onStatusChanged(getResources().getString(R.string.scanner_status_initialization_failure));
+        intializingScannersCount.decrementAndGet();
+        checkInitializationEnd();
     }
 
     @Override
@@ -186,8 +206,45 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             if (!laserModeOnly) {
                 // In that case try to connect to a camera.
                 initCamera();
+                Log.i(LOG_TAG, "All scanner SDKs have failed");
+                onStatusChanged(getResources().getString(R.string.activity_scan_no_compatible_sdk));
+                checkInitializationEnd();
             }
         }
+    }
+
+    private void checkInitializationEnd() {
+        synchronized (scanners) {
+            if (intializingScannersCount.get() == 0) {
+                if (this.scanners.isEmpty()) {
+                    if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) {
+                        // We may have a BT keyboard connected
+                        Log.i(LOG_TAG, "No real scanner available but BT keyboard connected");
+                        onStatusChanged(getResources().getString(R.string.scanner_using_bt_keyboard));
+                    } else {
+                        if (!laserModeOnly) {
+                            // In that case try to connect to a camera.
+                            initCamera();
+                        }
+                    }
+                }
+                intializingScannersCount.set(0);
+
+                List<String> userProviders = new ArrayList<>();
+                for (Scanner s : scanners) {
+                    userProviders.add(s.getProviderKey());
+                }
+                LaserScanner.actuallyUsedProviders(userProviders);
+
+                Log.i(LOG_TAG, "all found scanners have now ended their initialization (or failed to do so)");
+            }
+        }
+    }
+
+    @Override
+    public void endOfScannerSearch() {
+        Log.i(LOG_TAG, "Search for scanners from SDK has ended");
+        Log.i(LOG_TAG, intializingScannersCount.get() + " scanners from the different SDKs have reported for duty. Waiting for their initialization.");
     }
 
     protected void initCamera() {
@@ -197,15 +254,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (this.scanner != null) {
-            this.scanner.disconnect();
-            this.scanner = null;
+        for (Scanner scanner : this.scanners) {
+            scanner.disconnect();
         }
+        this.scanners.clear();
+        this.intializingScannersCount.set(1);
 
         setContentView(layoutIdCamera);
 
         ZbarScanView zbarView = (ZbarScanView) findViewById(zbarViewId);
-        scanner = new ScannerZbarViewImpl(zbarView, this);
+        Scanner scanner = new ScannerZbarViewImpl(zbarView, this);
         scannerCreated("camera", "camera", scanner);
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
@@ -244,7 +302,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         }
         if (df != null) {
             df = null;
-            this.scanner.resume();
+            for (Scanner scanner : this.scanners) {
+                scanner.resume();
+            }
         }
     }
 
@@ -264,7 +324,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             Barcode b = new Barcode(this.keyboardInput, BarcodeType.UNKNOWN);
             this.onData(new ArrayList<>(Collections.singleton(b)));
             this.keyboardInput = "";
-        }else if (!event.isPrintingKey()) {
+        } else if (!event.isPrintingKey()) {
             // Skip un-printable characters.
             return super.dispatchKeyEvent(event);
         } else if (event.getAction() == KeyEvent.ACTION_DOWN) {

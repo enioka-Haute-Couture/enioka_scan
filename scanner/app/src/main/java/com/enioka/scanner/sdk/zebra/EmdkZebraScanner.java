@@ -85,7 +85,7 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
 
         // Check the return status of getEMDKManager and update the status TextView accordingly
         if (results.statusCode != EMDKResults.STATUS_CODE.SUCCESS) {
-            initCb.onConnectionFailure();
+            initCb.onConnectionFailure(this);
         }
     }
 
@@ -98,7 +98,7 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
             initializeScanner();
         } catch (ScannerException e) {
             e.printStackTrace();
-            initCb.onConnectionFailure();
+            initCb.onConnectionFailure(this);
         }
 
         // Toast to indicate that the user can now start scanning
@@ -135,7 +135,7 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
             scanner = barcodeManager.getDevice(BarcodeManager.DeviceIdentifier.DEFAULT);
 
             if (scanner == null) {
-                initCb.onConnectionFailure();
+                initCb.onConnectionFailure(this);
                 return;
             }
 
@@ -201,7 +201,7 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
             waitingForResult = true;
             scanner.read();
             if (initCb != null) {
-                initCb.onConnectionSuccessful();
+                initCb.onConnectionSuccessful(this);
             }
         }
     }
@@ -479,6 +479,11 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
     @Override
     public boolean isIlluminationOn() {
         return false;
+    }
+
+    @Override
+    public String getProviderKey() {
+        return EmdkZebraProvider.PROVIDER_NAME;
     }
 }
 

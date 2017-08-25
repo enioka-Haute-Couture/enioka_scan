@@ -12,7 +12,7 @@ import com.enioka.scanner.api.ScannerSearchOptions;
  */
 public class EmdkZebraProvider implements ScannerProvider {
     private final static String LOG_TAG = "EmdkProvider";
-    private static final String PROVIDER_NAME = "Zebra EMDK";
+    static final String PROVIDER_NAME = "Zebra EMDK";
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
@@ -33,5 +33,10 @@ public class EmdkZebraProvider implements ScannerProvider {
             Log.e(LOG_TAG, "Could not create a Scanner instance - the implementation may lack a default constructor.", e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String getKey() {
+        return PROVIDER_NAME;
     }
 }

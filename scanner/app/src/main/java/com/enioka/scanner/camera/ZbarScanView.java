@@ -72,6 +72,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private boolean failed = false;
 
     private boolean usePreviewForPicture = true;
+    boolean allowTargetDrag = true;
     private byte[] lastPreviewData;
     private Camera.Size previewSize;
 
@@ -922,6 +923,10 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
     public interface ResultValidatorAsync {
         void validateResultAsync(String result, int type);
+    }
+
+    public void setAllowTargetDrag(boolean allowTargetDrag) {
+        this.allowTargetDrag = allowTargetDrag;
     }
 
     //

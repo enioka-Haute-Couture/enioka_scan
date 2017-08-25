@@ -87,7 +87,7 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
 
         // Done - signal client.
         if (cb0 != null) {
-            cb0.onConnectionSuccessful();
+            cb0.onConnectionSuccessful(this);
         }
 
         if (cb2 != null) {
@@ -249,5 +249,10 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
         if (dataCb != null) {
             dataCb.onData(barcodes);
         }
+    }
+
+    @Override
+    public String getProviderKey() {
+        return HHTProvider.PROVIDER_NAME;
     }
 }

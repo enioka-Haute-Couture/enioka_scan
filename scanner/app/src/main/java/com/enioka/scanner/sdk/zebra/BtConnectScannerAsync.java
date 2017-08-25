@@ -16,13 +16,15 @@ class BtConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
     private Scanner.ScannerInitCallback callback;
     private SDKHandler sdkHandler;
     private int scannerId;
+    private Scanner scanner;
 
     private static boolean isConfigured = false;
 
-    public BtConnectScannerAsync(Scanner.ScannerInitCallback callback, SDKHandler sdkHandler, int scannerId) {
+    public BtConnectScannerAsync(Scanner.ScannerInitCallback callback, SDKHandler sdkHandler, int scannerId, Scanner scanner) {
         this.callback = callback;
         this.sdkHandler = sdkHandler;
         this.scannerId = scannerId;
+        this.scanner = scanner;
     }
 
     @Override
@@ -83,11 +85,11 @@ class BtConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
         super.onPostExecute(result);
         if (result) {
             if (callback != null) {
-                callback.onConnectionSuccessful();
+                callback.onConnectionSuccessful(scanner);
             }
         } else {
             if (callback != null) {
-                callback.onConnectionFailure();
+                callback.onConnectionFailure(scanner);
             }
         }
     }

@@ -84,9 +84,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (enableScan) {
-            Common.askForPermission(this);
-        }
+        Common.askForPermission(this);
     }
 
     @Override

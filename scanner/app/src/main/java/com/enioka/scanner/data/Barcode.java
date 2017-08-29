@@ -8,7 +8,7 @@ public class Barcode {
     private BarcodeType barcodeType;
 
     public Barcode(String barcode, BarcodeType barcodeType) {
-        this.barcode = barcode;
+        this.barcode = barcode.trim();
         this.barcodeType = barcodeType;
     }
 

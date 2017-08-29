@@ -247,7 +247,7 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
         List<Barcode> barcodes = new ArrayList<>();
         barcodes.add(new Barcode(barcode, bt));
         if (dataCb != null) {
-            dataCb.onData(barcodes);
+            dataCb.onData(this, barcodes);
         }
     }
 

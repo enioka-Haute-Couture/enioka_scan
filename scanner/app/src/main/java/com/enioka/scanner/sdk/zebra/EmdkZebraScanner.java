@@ -32,6 +32,7 @@ import java.util.Map;
 public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.symbol.emdk.barcode.Scanner.StatusListener, com.symbol.emdk.barcode.Scanner.DataListener {
     private final static String LOG_TAG = "ScannerZebra";
 
+    private Scanner selfScanner = this;
     private boolean waitingForResult = false;
     private Scanner.ScannerDataCallback dataCb = null;
     private Scanner.ScannerStatusCallback statusCb = null;
@@ -358,7 +359,7 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
         @Override
         protected void onPostExecute(List<Barcode> result) {
             if (dataCb != null && result.size() > 0) {
-                dataCb.onData(result);
+                dataCb.onData(selfScanner, result);
             }
         }
 

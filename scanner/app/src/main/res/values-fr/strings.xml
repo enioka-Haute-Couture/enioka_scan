@@ -18,4 +18,6 @@
     <string name="fragment_scan_manual_invite">Veuillez saisir la valeur du code barre</string>
     <string name="fragment_scan_manual_ok">Envoyer</string>
     <string name="fragment_scan_manual_title">Saisie manuelle</string>
+    <string name="activity_scan_no_compatible_sdk">Aucun scanner compatible n\'est disponible sur cet appareil</string>
+
 </resources>

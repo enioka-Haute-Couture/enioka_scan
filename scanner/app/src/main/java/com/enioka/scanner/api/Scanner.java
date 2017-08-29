@@ -48,7 +48,7 @@ public interface Scanner {
          *
          * @param data the data read by the reader.
          */
-        void onData(List<Barcode> data);
+        void onData(Scanner s, List<Barcode> data);
     }
 
     interface ScannerStatusCallback {

@@ -84,9 +84,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (enableScan) {
-            Common.askForPermission(this);
-        }
+        Common.askForPermission(this);
     }
 
     @Override
@@ -198,9 +196,19 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     @Override
     public void noScannerAvailable() {
-        Log.i(LOG_TAG, "All scanner SDKs have failed");
-        onStatusChanged(getResources().getString(R.string.activity_scan_no_compatible_sdk));
-        checkInitializationEnd();
+        if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) {
+            // We may have a BT keyboard connected
+            Log.i(LOG_TAG, "No real scanner available but BT keyboard connected");
+            onStatusChanged(getResources().getString(R.string.scanner_using_bt_keyboard));
+        } else {
+            if (!laserModeOnly) {
+                // In that case try to connect to a camera.
+                initCamera();
+                Log.i(LOG_TAG, "All scanner SDKs have failed");
+                onStatusChanged(getResources().getString(R.string.activity_scan_no_compatible_sdk));
+                checkInitializationEnd();
+            }
+        }
     }
 
     private void checkInitializationEnd() {
@@ -281,7 +289,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void onData(List<Barcode> data) {
+    public void onData(Scanner s, List<Barcode> data) {
         String res = "";
         for (Barcode b : data) {
             Log.d(LOG_TAG, "Received barcode from scanner: " + b.getBarcode() + " - " + b.getBarcodeType().code);
@@ -306,17 +314,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (!enableScan) {
-            return false;
+            return super.dispatchKeyEvent(event);
         }
 
         if (event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
             // The ending CR is most often a simple UP without DOWN.
             Barcode b = new Barcode(this.keyboardInput, BarcodeType.UNKNOWN);
-            this.onData(new ArrayList<>(Collections.singleton(b)));
+            this.onData(null, new ArrayList<>(Collections.singleton(b)));
             this.keyboardInput = "";
         } else if (!event.isPrintingKey()) {
             // Skip un-printable characters.
-            return super.onKeyDown(event.getKeyCode(), event);
+            return super.dispatchKeyEvent(event);
         } else if (event.getAction() == KeyEvent.ACTION_DOWN) {
             // Only use DOWN event - UP events are not synchronized with SHIFT events.
             this.keyboardInput += (char) event.getKeyCharacterMap().get(event.getKeyCode(), event.getMetaState());

@@ -85,7 +85,7 @@ public class ManualInputFragment extends DialogFragment {
                 List<Barcode> res = new ArrayList<Barcode>(1);
                 Barcode b = new Barcode(txt, BarcodeType.UNKNOWN);
                 res.add(b);
-                cb.onData(res);
+                cb.onData(null, res);
 
                 // Do not always dismiss - let the host do it in some cases (it may want to validate the data).
                 if (closeOnValidation) {
@@ -106,7 +106,7 @@ public class ManualInputFragment extends DialogFragment {
                     List<Barcode> res = new ArrayList<Barcode>(1);
                     Barcode b = new Barcode(txt, BarcodeType.UNKNOWN);
                     res.add(b);
-                    cb.onData(res);
+                    cb.onData(null, res);
 
                     if (closeOnValidation) {
                         dismiss();

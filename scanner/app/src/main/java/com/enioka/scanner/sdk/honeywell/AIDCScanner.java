@@ -93,6 +93,8 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
             this.statusCb.onStatusChanged("Scanner is ready");
         }
         Log.i(LOG_TAG, "Scanner initialized");
+
+        cb0.onConnectionSuccessful(this);
     }
 
     @Override

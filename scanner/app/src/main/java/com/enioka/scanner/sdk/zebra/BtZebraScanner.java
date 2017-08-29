@@ -28,6 +28,8 @@ import java.util.Map;
 class BtZebraScanner implements Scanner, IDcsSdkApiDelegate {
     private static final String LOG_TAG = "BtZebraScanner";
 
+    private Scanner selfScanner = this;
+
     private static final Map<Integer, BarcodeType> barcodeTypesMapping;
 
     static {
@@ -303,7 +305,7 @@ class BtZebraScanner implements Scanner, IDcsSdkApiDelegate {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    dataCb.onData(res);
+                    dataCb.onData(selfScanner, res);
                 }
             });
         }

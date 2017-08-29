@@ -108,7 +108,7 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
         if (dataDb != null) {
             List<Barcode> res = new ArrayList<>(1);
             res.add(new Barcode(code.trim(), barcodeTypesMapping.get(type)));
-            dataDb.onData(res);
+            dataDb.onData(this, res);
         }
     }
 

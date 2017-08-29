@@ -25,6 +25,7 @@ import java.util.Map;
 public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
     private final static String LOG_TAG = "ScannerHoneywellAidc";
 
+    private Scanner selfScanner = this;
     AidcManager mgr;
     ScannerDataCallback dataCb;
     ScannerStatusCallback statusCb;
@@ -175,7 +176,7 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
         @Override
         protected void onPostExecute(Barcode barcode) {
             if (dataCb != null) {
-                dataCb.onData(new ArrayList<Barcode>(Arrays.asList(barcode)));
+                dataCb.onData(selfScanner, new ArrayList<Barcode>(Arrays.asList(barcode)));
             }
         }
     }

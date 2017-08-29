@@ -289,7 +289,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void onData(List<Barcode> data) {
+    public void onData(Scanner s, List<Barcode> data) {
         String res = "";
         for (Barcode b : data) {
             Log.d(LOG_TAG, "Received barcode from scanner: " + b.getBarcode() + " - " + b.getBarcodeType().code);
@@ -320,7 +320,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         if (event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
             // The ending CR is most often a simple UP without DOWN.
             Barcode b = new Barcode(this.keyboardInput, BarcodeType.UNKNOWN);
-            this.onData(new ArrayList<>(Collections.singleton(b)));
+            this.onData(null, new ArrayList<>(Collections.singleton(b)));
             this.keyboardInput = "";
         } else if (!event.isPrintingKey()) {
             // Skip un-printable characters.

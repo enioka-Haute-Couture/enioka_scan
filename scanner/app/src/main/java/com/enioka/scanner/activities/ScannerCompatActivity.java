@@ -180,7 +180,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                         scanner.pause();
                     }
                     df = ManualInputFragment.newInstance();
-                    df.setSuggestion(autocompletion, threshold);
+                    df.setAutocompletion(autocompletion, threshold);
                     df.show(getSupportFragmentManager(), "manual");
                 }
             });

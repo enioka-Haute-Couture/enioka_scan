@@ -36,8 +36,8 @@ public class ManualInputFragment extends DialogFragment {
     protected List<String> autocompletion = new ArrayList<>();
     protected int threshold = 5;
 
-    public void setSuggestion(List<String> suggestions, int threshold) {
-        this.autocompletion = suggestions;
+    public void setAutocompletion(List<String> autocompletion, int threshold) {
+        this.autocompletion = autocompletion;
         this.threshold = threshold;
     }
 
@@ -83,7 +83,7 @@ public class ManualInputFragment extends DialogFragment {
 
         String[] autocompletionArray = new String[autocompletion.size()];
         autocompletionArray = autocompletion.toArray(autocompletionArray);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), R.layout.dropdown_item,  R.id.textViewItem,  autocompletionArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), R.layout.dropdown_item, R.id.textViewItem, autocompletionArray);
         AutoCompleteTextView textView = (AutoCompleteTextView) view.findViewById(R.id.scanner_manual_input);
         textView.setThreshold(this.threshold);
         textView.setAdapter(adapter);

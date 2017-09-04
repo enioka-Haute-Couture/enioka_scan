@@ -19,6 +19,21 @@
         android:text="@string/fragment_scan_manual_invite"
         android:textSize="16sp" />
 
+    <AutoCompleteTextView
+        android:id="@+id/scanner_manual_input"
+        android:layout_width="230dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/scanner_manual_invite"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="25dp"
+        android:gravity="center"
+        android:inputType="textCapCharacters|text"
+        android:hint="@string/fragment_scan_manual_hint"
+        android:textSize="16sp">
+
+        <requestFocus />
+    </AutoCompleteTextView>
+    <!--
     <EditText
         android:id="@+id/scanner_manual_input"
         android:layout_width="144dp"
@@ -33,7 +48,7 @@
 
         <requestFocus />
     </EditText>
-
+-->
     <Button
         android:id="@+id/scanner_manual_bt_ok"
         android:layout_width="wrap_content"

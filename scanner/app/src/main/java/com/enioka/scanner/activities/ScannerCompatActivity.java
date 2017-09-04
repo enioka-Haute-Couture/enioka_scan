@@ -71,6 +71,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
      */
     protected int flashlightViewId = R.id.scanner_flashlight;
 
+    protected List<String> autocompletion = new ArrayList<>();
+    protected int threshold = 5;
+
 
     private String keyboardInput = "";
     protected ManualInputFragment df;
@@ -85,6 +88,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Common.askForPermission(this);
+    }
+
+    public void setAutocompletion(List autocompletion, int threshold) {
+        this.autocompletion = autocompletion;
+        this.threshold = threshold;
+
     }
 
     @Override
@@ -171,11 +180,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                         scanner.pause();
                     }
                     df = ManualInputFragment.newInstance();
+                    df.setSuggestion(autocompletion, threshold);
                     df.show(getSupportFragmentManager(), "manual");
                 }
             });
         }
     }
+
 
     @Override
     public void onConnectionSuccessful(Scanner s) {

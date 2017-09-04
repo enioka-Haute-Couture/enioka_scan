@@ -5,11 +5,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -30,6 +33,13 @@ public class ManualInputFragment extends DialogFragment {
     private Scanner.ScannerDataCallback cb;
     private Boolean closeOnValidation;
     private int inviteTextId;
+    protected List<String> autocompletion = new ArrayList<>();
+    protected int threshold = 5;
+
+    public void setSuggestion(List<String> suggestions, int threshold) {
+        this.autocompletion = suggestions;
+        this.threshold = threshold;
+    }
 
     public static ManualInputFragment newInstance() {
         return newInstance(true, R.string.fragment_scan_manual_invite);
@@ -66,12 +76,18 @@ public class ManualInputFragment extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCancelable(true);
-
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View view = inflater.inflate(R.layout.fragment_scan_manual_input, null);
         builder.setView(view);
-
         final Dialog res = builder.create();
+
+        String[] autocompletionArray = new String[autocompletion.size()];
+        autocompletionArray = autocompletion.toArray(autocompletionArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), R.layout.dropdown_item,  R.id.textViewItem,  autocompletionArray);
+        AutoCompleteTextView textView = (AutoCompleteTextView) view.findViewById(R.id.scanner_manual_input);
+        textView.setThreshold(this.threshold);
+        textView.setAdapter(adapter);
+        Log.v("ManualInput", "Set " + autocompletionArray.length + " autocompletion elements");
 
         res.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         view.findViewById(R.id.scanner_manual_bt_ok).setOnClickListener(new View.OnClickListener() {
@@ -94,7 +110,7 @@ public class ManualInputFragment extends DialogFragment {
             }
         });
 
-        ((EditText) view.findViewById(R.id.scanner_manual_input)).setOnEditorActionListener(new EditText.OnEditorActionListener() {
+        ((AutoCompleteTextView) view.findViewById(R.id.scanner_manual_input)).setOnEditorActionListener(new EditText.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {

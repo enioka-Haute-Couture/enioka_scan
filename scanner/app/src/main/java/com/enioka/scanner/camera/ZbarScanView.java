@@ -326,22 +326,25 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             prms.setPreviewSize(prevSize.width, prevSize.height);
 
             // COMPAT HACKS
+            this.usePreviewForPicture = false;
             if (android.os.Build.MODEL.equals("LG-H340n")) {
                 prms.setPreviewSize(1600, 1200);
-                Log.d(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+                Log.d(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height) + " (requested ratio was " + preferredRatio + ")");
             } else if (android.os.Build.MODEL.equals("SPA43LTE")) {
                 if (preferredRatio < 1.5) {
                     prms.setPreviewSize(1440, 1080); // Actual working max, 1.33 ratio. No higher rez works.
                 } else {
                     prms.setPreviewSize(1280, 720);
                 }
-                Log.d(TAG, "SPA43LTE specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+                this.usePreviewForPicture = true;
+                Log.d(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
             } else {
                 Log.d(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
+                this.usePreviewForPicture = previewSize.height >= 1080;
             }
 
             this.previewSize = prms.getPreviewSize();
-            this.usePreviewForPicture = previewSize.height >= 1080;
+
 
             //////////////////////////////////////
             // Picture resolution
@@ -365,16 +368,17 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
             boolean foundWithGoodRatio = false;
             for (Camera.Size size : sizes) {
-                Log.d(TAG, "supports picture resolution " + size.width + "*" + size.height + " - " + ((float) prevSize.width / (float) prevSize.height));
-                if (Math.abs((float) size.width / (float) size.height - preferredRatio) < 0.1f && size.width > pictureSize.width && size.width <= 2048 && size.height <= 1536) {
+                Log.d(TAG, "supports picture resolution " + size.width + "*" + size.height + " - " + ((float) size.width / (float) size.height));
+                if (Math.abs((float) size.width / (float) size.height - preferredRatio) < 0.1f && size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
                     pictureSize = size;
                     foundWithGoodRatio = true;
                 }
-                if (size.width > pictureSize.width && size.width <= 2048 && size.height <= 1536) {
+                if (size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
                     betterChoiceWrongRatio = size;
                 }
             }
             if (!foundWithGoodRatio) {
+                Log.d(TAG, "Could not find a photo resolution with requested ratio " + preferredRatio + ". Going with wrong ratio resolution");
                 pictureSize = betterChoiceWrongRatio;
             }
             prms.setPictureSize(pictureSize.width, pictureSize.height);

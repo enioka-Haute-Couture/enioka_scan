@@ -340,7 +340,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 Log.d(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
             } else {
                 Log.d(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
-                this.usePreviewForPicture = previewSize.height >= 1080;
+                this.usePreviewForPicture = prevSize.height >= 1080;
             }
 
             this.previewSize = prms.getPreviewSize();

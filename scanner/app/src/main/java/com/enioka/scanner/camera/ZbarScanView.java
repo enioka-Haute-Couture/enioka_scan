@@ -805,16 +805,19 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     public static void beepOk() {
         ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
         tg.startTone(ToneGenerator.TONE_PROP_PROMPT, 100);
+        tg.release();
     }
 
     public static void beepWaiting() {
         ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
         tg.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 300);
+        tg.release();
     }
 
     public static void beepKo() {
         ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
         tg.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 300);
+        tg.release();
     }
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////

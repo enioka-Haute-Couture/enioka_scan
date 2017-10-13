@@ -353,10 +353,13 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             // Then, look for any higher resolution with the same ratio
             List<Camera.Size> sizes = prms.getSupportedPictureSizes();
             Camera.Size pictureSize = null, smallestSize = sizes.get(0), betterChoiceWrongRatio = null;
+            boolean foundWithGoodRatio = false;
+
             for (Camera.Size s : sizes) {
                 // Is preview resolution a picture resolution?
                 if (s.width == prevSize.width && s.height == prevSize.height) {
                     pictureSize = s;
+                    foundWithGoodRatio = true;
                 }
                 if (s.width < smallestSize.width) {
                     smallestSize = s;
@@ -366,7 +369,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 pictureSize = smallestSize;
             }
 
-            boolean foundWithGoodRatio = false;
             for (Camera.Size size : sizes) {
                 Log.d(TAG, "supports picture resolution " + size.width + "*" + size.height + " - " + ((float) size.width / (float) size.height));
                 if (Math.abs((float) size.width / (float) size.height - preferredRatio) < 0.1f && size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {

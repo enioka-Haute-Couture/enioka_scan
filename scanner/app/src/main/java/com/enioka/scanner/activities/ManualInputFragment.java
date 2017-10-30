@@ -3,6 +3,8 @@ package com.enioka.scanner.activities;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
@@ -35,6 +37,7 @@ public class ManualInputFragment extends DialogFragment {
     private int inviteTextId;
     protected List<String> autocompletion = new ArrayList<>();
     protected int threshold = 5;
+    protected DialogInterface di;
 
     public void setAutocompletion(List<String> autocompletion, int threshold) {
         this.autocompletion = autocompletion;
@@ -79,6 +82,10 @@ public class ManualInputFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View view = inflater.inflate(R.layout.fragment_scan_manual_input, null);
         builder.setView(view);
+
+
+
+
         final Dialog res = builder.create();
 
         String[] autocompletionArray = new String[autocompletion.size()];
@@ -107,6 +114,7 @@ public class ManualInputFragment extends DialogFragment {
                 if (closeOnValidation) {
                     dismiss();
                 }
+
             }
         });
 
@@ -138,4 +146,27 @@ public class ManualInputFragment extends DialogFragment {
 
         return res;
     }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if(di!=null)
+        {
+            di.dismiss();
+        }
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        super.onCancel(dialog);
+        if(di!=null){
+            di.cancel();
+        }
+    }
+
+    public void setDialogInterface(DialogInterface di) {
+        this.di = di;
+    }
+
+
 }

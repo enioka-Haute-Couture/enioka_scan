@@ -1,5 +1,6 @@
 package com.enioka.scanner.activities;
 
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -181,6 +182,27 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                     }
                     df = ManualInputFragment.newInstance();
                     df.setAutocompletion(autocompletion, threshold);
+                    df.setDialogInterface(new DialogInterface() {
+                        @Override
+                        public void cancel() {
+                            if(ScannerCompatActivity.this.scanners  != null)
+                            {
+                                for (Scanner scanner : ScannerCompatActivity.this.scanners) {
+                                    scanner.resume();
+                                }
+                            }
+
+                        }
+                        @Override
+                        public void dismiss() {
+                            if(ScannerCompatActivity.this.scanners  != null)
+                            {
+                                for (Scanner scanner : ScannerCompatActivity.this.scanners) {
+                                    scanner.resume();
+                                }
+                            }
+                        }
+                    });
                     df.show(getSupportFragmentManager(), "manual");
                 }
             });

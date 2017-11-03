@@ -5,7 +5,7 @@ package com.enioka.scanner.data;
  */
 public class Barcode {
     private String barcode;
-    private BarcodeType barcodeType;
+    private BarcodeType barcodeType = BarcodeType.UNKNOWN;
 
     public Barcode(String barcode, BarcodeType barcodeType) {
         this.barcode = barcode.trim();

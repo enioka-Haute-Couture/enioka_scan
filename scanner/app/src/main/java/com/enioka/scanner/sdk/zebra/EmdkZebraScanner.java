@@ -339,7 +339,11 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
 
                         // Handle result
                         if (!TextUtils.isEmpty(barcodeData)) {
-                            res.add(new Barcode(barcodeData, symbol2Api.get(data.getLabelType())));
+                            BarcodeType type = symbol2Api.get(data.getLabelType());
+                            if (type == null) {
+                                type = BarcodeType.UNKNOWN;
+                            }
+                            res.add(new Barcode(barcodeData, type));
                         }
                     }
                 }

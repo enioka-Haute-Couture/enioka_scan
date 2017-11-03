@@ -299,7 +299,11 @@ class BtZebraScanner implements Scanner, IDcsSdkApiDelegate {
 
         if (dataCb != null) {
             final List<Barcode> res = new ArrayList<>(1);
-            res.add(new Barcode(new String(barcodeData).trim(), barcodeTypesMapping.get(barcodeType)));
+            BarcodeType type = barcodeTypesMapping.get(barcodeType);
+            if (type == null) {
+                type = BarcodeType.UNKNOWN;
+            }
+            res.add(new Barcode(new String(barcodeData).trim(), type));
 
             // Use a handler from the main message loop to run on the UI thread, as dcssdkEventBarcode is called by another thread.
             new Handler(Looper.getMainLooper()).post(new Runnable() {

@@ -170,7 +170,11 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
             }
 
             BarcodeReadEvent evt = barcodeReadEvents[0];
-            return new Barcode(evt.getBarcodeData(), aidc2Api.get(evt.getCodeId()));
+            BarcodeType type = aidc2Api.get(evt.getCodeId());
+            if (type == null) {
+                type = BarcodeType.UNKNOWN;
+            }
+            return new Barcode(evt.getBarcodeData(), type);
         }
 
         @Override

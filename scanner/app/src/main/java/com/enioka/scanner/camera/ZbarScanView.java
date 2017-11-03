@@ -286,6 +286,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_BARCODE)) {
                 Log.d(TAG, "supportedSceneModes - scene mode barcode supported and selected");
                 prms.setSceneMode(Camera.Parameters.SCENE_MODE_BARCODE);
+            } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO)) {
+                Log.d(TAG, "supportedSceneModes - scene mode SCENE_MODE_STEADYPHOTO supported and selected");
+                prms.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
             }
 
             // Set flash mode to torch if supported

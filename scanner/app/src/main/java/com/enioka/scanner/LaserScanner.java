@@ -28,7 +28,7 @@ public final class LaserScanner {
     /**
      * The list of available scanner providers. (manual for now => no useless complicated plugin system)
      */
-    private static final List<ScannerProvider> laserProviders = new ArrayList<>(Arrays.asList(new EmdkZebraProvider(), new BtZebraProvider(), new HHTProvider(), new AIDCProvider()));
+    private static final List<ScannerProvider> laserProviders = new ArrayList<>(Arrays.asList(new EmdkZebraProvider(), new HHTProvider(), new AIDCProvider()));
     private static Boolean scannerFound = false;
 
     /**

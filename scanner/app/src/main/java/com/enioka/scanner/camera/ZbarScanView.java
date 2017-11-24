@@ -12,7 +12,6 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -27,17 +26,11 @@ import android.widget.FrameLayout;
 
 import com.enioka.scanner.R;
 
-import net.sourceforge.zbar.Image;
 import net.sourceforge.zbar.ImageScanner;
-import net.sourceforge.zbar.Symbol;
-import net.sourceforge.zbar.SymbolSet;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import me.dm7.barcodescanner.core.DisplayUtils;
 
@@ -66,6 +59,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     protected int x1, y1, x2, y2, x3, y3, x4, y4; // 1 = top left, 2 = top right, 3 = bottom right, 4 = bottom left.
     private float camResRatio;
     private boolean manualAutoFocus = false;
+    private boolean hasExposureCompensation = false;
     private boolean torchOn = false;
     private ZbarScanViewOverlay overlay;
     protected boolean scanningStarted = true;
@@ -75,6 +69,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     boolean allowTargetDrag = true;
     private byte[] lastPreviewData;
     private Camera.Size previewSize;
+
+    private FrameAnalyserManager frameAnalyser;
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Stupid constructors
@@ -96,13 +93,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (!this.isInEditMode()) {
             // ZBar is a native library
             System.loadLibrary("iconv");
-
-            // Barcode analyzer (properties: 0 = all symbologies, 256 = config, 3 = value)
-            this.scanner = new ImageScanner();
-            this.scanner.setConfig(0, 256, 0); // 256 =   ZBAR_CFG_X_DENSITY (disable vertical scanning)
-            //this.scanner.setConfig(0, 257, 3); // 257 =  ZBAR_CFG_Y_DENSITY (skip 2 out of 3 lines)
-            this.scanner.setConfig(0, 0, 0); //  0 = ZBAR_CFG_ENABLE (disable all symbologies)
-            this.scanner.setConfig(Symbol.CODE128, 0, 1); //  0 = ZBAR_CFG_ENABLE (enable symbology 128)
+            frameAnalyser = new FrameAnalyserManager(this);
         }
 
         // Target rectangle paint
@@ -142,7 +133,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
      * @param s the ID of the symbology (ZBAR coding)
      */
     public void addSymbology(int s) {
-        this.scanner.setConfig(s, 0, 1);
+        //this.scanner.setConfig(s, 0, 1);
     }
 
     public void initRect() {
@@ -219,17 +210,21 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             Log.d(TAG, "Camera supports " + nbAreas + " focus areas");
             if (nbAreas > 0) {
                 List<Camera.Area> areas = new ArrayList<>();
-                areas.add(new Camera.Area(new Rect(-10, -10, 10, 10), 1000));
+                areas.add(new Camera.Area(new Rect(-800, -100, 800, 100), 1000));
                 prms.setFocusAreas(areas);
                 Log.d(TAG, "Using a central focus area");
+            } else {
+                Log.d(TAG, "No focus area used");
             }
 
             // Metering areas
             if (prms.getMaxNumMeteringAreas() > 0) {
                 List<Camera.Area> areas = new ArrayList<>();
-                areas.add(new Camera.Area(new Rect(-1000, -50, 1000, 50), 1000));
+                areas.add(new Camera.Area(new Rect(-800, -50, 800, 50), 1000));
                 prms.setMeteringAreas(areas);
                 Log.d(TAG, "Using a central metering area");
+            } else {
+                Log.d(TAG, "No specific metering area available");
             }
 
             // Exposure
@@ -239,6 +234,8 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             }
             if (prms.getMaxExposureCompensation() > 0 && prms.getMinExposureCompensation() > 0) {
                 Log.d(TAG, "Exposure compensation is supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
+                hasExposureCompensation = true;
+                prms.setExposureCompensation((prms.getMaxExposureCompensation() + prms.getMinExposureCompensation()) / 2 - 1);
             } else {
                 Log.d(TAG, "Exposure compensation is not supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
             }
@@ -341,6 +338,15 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 }
                 this.usePreviewForPicture = true;
                 Log.d(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+            } else if (android.os.Build.MODEL.equals("Archos Sense 50XZZ")) {
+                if (preferredRatio < 1.5) {
+                    prms.setPreviewSize(800, 600);
+                    prms.setPreviewSize(1440, 1080);
+                } else {
+                    prms.setPreviewSize(1280, 720);
+                }
+                this.usePreviewForPicture = true;
+                Log.d(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
             } else {
                 Log.d(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
                 this.usePreviewForPicture = prevSize.height >= 1080;
@@ -390,7 +396,31 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             camResRatio = (float) prms.getPictureSize().width / (float) prms.getPictureSize().height;
             Log.d(TAG, "Using picture resolution " + pictureSize.width + "*" + pictureSize.height + ". Ratio is " + camResRatio + ". (Preferred ratio was " + preferredRatio + ")");
 
-            // Set camera
+
+            //////////////////////////////////////
+            // Perf hacks
+
+            // We are using video...
+            prms.setRecordingHint(true);
+
+            // We need to best frame rate available
+            int[] bestPreviewFpsRange = new int[]{0, 0};
+            for (int[] fpsRange : prms.getSupportedPreviewFpsRange()) {
+                if (fpsRange[0] >= bestPreviewFpsRange[0] && fpsRange[1] >= bestPreviewFpsRange[1]) {
+                    bestPreviewFpsRange = fpsRange;
+                }
+            }
+            if (bestPreviewFpsRange[1] > 0) {
+                prms.setPreviewFpsRange(bestPreviewFpsRange[0], bestPreviewFpsRange[1]);
+                Log.i(TAG, "Requesting preview FPS range at " + bestPreviewFpsRange[0] + "," + bestPreviewFpsRange[1]);
+            }
+
+            // Probably useless: don't use colors, as camera color interpolation destroys precision.
+            prms.setColorEffect(Camera.Parameters.EFFECT_MONO);
+
+
+            //////////////////////////////////////
+            // Camera prms done
             setCameraParameters(prms);
 
             this.cam.setDisplayOrientation(getCameraDisplayOrientation());
@@ -536,7 +566,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                         overlay.invalidate();
                         try {
                             if (scanningStarted) {
-                                camera.setOneShotPreviewCallback(t);
+                                camera.setPreviewCallback(t);
                             }
                         } catch (RuntimeException e) {
                             // Can happen when the camera was released before this callback happens. Not an issue - the scan has already succeeded.
@@ -564,7 +594,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             this.cam.setPreviewDisplay(this.camHolder);
             this.cam.startPreview();
             if (scanningStarted) {
-                this.cam.setOneShotPreviewCallback(this);
+                this.cam.setPreviewCallback(this);
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not start camera", e);
@@ -588,182 +618,45 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private static Calendar last = Calendar.getInstance();
     private Integer waitingForValidations = 0;
     private Calendar focusTime = Calendar.getInstance();
+    private Calendar latestAnalysis = Calendar.getInstance();
     private String latestBarcodeValue = "";
 
     // THE main method.
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
+
         if (!scanningStarted) {
             return;
         }
-        //Log.i(TAG, "Starting analysis on " + data.length + " bytes of camera data");
 
-        Calendar now = Calendar.getInstance();
-        long msSinceLast = now.getTimeInMillis() - last.getTimeInMillis();
-
-        byte[] previewData = data;
-
-        String symData;
-        int symType;
-
-        // Data characteristics
-        int dataWidth = camera.getParameters().getPreviewSize().width;
-        int dataHeight = camera.getParameters().getPreviewSize().height;
-
-        // The rectangle is in view coordinates.
-        float yratio = (float) dataWidth / (float) this.camView.getMeasuredHeight();  // Photo pixels per preview surface pixel. Width because: 90° rotated.
-        float xratio = (float) dataHeight / (float) this.camView.getMeasuredWidth();
-        int realy1 = (int) (y1 * yratio);
-        int realy3 = (int) (y3 * yratio);
-        int realx1 = (int) (x1 * xratio);
-        int realx3 = (int) (x3 * xratio);
-
-        int croppedDataWidth, croppedDataHeight;
-
-        // Rotate and crop.
-        if (DisplayUtils.getScreenOrientation(this.getContext()) == 1) {
-            // French (vertical) - crop & rotate
-            byte[] barcode = new byte[(1 + realx3 - realx1) * (1 + realy3 - realy1)];
-
-            int i = 0;
-            for (int w = realy1; w <= realy3; w++) {
-                for (int h = realx3 - 1; h >= realx1; h--) {
-                    barcode[i++] = data[h * dataWidth + w];
-                }
-            }
-
-            //noinspection SuspiciousNameCombination
-            croppedDataWidth = (1 + realx3 - realx1);
-            croppedDataHeight = (1 + realy3 - realy1);
-            data = barcode;
-        } else {
-            // Italian (horizontal). No need to rotate - just crop.
-            yratio = (float) dataHeight / (float) this.camView.getMeasuredHeight();  // Photo pixels per preview surface pixel.
-            xratio = (float) dataWidth / (float) this.camView.getMeasuredWidth();
-
-            realy1 = (int) (y1 * yratio);
-            realy3 = (int) (y3 * yratio);
-            realx1 = (int) (x1 * xratio);
-            realx3 = (int) (x3 * xratio);
-
-            croppedDataWidth = (1 + realx3 - realx1);
-            croppedDataHeight = (1 + realy3 - realy1);
-
-            byte[] barcode = new byte[croppedDataWidth * croppedDataHeight];
-            int i = 0;
-            for (int h = realy1; h <= realy3; h++) {
-                for (int w = realx1; w <= realx3; w++) {
-                    barcode[i++] = data[h * dataWidth + w];
-                }
-            }
-
-            data = barcode;
-        }
-
-        // Analysis
-        Image pic = new Image(croppedDataWidth, croppedDataHeight, "Y800");
-        pic.setData(data);
-        //pic.setCrop(0, realy1, dataWidth, realy3 - realy1); // Left, top, width, height
-        boolean hasBeeped = false;
-        if (this.scanner.scanImage(pic) != 0) {
-            // There is a result! Extract it.
-            if (this.handler != null) {
-                SymbolSet var15 = this.scanner.getResults();
-                Iterator i$ = var15.iterator();
-
-                Set<String> foundStrings = new HashSet<>();
-                while (i$.hasNext()) {
-                    Symbol sym = (Symbol) i$.next();
-                    symData = sym.getData();
-                    symType = sym.getType();
-
-                    if (msSinceLast < MS_SINCE_LAST && symData.equals(latestBarcodeValue)) {
-                        // Same as the last (and very recent) barcode read
-                        break;
-                    } else if (!TextUtils.isEmpty(symData) && !foundStrings.contains(symData)) {
-                        beepOk();
-                        latestBarcodeValue = symData;
-                        last = now;
-                        foundStrings.add(symData);
-
-                        if (!hasBeeped && this.beepBeforeValidation) {
-                            hasBeeped = true;
-                            //beepWaiting();
-                        }
-                        if (this.validatorAsync != null) {
-                            synchronized (waitingForValidations) {
-                                // Store the preview frame for using as picture
-                                if (usePreviewForPicture) {
-                                    lastPreviewData = previewData;
-                                }
-                                waitingForValidations++;
-                                this.validatorAsync.validateResultAsync(symData, symType);
-                            }
-                        } else {
-                            if (this.validator != null && !this.validator.validateResult(symData, symType)) {
-                                continue;
-                            }
-                            if (endValidationAnalysis(true, symData)) {
-                                return;
-                            }
-                        }
-                    }
-                }
-
-                // No results (at least with sync validation) so rearm analysis.
-                if (waitingForValidations == 0) {
-                    camera.setOneShotPreviewCallback(this);
-                }
-            }
-        } else {
-            // No results at all: always rearm.
-            final ZbarScanView t = this;
-            Calendar limit = Calendar.getInstance();
-            limit.add(Calendar.SECOND, -1);
-            if (manualAutoFocus && focusTime.before(limit)) {
-                focusTime = now;
-                this.cam.autoFocus(new Camera.AutoFocusCallback() {
-                    @Override
-                    public void onAutoFocus(boolean success, Camera camera) {
-                        Log.d(TAG, "Focus " + success);
-                        try {
-                            camera.setOneShotPreviewCallback(t);
-                        } catch (RuntimeException e) {
-                            // Happens when camera is already released - not an issue, it means scan is over.
-                        }
-                    }
-                });
-            } else {
-                camera.setOneShotPreviewCallback(this);
-            }
-        }
+        FrameAnalysisContext ctx = new FrameAnalysisContext();
+        ctx.frame = data;
+        ctx.cameraHeight = camera.getParameters().getPreviewSize().height;
+        ctx.cameraWidth = camera.getParameters().getPreviewSize().width;
+        ctx.camViewMeasuredHeight = this.camView.getMeasuredHeight();
+        ctx.camViewMeasuredWidth = this.camView.getMeasuredWidth();
+        ctx.vertical = DisplayUtils.getScreenOrientation(this.getContext()) == 1;
+        ctx.x1 = x1;
+        ctx.x2 = x2;
+        ctx.x3 = x3;
+        ctx.x4 = x4;
+        ctx.y1 = y1;
+        ctx.y2 = y2;
+        ctx.y3 = y3;
+        ctx.y4 = y4;
+        long start = System.nanoTime();
+        frameAnalyser.handleFrame(ctx);
+        Log.d(TAG, "MAIN - GIVEN TO ANALYSER - TOOK MS " + (System.nanoTime() - start) / 1000000);
     }
 
-    public void giveValidationResult(boolean res, String value) {
-        giveValidationResult(res, value, false);
-    }
-
-    public void giveValidationResult(boolean res, String value, boolean keepScanning) {
-        if (this.validatorAsync == null) {
-            throw new IllegalArgumentException("Cannot call giveValidationResult when validator is synchronous");
+    void analyserCallback(String result, int type, byte[] previewData) {
+        if (usePreviewForPicture) {
+            lastPreviewData = previewData;
         }
-
-        synchronized (this.waitingForValidations) {
-            this.waitingForValidations--;
-            endValidationAnalysis(res, value, keepScanning);
-            // enforce technical checks
-            if (this.cam != null && this.waitingForValidations == 0 && (!res || keepScanning)) {
-                // No game - let's try again.
-                this.cam.setOneShotPreviewCallback(this);
-            }
-        }
+        endValidationAnalysis(true, result, type, true);
     }
 
-    private boolean endValidationAnalysis(boolean valid, String res) {
-        return endValidationAnalysis(valid, res, false);
-    }
-
-    private boolean endValidationAnalysis(boolean valid, String res, boolean keepScanning) {
+    private boolean endValidationAnalysis(boolean valid, final String res, final int type, boolean keepScanning) {
         if (!valid) {
             lastPreviewData = null;
             return false;
@@ -777,7 +670,13 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         Log.d(TAG, res);
 
         // Return result
-        this.handler.handleScanResult(res);
+        this.post(new Runnable() {
+            @Override
+            public void run() {
+                ZbarScanView.this.handler.handleScanResult(res, type);
+            }
+        });
+
         return true;
     }
 
@@ -791,7 +690,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (this.cam != null) {
             this.cam.startPreview();
             if (scanningStarted) {
-                this.cam.setOneShotPreviewCallback(this);
+                this.cam.setPreviewCallback(this);
             }
         }
     }
@@ -799,7 +698,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     public void startScanner() {
         Log.d(VIEW_LOG_TAG, "Scanning started");
         this.scanningStarted = true;
-        this.cam.setOneShotPreviewCallback(this);
+        this.cam.setPreviewCallback(this);
     }
 
     public void pauseScanner() {
@@ -832,11 +731,11 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     public void cleanUp() {
         if (this.cam != null) {
             Log.i(TAG, "Removing all camera callbacks and stopping it");
-            this.cam.setOneShotPreviewCallback(null);
             this.cam.setPreviewCallback(null);
             this.cam.stopPreview();
             this.setOnClickListener(null);
             this.lastPreviewData = null;
+            frameAnalyser.close();
         }
         closeCamera();
     }
@@ -926,7 +825,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     }
 
     public interface ResultHandler {
-        void handleScanResult(String result);
+        void handleScanResult(String result, int type);
     }
 
     public interface ResultValidator {

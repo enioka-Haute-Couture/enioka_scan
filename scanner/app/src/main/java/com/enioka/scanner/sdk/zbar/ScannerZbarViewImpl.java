@@ -98,13 +98,14 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
     }
 
     @Override
-    public void handleScanResult(String result) {
+    public void handleScanResult(String result, int type) {
+        validateResultAsync(result, type);
     }
 
     @Override
     public void validateResultAsync(final String code, final int type) {
         Log.d(LOG_TAG, "validateResultAsync " + code + " - " + type);
-        scanner.giveValidationResult(true, code, true);
+        //scanner.giveValidationResult(true, code, true);
         if (dataDb != null) {
             List<Barcode> res = new ArrayList<>(1);
             res.add(new Barcode(code.trim(), barcodeTypesMapping.get(type)));

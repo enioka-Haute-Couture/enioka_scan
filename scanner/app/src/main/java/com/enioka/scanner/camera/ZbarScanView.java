@@ -175,7 +175,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         // Camera pane init
         if (this.cam == null && !this.isInEditMode()) {
             try {
-                Log.i(TAG, "Camera is being opened");
+                Log.i(TAG, "Camera is being opened. Device is " + android.os.Build.MODEL);
                 this.cam = Camera.open();
             } catch (final Exception e) {
                 failed = true;
@@ -212,9 +212,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 List<Camera.Area> areas = new ArrayList<>();
                 areas.add(new Camera.Area(new Rect(-800, -100, 800, 100), 1000));
                 prms.setFocusAreas(areas);
-                Log.d(TAG, "Using a central focus area");
+                Log.i(TAG, "Using a central focus area");
             } else {
-                Log.d(TAG, "No focus area used");
+                Log.i(TAG, "No focus area used");
             }
 
             // Metering areas
@@ -222,9 +222,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 List<Camera.Area> areas = new ArrayList<>();
                 areas.add(new Camera.Area(new Rect(-800, -50, 800, 50), 1000));
                 prms.setMeteringAreas(areas);
-                Log.d(TAG, "Using a central metering area");
+                Log.i(TAG, "Using a central metering area");
             } else {
-                Log.d(TAG, "No specific metering area available");
+                Log.i(TAG, "No specific metering area available");
             }
 
             // Exposure
@@ -232,27 +232,31 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 Log.d(TAG, "Auto exposure lock is supported and value is: " + prms.getAutoExposureLock());
                 //prms.setAutoExposureLock(true);
             }
-            if (prms.getMaxExposureCompensation() > 0 && prms.getMinExposureCompensation() > 0) {
-                Log.d(TAG, "Exposure compensation is supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
+            if (prms.getMaxExposureCompensation() > 0 && prms.getMinExposureCompensation() < 0) {
+                Log.i(TAG, "Exposure compensation is supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
                 hasExposureCompensation = true;
                 prms.setExposureCompensation((prms.getMaxExposureCompensation() + prms.getMinExposureCompensation()) / 2 - 1);
+                Log.i(TAG, "Exposure compensation set to " + prms.getExposureCompensation());
             } else {
-                Log.d(TAG, "Exposure compensation is not supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
+                Log.i(TAG, "Exposure compensation is not supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
             }
             if (prms.getWhiteBalance() != null) {
-                Log.d(TAG, "white balance is supported with modes: " + prms.getSupportedWhiteBalance() + ". Selected is: " + prms.getWhiteBalance());
+                Log.i(TAG, "white balance is supported with modes: " + prms.getSupportedWhiteBalance() + ". Selected is: " + prms.getWhiteBalance());
                 //prms.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_DAYLIGHT);
             }
 
             // Antibanding
             if (prms.getAntibanding() != null) {
-                Log.d(TAG, "Antibanding is supported and is " + prms.getAntibanding());
+                Log.i(TAG, "Antibanding is supported and is " + prms.getAntibanding());
                 //prms.setAntibanding(Camera.Parameters.ANTIBANDING_OFF);
             }
 
             // Stabilization
             if (prms.isVideoStabilizationSupported()) {
-                Log.d(TAG, "Video stabilization is supported and is: " + prms.getVideoStabilization());
+                Log.i(TAG, "Video stabilization is supported and will be set to true - currently is: " + prms.getVideoStabilization());
+                prms.setVideoStabilization(true);
+            } else {
+                Log.i(TAG, "Video stabilization is not supported");
             }
 
             // A YUV format. NV21 is always available, no need to check if it is supported
@@ -263,28 +267,28 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             Log.d(TAG, "Supported focus modes: " + supportedFocusModes.toString());
             if (supportedFocusModes.contains("mw_continuous-picture")) {
                 prms.setFocusMode("mw_continuous-picture");
-                Log.d(TAG, "supportedFocusModes - mw_continuous-picture supported and selected");
+                Log.i(TAG, "supportedFocusModes - mw_continuous-picture supported and selected");
             } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
                 prms.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-                Log.d(TAG, "supportedFocusModes - continuous-picture supported and selected");
+                Log.i(TAG, "supportedFocusModes - continuous-picture supported and selected");
             } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
                 prms.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-                Log.d(TAG, "supportedFocusModes - auto supported and selected");
+                Log.i(TAG, "supportedFocusModes - auto supported and selected");
                 manualAutoFocus = true;
             } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_MACRO)) {
                 prms.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
-                Log.d(TAG, "supportedFocusModes - macro supported and selected");
+                Log.i(TAG, "supportedFocusModes - macro supported and selected");
             } else {
-                Log.d(TAG, "no autofocus supported");
+                Log.i(TAG, "no autofocus supported");
             }
 
             // Scene mode
             List<String> supportedSceneModes = prms.getSupportedSceneModes();
             if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_BARCODE)) {
-                Log.d(TAG, "supportedSceneModes - scene mode barcode supported and selected");
+                Log.i(TAG, "supportedSceneModes - scene mode barcode supported and selected");
                 prms.setSceneMode(Camera.Parameters.SCENE_MODE_BARCODE);
             } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO)) {
-                Log.d(TAG, "supportedSceneModes - scene mode SCENE_MODE_STEADYPHOTO supported and selected");
+                Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_STEADYPHOTO supported and selected");
                 prms.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
             }
 
@@ -302,7 +306,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
             // Simple debug display
             for (Camera.Size s : rezs) {
-                Log.d(TAG, "supports preview resolution " + s.width + "*" + s.height + " - " + ((float) s.width / (float) s.height));
+                Log.d(TAG, "\tsupports preview resolution " + s.width + "*" + s.height + " - " + ((float) s.width / (float) s.height));
             }
 
             if (prevSize == null || prevSize.width < 1024 || (float) prevSize.width / (float) prevSize.height - preferredRatio > 0.1f) {
@@ -329,7 +333,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             this.usePreviewForPicture = false;
             if (android.os.Build.MODEL.equals("LG-H340n")) {
                 prms.setPreviewSize(1600, 1200);
-                Log.d(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height) + " (requested ratio was " + preferredRatio + ")");
+                Log.i(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height) + " (requested ratio was " + preferredRatio + ")");
             } else if (android.os.Build.MODEL.equals("SPA43LTE")) {
                 if (preferredRatio < 1.5) {
                     prms.setPreviewSize(1440, 1080); // Actual working max, 1.33 ratio. No higher rez works.
@@ -337,18 +341,18 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                     prms.setPreviewSize(1280, 720);
                 }
                 this.usePreviewForPicture = true;
-                Log.d(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
-            } else if (android.os.Build.MODEL.equals("Archos Sense 50XZZ")) {
+                Log.i(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+            } else if (android.os.Build.MODEL.equals("Archos Sense 50X")) {
                 if (preferredRatio < 1.5) {
-                    prms.setPreviewSize(800, 600);
+                    //prms.setPreviewSize(800, 600);
                     prms.setPreviewSize(1440, 1080);
                 } else {
                     prms.setPreviewSize(1280, 720);
                 }
                 this.usePreviewForPicture = true;
-                Log.d(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+                Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
             } else {
-                Log.d(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
+                Log.i(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
                 this.usePreviewForPicture = prevSize.height >= 1080;
             }
 
@@ -360,6 +364,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
             // A preview resolution is often a picture resolution, so start with this.
             // Then, look for any higher resolution with the same ratio
+            Log.i(TAG, "Looking for the ideal photo resolution. View ratio is " + preferredRatio);
             List<Camera.Size> sizes = prms.getSupportedPictureSizes();
             Camera.Size pictureSize = null, smallestSize = sizes.get(0), betterChoiceWrongRatio = null;
             boolean foundWithGoodRatio = false;
@@ -379,7 +384,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             }
 
             for (Camera.Size size : sizes) {
-                Log.d(TAG, "supports picture resolution " + size.width + "*" + size.height + " - " + ((float) size.width / (float) size.height));
+                Log.d(TAG, "\tsupports picture resolution " + size.width + "*" + size.height + " - " + ((float) size.width / (float) size.height));
                 if (Math.abs((float) size.width / (float) size.height - preferredRatio) < 0.1f && size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
                     pictureSize = size;
                     foundWithGoodRatio = true;
@@ -394,7 +399,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             }
             prms.setPictureSize(pictureSize.width, pictureSize.height);
             camResRatio = (float) prms.getPictureSize().width / (float) prms.getPictureSize().height;
-            Log.d(TAG, "Using picture resolution " + pictureSize.width + "*" + pictureSize.height + ". Ratio is " + camResRatio + ". (Preferred ratio was " + preferredRatio + ")");
+            Log.i(TAG, "Using picture resolution " + pictureSize.width + "*" + pictureSize.height + ". Ratio is " + camResRatio + ". (Preferred ratio was " + preferredRatio + ")");
 
 
             //////////////////////////////////////

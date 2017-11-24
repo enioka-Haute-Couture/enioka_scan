@@ -629,7 +629,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     // THE main method.
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-
         if (!scanningStarted) {
             return;
         }
@@ -649,9 +648,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         ctx.y2 = y2;
         ctx.y3 = y3;
         ctx.y4 = y4;
-        long start = System.nanoTime();
         frameAnalyser.handleFrame(ctx);
-        Log.d(TAG, "MAIN - GIVEN TO ANALYSER - TOOK MS " + (System.nanoTime() - start) / 1000000);
     }
 
     void analyserCallback(String result, int type, byte[] previewData) {

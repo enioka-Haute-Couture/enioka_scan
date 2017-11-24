@@ -12,20 +12,24 @@ import net.sourceforge.zbar.SymbolSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Analyse frames with ZBar and set result. Listens on a queue.
+ * Analyse frames with ZBar and set result. Listens on a queue. Stops when queue contains null.
  */
 class FrameAnalyser implements Runnable {
     private static final String TAG = "BARCODE";
 
-    private FrameAnalysisContext ctx;
     private ImageScanner scanner;
     private FrameAnalyserManager parent;
+    private BlockingQueue<FrameAnalysisContext> queue;
+    private Semaphore end = new Semaphore(0);
 
-    FrameAnalyser(FrameAnalysisContext ctx, FrameAnalyserManager parent) {
-        this.ctx = ctx;
+    FrameAnalyser(BlockingQueue<FrameAnalysisContext> queue, FrameAnalyserManager parent) {
         this.parent = parent;
+        this.queue = queue;
 
         Log.i(TAG, "Analyser is ready inside pool");
     }
@@ -33,23 +37,43 @@ class FrameAnalyser implements Runnable {
     @Override
     public void run() {
         Log.i(TAG, "run is called " + Thread.currentThread().getId());
-        android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+        android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        initScanner();
 
-        onPreviewFrame();
+        boolean first = true;
+        FrameAnalysisContext ctx = null;
+        while (ctx == null || ctx.frame != null) {
+            try {
+                ctx = queue.take();
+                first = false;
+            } catch (InterruptedException e) {
+                // Just stop.
+                break;
+            }
+            if (ctx != null && ctx.frame != null) {
+                onPreviewFrame(ctx);
+            }
+        }
+
+        Log.i(TAG, "Frame analyser is closing");
+        end.release();
     }
 
-    private void onPreviewFrame() {
-        // parent.handleResult(null, 0, null);
-        // return;
-
-        long start = System.nanoTime();
-
+    private void initScanner() {
         // Barcode analyzer (properties: 0 = all symbologies, 256 = config, 3 = value)
         this.scanner = new ImageScanner();
         this.scanner.setConfig(0, 256, 0); // 256 =   ZBAR_CFG_X_DENSITY (disable vertical scanning)
         //this.scanner.setConfig(0, 257, 3); // 257 =  ZBAR_CFG_Y_DENSITY (skip 2 out of 3 lines)
         this.scanner.setConfig(0, 0, 0); //  0 = ZBAR_CFG_ENABLE (disable all symbologies)
         this.scanner.setConfig(Symbol.CODE128, 0, 1); //  0 = ZBAR_CFG_ENABLE (enable symbology 128)
+    }
+
+    void awaitTermination(int units, TimeUnit unit) throws InterruptedException {
+        end.tryAcquire(units, unit);
+    }
+
+    private void onPreviewFrame(FrameAnalysisContext ctx) {
+        long start = System.nanoTime();
 
         //Log.i(TAG, "New frame analysis");
         String symData;
@@ -113,7 +137,7 @@ class FrameAnalyser implements Runnable {
         Image pic = new Image(croppedDataWidth, croppedDataHeight, "Y800");
         pic.setData(ctx.frame);
 
-        //pic.setCrop(0, realy1, dataWidth, realY3 - realy1); // Left, top, width, height
+        //pic.setCrop(0, realY1, dataWidth, realY3 - realY1); // Left, top, width, height
         if (this.scanner.scanImage(pic) > 0) {
             // There is a result! Extract it.
             SymbolSet var15 = this.scanner.getResults();
@@ -130,9 +154,8 @@ class FrameAnalyser implements Runnable {
                     parent.handleResult(symData, symType, ctx.frame);
                 }
             }
-        } else {
-            parent.handleResult(null, 0, null);
         }
-        Log.d(TAG, "Took ms: " + (System.nanoTime() - start) / 1000000);
+        parent.fpsCounter();
+        Log.v(TAG, "Took ms: " + (System.nanoTime() - start) / 1000000);
     }
 }

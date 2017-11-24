@@ -19,7 +19,7 @@ import java.util.Map;
 
 /**
  */
-public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler, ZbarScanView.ResultValidatorAsync {
+public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler {
     private static final String LOG_TAG = "ScannerZbarViewImpl";
 
     private static final Map<Integer, BarcodeType> barcodeTypesMapping;
@@ -44,7 +44,6 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
         scanner.addSymbology(Symbol.EAN13);
         scanner.addSymbology(Symbol.I25);
         scanner.setResultHandler(this);
-        scanner.setAsyncResultValidator(this);
         scanner.setTorch(false);
         scanner.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -98,14 +97,8 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler,
     }
 
     @Override
-    public void handleScanResult(String result, int type) {
-        validateResultAsync(result, type);
-    }
-
-    @Override
-    public void validateResultAsync(final String code, final int type) {
-        Log.d(LOG_TAG, "validateResultAsync " + code + " - " + type);
-        //scanner.giveValidationResult(true, code, true);
+    public void handleScanResult(String code, int type) {
+        Log.v(LOG_TAG, "handleScanResult " + code + " - " + type);
         if (dataDb != null) {
             List<Barcode> res = new ArrayList<>(1);
             res.add(new Barcode(code.trim(), barcodeTypesMapping.get(type)));

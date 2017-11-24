@@ -29,7 +29,6 @@ import com.enioka.scanner.R;
 import net.sourceforge.zbar.ImageScanner;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import me.dm7.barcodescanner.core.DisplayUtils;
@@ -39,7 +38,8 @@ import me.dm7.barcodescanner.core.DisplayUtils;
  * To be directly reused in layouts.
  * We are using deprecated Camera API because old Android.
  */
-@SuppressWarnings("deprecation")
+@SuppressWarnings({"deprecation", "unused"})
+// Deprecation: using CameraV1. Unused: some methods only used in clients.
 public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback, SurfaceHolder.Callback {
     protected static final int RECT_HEIGHT = 10;
     protected static final float MM_INSIDE_INCH = 25.4f;
@@ -52,9 +52,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private SurfaceHolder camHolder;
     private ImageScanner scanner;
     private ResultHandler handler;
-    private ResultValidator validator;
-    private ResultValidatorAsync validatorAsync;
-    private boolean beepBeforeValidation = false;
     protected Paint targetRectPaint, guideLinePaint, filterOutPaint, autoFocusPaint;
     protected int x1, y1, x2, y2, x3, y3, x4, y4; // 1 = top left, 2 = top right, 3 = bottom right, 4 = bottom left.
     private float camResRatio;
@@ -327,35 +324,42 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                     }
                 }
             }
-            prms.setPreviewSize(prevSize.width, prevSize.height);
+            if (prevSize != null) {
+                prms.setPreviewSize(prevSize.width, prevSize.height);
+            } else {
+                throw new RuntimeException("no suitable preview resolution");
+            }
 
             // COMPAT HACKS
             this.usePreviewForPicture = false;
-            if (android.os.Build.MODEL.equals("LG-H340n")) {
-                prms.setPreviewSize(1600, 1200);
-                Log.i(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height) + " (requested ratio was " + preferredRatio + ")");
-            } else if (android.os.Build.MODEL.equals("SPA43LTE")) {
-                if (preferredRatio < 1.5) {
-                    prms.setPreviewSize(1440, 1080); // Actual working max, 1.33 ratio. No higher rez works.
-                } else {
-                    prms.setPreviewSize(1280, 720);
-                }
-                this.usePreviewForPicture = true;
-                Log.i(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
-            } else if (android.os.Build.MODEL.equals("Archos Sense 50X")) {
-                if (preferredRatio < 1.5) {
-                    //prms.setPreviewSize(800, 600);
-                    prms.setPreviewSize(1440, 1080);
-                } else {
-                    prms.setPreviewSize(1280, 720);
-                }
-                this.usePreviewForPicture = true;
-                Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
-            } else {
-                Log.i(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
-                this.usePreviewForPicture = prevSize.height >= 1080;
+            switch (android.os.Build.MODEL) {
+                case "LG-H340n":
+                    prms.setPreviewSize(1600, 1200);
+                    Log.i(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height) + " (requested ratio was " + preferredRatio + ")");
+                    break;
+                case "SPA43LTE":
+                    if (preferredRatio < 1.5) {
+                        prms.setPreviewSize(1440, 1080); // Actual working max, 1.33 ratio. No higher rez works.
+                    } else {
+                        prms.setPreviewSize(1280, 720);
+                    }
+                    this.usePreviewForPicture = true;
+                    Log.i(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+                    break;
+                case "Archos Sense 50X":
+                    if (preferredRatio < 1.5) {
+                        //prms.setPreviewSize(800, 600);
+                        prms.setPreviewSize(1440, 1080);
+                    } else {
+                        prms.setPreviewSize(1280, 720);
+                    }
+                    this.usePreviewForPicture = true;
+                    Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+                    break;
+                default:
+                    Log.i(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
+                    this.usePreviewForPicture = prevSize.height >= 1080;
             }
-
             this.previewSize = prms.getPreviewSize();
 
 
@@ -397,6 +401,10 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 Log.d(TAG, "Could not find a photo resolution with requested ratio " + preferredRatio + ". Going with wrong ratio resolution");
                 pictureSize = betterChoiceWrongRatio;
             }
+            if (pictureSize == null) {
+                throw new RuntimeException("no suitable photo resolution");
+            }
+
             prms.setPictureSize(pictureSize.width, pictureSize.height);
             camResRatio = (float) prms.getPictureSize().width / (float) prms.getPictureSize().height;
             Log.i(TAG, "Using picture resolution " + pictureSize.width + "*" + pictureSize.height + ". Ratio is " + camResRatio + ". (Preferred ratio was " + preferredRatio + ")");
@@ -520,8 +528,14 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         boolean support = getSupportTorch(prms);
         if (support && value) {
             prms.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+            if (this.hasExposureCompensation) {
+                prms.setExposureCompensation(prms.getMinExposureCompensation() + 1);
+            }
         } else if (support) {
             prms.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+            if (this.hasExposureCompensation) {
+                prms.setExposureCompensation((prms.getMaxExposureCompensation() + prms.getMinExposureCompensation()) / 2 - 1);
+            }
         }
     }
 
@@ -535,7 +549,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             return;
         }
         if (this.cam == null && !this.isInEditMode()) {
-            this.cam = Camera.open();
+            this.cam = Camera.open(); // debug only
         }
         Camera.Parameters prms = this.cam.getParameters();
         setTorch(prms, value);
@@ -554,7 +568,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             throw new RuntimeException(TAG + "- SetUpCamera : Could not set camera parameters ", e);
         }
     }
-
 
     /**
      * Force the camera to perform an autofocus
@@ -619,12 +632,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private static Calendar last = Calendar.getInstance();
-    private Integer waitingForValidations = 0;
-    private Calendar focusTime = Calendar.getInstance();
-    private Calendar latestAnalysis = Calendar.getInstance();
-    private String latestBarcodeValue = "";
+    // Frame & barcode analysis
 
     // THE main method.
     @Override
@@ -651,37 +659,29 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         frameAnalyser.handleFrame(ctx);
     }
 
-    void analyserCallback(String result, int type, byte[] previewData) {
+    void analyserCallback(final String result, final int type, byte[] previewData) {
         if (usePreviewForPicture) {
             lastPreviewData = previewData;
         }
-        endValidationAnalysis(true, result, type, true);
-    }
 
-    private boolean endValidationAnalysis(boolean valid, final String res, final int type, boolean keepScanning) {
-        if (!valid) {
-            lastPreviewData = null;
-            return false;
-        }
-
-        // Victory beep!
-        // beepOk();
-        if (!keepScanning) {
+        /*if (!keepScanning) {
             this.closeCamera();
-        }
-        Log.d(TAG, res);
+        }*/
 
-        // Return result
+        // Return result on main thread
         this.post(new Runnable() {
             @Override
             public void run() {
-                ZbarScanView.this.handler.handleScanResult(res, type);
+                ZbarScanView.this.handler.handleScanResult(result, type);
             }
         });
-
-        return true;
     }
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Lifecycle external toggles
     public void pauseCamera() {
         if (this.cam != null) {
             this.cam.stopPreview();
@@ -760,6 +760,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         Camera.CameraInfo info = new Camera.CameraInfo();
         Camera.getCameraInfo(0, info);
         WindowManager wm = (WindowManager) this.getContext().getSystemService(Context.WINDOW_SERVICE);
+        if (wm == null) {
+            return 0;
+        }
         Display display = wm.getDefaultDisplay();
         int rotation = display.getRotation();
         short degrees = 0;
@@ -810,49 +813,23 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         //canvas.drawRect(x2, y2, this.getMeasuredWidth(), y3, filterOutPaint);
     }
 
-    public void setBeepBeforeValidation() {
-        this.beepBeforeValidation = true;
-    }
-
     public void setResultHandler(ResultHandler handler) {
         this.handler = handler;
-    }
-
-    public void setResultValidator(ResultValidator handler) {
-        this.validator = handler;
-    }
-
-    public void setAsyncResultValidator(ResultValidatorAsync handler) {
-        this.validatorAsync = handler;
     }
 
     public interface ResultHandler {
         void handleScanResult(String result, int type);
     }
 
-    public interface ResultValidator {
-        boolean validateResult(String result, int type);
-    }
-
-    public interface ResultValidatorAsync {
-        void validateResultAsync(String result, int type);
-    }
-
     public void setAllowTargetDrag(boolean allowTargetDrag) {
         this.allowTargetDrag = allowTargetDrag;
     }
-
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Camera as a camera!
-
-    public boolean isUsePreviewForPicture() {
-        return usePreviewForPicture;
-    }
-
     public void takePicture(final Camera.PictureCallback callback) {
         if (usePreviewForPicture && lastPreviewData != null) {
             Log.d(TAG, "Picture from preview");
@@ -868,7 +845,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             this.cam.takePicture(null, null, callback);
         }
     }
-
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 }

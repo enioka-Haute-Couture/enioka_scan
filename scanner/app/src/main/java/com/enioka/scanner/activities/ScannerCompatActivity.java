@@ -88,7 +88,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Common.askForPermission(this);
+        //Common.askForPermission(this); // NO: this actually pauses then resumes the activity.
     }
 
     public void setAutocompletion(List autocompletion, int threshold) {
@@ -185,18 +185,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                     df.setDialogInterface(new DialogInterface() {
                         @Override
                         public void cancel() {
-                            if(ScannerCompatActivity.this.scanners  != null)
-                            {
+                            if (ScannerCompatActivity.this.scanners != null) {
                                 for (Scanner scanner : ScannerCompatActivity.this.scanners) {
                                     scanner.resume();
                                 }
                             }
 
                         }
+
                         @Override
                         public void dismiss() {
-                            if(ScannerCompatActivity.this.scanners  != null)
-                            {
+                            if (ScannerCompatActivity.this.scanners != null) {
                                 for (Scanner scanner : ScannerCompatActivity.this.scanners) {
                                     scanner.resume();
                                 }

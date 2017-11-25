@@ -26,6 +26,16 @@ class FrameAnalyserManager {
     private long latestLog = 0;
     private int countLatestSecond = 0;
 
+    // FPS callback. Note: all thresholds are used with "greater than", not "greater or equal to".
+    private long analyserStart = 0;
+    private long latestFpsReaction = 0;
+    private int successiveThresholdViolationsCount = 0;
+    private static final int BEGIN_FPS_ANALYSIS_DELAY_SECONDS = 1;
+    private static final int INBETWEEN_ANALYSIS_DELAY_SECONDS = 3;
+    private static final int LOWER_FPS_THRESHOLD = 10;
+    private static final int UPPER_FPS_THRESHOLD = 20;
+    private static final int SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD = 2;
+
     // Deduplication variables
     private Calendar latestResultTime = Calendar.getInstance();
     private String latestBarcodeRead = "";
@@ -33,7 +43,7 @@ class FrameAnalyserManager {
 
     // Analyser pool
     private Queue<FrameAnalyser> analysers = new ArrayDeque<>(NUMBER_OF_CORES);
-    private BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(25, true); // about 1 second in perfect conditions
+    private BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(25, false); // about 1 second in perfect conditions
 
     FrameAnalyserManager(ZbarScanView parent) {
         this.parent = parent;
@@ -67,20 +77,39 @@ class FrameAnalyserManager {
     }
 
     // Note this method is not synchronised as it is called on each frame and this would be costly.
-    // So the FPS indication may be slightly off, which is not an issue as it is only an indication.
+    // So the FPS indication may be slightly off, which is not an issue as precision is not needed.
     void fpsCounter() {
         long currentTime = System.nanoTime();
+        if (analyserStart == 0) {
+            analyserStart = currentTime;
+        }
+
         countLatestSecond++;
         if (latestLog > latestIntervalStart + 1000000000) {
-            Log.d(TAG, "FPS: " + 1000000000 * (float) countLatestSecond / (currentTime - latestIntervalStart) + " - Pool size: " + analysers.size());
+            float fps = 1000000000 * (float) countLatestSecond / (currentTime - latestIntervalStart);
+            Log.d(TAG, "FPS: " + fps + " - Pool size: " + analysers.size() + ". Current analysis queue depth: " + queue.size());
             latestIntervalStart = currentTime;
             countLatestSecond = 0;
+
+            // Only do FPS analysis a few seconds after actual scan start, and use a stabilization preiod between callback calls.
+            if (currentTime > analyserStart + BEGIN_FPS_ANALYSIS_DELAY_SECONDS * 1000000000L && currentTime > latestFpsReaction + INBETWEEN_ANALYSIS_DELAY_SECONDS * 1000000000L) {
+                if (fps < LOWER_FPS_THRESHOLD || fps > UPPER_FPS_THRESHOLD) {
+                    successiveThresholdViolationsCount++;
+
+                    if (successiveThresholdViolationsCount > SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD) {
+                        this.parent.onWorryingFps(fps < LOWER_FPS_THRESHOLD);
+                        latestFpsReaction = currentTime;
+                    }
+                } else {
+                    successiveThresholdViolationsCount = 0;
+                }
+            }
         }
         latestLog = currentTime + 1;
     }
 
     /**
-     * Called after each analysis, with null value if nothing found.
+     * Called after each successful analysis.
      */
     synchronized void handleResult(String result, int symType, byte[] imagePreview) {
         if (result == null) {

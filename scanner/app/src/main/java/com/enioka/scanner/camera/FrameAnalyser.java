@@ -36,7 +36,6 @@ class FrameAnalyser implements Runnable {
 
     @Override
     public void run() {
-        Log.i(TAG, "run is called " + Thread.currentThread().getId());
         android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         initScanner();
 

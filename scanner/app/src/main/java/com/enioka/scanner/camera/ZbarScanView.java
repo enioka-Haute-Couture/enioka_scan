@@ -26,9 +26,9 @@ import android.widget.FrameLayout;
 
 import com.enioka.scanner.R;
 
-import net.sourceforge.zbar.ImageScanner;
-
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import me.dm7.barcodescanner.core.DisplayUtils;
@@ -45,12 +45,10 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     protected static final float MM_INSIDE_INCH = 25.4f;
     private static final String TAG = "BARCODE";
 
-    private static final int MS_SINCE_LAST = 1000;
-
+    private Context context;
     private Camera cam;
     protected SurfaceView camView;
     private SurfaceHolder camHolder;
-    private ImageScanner scanner;
     private ResultHandler handler;
     protected Paint targetRectPaint, guideLinePaint, filterOutPaint, autoFocusPaint;
     protected int x1, y1, x2, y2, x3, y3, x4, y4; // 1 = top left, 2 = top right, 3 = bottom right, 4 = bottom left.
@@ -65,6 +63,8 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private boolean usePreviewForPicture = true;
     boolean allowTargetDrag = true;
     private byte[] lastPreviewData;
+
+    private List<Camera.Size> allowedPreviewSizes = new ArrayList<>(20);
     private Camera.Size previewSize;
 
     private FrameAnalyserManager frameAnalyser;
@@ -74,11 +74,13 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     // Stupid constructors
     public ZbarScanView(Context context) {
         super(context);
+        this.context = context;
         initOnce(context);
     }
 
     public ZbarScanView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
+        this.context = context;
         initOnce(context);
     }
     //
@@ -238,7 +240,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 Log.i(TAG, "Exposure compensation is not supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
             }
             if (prms.getWhiteBalance() != null) {
-                Log.i(TAG, "white balance is supported with modes: " + prms.getSupportedWhiteBalance() + ". Selected is: " + prms.getWhiteBalance());
+                Log.i(TAG, "White balance is supported with modes: " + prms.getSupportedWhiteBalance() + ". Selected is: " + prms.getWhiteBalance());
                 //prms.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_DAYLIGHT);
             }
 
@@ -301,11 +303,22 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio);
             boolean goodMatchFound = false;
 
-            // Simple debug display
+            // First simply list resolutions (debug display & res list creation)
             for (Camera.Size s : rezs) {
                 Log.d(TAG, "\tsupports preview resolution " + s.width + "*" + s.height + " - " + ((float) s.width / (float) s.height));
+
+                if (Math.abs((float) s.width / (float) s.height - preferredRatio) < 0.1f) {
+                    allowedPreviewSizes.add(s);
+                }
+                Collections.sort(allowedPreviewSizes, new Comparator<Camera.Size>() {
+                    @Override
+                    public int compare(Camera.Size o1, Camera.Size o2) {
+                        return o1.width < o2.width ? -1 : o1.width == o2.width ? 0 : 1;
+                    }
+                });
             }
 
+            // Select the best resolution.
             if (prevSize == null || prevSize.width < 1024 || (float) prevSize.width / (float) prevSize.height - preferredRatio > 0.1f) {
                 // First try with only the preferred ratio.
                 for (Camera.Size s : rezs) {
@@ -324,11 +337,11 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                     }
                 }
             }
-            if (prevSize != null) {
-                prms.setPreviewSize(prevSize.width, prevSize.height);
-            } else {
+            if (prevSize == null) {
                 throw new RuntimeException("no suitable preview resolution");
             }
+            prms.setPreviewSize(prevSize.width, prevSize.height);
+
 
             // COMPAT HACKS
             this.usePreviewForPicture = false;
@@ -414,7 +427,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             // Perf hacks
 
             // We are using video...
-            prms.setRecordingHint(true);
+            //prms.setRecordingHint(true);
 
             // We need to best frame rate available
             int[] bestPreviewFpsRange = new int[]{0, 0};
@@ -429,7 +442,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             }
 
             // Probably useless: don't use colors, as camera color interpolation destroys precision.
-            prms.setColorEffect(Camera.Parameters.EFFECT_MONO);
+            if (prms.getSupportedColorEffects().contains(Camera.Parameters.EFFECT_MONO)) {
+                prms.setColorEffect(Camera.Parameters.EFFECT_MONO);
+            }
 
 
             //////////////////////////////////////
@@ -450,6 +465,61 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         // Add the overlay upon the camera
         overlay = new ZbarScanViewOverlay(context, this);
         this.addView(overlay);
+    }
+
+    /**
+     * Will change the resolution according to the analysis FPS rate.
+     */
+    synchronized void onWorryingFps(boolean low) {
+        if (this.cam == null) {
+            return;
+        }
+
+        // Current resolution index?
+        int currentResolutionIndex = -1;
+        int i = -1;
+        for (Camera.Size size : allowedPreviewSizes) {
+            i++;
+            if (size.width == previewSize.width && size.height == previewSize.height) {
+                currentResolutionIndex = i;
+                break;
+            }
+        }
+
+        // Checks
+        if (currentResolutionIndex == -1) {
+            // Happens when the chosen resolution does not have the correct ratio.
+            Log.d(TAG, "Out of bounds FPS but no suitable alternative resolution available");
+            return;
+        }
+        int indexShift;
+        if (low) {
+            if (currentResolutionIndex == 0) {
+                // We already use the lowest resolution possible
+                Log.d(TAG, "Low analysis FPS but already on the lowest possible resolution");
+                return;
+            }
+            indexShift = -1;
+        } else {
+            if (currentResolutionIndex == allowedPreviewSizes.size() - 1) {
+                // We already use the lowest resolution possible
+                Log.d(TAG, "High analysis FPS but already on the highest possible resolution");
+                return;
+            }
+            indexShift = +1;
+        }
+
+        // We have a correct new preview resolution!
+        Camera.Size newRez = allowedPreviewSizes.get(currentResolutionIndex + indexShift);
+        Log.i(TAG, "Changing preview resolution from " + previewSize.width + "*" + previewSize.height + " to " + newRez.width + "*" + newRez.height);
+
+        // Set it
+        Camera.Parameters prms = this.cam.getParameters();
+        pauseCamera();
+        previewSize = newRez;
+        prms.setPreviewSize(newRez.width, newRez.height);
+        setCameraParameters(prms);
+        resumeCamera();
     }
 
     @Override

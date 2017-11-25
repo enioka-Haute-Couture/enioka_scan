@@ -248,92 +248,15 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
         //////////////////////////////////////
         // Preview Resolution
-        List<Camera.Size> rezs = prms.getSupportedPreviewSizes();
-        Camera.Size prevSize = prms.getPreferredPreviewSizeForVideo();
-        // Prefer 4/3 ratio is portrait mode, 16/9 in landscape.
-        float preferredRatio = DisplayUtils.getScreenOrientation(this.getContext()) == 1 ? 4f / 3f : 16f / 9f;
-        Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio);
-        boolean goodMatchFound = false;
-
-        // First simply list resolutions (debug display & sorted res list creation)
-        for (Camera.Size s : rezs) {
-            Log.d(TAG, "\tsupports preview resolution " + s.width + "*" + s.height + " - " + ((float) s.width / (float) s.height));
-
-            if (Math.abs((float) s.width / (float) s.height - preferredRatio) < 0.1f) {
-                allowedPreviewSizes.add(s);
-            }
-        }
-        Collections.sort(allowedPreviewSizes, new Comparator<Camera.Size>() {
-            @Override
-            public int compare(Camera.Size o1, Camera.Size o2) {
-                return o1.width < o2.width ? -1 : o1.width == o2.width ? 0 : 1;
-            }
-        });
-
-        // Select the best resolution.
-        if (prevSize == null || prevSize.width < 1024 || (float) prevSize.width / (float) prevSize.height - preferredRatio > 0.1f) {
-            // First try with only the preferred ratio.
-            for (Camera.Size s : rezs) {
-                if (s.width <= 1980 && s.height <= 1080 && (prevSize == null || (s.width > prevSize.width) && Math.abs((float) s.width / (float) s.height - preferredRatio) < 0.1f)) {
-                    prevSize = s;
-                    goodMatchFound = true;
-                }
-            }
-
-            // If not found, try with any ratio.
-            if (!goodMatchFound) {
-                for (Camera.Size s : rezs) {
-                    if (s.width <= 1980 && s.height <= 1080 && (prevSize == null || (s.width > prevSize.width))) {
-                        prevSize = s;
-                    }
-                }
-            }
-        }
-        if (prevSize == null) {
-            throw new RuntimeException("no suitable preview resolution");
-        }
-        prms.setPreviewSize(prevSize.width, prevSize.height);
-
-
-        // COMPAT HACKS
-        this.usePreviewForPicture = false;
-        switch (android.os.Build.MODEL) {
-            case "LG-H340n":
-                prms.setPreviewSize(1600, 1200);
-                Log.i(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height) + " (requested ratio was " + preferredRatio + ")");
-                useAdaptiveResolution = false;
-                break;
-            case "SPA43LTE":
-                if (preferredRatio < 1.5) {
-                    prms.setPreviewSize(1440, 1080); // Actual working max, 1.33 ratio. No higher rez works.
-                } else {
-                    prms.setPreviewSize(1280, 720);
-                }
-                this.usePreviewForPicture = true;
-                Log.i(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
-                break;
-            case "Archos Sense 50X":
-                if (preferredRatio < 1.5) {
-                    //prms.setPreviewSize(800, 600);
-                    prms.setPreviewSize(1440, 1080);
-                } else {
-                    prms.setPreviewSize(1280, 720);
-                }
-                this.usePreviewForPicture = true;
-                Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
-                break;
-            default:
-                Log.i(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
-                this.usePreviewForPicture = prevSize.height >= 1080;
-        }
-        this.previewSize = prms.getPreviewSize();
-
+        setPreviewResolution(prms);
 
         //////////////////////////////////////
         // Picture resolution
 
         // A preview resolution is often a picture resolution, so start with this.
         // Then, look for any higher resolution with the same ratio
+        // Note the ratio looked for is the preview ratio, not the view ratio as it may be different.
+        float preferredRatio = (float) this.previewSize.width / (float) this.previewSize.height;
         Log.i(TAG, "Looking for the ideal photo resolution. View ratio is " + preferredRatio);
         List<Camera.Size> sizes = prms.getSupportedPictureSizes();
         Camera.Size pictureSize = null, smallestSize = sizes.get(0), betterChoiceWrongRatio = null;
@@ -341,7 +264,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
         for (Camera.Size s : sizes) {
             // Is preview resolution a picture resolution?
-            if (s.width == prevSize.width && s.height == prevSize.height) {
+            if (s.width == previewSize.width && s.height == previewSize.height) {
                 pictureSize = s;
                 foundWithGoodRatio = true;
             }
@@ -384,8 +307,10 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
         // We need to best frame rate available
         int[] bestPreviewFpsRange = new int[]{0, 0};
+        Log.d(TAG, "Supported FPS ranges:");
         for (int[] fpsRange : prms.getSupportedPreviewFpsRange()) {
-            if (fpsRange[0] >= bestPreviewFpsRange[0] && fpsRange[1] >= bestPreviewFpsRange[1]) {
+            Log.d(TAG, "\t" + fpsRange[0] + "," + fpsRange[1]);
+            if (fpsRange[0] >= bestPreviewFpsRange[0] && fpsRange[1] >= bestPreviewFpsRange[1] && fpsRange[0] * 1.5 > fpsRange[1]) {
                 bestPreviewFpsRange = fpsRange;
             }
         }
@@ -394,17 +319,109 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             Log.i(TAG, "Requesting preview FPS range at " + bestPreviewFpsRange[0] + "," + bestPreviewFpsRange[1]);
         }
 
-        // Probably useless: don't use colors, as camera color interpolation destroys precision. Replace with explicit chroma filter?
-        if (prms.getSupportedColorEffects() != null && prms.getSupportedColorEffects().contains(Camera.Parameters.EFFECT_MONO)) {
-            prms.setColorEffect(Camera.Parameters.EFFECT_MONO);
-        }
-
 
         //////////////////////////////////////
         // Camera prms done
         setCameraParameters(prms);
 
         this.cam.setDisplayOrientation(getCameraDisplayOrientation());
+    }
+
+    /**
+     * Sets all variables related to camera preview size.
+     *
+     * @param prms camera to set.
+     */
+    private void setPreviewResolution(Camera.Parameters prms) {
+        List<Camera.Size> rezs = prms.getSupportedPreviewSizes();
+        Camera.Size prevSize = null; // prms.getPreferredPreviewSizeForVideo();
+
+        // Look for a resolution not too far from the view ratio.
+        float preferredRatio = (float) this.camView.getMeasuredHeight() / (float) this.camView.getMeasuredWidth();
+        if (preferredRatio < 1) {
+            preferredRatio = 1 / preferredRatio;
+        }
+        Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio);
+        boolean goodMatchFound = false;
+
+        // First simply list resolutions (debug display & sorted res list creation)
+        for (Camera.Size s : rezs) {
+            Log.d(TAG, "\tsupports preview resolution " + s.width + "*" + s.height + " - " + ((float) s.width / (float) s.height));
+
+            if (Math.abs((float) s.width / (float) s.height - preferredRatio) < 0.3f) {
+                allowedPreviewSizes.add(s);
+            }
+        }
+        Collections.sort(allowedPreviewSizes, new Comparator<Camera.Size>() {
+            @Override
+            public int compare(Camera.Size o1, Camera.Size o2) {
+                return o1.width < o2.width ? -1 : o1.width == o2.width ? 0 : 1;
+            }
+        });
+        Log.v(TAG, "Allowed preview sizes (acceptable ratio): ");
+        for (Camera.Size s : allowedPreviewSizes) {
+            Log.v(TAG, "\t" + s.width + "*" + s.height + " - " + ((float) s.width / (float) s.height));
+        }
+
+        // Select the best resolution.
+        // First try with only the preferred ratio.
+        for (Camera.Size s : rezs) {
+            if (prevSize == null || (s.width > prevSize.width) && Math.abs((float) s.width / (float) s.height - preferredRatio) < 0.1f) {
+                prevSize = s;
+                goodMatchFound = true;
+            }
+        }
+
+        // If not found, try with any ratio.
+        if (!goodMatchFound) {
+            for (Camera.Size s : rezs) {
+                if (s.width <= 1980 && s.height <= 1080 && (prevSize == null || (s.width > prevSize.width))) {
+                    prevSize = s;
+                }
+            }
+        }
+
+        if (prevSize == null) {
+            throw new RuntimeException("no suitable preview resolution");
+        }
+        prms.setPreviewSize(prevSize.width, prevSize.height);
+
+
+        // COMPAT HACKS
+        this.usePreviewForPicture = false;
+        switch (android.os.Build.MODEL) {
+            case "LG-H340n":
+                prms.setPreviewSize(1600, 1200);
+                Log.i(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height) + " (requested ratio was " + preferredRatio + ")");
+                this.useAdaptiveResolution = false;
+                break;
+            case "SPA43LTE":
+                if (preferredRatio < 1.5) {
+                    prms.setPreviewSize(1440, 1080); // Actual working max, 1.33 ratio. No higher rez works.
+                } else {
+                    prms.setPreviewSize(1280, 720);
+                }
+                this.usePreviewForPicture = true;
+                this.useAdaptiveResolution = false;
+                Log.i(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+                break;
+            case "Archos Sense 50X":
+                if (preferredRatio < 1.5) {
+                    //prms.setPreviewSize(800, 600);
+                    prms.setPreviewSize(1440, 1080);
+                } else {
+                    prms.setPreviewSize(1280, 720);
+                }
+                this.usePreviewForPicture = true;
+                Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+                break;
+            default:
+                Log.i(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
+                this.usePreviewForPicture = prevSize.height >= 1080;
+        }
+
+        // Set a denormalized field - this is used widely in the class.
+        this.previewSize = prms.getPreviewSize();
     }
 
     private void setAreas(Camera.Parameters prms) {
@@ -493,13 +510,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         resumeCamera();
     }
 
-    @Override
-    protected void onWindowVisibilityChanged(int visibility) {
-        super.onWindowVisibilityChanged(visibility);
-        if (visibility == VISIBLE && this.cam != null) {
-            this.cam.cancelAutoFocus();
-        }
-    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Torch
 
     /**
      * Indicate if the torch mode is handled or not
@@ -525,14 +538,16 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (failed) {
             return false;
         }
-        if (this.cam == null && !this.isInEditMode()) {
-            return false;
+        if (this.cam == null || this.isInEditMode()) {
+            return true;
         }
         Camera.Parameters prms = this.cam.getParameters();
         return getSupportTorch(prms);
     }
 
-
+    /**
+     * @return true if torch is on
+     */
     public boolean getTorchOn() {
         if (failed) {
             return false;
@@ -582,6 +597,12 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         setTorch(prms, value);
         setCameraParameters(prms);
     }
+    // torch
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Misc
 
     /**
      * Apply given parameters to the camera
@@ -701,8 +722,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                         return true;
                     case MotionEvent.ACTION_MOVE:
                         final float dy = event.getY() - dragStartY;
-                        Log.i(TAG, "eventY " + event.getY() + " - " + "dy: " + dy + " - dragStartRectTop: " + dragCropTop + " - dragStartRectBottom: " + dragCropBottom);
-
                         float newTop = dragCropTop + (int) dy;
                         float newBottom = dragCropBottom + (int) dy;
                         if (newTop > 0 && newBottom < ZbarScanView.this.camView.getHeight()) {
@@ -714,8 +733,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
                             prms.topMargin = cropRect.top;
                             targetView.setLayoutParams(prms);
-
-                            Log.i(TAG, "Crop rect top: " + cropRect.top + " - bottom: " + cropRect.bottom);
                         }
 
                         return true;

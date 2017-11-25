@@ -43,7 +43,7 @@ class FrameAnalyserManager {
 
     // Analyser pool
     private Queue<FrameAnalyser> analysers = new ArrayDeque<>(NUMBER_OF_CORES);
-    private BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(25, false); // about 1 second in perfect conditions
+    private BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(2 * NUMBER_OF_CORES, false);
 
     FrameAnalyserManager(ZbarScanView parent) {
         this.parent = parent;

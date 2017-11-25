@@ -2,8 +2,6 @@ package com.enioka.scanner.sdk.zbar;
 
 import android.app.Activity;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.camera.ZbarScanView;
@@ -45,14 +43,6 @@ public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler 
         scanner.addSymbology(Symbol.I25);
         scanner.setResultHandler(this);
         scanner.setTorch(false);
-        scanner.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.v(LOG_TAG, "Autofocus");
-                scanner.triggerAutoFocus();
-                return false;
-            }
-        });
     }
 
     @Override

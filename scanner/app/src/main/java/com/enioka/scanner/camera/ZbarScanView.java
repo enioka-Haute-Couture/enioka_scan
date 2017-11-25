@@ -63,6 +63,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private boolean usePreviewForPicture = true;
     boolean allowTargetDrag = true;
     private byte[] lastPreviewData;
+    private boolean useAdaptiveResolution = true;
 
     private List<Camera.Size> allowedPreviewSizes = new ArrayList<>(20);
     private Camera.Size previewSize;
@@ -349,6 +350,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 case "LG-H340n":
                     prms.setPreviewSize(1600, 1200);
                     Log.i(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height) + " (requested ratio was " + preferredRatio + ")");
+                    useAdaptiveResolution = false;
                     break;
                 case "SPA43LTE":
                     if (preferredRatio < 1.5) {
@@ -471,7 +473,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
      * Will change the resolution according to the analysis FPS rate.
      */
     synchronized void onWorryingFps(boolean low) {
-        if (this.cam == null) {
+        if (this.cam == null || !useAdaptiveResolution) {
             return;
         }
 

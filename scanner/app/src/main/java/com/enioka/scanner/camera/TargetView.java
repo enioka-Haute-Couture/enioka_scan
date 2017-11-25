@@ -74,4 +74,9 @@ public class TargetView extends View {
         canvas.drawRect(targetRect, targetRectPaint);
         canvas.drawLine(0, (wholeView.bottom - wholeView.top) / 2, wholeView.right, (wholeView.bottom - wholeView.top) / 2, guideLinePaint);
     }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
 }

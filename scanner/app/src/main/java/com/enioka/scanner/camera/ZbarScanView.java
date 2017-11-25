@@ -1,11 +1,12 @@
 package com.enioka.scanner.camera;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
-import android.graphics.Canvas;
+import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
 import android.graphics.ImageFormat;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -16,11 +17,11 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.ViewGroup;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -43,20 +44,20 @@ import me.dm7.barcodescanner.core.DisplayUtils;
 public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback, SurfaceHolder.Callback {
     protected static final int RECT_HEIGHT = 10;
     protected static final float MM_INSIDE_INCH = 25.4f;
+    private float ydpi;
     private static final String TAG = "BARCODE";
 
     private Context context;
     private Camera cam;
     protected SurfaceView camView;
-    private SurfaceHolder camHolder;
     private ResultHandler handler;
-    protected Paint targetRectPaint, guideLinePaint, filterOutPaint, autoFocusPaint;
-    protected int x1, y1, x2, y2, x3, y3, x4, y4; // 1 = top left, 2 = top right, 3 = bottom right, 4 = bottom left.
+    protected Paint autoFocusPaint;
+    //protected int x1, y1, x2, y2, x3, y3, x4, y4; // 1 = top left, 2 = top right, 3 = bottom right, 4 = bottom left.
+    protected Rect cropRect = new Rect(); // The "targeting" rectangle.
     private float camResRatio;
     private boolean manualAutoFocus = false;
     private boolean hasExposureCompensation = false;
     private boolean torchOn = false;
-    private ZbarScanViewOverlay overlay;
     protected boolean scanningStarted = true;
     private boolean failed = false;
 
@@ -96,26 +97,11 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             frameAnalyser = new FrameAnalyserManager(this);
         }
 
-        // Target rectangle paint
-        targetRectPaint = new Paint();
-        targetRectPaint.setColor(Color.RED);
-        targetRectPaint.setStrokeWidth(5);
-        targetRectPaint.setStyle(Paint.Style.STROKE);
-
         autoFocusPaint = new Paint();
         autoFocusPaint.setColor(Color.RED);
         autoFocusPaint.setStrokeWidth(0);
         autoFocusPaint.setAlpha(126);
         autoFocusPaint.setStyle(Paint.Style.FILL);
-
-
-        guideLinePaint = new Paint();
-        guideLinePaint.setColor(Color.RED);
-        guideLinePaint.setStyle(Paint.Style.STROKE);
-        guideLinePaint.setPathEffect(new DashPathEffect(new float[]{5, 10, 15, 20}, 0));
-
-        filterOutPaint = new Paint();
-        filterOutPaint.setColor(0x60000000);
 
         // Take photo on click instead of continuous scan
         // this.setOnClickListener(this);
@@ -123,8 +109,12 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         // If the preview does not take all the space
         this.setBackgroundColor(Color.BLACK);
 
-        // Then repeatable inits
-        setUpCamera(context);
+        // The view holding the preview. This will in turn (camHolder.addCallback) call setUpCamera.
+        if (this.camView == null) {
+            camView = new SurfaceView(context);
+            this.addView(camView);
+        }
+        camView.getHolder().addCallback(this);
     }
 
     /**
@@ -136,337 +126,316 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         //this.scanner.setConfig(s, 0, 1);
     }
 
-    public void initRect() {
-        // Target rectangle dimensions
-        DisplayMetrics metrics = this.getContext().getResources().getDisplayMetrics();
-        //float xdpi = metrics.xdpi;
-        float ydpi = metrics.ydpi;
-
-        int actualLayoutWidth, actualLayoutHeight;
-        if (this.isInEditMode()) {
-            actualLayoutWidth = this.getMeasuredWidth();
-            actualLayoutHeight = this.getMeasuredHeight();
-        } else {
-            actualLayoutWidth = this.camView.getMeasuredWidth();
-            actualLayoutHeight = this.camView.getMeasuredHeight();
+    /**
+     * After this call the camera is selected, with correct parameters and open, ready to be plugged on a preview pane.
+     */
+    public void setUpCamera() {
+        // Camera pane init
+        if (this.cam != null || this.isInEditMode()) {
+            return;
         }
 
-        if (!this.isInEditMode()) {
-            x1 = (int) (actualLayoutWidth * 0.1) + (int) this.camView.getX();
-            x2 = (int) (actualLayoutWidth * 0.9) + (int) this.camView.getX();
-        } else {
-            x1 = (int) (actualLayoutWidth * 0.1) + (int) this.getX();
-            x2 = (int) (actualLayoutWidth * 0.9) + (int) this.getX();
+        try {
+            Log.i(TAG, "Camera is being opened. Device is " + android.os.Build.MODEL);
+            this.cam = Camera.open();
+        } catch (final Exception e) {
+            failed = true;
+            new AlertDialog.Builder(context).setTitle(getResources().getString(R.string.scanner_zbar_open_error_title)).
+                    setMessage(getResources().getString(R.string.scanner_zbar_open_error)).
+                    setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            throw e;
+                        }
+                    }).show();
+            return;
         }
-        x3 = x2;
-        x4 = x1;
 
-        y1 = (int) (actualLayoutHeight / 2 - RECT_HEIGHT / 2 / MM_INSIDE_INCH * ydpi);
-        y2 = y1;
+        if (this.cam == null) {
+            failed = true;
+            new AlertDialog.Builder(context).setTitle(getResources().getString(R.string.scanner_zbar_open_error_title)).
+                    setMessage(getResources().getString(R.string.scanner_zbar_no_camera)).
+                    setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            throw new RuntimeException("No camera on device");
+                        }
+                    }).show();
+            return;
+        }
 
-        y3 = (int) (actualLayoutHeight / 2 + RECT_HEIGHT / 2 / MM_INSIDE_INCH * ydpi);
-        y4 = y3;
+        Camera.Parameters prms = this.cam.getParameters();
 
-        Log.i(TAG, "x1 " + x1 + " - y1 " + y1 + " - x3 " + x3 + " - y3 " + y3);
+        // Focus & Metering areas
+        setAreas(prms);
+
+        // Exposure
+        if (prms.isAutoExposureLockSupported()) {
+            Log.d(TAG, "Auto exposure lock is supported and value is: " + prms.getAutoExposureLock());
+            //prms.setAutoExposureLock(true);
+        }
+        if (prms.getMaxExposureCompensation() > 0 && prms.getMinExposureCompensation() < 0) {
+            Log.i(TAG, "Exposure compensation is supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
+            hasExposureCompensation = true;
+            //prms.setExposureCompensation((prms.getMaxExposureCompensation() + prms.getMinExposureCompensation()) / 2 - 1);
+            Log.i(TAG, "Exposure compensation set to " + prms.getExposureCompensation());
+        } else {
+            Log.i(TAG, "Exposure compensation is not supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
+        }
+        if (prms.getWhiteBalance() != null) {
+            Log.i(TAG, "White balance is supported with modes: " + prms.getSupportedWhiteBalance() + ". Selected is: " + prms.getWhiteBalance());
+            //prms.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_DAYLIGHT);
+        }
+
+        // Antibanding
+        if (prms.getAntibanding() != null) {
+            Log.i(TAG, "Antibanding is supported and is " + prms.getAntibanding());
+            //prms.setAntibanding(Camera.Parameters.ANTIBANDING_OFF);
+        }
+
+        // Stabilization
+        if (prms.isVideoStabilizationSupported()) {
+            Log.i(TAG, "Video stabilization is supported and will be set to true - currently is: " + prms.getVideoStabilization());
+            prms.setVideoStabilization(true);
+        } else {
+            Log.i(TAG, "Video stabilization is not supported");
+        }
+
+        // A YUV format. NV21 is always available, no need to check if it is supported
+        prms.setPreviewFormat(ImageFormat.NV21);
+
+        // Set focus mode to FOCUS_MODE_CONTINUOUS_PICTURE if supported
+        List<String> supportedFocusModes = prms.getSupportedFocusModes();
+        Log.d(TAG, "Supported focus modes: " + supportedFocusModes.toString());
+        if (supportedFocusModes.contains("mw_continuous-picture")) {
+            prms.setFocusMode("mw_continuous-picture");
+            Log.i(TAG, "supportedFocusModes - mw_continuous-picture supported and selected");
+        } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            Log.i(TAG, "supportedFocusModes - continuous-picture supported and selected");
+        } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+            Log.i(TAG, "supportedFocusModes - auto supported and selected");
+            manualAutoFocus = true;
+        } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_MACRO)) {
+            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
+            Log.i(TAG, "supportedFocusModes - macro supported and selected");
+        } else {
+            Log.i(TAG, "no autofocus supported");
+        }
+
+        // Scene mode. Try to select a mode which will ensure a high FPS rate.
+        List<String> supportedSceneModes = prms.getSupportedSceneModes();
+        if (supportedSceneModes != null) {
+            Log.d(TAG, "Supported scene modes: " + supportedSceneModes.toString());
+        }
+        if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_BARCODE)) {
+            Log.i(TAG, "supportedSceneModes - scene mode barcode supported and selected");
+            prms.setSceneMode(Camera.Parameters.SCENE_MODE_BARCODE);
+        } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_ACTION)) {
+            Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_ACTION supported and selected");
+            prms.setSceneMode(Camera.Parameters.SCENE_MODE_ACTION);
+        } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_SPORTS)) { // actually same as action
+            Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_SPORTS supported and selected");
+            prms.setSceneMode(Camera.Parameters.SCENE_MODE_SPORTS);
+        } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO)) {
+            Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_STEADYPHOTO supported and selected");
+            prms.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
+        }
+
+        // Set flash mode to torch if supported
+        setTorch(prms, torchOn);
+
+        //////////////////////////////////////
+        // Preview Resolution
+        List<Camera.Size> rezs = prms.getSupportedPreviewSizes();
+        Camera.Size prevSize = prms.getPreferredPreviewSizeForVideo();
+        // Prefer 4/3 ratio is portrait mode, 16/9 in landscape.
+        float preferredRatio = DisplayUtils.getScreenOrientation(this.getContext()) == 1 ? 4f / 3f : 16f / 9f;
+        Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio);
+        boolean goodMatchFound = false;
+
+        // First simply list resolutions (debug display & sorted res list creation)
+        for (Camera.Size s : rezs) {
+            Log.d(TAG, "\tsupports preview resolution " + s.width + "*" + s.height + " - " + ((float) s.width / (float) s.height));
+
+            if (Math.abs((float) s.width / (float) s.height - preferredRatio) < 0.1f) {
+                allowedPreviewSizes.add(s);
+            }
+        }
+        Collections.sort(allowedPreviewSizes, new Comparator<Camera.Size>() {
+            @Override
+            public int compare(Camera.Size o1, Camera.Size o2) {
+                return o1.width < o2.width ? -1 : o1.width == o2.width ? 0 : 1;
+            }
+        });
+
+        // Select the best resolution.
+        if (prevSize == null || prevSize.width < 1024 || (float) prevSize.width / (float) prevSize.height - preferredRatio > 0.1f) {
+            // First try with only the preferred ratio.
+            for (Camera.Size s : rezs) {
+                if (s.width <= 1980 && s.height <= 1080 && (prevSize == null || (s.width > prevSize.width) && Math.abs((float) s.width / (float) s.height - preferredRatio) < 0.1f)) {
+                    prevSize = s;
+                    goodMatchFound = true;
+                }
+            }
+
+            // If not found, try with any ratio.
+            if (!goodMatchFound) {
+                for (Camera.Size s : rezs) {
+                    if (s.width <= 1980 && s.height <= 1080 && (prevSize == null || (s.width > prevSize.width))) {
+                        prevSize = s;
+                    }
+                }
+            }
+        }
+        if (prevSize == null) {
+            throw new RuntimeException("no suitable preview resolution");
+        }
+        prms.setPreviewSize(prevSize.width, prevSize.height);
+
+
+        // COMPAT HACKS
+        this.usePreviewForPicture = false;
+        switch (android.os.Build.MODEL) {
+            case "LG-H340n":
+                prms.setPreviewSize(1600, 1200);
+                Log.i(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height) + " (requested ratio was " + preferredRatio + ")");
+                useAdaptiveResolution = false;
+                break;
+            case "SPA43LTE":
+                if (preferredRatio < 1.5) {
+                    prms.setPreviewSize(1440, 1080); // Actual working max, 1.33 ratio. No higher rez works.
+                } else {
+                    prms.setPreviewSize(1280, 720);
+                }
+                this.usePreviewForPicture = true;
+                Log.i(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+                break;
+            case "Archos Sense 50X":
+                if (preferredRatio < 1.5) {
+                    //prms.setPreviewSize(800, 600);
+                    prms.setPreviewSize(1440, 1080);
+                } else {
+                    prms.setPreviewSize(1280, 720);
+                }
+                this.usePreviewForPicture = true;
+                Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
+                break;
+            default:
+                Log.i(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
+                this.usePreviewForPicture = prevSize.height >= 1080;
+        }
+        this.previewSize = prms.getPreviewSize();
+
+
+        //////////////////////////////////////
+        // Picture resolution
+
+        // A preview resolution is often a picture resolution, so start with this.
+        // Then, look for any higher resolution with the same ratio
+        Log.i(TAG, "Looking for the ideal photo resolution. View ratio is " + preferredRatio);
+        List<Camera.Size> sizes = prms.getSupportedPictureSizes();
+        Camera.Size pictureSize = null, smallestSize = sizes.get(0), betterChoiceWrongRatio = null;
+        boolean foundWithGoodRatio = false;
+
+        for (Camera.Size s : sizes) {
+            // Is preview resolution a picture resolution?
+            if (s.width == prevSize.width && s.height == prevSize.height) {
+                pictureSize = s;
+                foundWithGoodRatio = true;
+            }
+            if (s.width < smallestSize.width) {
+                smallestSize = s;
+            }
+        }
+        if (pictureSize == null) {
+            pictureSize = smallestSize;
+        }
+
+        for (Camera.Size size : sizes) {
+            Log.d(TAG, "\tsupports picture resolution " + size.width + "*" + size.height + " - " + ((float) size.width / (float) size.height));
+            if (Math.abs((float) size.width / (float) size.height - preferredRatio) < 0.1f && size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
+                pictureSize = size;
+                foundWithGoodRatio = true;
+            }
+            if (size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
+                betterChoiceWrongRatio = size;
+            }
+        }
+        if (!foundWithGoodRatio) {
+            Log.d(TAG, "Could not find a photo resolution with requested ratio " + preferredRatio + ". Going with wrong ratio resolution");
+            pictureSize = betterChoiceWrongRatio;
+        }
+        if (pictureSize == null) {
+            throw new RuntimeException("no suitable photo resolution");
+        }
+
+        prms.setPictureSize(pictureSize.width, pictureSize.height);
+        camResRatio = (float) prms.getPictureSize().width / (float) prms.getPictureSize().height;
+        Log.i(TAG, "Using picture resolution " + pictureSize.width + "*" + pictureSize.height + ". Ratio is " + camResRatio + ". (Preferred ratio was " + preferredRatio + ")");
+
+
+        //////////////////////////////////////
+        // Perf hacks
+
+        // We are using video...
+        //prms.setRecordingHint(true);
+
+        // We need to best frame rate available
+        int[] bestPreviewFpsRange = new int[]{0, 0};
+        for (int[] fpsRange : prms.getSupportedPreviewFpsRange()) {
+            if (fpsRange[0] >= bestPreviewFpsRange[0] && fpsRange[1] >= bestPreviewFpsRange[1]) {
+                bestPreviewFpsRange = fpsRange;
+            }
+        }
+        if (bestPreviewFpsRange[1] > 0) {
+            prms.setPreviewFpsRange(bestPreviewFpsRange[0], bestPreviewFpsRange[1]);
+            Log.i(TAG, "Requesting preview FPS range at " + bestPreviewFpsRange[0] + "," + bestPreviewFpsRange[1]);
+        }
+
+        // Probably useless: don't use colors, as camera color interpolation destroys precision. Replace with explicit chroma filter?
+        if (prms.getSupportedColorEffects() != null && prms.getSupportedColorEffects().contains(Camera.Parameters.EFFECT_MONO)) {
+            prms.setColorEffect(Camera.Parameters.EFFECT_MONO);
+        }
+
+
+        //////////////////////////////////////
+        // Camera prms done
+        setCameraParameters(prms);
+
+        this.cam.setDisplayOrientation(getCameraDisplayOrientation());
     }
 
+    private void setAreas(Camera.Parameters prms) {
+        // Metering areas are relative to -1000,-1000 -> 1000,1000 rectangle.
+        // Translate the targeting rectangle to this coordinate system.
+        int top = cropRect.top; // layoutPrms.topMargin;
+        int bottom = cropRect.bottom; // layoutPrms.height + top;
+        int height = this.getMeasuredHeight();
+        Rect target = new Rect(-800, (int) ((float) top / height * 2000) - 1000, 800, (int) ((float) bottom / height * 2000) - 1000);
 
-    public void setUpCamera(Context context) {
-        // Camera pane init
-        if (this.cam == null && !this.isInEditMode()) {
-            try {
-                Log.i(TAG, "Camera is being opened. Device is " + android.os.Build.MODEL);
-                this.cam = Camera.open();
-            } catch (final Exception e) {
-                failed = true;
-                new AlertDialog.Builder(context).setTitle(getResources().getString(R.string.scanner_zbar_open_error_title)).
-                        setMessage(getResources().getString(R.string.scanner_zbar_open_error)).
-                        setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                throw e;
-                            }
-                        }).show();
-                return;
-            }
-
-            if (this.cam == null) {
-                failed = true;
-                new AlertDialog.Builder(context).setTitle(getResources().getString(R.string.scanner_zbar_open_error_title)).
-                        setMessage(getResources().getString(R.string.scanner_zbar_no_camera)).
-                        setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                throw new RuntimeException("No camera on device");
-                            }
-                        }).show();
-                return;
-            }
-
-            Camera.Parameters prms = this.cam.getParameters();
-
-            // Focus
-            int nbAreas = prms.getMaxNumFocusAreas();
-            Log.d(TAG, "Camera supports " + nbAreas + " focus areas");
-            if (nbAreas > 0) {
-                List<Camera.Area> areas = new ArrayList<>();
-                areas.add(new Camera.Area(new Rect(-800, -100, 800, 100), 1000));
-                prms.setFocusAreas(areas);
-                Log.i(TAG, "Using a central focus area");
-            } else {
-                Log.i(TAG, "No focus area used");
-            }
-
-            // Metering areas
-            if (prms.getMaxNumMeteringAreas() > 0) {
-                List<Camera.Area> areas = new ArrayList<>();
-                areas.add(new Camera.Area(new Rect(-800, -50, 800, 50), 1000));
-                prms.setMeteringAreas(areas);
-                Log.i(TAG, "Using a central metering area");
-            } else {
-                Log.i(TAG, "No specific metering area available");
-            }
-
-            // Exposure
-            if (prms.isAutoExposureLockSupported()) {
-                Log.d(TAG, "Auto exposure lock is supported and value is: " + prms.getAutoExposureLock());
-                //prms.setAutoExposureLock(true);
-            }
-            if (prms.getMaxExposureCompensation() > 0 && prms.getMinExposureCompensation() < 0) {
-                Log.i(TAG, "Exposure compensation is supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
-                hasExposureCompensation = true;
-                prms.setExposureCompensation((prms.getMaxExposureCompensation() + prms.getMinExposureCompensation()) / 2 - 1);
-                Log.i(TAG, "Exposure compensation set to " + prms.getExposureCompensation());
-            } else {
-                Log.i(TAG, "Exposure compensation is not supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
-            }
-            if (prms.getWhiteBalance() != null) {
-                Log.i(TAG, "White balance is supported with modes: " + prms.getSupportedWhiteBalance() + ". Selected is: " + prms.getWhiteBalance());
-                //prms.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_DAYLIGHT);
-            }
-
-            // Antibanding
-            if (prms.getAntibanding() != null) {
-                Log.i(TAG, "Antibanding is supported and is " + prms.getAntibanding());
-                //prms.setAntibanding(Camera.Parameters.ANTIBANDING_OFF);
-            }
-
-            // Stabilization
-            if (prms.isVideoStabilizationSupported()) {
-                Log.i(TAG, "Video stabilization is supported and will be set to true - currently is: " + prms.getVideoStabilization());
-                prms.setVideoStabilization(true);
-            } else {
-                Log.i(TAG, "Video stabilization is not supported");
-            }
-
-            // A YUV format. NV21 is always available, no need to check if it is supported
-            prms.setPreviewFormat(ImageFormat.NV21);
-
-            // Set focus mode to FOCUS_MODE_CONTINUOUS_PICTURE if supported
-            List<String> supportedFocusModes = prms.getSupportedFocusModes();
-            Log.d(TAG, "Supported focus modes: " + supportedFocusModes.toString());
-            if (supportedFocusModes.contains("mw_continuous-picture")) {
-                prms.setFocusMode("mw_continuous-picture");
-                Log.i(TAG, "supportedFocusModes - mw_continuous-picture supported and selected");
-            } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-                prms.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-                Log.i(TAG, "supportedFocusModes - continuous-picture supported and selected");
-            } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-                prms.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-                Log.i(TAG, "supportedFocusModes - auto supported and selected");
-                manualAutoFocus = true;
-            } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_MACRO)) {
-                prms.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
-                Log.i(TAG, "supportedFocusModes - macro supported and selected");
-            } else {
-                Log.i(TAG, "no autofocus supported");
-            }
-
-            // Scene mode
-            List<String> supportedSceneModes = prms.getSupportedSceneModes();
-            if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_BARCODE)) {
-                Log.i(TAG, "supportedSceneModes - scene mode barcode supported and selected");
-                prms.setSceneMode(Camera.Parameters.SCENE_MODE_BARCODE);
-            } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO)) {
-                Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_STEADYPHOTO supported and selected");
-                prms.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
-            }
-
-            // Set flash mode to torch if supported
-            setTorch(prms, torchOn);
-
-            //////////////////////////////////////
-            // Preview Resolution
-            List<Camera.Size> rezs = prms.getSupportedPreviewSizes();
-            Camera.Size prevSize = prms.getPreferredPreviewSizeForVideo();
-            // Prefer 4/3 ratio is portrait mode, 16/9 in landscape.
-            float preferredRatio = DisplayUtils.getScreenOrientation(this.getContext()) == 1 ? 4f / 3f : 16f / 9f;
-            Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio);
-            boolean goodMatchFound = false;
-
-            // First simply list resolutions (debug display & res list creation)
-            for (Camera.Size s : rezs) {
-                Log.d(TAG, "\tsupports preview resolution " + s.width + "*" + s.height + " - " + ((float) s.width / (float) s.height));
-
-                if (Math.abs((float) s.width / (float) s.height - preferredRatio) < 0.1f) {
-                    allowedPreviewSizes.add(s);
-                }
-                Collections.sort(allowedPreviewSizes, new Comparator<Camera.Size>() {
-                    @Override
-                    public int compare(Camera.Size o1, Camera.Size o2) {
-                        return o1.width < o2.width ? -1 : o1.width == o2.width ? 0 : 1;
-                    }
-                });
-            }
-
-            // Select the best resolution.
-            if (prevSize == null || prevSize.width < 1024 || (float) prevSize.width / (float) prevSize.height - preferredRatio > 0.1f) {
-                // First try with only the preferred ratio.
-                for (Camera.Size s : rezs) {
-                    if (s.width <= 1980 && s.height <= 1080 && (prevSize == null || (s.width > prevSize.width) && Math.abs((float) s.width / (float) s.height - preferredRatio) < 0.1f)) {
-                        prevSize = s;
-                        goodMatchFound = true;
-                    }
-                }
-
-                // If not found, try with any ratio.
-                if (!goodMatchFound) {
-                    for (Camera.Size s : rezs) {
-                        if (s.width <= 1980 && s.height <= 1080 && (prevSize == null || (s.width > prevSize.width))) {
-                            prevSize = s;
-                        }
-                    }
-                }
-            }
-            if (prevSize == null) {
-                throw new RuntimeException("no suitable preview resolution");
-            }
-            prms.setPreviewSize(prevSize.width, prevSize.height);
-
-
-            // COMPAT HACKS
-            this.usePreviewForPicture = false;
-            switch (android.os.Build.MODEL) {
-                case "LG-H340n":
-                    prms.setPreviewSize(1600, 1200);
-                    Log.i(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height) + " (requested ratio was " + preferredRatio + ")");
-                    useAdaptiveResolution = false;
-                    break;
-                case "SPA43LTE":
-                    if (preferredRatio < 1.5) {
-                        prms.setPreviewSize(1440, 1080); // Actual working max, 1.33 ratio. No higher rez works.
-                    } else {
-                        prms.setPreviewSize(1280, 720);
-                    }
-                    this.usePreviewForPicture = true;
-                    Log.i(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
-                    break;
-                case "Archos Sense 50X":
-                    if (preferredRatio < 1.5) {
-                        //prms.setPreviewSize(800, 600);
-                        prms.setPreviewSize(1440, 1080);
-                    } else {
-                        prms.setPreviewSize(1280, 720);
-                    }
-                    this.usePreviewForPicture = true;
-                    Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
-                    break;
-                default:
-                    Log.i(TAG, "Using preview resolution " + prevSize.width + "*" + prevSize.height + ". Ratio is " + ((float) prevSize.width / (float) prevSize.height));
-                    this.usePreviewForPicture = prevSize.height >= 1080;
-            }
-            this.previewSize = prms.getPreviewSize();
-
-
-            //////////////////////////////////////
-            // Picture resolution
-
-            // A preview resolution is often a picture resolution, so start with this.
-            // Then, look for any higher resolution with the same ratio
-            Log.i(TAG, "Looking for the ideal photo resolution. View ratio is " + preferredRatio);
-            List<Camera.Size> sizes = prms.getSupportedPictureSizes();
-            Camera.Size pictureSize = null, smallestSize = sizes.get(0), betterChoiceWrongRatio = null;
-            boolean foundWithGoodRatio = false;
-
-            for (Camera.Size s : sizes) {
-                // Is preview resolution a picture resolution?
-                if (s.width == prevSize.width && s.height == prevSize.height) {
-                    pictureSize = s;
-                    foundWithGoodRatio = true;
-                }
-                if (s.width < smallestSize.width) {
-                    smallestSize = s;
-                }
-            }
-            if (pictureSize == null) {
-                pictureSize = smallestSize;
-            }
-
-            for (Camera.Size size : sizes) {
-                Log.d(TAG, "\tsupports picture resolution " + size.width + "*" + size.height + " - " + ((float) size.width / (float) size.height));
-                if (Math.abs((float) size.width / (float) size.height - preferredRatio) < 0.1f && size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
-                    pictureSize = size;
-                    foundWithGoodRatio = true;
-                }
-                if (size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
-                    betterChoiceWrongRatio = size;
-                }
-            }
-            if (!foundWithGoodRatio) {
-                Log.d(TAG, "Could not find a photo resolution with requested ratio " + preferredRatio + ". Going with wrong ratio resolution");
-                pictureSize = betterChoiceWrongRatio;
-            }
-            if (pictureSize == null) {
-                throw new RuntimeException("no suitable photo resolution");
-            }
-
-            prms.setPictureSize(pictureSize.width, pictureSize.height);
-            camResRatio = (float) prms.getPictureSize().width / (float) prms.getPictureSize().height;
-            Log.i(TAG, "Using picture resolution " + pictureSize.width + "*" + pictureSize.height + ". Ratio is " + camResRatio + ". (Preferred ratio was " + preferredRatio + ")");
-
-
-            //////////////////////////////////////
-            // Perf hacks
-
-            // We are using video...
-            //prms.setRecordingHint(true);
-
-            // We need to best frame rate available
-            int[] bestPreviewFpsRange = new int[]{0, 0};
-            for (int[] fpsRange : prms.getSupportedPreviewFpsRange()) {
-                if (fpsRange[0] >= bestPreviewFpsRange[0] && fpsRange[1] >= bestPreviewFpsRange[1]) {
-                    bestPreviewFpsRange = fpsRange;
-                }
-            }
-            if (bestPreviewFpsRange[1] > 0) {
-                prms.setPreviewFpsRange(bestPreviewFpsRange[0], bestPreviewFpsRange[1]);
-                Log.i(TAG, "Requesting preview FPS range at " + bestPreviewFpsRange[0] + "," + bestPreviewFpsRange[1]);
-            }
-
-            // Probably useless: don't use colors, as camera color interpolation destroys precision.
-            if (prms.getSupportedColorEffects().contains(Camera.Parameters.EFFECT_MONO)) {
-                prms.setColorEffect(Camera.Parameters.EFFECT_MONO);
-            }
-
-
-            //////////////////////////////////////
-            // Camera prms done
-            setCameraParameters(prms);
-
-            this.cam.setDisplayOrientation(getCameraDisplayOrientation());
-
-            // The view holding the preview
-            if (this.camView == null) {
-                camView = new SurfaceView(context);
-                this.addView(camView);
-            }
-            this.camHolder = camView.getHolder();
-            this.camHolder.addCallback(this);
+        // Metering area: for aperture computations.
+        if (prms.getMaxNumMeteringAreas() > 0) {
+            List<Camera.Area> areas = new ArrayList<>();
+            areas.add(new Camera.Area(target, 1000));
+            prms.setMeteringAreas(areas);
+            Log.i(TAG, "Using a central metering area: " + target);
+        } else {
+            Log.i(TAG, "No specific metering area available");
         }
 
-        // Add the overlay upon the camera
-        overlay = new ZbarScanViewOverlay(context, this);
-        this.addView(overlay);
+        // Focus area
+        int nbAreas = prms.getMaxNumFocusAreas();
+        Log.d(TAG, "Camera supports " + nbAreas + " focus areas");
+        if (nbAreas > 0) {
+            List<Camera.Area> areas = new ArrayList<>();
+            areas.add(new Camera.Area(target, 1000));
+            prms.setFocusAreas(areas);
+            Log.i(TAG, "Using a central focus area: " + target);
+        } else {
+            Log.i(TAG, "No focus area available");
+        }
     }
 
     /**
@@ -525,20 +494,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-
-        if (this.cam == null && this.camView != null && !this.isInEditMode()) {
-            int idealWidth = (int) (h / camResRatio);
-            FrameLayout.LayoutParams ly = (FrameLayout.LayoutParams) camView.getLayoutParams();
-            ly.width = idealWidth;
-            ly.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            ly.gravity = Gravity.CENTER;
-            camView.setLayoutParams(ly);
-        }
-    }
-
-    @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
         if (visibility == VISIBLE && this.cam != null) {
@@ -571,7 +526,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             return false;
         }
         if (this.cam == null && !this.isInEditMode()) {
-            this.cam = Camera.open();
+            return false;
         }
         Camera.Parameters prms = this.cam.getParameters();
         return getSupportTorch(prms);
@@ -583,7 +538,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             return false;
         }
         if (this.cam == null && !this.isInEditMode()) {
-            this.cam = Camera.open();
+            return false;
         }
         Camera.Parameters prms = this.cam.getParameters();
         return prms.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH);
@@ -601,12 +556,12 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (support && value) {
             prms.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
             if (this.hasExposureCompensation) {
-                prms.setExposureCompensation(prms.getMinExposureCompensation() + 1);
+                // prms.setExposureCompensation(prms.getMinExposureCompensation() + 1);
             }
         } else if (support) {
             prms.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
             if (this.hasExposureCompensation) {
-                prms.setExposureCompensation((prms.getMaxExposureCompensation() + prms.getMinExposureCompensation()) / 2 - 1);
+                //prms.setExposureCompensation((prms.getMaxExposureCompensation() + prms.getMinExposureCompensation()) / 2 - 1);
             }
         }
     }
@@ -621,7 +576,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             return;
         }
         if (this.cam == null && !this.isInEditMode()) {
-            this.cam = Camera.open(); // debug only
+            return;
         }
         Camera.Parameters prms = this.cam.getParameters();
         setTorch(prms, value);
@@ -647,13 +602,11 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     public void triggerAutoFocus() {
         if (manualAutoFocus) {
             final ZbarScanView t = this;
-            overlay.invalidate();
             try {
                 this.cam.autoFocus(new Camera.AutoFocusCallback() {
                     @Override
                     public void onAutoFocus(boolean success, Camera camera) {
                         Log.v(TAG, "onAutoFocus: done");
-                        overlay.invalidate();
                         try {
                             if (scanningStarted) {
                                 camera.setPreviewCallback(t);
@@ -673,22 +626,158 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Target area handling
+
+    /**
+     * Sets up the central targeting rectangle. Must be called after surface init.
+     */
+    private void computeCropRectangle() {
+        // First, top may be a user preference
+        Activity a = this.getActivity();
+        int top = -1;
+        if (a != null) {
+            try {
+                SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
+                top = p.getInt("y" + getCameraDisplayOrientation(), 0);
+            } catch (Exception e) {
+                Log.w(TAG, "Could not retrieve preferences");
+            }
+        }
+
+        // Target rectangle dimensions
+        DisplayMetrics metrics = this.getContext().getResources().getDisplayMetrics();
+        //float xdpi = metrics.xdpi;
+        ydpi = metrics.ydpi;
+
+        int actualLayoutWidth, actualLayoutHeight;
+        if (this.isInEditMode()) {
+            actualLayoutWidth = this.getMeasuredWidth();
+            actualLayoutHeight = this.getMeasuredHeight();
+        } else {
+            actualLayoutWidth = this.camView.getMeasuredWidth();
+            actualLayoutHeight = this.camView.getMeasuredHeight();
+        }
+
+        int y1, y3;
+        if (top != -1) {
+            y1 = top;
+            y3 = (int) (top + RECT_HEIGHT / MM_INSIDE_INCH * ydpi);
+        } else {
+            y1 = (int) (actualLayoutHeight / 2 - RECT_HEIGHT / 2 / MM_INSIDE_INCH * ydpi);
+            y3 = (int) (actualLayoutHeight / 2 + RECT_HEIGHT / 2 / MM_INSIDE_INCH * ydpi);
+        }
+
+        cropRect.top = y1;
+        cropRect.bottom = y3;
+        cropRect.left = (int) (actualLayoutWidth * 0.1);
+        cropRect.right = (int) (actualLayoutWidth * 0.9);
+
+        Log.i(TAG, "Setting targeting rect at " + cropRect);
+    }
+
+    float dragStartY, dragCropTop, dragCropBottom;
+
+    /**
+     * Adds the targeting view to layout. Must be called after computeCropRectangle was called. Separate from computeCropRectangle
+     * because: we want to add this view last, in order to put it on top. (and we need to calculate the crop rectangle early).
+     */
+    private void addTargetView() {
+        final View targetView = new TargetView(this.getContext());
+        targetView.setId(R.id.barcode_scanner_camera_view);
+        final FrameLayout.LayoutParams prms = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, (int) (RECT_HEIGHT / MM_INSIDE_INCH * ydpi));
+        prms.setMargins(0, cropRect.top, 0, 0);
+
+        Log.i(TAG, "Targeting overlay added");
+        this.addView(targetView, prms);
+
+        targetView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        dragStartY = event.getY();
+                        dragCropTop = cropRect.top;
+                        dragCropBottom = cropRect.bottom;
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        final float dy = event.getY() - dragStartY;
+                        Log.i(TAG, "eventY " + event.getY() + " - " + "dy: " + dy + " - dragStartRectTop: " + dragCropTop + " - dragStartRectBottom: " + dragCropBottom);
+
+                        float newTop = dragCropTop + (int) dy;
+                        float newBottom = dragCropBottom + (int) dy;
+                        if (newTop > 0 && newBottom < ZbarScanView.this.camView.getHeight()) {
+                            cropRect.top = (int) newTop;
+                            cropRect.bottom = (int) newBottom;
+
+                            dragCropTop = newTop;
+                            dragCropBottom = newBottom;
+
+                            prms.topMargin = cropRect.top;
+                            targetView.setLayoutParams(prms);
+
+                            Log.i(TAG, "Crop rect top: " + cropRect.top + " - bottom: " + cropRect.bottom);
+                        }
+
+                        return true;
+
+                    case MotionEvent.ACTION_UP:
+                        dragStartY = 0;
+                        v.performClick();
+                        storePreferences("y" + getCameraDisplayOrientation(), cropRect.top);
+                        break;
+                }
+
+                return false;
+            }
+        });
+    }
+
+    private void storePreferences(String key, int y) {
+        Activity a = this.getActivity();
+        if (a == null) {
+            return;
+        }
+
+        SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor e = p.edit();
+        e.putInt(key, y);
+        e.apply();
+    }
+
+    private Activity getActivity() {
+        Context context = getContext();
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity) context;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
+    }
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // Reactions to preview pane being created/modified/destroyed.
     @Override
-    public void surfaceCreated(SurfaceHolder holder) {
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        computeCropRectangle();
         if (this.cam == null) {
-            setUpCamera(this.getContext());
+            setUpCamera();
+            surfaceHolder.setFixedSize(this.previewSize.width, this.previewSize.height);
         }
 
         try {
-            this.cam.setPreviewDisplay(this.camHolder);
+            this.cam.setPreviewDisplay(surfaceHolder);
             this.cam.startPreview();
             if (scanningStarted) {
                 this.cam.setPreviewCallback(this);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Could not start camera", e);
+            throw new RuntimeException("Could not start camera preview and preview data analysis", e);
         }
+        addTargetView();
     }
 
     @Override
@@ -720,14 +809,14 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         ctx.camViewMeasuredHeight = this.camView.getMeasuredHeight();
         ctx.camViewMeasuredWidth = this.camView.getMeasuredWidth();
         ctx.vertical = DisplayUtils.getScreenOrientation(this.getContext()) == 1;
-        ctx.x1 = x1;
-        ctx.x2 = x2;
-        ctx.x3 = x3;
-        ctx.x4 = x4;
-        ctx.y1 = y1;
-        ctx.y2 = y2;
-        ctx.y3 = y3;
-        ctx.y4 = y4;
+        ctx.x1 = cropRect.left;
+        ctx.x2 = cropRect.right;
+        ctx.x3 = ctx.x2;
+        ctx.x4 = ctx.x1;
+        ctx.y1 = cropRect.top;
+        ctx.y2 = ctx.y1;
+        ctx.y3 = cropRect.bottom;
+        ctx.y4 = ctx.y3;
         frameAnalyser.handleFrame(ctx);
     }
 
@@ -744,7 +833,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         this.post(new Runnable() {
             @Override
             public void run() {
-                ZbarScanView.this.handler.handleScanResult(result, type);
+                if (ZbarScanView.this.handler != null) {
+                    ZbarScanView.this.handler.handleScanResult(result, type);
+                }
             }
         });
     }
@@ -833,6 +924,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         Camera.getCameraInfo(0, info);
         WindowManager wm = (WindowManager) this.getContext().getSystemService(Context.WINDOW_SERVICE);
         if (wm == null) {
+            Log.w(TAG, "could not get the window manager");
             return 0;
         }
         Display display = wm.getDefaultDisplay();
@@ -861,28 +953,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             result = (info.orientation - degrees + 360) % 360;
         }
         return result;
-    }
-
-    protected void drawHud(Canvas canvas) {
-        if (x1 == 0) {
-            this.initRect();
-        }
-
-        // Draw rectangle
-        canvas.drawRect(x1, y1, x3, y3, targetRectPaint);
-
-        // Guide horizontal line
-        canvas.drawLine(0, y1 + (y3 - y1) / 2, this.getMeasuredWidth(), y1 + (y3 - y1) / 2, guideLinePaint);
-
-        if (manualAutoFocus) {
-            // Draw autofocus reticule
-            canvas.drawRect(x1, y1, x3, y3, autoFocusPaint);
-        }
-        // Hide rest of the view
-        //canvas.drawRect(0, 0, this.getMeasuredWidth(), y1, filterOutPaint);
-        //canvas.drawRect(0, y3, this.getMeasuredWidth(), this.getMeasuredHeight(), filterOutPaint);
-        //canvas.drawRect(0, y1, x4, y4, filterOutPaint);
-        //canvas.drawRect(x2, y2, this.getMeasuredWidth(), y3, filterOutPaint);
     }
 
     public void setResultHandler(ResultHandler handler) {

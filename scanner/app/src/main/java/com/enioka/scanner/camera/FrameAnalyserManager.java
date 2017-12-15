@@ -126,4 +126,15 @@ class FrameAnalyserManager {
         beepOk();
         parent.analyserCallback(result, symType, imagePreview);
     }
+
+    /**
+     * Default is simply CODE_128. Use the Symbol static fields to specify a symbology.
+     *
+     * @param s the ID of the symbology (ZBAR coding)
+     */
+    void addSymbology(int s) {
+        for (FrameAnalyser frameAnalyser : analysers) {
+            frameAnalyser.addSymbology(s);
+        }
+    }
 }

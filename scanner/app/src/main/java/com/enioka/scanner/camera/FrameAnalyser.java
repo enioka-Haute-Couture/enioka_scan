@@ -67,6 +67,15 @@ class FrameAnalyser implements Runnable {
         this.scanner.setConfig(Symbol.CODE128, 0, 1); //  0 = ZBAR_CFG_ENABLE (enable symbology 128)
     }
 
+    /**
+     * Default is simply CODE_128. Use the Symbol static fields to specify a symbology.
+     *
+     * @param s the ID of the symbology (ZBAR coding)
+     */
+    void addSymbology(int s) {
+        this.scanner.setConfig(s, 0, 1);
+    }
+
     void awaitTermination(int units, TimeUnit unit) throws InterruptedException {
         end.tryAcquire(units, unit);
     }

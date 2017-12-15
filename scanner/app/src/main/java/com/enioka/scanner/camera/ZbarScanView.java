@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.AudioManager;
@@ -51,7 +50,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private Camera cam;
     protected SurfaceView camView;
     private ResultHandler handler;
-    protected Paint autoFocusPaint;
     //protected int x1, y1, x2, y2, x3, y3, x4, y4; // 1 = top left, 2 = top right, 3 = bottom right, 4 = bottom left.
     protected Rect cropRect = new Rect(); // The "targeting" rectangle.
     private float camResRatio;
@@ -97,12 +95,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             frameAnalyser = new FrameAnalyserManager(this);
         }
 
-        autoFocusPaint = new Paint();
-        autoFocusPaint.setColor(Color.RED);
-        autoFocusPaint.setStrokeWidth(0);
-        autoFocusPaint.setAlpha(126);
-        autoFocusPaint.setStyle(Paint.Style.FILL);
-
         // Take photo on click instead of continuous scan
         // this.setOnClickListener(this);
 
@@ -123,7 +115,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
      * @param s the ID of the symbology (ZBAR coding)
      */
     public void addSymbology(int s) {
-        //this.scanner.setConfig(s, 0, 1);
+        if (frameAnalyser != null) {
+            frameAnalyser.addSymbology(s);
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.AudioManager;
@@ -29,7 +30,9 @@ import com.enioka.scanner.R;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import me.dm7.barcodescanner.core.DisplayUtils;
 
@@ -46,6 +49,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private float ydpi;
     float dragStartY, dragCropTop, dragCropBottom;
     private static final String TAG = "BARCODE";
+    private static final String PREFERENCE_FORBIDDEN_REZ = "forbidden_resolutions";
+    private static final String PREFERENCE_PREFERRED_PREVIEW_REZ_X = "preferred_preview_rez_x";
+    private static final String PREFERENCE_PREFERRED_PREVIEW_REZ_Y = "preferred_preview_rez_y";
 
     private Context context;
     private Camera cam;
@@ -133,6 +139,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             this.cam = Camera.open();
         } catch (final Exception e) {
             failed = true;
+            e.printStackTrace();
             new AlertDialog.Builder(context).setTitle(getResources().getString(R.string.scanner_zbar_open_error_title)).
                     setMessage(getResources().getString(R.string.scanner_zbar_open_error)).
                     setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -291,11 +298,20 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio);
         boolean goodMatchFound = false;
 
+        Set<String> forbiddenRezs = getPreferencesStringSet("rezs_too_high");
+        if (forbiddenRezs == null) {
+            forbiddenRezs = new HashSet<>(0);
+        }
+
         // First simply list resolutions (debug display & sorted res list creation)
         for (Camera.Size s : rezs) {
             Log.d(TAG, "\tsupports preview resolution " + s.width + "*" + s.height + " - " + ((float) s.width / (float) s.height));
 
             if (Math.abs((float) s.width / (float) s.height - preferredRatio) < 0.3f) {
+                if (forbiddenRezs.contains(s.width + "*" + s.height)) {
+                    Log.d(TAG, "Resolution is forbidden - FPS too low");
+                    continue;
+                }
                 allowedPreviewSizes.add(s);
             }
         }
@@ -331,8 +347,21 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (prevSize == null) {
             throw new RuntimeException("no suitable preview resolution");
         }
-        prms.setPreviewSize(prevSize.width, prevSize.height);
 
+        // Finally, if there is a preferred preview size, just use it.
+        Point preferred = getDefaultPreviewResolution();
+        if (preferred != null && preferred.x > 0 && preferred.y > 0) {
+            for (Camera.Size cs : allowedPreviewSizes) {
+                if (preferred.x == cs.width && preferred.y == cs.height) {
+                    prevSize = cs;
+                    Log.i(TAG, "Loaded preferred preview resolution " + preferred);
+                    break;
+                }
+            }
+        }
+
+        // We now have a preview resolution for sure.
+        prms.setPreviewSize(prevSize.width, prevSize.height);
 
         // COMPAT HACKS
         this.usePreviewForPicture = false;
@@ -510,12 +539,53 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         return previewSize.height;
     }
 
-    /**
-     * Called when the FPS is near the lower limit. Used to check if it would not be advisable to lower resolution.
-     */
-    void onLowishFps() {
-        if (previewSize.height > 1080) {
-            onWorryingFps(true);
+    int getPreviewColumnCount() {
+        return previewSize.width;
+    }
+
+    void removeResolution(Point rez) {
+        Camera.Size s = null;
+        for (Camera.Size cs : allowedPreviewSizes) {
+            if (cs.height == rez.y && cs.width == rez.x) {
+                s = cs;
+                break;
+            }
+        }
+        if (s != null) {
+            allowedPreviewSizes.remove(s);
+            Set<String> forbiddenRezs = getPreferencesStringSet(PREFERENCE_FORBIDDEN_REZ);
+            if (forbiddenRezs == null) {
+                forbiddenRezs = new HashSet<>(1);
+            }
+            forbiddenRezs.add(rez.x + "*" + rez.y);
+            storePreferences(PREFERENCE_FORBIDDEN_REZ, forbiddenRezs);
+            Log.i(TAG, "Resolution " + rez + " is removed from possible preview resolutions");
+        }
+    }
+
+    void persistDefaultPreviewResolution(Point p) {
+        this.storePreferences(PREFERENCE_PREFERRED_PREVIEW_REZ_X, p.x);
+        this.storePreferences(PREFERENCE_PREFERRED_PREVIEW_REZ_Y, p.y);
+    }
+
+    Point getDefaultPreviewResolution() {
+        Activity a = getActivity();
+        if (a == null) {
+            return null;
+        }
+
+        try {
+            SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
+            int x = p.getInt(PREFERENCE_PREFERRED_PREVIEW_REZ_X, 0);
+            int y = p.getInt(PREFERENCE_PREFERRED_PREVIEW_REZ_Y, 0);
+            if (x > 0 && y > 0) {
+                return new Point(x, y);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Could not retrieve preferences");
+            return null;
         }
     }
 
@@ -730,7 +800,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         });
     }
 
-    private void storePreferences(String key, int y) {
+    void storePreferences(String key, int y) {
         Activity a = this.getActivity();
         if (a == null) {
             return;
@@ -740,6 +810,33 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         SharedPreferences.Editor e = p.edit();
         e.putInt(key, y);
         e.apply();
+    }
+
+    void storePreferences(String key, Set<String> values) {
+        Activity a = this.getActivity();
+        if (a == null) {
+            return;
+        }
+
+        SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor e = p.edit();
+        e.putStringSet(key, values);
+        e.apply();
+    }
+
+    Set<String> getPreferencesStringSet(String key) {
+        Activity a = getActivity();
+        if (a == null) {
+            return null;
+        }
+
+        try {
+            SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
+            return p.getStringSet(key, null);
+        } catch (Exception e) {
+            Log.w(TAG, "Could not retrieve preferences");
+            return null;
+        }
     }
 
     private Activity getActivity() {

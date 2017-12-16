@@ -1,9 +1,12 @@
 package com.enioka.scanner.camera;
 
+import android.graphics.Point;
 import android.util.Log;
 
 import java.util.ArrayDeque;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -25,6 +28,10 @@ class FrameAnalyserManager {
     private long latestIntervalStart = 0;
     private long latestLog = 0;
     private int countLatestSecond = 0;
+
+    // Seconds in the different resolutions
+    private Map<Point, Long> resolutionUsage = new HashMap<>(20);
+    private Point mostUsedResolution;
 
     // FPS callback. Note: all thresholds are used with "greater than", not "greater or equal to".
     private long analyserStart = 0;
@@ -49,6 +56,13 @@ class FrameAnalyserManager {
     FrameAnalyserManager(ZbarScanView parent) {
         this.parent = parent;
 
+        // Misc initializations
+        mostUsedResolution = parent.getDefaultPreviewResolution();
+        if (mostUsedResolution == null) {
+            mostUsedResolution = new Point(0, 0);
+        }
+
+        // Create threads
         for (int i = 0; i < NUMBER_OF_CORES; i++) {
             FrameAnalyser frameAnalyser = new FrameAnalyser(queue, this);
             new Thread(frameAnalyser).start();
@@ -89,14 +103,40 @@ class FrameAnalyserManager {
 
         if (latestLog > latestIntervalStart + 1000000000) {
             float fps = 1000000000 * (float) countLatestSecond / (currentTime - latestIntervalStart);
-            Log.d(TAG, "FPS: " + fps + " - Pool size: " + analysers.size() + ". Current analysis queue depth: " + queue.size());
+            Log.d(TAG, "FPS: " + fps + " - Pool size: " + analysers.size() + ". Current analysis queue depth: " + queue.size() + ". Statistics are: " + resolutionUsage);
             latestIntervalStart = currentTime;
             countLatestSecond = 0;
 
             // Do not change resolution if low luminosity - it means the camera is inside a pocket.
-            // On low luminosity, the FPS drops dramatically, so we need this. to avoid resolution jumps.
-            if (pictureY < 20) {
+            // On low luminosity, the FPS drops dramatically, so we need this to avoid useless resolution jumps.
+            if (pictureY < 70) {
                 return;
+            }
+
+            // Increment time passed in this resolution.
+            Point currentResolution = new Point(parent.getPreviewColumnCount(), parent.getPreviewLineCount());
+            Long previousTimeValue = resolutionUsage.get(currentResolution);
+            if (previousTimeValue == null) {
+                previousTimeValue = 0L;
+            }
+            resolutionUsage.put(currentResolution, previousTimeValue + 1);
+
+            // Update most used resolution
+            Point tmpMostUsed = new Point(0, 0);
+            long maxUsages = 0L;
+            for (Map.Entry<Point, Long> pair : resolutionUsage.entrySet()) {
+                if (pair.getValue() > maxUsages) {
+                    maxUsages = pair.getValue();
+                    tmpMostUsed = pair.getKey();
+                }
+            }
+            boolean inMostUsedResolution = false;
+            if (tmpMostUsed != mostUsedResolution) {
+                mostUsedResolution = tmpMostUsed;
+                parent.persistDefaultPreviewResolution(mostUsedResolution);
+            }
+            if (mostUsedResolution == currentResolution) {
+                inMostUsedResolution = true;
             }
 
             // Only do FPS analysis a few seconds after actual scan start, and use a stabilization period between callback calls.
@@ -107,8 +147,17 @@ class FrameAnalyserManager {
                 {
                     successiveThresholdViolationsCount++;
 
-                    if (successiveThresholdViolationsCount > SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD) {
+                    // Only change resolution after a few violations (and give a boost to the most used resolution)
+                    if ((!inMostUsedResolution && successiveThresholdViolationsCount > SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD) ||
+                            (inMostUsedResolution && successiveThresholdViolationsCount > SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD * 2)) {
+
                         this.parent.onWorryingFps(fps < LOWER_COMFORTABLE_FPS_THRESHOLD);
+
+                        // Definitely remove resolutions a bit too high.
+                        if (fps < LOWER_COMFORTABLE_FPS_THRESHOLD && currentResolution.y > 1080) {
+                            parent.removeResolution(currentResolution);
+                        }
+
                         latestFpsReaction = currentTime;
                         successiveThresholdViolationsCount = 0;
 

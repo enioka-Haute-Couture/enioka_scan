@@ -47,7 +47,7 @@ class FrameAnalyserManager {
     // Deduplication variables
     private Calendar latestResultTime = Calendar.getInstance();
     private String latestBarcodeRead = "";
-    private static final int DOUBLE_READ_THRESHOLD_MS = 0;
+    private static final int DOUBLE_READ_THRESHOLD_MS = 500;
 
     // Analyser pool
     private Queue<FrameAnalyser> analysers = new ArrayDeque<>(NUMBER_OF_CORES);

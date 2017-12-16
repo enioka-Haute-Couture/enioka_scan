@@ -112,11 +112,12 @@ class FrameAnalyser implements Runnable {
         int realX3 = (int) (ctx.x3 * xRatio);
 
         int croppedDataWidth, croppedDataHeight;
+        byte[] barcode;
 
         // Rotate and crop the scan area. (only keep Y in the YUV image)
         if (ctx.vertical) {
             // French (vertical) - crop & rotate
-            byte[] barcode = new byte[(1 + realX3 - realX1) * (1 + realY3 - realY1)];
+            barcode = new byte[(1 + realX3 - realX1) * (1 + realY3 - realY1)];
 
             int i = 0;
             for (int w = realY1; w <= realY3; w++) {
@@ -129,7 +130,6 @@ class FrameAnalyser implements Runnable {
             //noinspection SuspiciousNameCombination
             croppedDataWidth = (1 + realX3 - realX1);
             croppedDataHeight = (1 + realY3 - realY1);
-            ctx.frame = barcode;
         } else {
             // Italian (horizontal). No need to rotate - just crop.
             yRatio = (float) dataHeight / ctx.camViewMeasuredHeight;  // Photo pixels per preview surface pixel.
@@ -143,7 +143,7 @@ class FrameAnalyser implements Runnable {
             croppedDataWidth = (1 + realX3 - realX1);
             croppedDataHeight = (1 + realY3 - realY1);
 
-            byte[] barcode = new byte[croppedDataWidth * croppedDataHeight];
+            barcode = new byte[croppedDataWidth * croppedDataHeight];
             int i = 0;
             for (int h = realY1; h <= realY3; h++) {
                 for (int w = realX1; w <= realX3; w++) {
@@ -151,13 +151,11 @@ class FrameAnalyser implements Runnable {
                     lumaSum += barcode[i - 1] & 0xff;
                 }
             }
-
-            ctx.frame = barcode;
         }
 
         // Analysis
         Image pic = new Image(croppedDataWidth, croppedDataHeight, "Y800");
-        pic.setData(ctx.frame);
+        pic.setData(barcode);
 
         //pic.setCrop(0, realY1, dataWidth, realY3 - realY1); // Left, top, width, height
         if (this.scanner.scanImage(pic) > 0) {
@@ -179,6 +177,7 @@ class FrameAnalyser implements Runnable {
         }
         int luma = (int) ((double) lumaSum / (croppedDataWidth * croppedDataHeight));
         parent.fpsCounter(luma);
+        parent.endOfFrame(ctx);
         Log.v(TAG, "Took ms: " + (System.nanoTime() - start) / 1000000);
     }
 }

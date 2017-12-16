@@ -71,6 +71,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
     private List<Camera.Size> allowedPreviewSizes = new ArrayList<>(20);
     private Camera.Size previewSize;
+    private int previewBufferSize;
 
     private FrameAnalyserManager frameAnalyser;
 
@@ -248,6 +249,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         //////////////////////////////////////
         // Preview Resolution
         setPreviewResolution(prms);
+        setInitialBuffers(prms);
 
         //////////////////////////////////////
         // Picture resolution
@@ -532,7 +534,15 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         previewSize = newRez;
         prms.setPreviewSize(newRez.width, newRez.height);
         setCameraParameters(prms);
+        setInitialBuffers(prms);
         resumeCamera();
+    }
+
+    private void setInitialBuffers(Camera.Parameters prms) {
+        previewBufferSize = (int) (previewSize.width * previewSize.height * ImageFormat.getBitsPerPixel(prms.getPreviewFormat()) / 8f);
+        for (int i = 0; i < Runtime.getRuntime().availableProcessors() * 2; i++) {
+            this.cam.addCallbackBuffer(new byte[previewBufferSize]);
+        }
     }
 
     int getPreviewLineCount() {
@@ -867,7 +877,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             this.cam.setPreviewDisplay(surfaceHolder);
             this.cam.startPreview();
             if (scanningStarted) {
-                this.cam.setPreviewCallback(this);
+                this.cam.setPreviewCallbackWithBuffer(this);
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not start camera preview and preview data analysis", e);
@@ -893,7 +903,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     // THE main method.
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        if (!scanningStarted) {
+        if (!scanningStarted || data == null || data.length == 0) {
             return;
         }
 
@@ -933,6 +943,12 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 }
             }
         });
+    }
+
+    void giveBufferBack(FrameAnalysisContext ctx) {
+        if (ctx.frame.length == previewBufferSize) {
+            this.cam.addCallbackBuffer(ctx.frame);
+        }
     }
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////

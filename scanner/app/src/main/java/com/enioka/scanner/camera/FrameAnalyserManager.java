@@ -73,7 +73,13 @@ class FrameAnalyserManager {
     }
 
     void handleFrame(FrameAnalysisContext ctx) {
-        queue.offer(ctx);
+        if (!queue.offer(ctx)) {
+            endOfFrame(ctx);
+        }
+    }
+
+    void endOfFrame(FrameAnalysisContext ctx) {
+        parent.giveBufferBack(ctx);
     }
 
     void close() {

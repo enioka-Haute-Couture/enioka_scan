@@ -26,6 +26,7 @@ class FrameAnalyser implements Runnable {
     private FrameAnalyserManager parent;
     private BlockingQueue<FrameAnalysisContext> queue;
     private Semaphore end = new Semaphore(0);
+    private Set<Integer> symbologies = new HashSet<>(10);
 
     FrameAnalyser(BlockingQueue<FrameAnalysisContext> queue, FrameAnalyserManager parent) {
         this.parent = parent;
@@ -39,18 +40,20 @@ class FrameAnalyser implements Runnable {
         android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         initScanner();
 
-        boolean first = true;
         FrameAnalysisContext ctx = null;
         while (ctx == null || ctx.frame != null) {
             try {
                 ctx = queue.take();
-                first = false;
             } catch (InterruptedException e) {
                 // Just stop.
                 break;
             }
             if (ctx != null && ctx.frame != null) {
-                onPreviewFrame(ctx);
+                try {
+                    onPreviewFrame(ctx);
+                } catch (Exception e) {
+                    // Happens on resolution changes which result in an inconsistent context.
+                }
             }
         }
 
@@ -58,22 +61,30 @@ class FrameAnalyser implements Runnable {
         end.release();
     }
 
-    private void initScanner() {
+    private synchronized void initScanner() {
         // Barcode analyzer (properties: 0 = all symbologies, 256 = config, 3 = value)
         this.scanner = new ImageScanner();
         //this.scanner.setConfig(0, 256, 0); // 256 =   ZBAR_CFG_X_DENSITY (disable vertical scanning)
         //this.scanner.setConfig(0, 257, 3); // 257 =  ZBAR_CFG_Y_DENSITY (skip 2 out of 3 lines)
         this.scanner.setConfig(0, 0, 0); //  0 = ZBAR_CFG_ENABLE (disable all symbologies)
-        this.scanner.setConfig(Symbol.CODE128, 0, 1); //  0 = ZBAR_CFG_ENABLE (enable symbology 128)
+
+        // Enable select symbologies
+        symbologies.add(Symbol.CODE128);
+        for (int symbology : symbologies) {
+            this.scanner.setConfig(symbology, 0, 1);
+        }
     }
 
     /**
-     * Default is simply CODE_128. Use the Symbol static fields to specify a symbology.
+     * Default is simply CODE_128. Use the Symbol static fields to specify a symbology. Can be used before init end.
      *
      * @param s the ID of the symbology (ZBAR coding)
      */
-    void addSymbology(int s) {
-        this.scanner.setConfig(s, 0, 1);
+    synchronized void addSymbology(int s) {
+        symbologies.add(s);
+        if (scanner != null) {
+            this.scanner.setConfig(s, 0, 1);
+        }
     }
 
     void awaitTermination(int units, TimeUnit unit) throws InterruptedException {
@@ -86,6 +97,7 @@ class FrameAnalyser implements Runnable {
         //Log.i(TAG, "New frame analysis");
         String symData;
         int symType;
+        long lumaSum = 0L;
 
         // Data characteristics
         int dataWidth = (int) ctx.cameraWidth;
@@ -101,7 +113,7 @@ class FrameAnalyser implements Runnable {
 
         int croppedDataWidth, croppedDataHeight;
 
-        // Rotate and crop.
+        // Rotate and crop the scan area. (only keep Y in the YUV image)
         if (ctx.vertical) {
             // French (vertical) - crop & rotate
             byte[] barcode = new byte[(1 + realX3 - realX1) * (1 + realY3 - realY1)];
@@ -110,6 +122,7 @@ class FrameAnalyser implements Runnable {
             for (int w = realY1; w <= realY3; w++) {
                 for (int h = realX3 - 1; h >= realX1; h--) {
                     barcode[i++] = ctx.frame[h * dataWidth + w];
+                    lumaSum += barcode[i - 1] & 0xff;
                 }
             }
 
@@ -135,6 +148,7 @@ class FrameAnalyser implements Runnable {
             for (int h = realY1; h <= realY3; h++) {
                 for (int w = realX1; w <= realX3; w++) {
                     barcode[i++] = ctx.frame[h * dataWidth + w];
+                    lumaSum += barcode[i - 1] & 0xff;
                 }
             }
 
@@ -163,7 +177,8 @@ class FrameAnalyser implements Runnable {
                 }
             }
         }
-        parent.fpsCounter();
+        int luma = (int) ((double) lumaSum / (croppedDataWidth * croppedDataHeight));
+        parent.fpsCounter(luma);
         Log.v(TAG, "Took ms: " + (System.nanoTime() - start) / 1000000);
     }
 }

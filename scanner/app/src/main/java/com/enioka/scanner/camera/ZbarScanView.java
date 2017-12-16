@@ -44,6 +44,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     protected static final int RECT_HEIGHT = 10;
     protected static final float MM_INSIDE_INCH = 25.4f;
     private float ydpi;
+    float dragStartY, dragCropTop, dragCropBottom;
     private static final String TAG = "BARCODE";
 
     private Context context;
@@ -52,8 +53,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private ResultHandler handler;
     //protected int x1, y1, x2, y2, x3, y3, x4, y4; // 1 = top left, 2 = top right, 3 = bottom right, 4 = bottom left.
     protected Rect cropRect = new Rect(); // The "targeting" rectangle.
-    private float camResRatio;
-    private boolean manualAutoFocus = false;
     private boolean hasExposureCompensation = false;
     private boolean torchOn = false;
     protected boolean scanningStarted = true;
@@ -123,7 +122,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     /**
      * After this call the camera is selected, with correct parameters and open, ready to be plugged on a preview pane.
      */
-    public void setUpCamera() {
+    private void setUpCamera() {
         // Camera pane init
         if (this.cam != null || this.isInEditMode()) {
             return;
@@ -184,7 +183,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         // Antibanding
         if (prms.getAntibanding() != null) {
             Log.i(TAG, "Antibanding is supported and is " + prms.getAntibanding());
-            //prms.setAntibanding(Camera.Parameters.ANTIBANDING_OFF);
+            prms.setAntibanding(Camera.Parameters.ANTIBANDING_AUTO);
         }
 
         // Stabilization
@@ -210,7 +209,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
             prms.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
             Log.i(TAG, "supportedFocusModes - auto supported and selected");
-            manualAutoFocus = true;
         } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_MACRO)) {
             prms.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
             Log.i(TAG, "supportedFocusModes - macro supported and selected");
@@ -246,52 +244,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
         //////////////////////////////////////
         // Picture resolution
-
-        // A preview resolution is often a picture resolution, so start with this.
-        // Then, look for any higher resolution with the same ratio
-        // Note the ratio looked for is the preview ratio, not the view ratio as it may be different.
-        float preferredRatio = (float) this.previewSize.width / (float) this.previewSize.height;
-        Log.i(TAG, "Looking for the ideal photo resolution. View ratio is " + preferredRatio);
-        List<Camera.Size> sizes = prms.getSupportedPictureSizes();
-        Camera.Size pictureSize = null, smallestSize = sizes.get(0), betterChoiceWrongRatio = null;
-        boolean foundWithGoodRatio = false;
-
-        for (Camera.Size s : sizes) {
-            // Is preview resolution a picture resolution?
-            if (s.width == previewSize.width && s.height == previewSize.height) {
-                pictureSize = s;
-                foundWithGoodRatio = true;
-            }
-            if (s.width < smallestSize.width) {
-                smallestSize = s;
-            }
-        }
-        if (pictureSize == null) {
-            pictureSize = smallestSize;
-        }
-
-        for (Camera.Size size : sizes) {
-            Log.d(TAG, "\tsupports picture resolution " + size.width + "*" + size.height + " - " + ((float) size.width / (float) size.height));
-            if (Math.abs((float) size.width / (float) size.height - preferredRatio) < 0.1f && size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
-                pictureSize = size;
-                foundWithGoodRatio = true;
-            }
-            if (size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
-                betterChoiceWrongRatio = size;
-            }
-        }
-        if (!foundWithGoodRatio) {
-            Log.d(TAG, "Could not find a photo resolution with requested ratio " + preferredRatio + ". Going with wrong ratio resolution");
-            pictureSize = betterChoiceWrongRatio;
-        }
-        if (pictureSize == null) {
-            throw new RuntimeException("no suitable photo resolution");
-        }
-
-        prms.setPictureSize(pictureSize.width, pictureSize.height);
-        camResRatio = (float) prms.getPictureSize().width / (float) prms.getPictureSize().height;
-        Log.i(TAG, "Using picture resolution " + pictureSize.width + "*" + pictureSize.height + ". Ratio is " + camResRatio + ". (Preferred ratio was " + preferredRatio + ")");
-
+        setPictureResolution(prms);
 
         //////////////////////////////////////
         // Perf hacks
@@ -418,6 +371,55 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         this.previewSize = prms.getPreviewSize();
     }
 
+    private void setPictureResolution(Camera.Parameters prms) {
+        // A preview resolution is often a picture resolution, so start with this.
+        // Then, look for any higher resolution with the same ratio
+
+        // Note the ratio looked for is the preview ratio, not the view ratio as it may be different.
+        float preferredRatio = (float) this.previewSize.width / (float) this.previewSize.height;
+        Log.i(TAG, "Looking for the ideal photo resolution. View ratio is " + preferredRatio);
+
+        List<Camera.Size> sizes = prms.getSupportedPictureSizes();
+        Camera.Size pictureSize = null, smallestSize = sizes.get(0), betterChoiceWrongRatio = null;
+        boolean foundWithGoodRatio = false;
+
+        for (Camera.Size s : sizes) {
+            // Is preview resolution a picture resolution?
+            if (s.width == previewSize.width && s.height == previewSize.height) {
+                pictureSize = s;
+                foundWithGoodRatio = true;
+            }
+            if (s.width < smallestSize.width) {
+                smallestSize = s;
+            }
+        }
+        if (pictureSize == null) {
+            pictureSize = smallestSize;
+        }
+
+        for (Camera.Size size : sizes) {
+            Log.d(TAG, "\tsupports picture resolution " + size.width + "*" + size.height + " - " + ((float) size.width / (float) size.height));
+            if (Math.abs((float) size.width / (float) size.height - preferredRatio) < 0.1f && size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
+                pictureSize = size;
+                foundWithGoodRatio = true;
+            }
+            if (size.width > pictureSize.width && size.width <= 2560 && size.height <= 1536) {
+                betterChoiceWrongRatio = size;
+            }
+        }
+        if (!foundWithGoodRatio) {
+            Log.d(TAG, "Could not find a photo resolution with requested ratio " + preferredRatio + ". Going with wrong ratio resolution");
+            pictureSize = betterChoiceWrongRatio;
+        }
+        if (pictureSize == null) {
+            throw new RuntimeException("no suitable photo resolution");
+        }
+
+        prms.setPictureSize(pictureSize.width, pictureSize.height);
+        float camResRatio = (float) prms.getPictureSize().width / (float) prms.getPictureSize().height;
+        Log.i(TAG, "Using picture resolution " + pictureSize.width + "*" + pictureSize.height + ". Ratio is " + camResRatio + ". (Preferred ratio was " + preferredRatio + ")");
+    }
+
     private void setAreas(Camera.Parameters prms) {
         // Metering areas are relative to -1000,-1000 -> 1000,1000 rectangle.
         // Translate the targeting rectangle to this coordinate system.
@@ -502,6 +504,19 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         prms.setPreviewSize(newRez.width, newRez.height);
         setCameraParameters(prms);
         resumeCamera();
+    }
+
+    int getPreviewLineCount() {
+        return previewSize.height;
+    }
+
+    /**
+     * Called when the FPS is near the lower limit. Used to check if it would not be advisable to lower resolution.
+     */
+    void onLowishFps() {
+        if (previewSize.height > 1080) {
+            onWorryingFps(true);
+        }
     }
 
 
@@ -610,32 +625,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             throw new RuntimeException(TAG + "- SetUpCamera : Could not set camera parameters ", e);
         }
     }
-
-    /**
-     * Force the camera to perform an autofocus
-     */
-    public void triggerAutoFocus() {
-        if (manualAutoFocus) {
-            final ZbarScanView t = this;
-            try {
-                this.cam.autoFocus(new Camera.AutoFocusCallback() {
-                    @Override
-                    public void onAutoFocus(boolean success, Camera camera) {
-                        Log.v(TAG, "onAutoFocus: done");
-                        try {
-                            if (scanningStarted) {
-                                camera.setPreviewCallback(t);
-                            }
-                        } catch (RuntimeException e) {
-                            // Can happen when the camera was released before this callback happens. Not an issue - the scan has already succeeded.
-                        }
-                    }
-                });
-            } catch (Exception e) {
-                // Autofocus may fail from time to time (especially if called too soon)
-            }
-        }
-    }
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -689,8 +678,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
         Log.i(TAG, "Setting targeting rect at " + cropRect);
     }
-
-    float dragStartY, dragCropTop, dragCropBottom;
 
     /**
      * Adds the targeting view to layout. Must be called after computeCropRectangle was called. Separate from computeCropRectangle

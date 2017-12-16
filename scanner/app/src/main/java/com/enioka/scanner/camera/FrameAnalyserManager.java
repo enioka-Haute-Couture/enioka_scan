@@ -33,6 +33,7 @@ class FrameAnalyserManager {
     private static final int BEGIN_FPS_ANALYSIS_DELAY_SECONDS = 1;
     private static final int INBETWEEN_ANALYSIS_DELAY_SECONDS = 3;
     private static final int LOWER_FPS_THRESHOLD = 10;
+    private static final int LOWER_COMFORTABLE_FPS_THRESHOLD = 15;
     private static final int UPPER_FPS_THRESHOLD = 20;
     private static final int SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD = 2;
 
@@ -78,27 +79,39 @@ class FrameAnalyserManager {
 
     // Note this method is not synchronised as it is called on each frame and this would be costly.
     // So the FPS indication may be slightly off, which is not an issue as precision is not needed.
-    void fpsCounter() {
+    void fpsCounter(int pictureY) {
         long currentTime = System.nanoTime();
         if (analyserStart == 0) {
             analyserStart = currentTime;
         }
 
         countLatestSecond++;
+
         if (latestLog > latestIntervalStart + 1000000000) {
             float fps = 1000000000 * (float) countLatestSecond / (currentTime - latestIntervalStart);
             Log.d(TAG, "FPS: " + fps + " - Pool size: " + analysers.size() + ". Current analysis queue depth: " + queue.size());
             latestIntervalStart = currentTime;
             countLatestSecond = 0;
 
-            // Only do FPS analysis a few seconds after actual scan start, and use a stabilization preiod between callback calls.
+            // Do not change resolution if low luminosity - it means the camera is inside a pocket.
+            // On low luminosity, the FPS drops dramatically, so we need this. to avoid resolution jumps.
+            if (pictureY < 20) {
+                return;
+            }
+
+            // Only do FPS analysis a few seconds after actual scan start, and use a stabilization period between callback calls.
             if (currentTime > analyserStart + BEGIN_FPS_ANALYSIS_DELAY_SECONDS * 1000000000L && currentTime > latestFpsReaction + INBETWEEN_ANALYSIS_DELAY_SECONDS * 1000000000L) {
-                if (fps < LOWER_FPS_THRESHOLD || fps > UPPER_FPS_THRESHOLD) {
+                if (fps < LOWER_FPS_THRESHOLD // Low FPS
+                        || fps > UPPER_FPS_THRESHOLD // High FPS
+                        || (fps < LOWER_COMFORTABLE_FPS_THRESHOLD && parent.getPreviewLineCount() > 1080)) // low FPS on high resolution )
+                {
                     successiveThresholdViolationsCount++;
 
                     if (successiveThresholdViolationsCount > SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD) {
-                        this.parent.onWorryingFps(fps < LOWER_FPS_THRESHOLD);
+                        this.parent.onWorryingFps(fps < LOWER_COMFORTABLE_FPS_THRESHOLD);
                         latestFpsReaction = currentTime;
+                        successiveThresholdViolationsCount = 0;
+
                     }
                 } else {
                     successiveThresholdViolationsCount = 0;

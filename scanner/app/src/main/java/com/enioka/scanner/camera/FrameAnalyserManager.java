@@ -21,8 +21,16 @@ class FrameAnalyserManager {
     private static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors(); // Wrong on old devices, not an issue for us.
     private static final String TAG = "BARCODE";
 
+    private static final int BEGIN_FPS_ANALYSIS_DELAY_SECONDS = 1;
+    private static final int INBETWEEN_ANALYSIS_DELAY_SECONDS = 3;
+    private static final int LOWER_FPS_THRESHOLD = 10;
+    private static final int LOWER_COMFORTABLE_FPS_THRESHOLD = 15;
+    private static final int UPPER_FPS_THRESHOLD = 20;
+    private static final int SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD = 2;
+
     // Success callback
-    private ZbarScanView parent;
+    private ScannerCallback parent;
+    private Resolution resolution;
 
     // FPS counter variables
     private long latestIntervalStart = 0;
@@ -37,12 +45,6 @@ class FrameAnalyserManager {
     private long analyserStart = 0;
     private long latestFpsReaction = 0;
     private int successiveThresholdViolationsCount = 0;
-    private static final int BEGIN_FPS_ANALYSIS_DELAY_SECONDS = 1;
-    private static final int INBETWEEN_ANALYSIS_DELAY_SECONDS = 3;
-    private static final int LOWER_FPS_THRESHOLD = 10;
-    private static final int LOWER_COMFORTABLE_FPS_THRESHOLD = 15;
-    private static final int UPPER_FPS_THRESHOLD = 20;
-    private static final int SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD = 2;
 
     // Deduplication variables
     private Calendar latestResultTime = Calendar.getInstance();
@@ -53,11 +55,12 @@ class FrameAnalyserManager {
     private Queue<FrameAnalyser> analysers = new ArrayDeque<>(NUMBER_OF_CORES);
     private BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(2 * NUMBER_OF_CORES, false);
 
-    FrameAnalyserManager(ZbarScanView parent) {
+    FrameAnalyserManager(ScannerCallback parent, Resolution bag) {
         this.parent = parent;
+        this.resolution = bag;
 
         // Misc initializations
-        mostUsedResolution = parent.getDefaultPreviewResolution();
+        mostUsedResolution = bag.preferredPreviewResolution;
         if (mostUsedResolution == null) {
             mostUsedResolution = new Point(0, 0);
         }
@@ -120,7 +123,7 @@ class FrameAnalyserManager {
             }
 
             // Increment time passed in this resolution.
-            Point currentResolution = new Point(parent.getPreviewColumnCount(), parent.getPreviewLineCount());
+            Point currentResolution = resolution.currentPreviewResolution;
             Long previousTimeValue = resolutionUsage.get(currentResolution);
             if (previousTimeValue == null) {
                 previousTimeValue = 0L;
@@ -139,7 +142,7 @@ class FrameAnalyserManager {
             boolean inMostUsedResolution = false;
             if (tmpMostUsed != mostUsedResolution) {
                 mostUsedResolution = tmpMostUsed;
-                parent.persistDefaultPreviewResolution(mostUsedResolution);
+                resolution.persistDefaultPreviewResolution(mostUsedResolution);
             }
             if (mostUsedResolution == currentResolution) {
                 inMostUsedResolution = true;
@@ -149,7 +152,7 @@ class FrameAnalyserManager {
             if (currentTime > analyserStart + BEGIN_FPS_ANALYSIS_DELAY_SECONDS * 1000000000L && currentTime > latestFpsReaction + INBETWEEN_ANALYSIS_DELAY_SECONDS * 1000000000L) {
                 if (fps < LOWER_FPS_THRESHOLD // Low FPS
                         || fps > UPPER_FPS_THRESHOLD // High FPS
-                        || (fps < LOWER_COMFORTABLE_FPS_THRESHOLD && parent.getPreviewLineCount() > 1080)) // low FPS on high resolution )
+                        || (fps < LOWER_COMFORTABLE_FPS_THRESHOLD && resolution.currentPreviewResolution.y > 1080)) // low FPS on high resolution )
                 {
                     successiveThresholdViolationsCount++;
 
@@ -161,7 +164,7 @@ class FrameAnalyserManager {
 
                         // Definitely remove resolutions a bit too high.
                         if (fps < LOWER_COMFORTABLE_FPS_THRESHOLD && currentResolution.y > 1080) {
-                            parent.removeResolution(currentResolution);
+                            resolution.removeResolution(currentResolution);
                         }
 
                         latestFpsReaction = currentTime;

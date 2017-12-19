@@ -111,7 +111,7 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
             actualLayoutWidth = this.getMeasuredWidth();
             actualLayoutHeight = this.getMeasuredHeight();
         } else {
-            actualLayoutWidth = this.getMeasuredWidth();
+            actualLayoutWidth = this.surfaceView.getMeasuredWidth();
             actualLayoutHeight = this.surfaceView.getMeasuredHeight();
         }
 

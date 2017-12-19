@@ -160,7 +160,10 @@ class FrameAnalyserManager {
                     if ((!inMostUsedResolution && successiveThresholdViolationsCount > SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD) ||
                             (inMostUsedResolution && successiveThresholdViolationsCount > SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD * 2)) {
 
-                        this.parent.onWorryingFps(fps < LOWER_COMFORTABLE_FPS_THRESHOLD);
+                        Point newResolution = this.resolution.getNextPreviewResolution(fps < LOWER_COMFORTABLE_FPS_THRESHOLD);
+                        if (newResolution != null) {
+                            parent.setPreviewResolution(newResolution);
+                        }
 
                         // Definitely remove resolutions a bit too high.
                         if (fps < LOWER_COMFORTABLE_FPS_THRESHOLD && currentResolution.y > 1080) {

@@ -31,5 +31,5 @@ interface ScannerCallback {
     // Resolution handling
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void onWorryingFps(boolean lowFps);
+    void setPreviewResolution(Point newResolution);
 }

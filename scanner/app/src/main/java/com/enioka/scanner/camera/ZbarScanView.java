@@ -41,9 +41,9 @@ import me.dm7.barcodescanner.core.DisplayUtils;
 public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback, SurfaceHolder.Callback, ScannerCallback {
     private static final String TAG = "BARCODE";
 
-
     protected static final int RECT_HEIGHT = 10;
     protected static final float MM_INSIDE_INCH = 25.4f;
+
 
     private float ydpi;
     float dragStartY, dragCropTop, dragCropBottom;
@@ -89,9 +89,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             System.loadLibrary("iconv");
             frameAnalyser = new FrameAnalyserManager(this, resolution);
         }
-
-        // Take photo on click instead of continuous scan
-        // this.setOnClickListener(this);
 
         // If the preview does not take all the space
         this.setBackgroundColor(Color.BLACK);
@@ -361,58 +358,11 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         }
     }
 
-    /**
-     * Will change the resolution according to the analysis FPS rate.
-     */
-    public synchronized void onWorryingFps(boolean low) {
-        if (this.cam == null || !resolution.useAdaptiveResolution) {
-            return;
-        }
-
-        // Current resolution index?
-        int currentResolutionIndex = -1;
-        int i = -1;
-        for (Point allowedResolution : resolution.allowedPreviewResolutions) {
-            i++;
-            if (allowedResolution.x == resolution.currentPreviewResolution.x && allowedResolution.y == resolution.currentPreviewResolution.y) {
-                currentResolutionIndex = i;
-                break;
-            }
-        }
-
-        // Checks
-        if (currentResolutionIndex == -1) {
-            // Happens when the chosen resolution does not have the correct ratio.
-            Log.d(TAG, "Out of bounds FPS but no suitable alternative resolution available");
-            return;
-        }
-        int indexShift;
-        if (low) {
-            if (currentResolutionIndex == 0) {
-                // We already use the lowest resolution possible
-                Log.d(TAG, "Low analysis FPS but already on the lowest possible resolution");
-                return;
-            }
-            indexShift = -1;
-        } else {
-            if (currentResolutionIndex == resolution.allowedPreviewResolutions.size() - 1) {
-                // We already use the lowest resolution possible
-                Log.d(TAG, "High analysis FPS but already on the highest possible resolution");
-                return;
-            }
-            indexShift = +1;
-        }
-
-        // We have a correct new preview resolution!
-        Point newRez = resolution.allowedPreviewResolutions.get(currentResolutionIndex + indexShift);
-        Log.i(TAG, "Changing preview resolution from " + resolution.currentPreviewResolution.x + "*" + resolution.currentPreviewResolution.y +
-                " to " + newRez.x + "*" + newRez.y);
-
-        // Set it
+    public void setPreviewResolution(Point newResolution) {
         Camera.Parameters prms = this.cam.getParameters();
         pauseCamera();
-        resolution.currentPreviewResolution = newRez;
-        prms.setPreviewSize(newRez.x, newRez.y);
+        resolution.currentPreviewResolution = newResolution;
+        prms.setPreviewSize(newResolution.x, newResolution.y);
         setCameraParameters(prms);
         setInitialBuffers(prms);
         resumeCamera();
@@ -636,6 +586,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         });
     }
 
+    public void setAllowTargetDrag(boolean allowTargetDrag) {
+        this.allowTargetDrag = allowTargetDrag;
+    }
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -849,10 +802,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
     public interface ResultHandler {
         void handleScanResult(String result, int type);
-    }
-
-    public void setAllowTargetDrag(boolean allowTargetDrag) {
-        this.allowTargetDrag = allowTargetDrag;
     }
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////

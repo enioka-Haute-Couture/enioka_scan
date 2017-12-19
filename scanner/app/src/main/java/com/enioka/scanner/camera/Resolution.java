@@ -13,6 +13,8 @@ import java.util.Set;
  * Bag for all resolution properties.
  */
 class Resolution {
+    private static final String TAG = "BARCODE";
+
     private static final String PREFERENCE_FORBIDDEN_REZ = "forbidden_resolutions";
 
     Resolution(Context context) {
@@ -53,7 +55,55 @@ class Resolution {
             }
             forbiddenRezs.add(rez.x + "*" + rez.y);
             ViewHelpersPreferences.storePreferences(context, PREFERENCE_FORBIDDEN_REZ, forbiddenRezs);
-            Log.i("BARCODE", "Resolution " + rez + " is removed from possible preview resolutions");
+            Log.i(TAG, "Resolution " + rez + " is removed from possible preview resolutions");
         }
+    }
+
+    public Point getNextPreviewResolution(boolean low) {
+        if (!useAdaptiveResolution) {
+            return null;
+        }
+
+        // Current resolution index?
+        int currentResolutionIndex = -1;
+        int i = -1;
+        for (Point allowedResolution : allowedPreviewResolutions) {
+            i++;
+            if (allowedResolution.x == currentPreviewResolution.x && allowedResolution.y == currentPreviewResolution.y) {
+                currentResolutionIndex = i;
+                break;
+            }
+        }
+
+        // Checks
+        if (currentResolutionIndex == -1) {
+            // Happens when the chosen resolution does not have the correct ratio.
+            Log.d(TAG, "Out of bounds FPS but no suitable alternative resolution available");
+            return null;
+        }
+        int indexShift;
+        if (low) {
+            if (currentResolutionIndex == 0) {
+                // We already use the lowest resolution possible
+                Log.d(TAG, "Low analysis FPS but already on the lowest possible resolution");
+                return null;
+            }
+            indexShift = -1;
+        } else {
+            if (currentResolutionIndex == allowedPreviewResolutions.size() - 1) {
+                // We already use the lowest resolution possible
+                Log.d(TAG, "High analysis FPS but already on the highest possible resolution");
+                return null;
+            }
+            indexShift = +1;
+        }
+
+        // We have a correct new preview resolution!
+        Point newRez = allowedPreviewResolutions.get(currentResolutionIndex + indexShift);
+        Log.i(TAG, "Changing preview resolution from " + currentPreviewResolution.x + "*" + currentPreviewResolution.y +
+                " to " + newRez.x + "*" + newRez.y);
+
+        // Set it
+        return newRez;
     }
 }

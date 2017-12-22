@@ -28,7 +28,6 @@ class ViewHelpersResolution {
         }
         Log.i(TAG, "Using memory limit (MB): " + maxMb);
         
-
         // Look for a resolution not too far from the view ratio.
         float preferredRatio = (float) camView.getMeasuredHeight() / (float) camView.getMeasuredWidth();
         if (preferredRatio < 1) {

@@ -5,7 +5,7 @@ android {
     buildToolsVersion '26.0.2'
 
     defaultConfig {
-        applicationId "com.geodis.mobicop.demoscannerapp"
+        applicationId "com.enioka.scanner.demoscannerapp"
         minSdkVersion 16
         targetSdkVersion 25
         versionCode 1

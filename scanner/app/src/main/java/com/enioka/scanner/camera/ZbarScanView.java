@@ -112,6 +112,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         }
     }
 
+
     /**
      * After this call the camera is selected, with correct parameters and open, ready to be plugged on a preview pane.
      */
@@ -153,6 +154,25 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
         Camera.Parameters prms = this.cam.getParameters();
 
+        // Scene mode. Try to select a mode which will ensure a high FPS rate.
+        List<String> supportedSceneModes = prms.getSupportedSceneModes();
+        if (supportedSceneModes != null) {
+            Log.d(TAG, "Supported scene modes: " + supportedSceneModes.toString());
+        }
+        if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_BARCODE)) {
+            Log.i(TAG, "supportedSceneModes - scene mode barcode supported and selected");
+            prms.setSceneMode(Camera.Parameters.SCENE_MODE_BARCODE);
+        } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_ACTION)) {
+            Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_ACTION supported and selected");
+            prms.setSceneMode(Camera.Parameters.SCENE_MODE_ACTION);
+        } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_SPORTS)) { // actually same as action
+            Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_SPORTS supported and selected");
+            prms.setSceneMode(Camera.Parameters.SCENE_MODE_SPORTS);
+        } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO)) {
+            Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_STEADYPHOTO supported and selected");
+            prms.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
+        }
+
         // Focus & Metering areas
         setAreas(prms);
 
@@ -191,25 +211,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         // A YUV format. NV21 is always available, no need to check if it is supported
         prms.setPreviewFormat(ImageFormat.NV21);
         resolution.bytesPerPixel = ImageFormat.getBitsPerPixel(prms.getPreviewFormat()) / 8f;
-
-        // Scene mode. Try to select a mode which will ensure a high FPS rate.
-        List<String> supportedSceneModes = prms.getSupportedSceneModes();
-        if (supportedSceneModes != null) {
-            Log.d(TAG, "Supported scene modes: " + supportedSceneModes.toString());
-        }
-        if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_BARCODE)) {
-            Log.i(TAG, "supportedSceneModes - scene mode barcode supported and selected");
-            prms.setSceneMode(Camera.Parameters.SCENE_MODE_BARCODE);
-        } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_ACTION)) {
-            Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_ACTION supported and selected");
-            prms.setSceneMode(Camera.Parameters.SCENE_MODE_ACTION);
-        } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_SPORTS)) { // actually same as action
-            Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_SPORTS supported and selected");
-            prms.setSceneMode(Camera.Parameters.SCENE_MODE_SPORTS);
-        } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO)) {
-            Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_STEADYPHOTO supported and selected");
-            prms.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
-        }
 
         // Set focus mode to FOCUS_MODE_CONTINUOUS_PICTURE if supported
         List<String> supportedFocusModes = prms.getSupportedFocusModes();
@@ -308,6 +309,8 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 resolution.usePreviewForPhoto = true;
                 Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
                 break;
+            case "TC25":
+                prms.setSceneMode(Camera.Parameters.SCENE_MODE_AUTO); // Disable - bug - AF is disabled if scene mode activated.
             default:
                 Log.i(TAG, "Using preview resolution " + resolution.currentPreviewResolution.x + "*" +
                         resolution.currentPreviewResolution.y + ". Ratio is " +

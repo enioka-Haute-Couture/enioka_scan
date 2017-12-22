@@ -15,7 +15,7 @@ import java.util.Set;
  * Logic for resolution choices.
  */
 class ViewHelpersResolution {
-    private static final String TAG = "ViewHelpersResolution";
+    private static final String TAG = "BARCODE";
 
     static void setPreviewResolution(Context context, Resolution bag, SurfaceView camView) {
         Point previewResolution = null;
@@ -27,7 +27,7 @@ class ViewHelpersResolution {
             maxMb = activityManager.getMemoryClass();
         }
         Log.i(TAG, "Using memory limit (MB): " + maxMb);
-        
+
         // Look for a resolution not too far from the view ratio.
         float preferredRatio = (float) camView.getMeasuredHeight() / (float) camView.getMeasuredWidth();
         if (preferredRatio < 1) {
@@ -47,12 +47,12 @@ class ViewHelpersResolution {
 
             if (Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.3f) {
                 if (forbiddenRezs.contains(resolution.x + "*" + resolution.y)) {
-                    Log.d(TAG, "Resolution is forbidden - FPS too low");
+                    Log.d(TAG, "\t\tResolution is forbidden - FPS too low");
                     continue;
                 }
                 int previewBufferSize = (int) (resolution.x * resolution.y * bag.bytesPerPixel);
                 if (previewBufferSize * Runtime.getRuntime().availableProcessors() * 2 / 1024 / 1024 > (maxMb * 0.75)) {
-                    Log.d(TAG, "Resolution is forbidden - too much memory would be used");
+                    Log.d(TAG, "\t\tResolution is forbidden - too much memory would be used");
                     continue;
                 }
 
@@ -72,7 +72,7 @@ class ViewHelpersResolution {
 
         // Select the best resolution.
         // First try with only the preferred ratio.
-        for (Point resolution : bag.supportedPreviewResolutions) {
+        for (Point resolution : bag.allowedPreviewResolutions) {
             if (previewResolution == null || (resolution.x > previewResolution.x) && Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.1f) {
                 previewResolution = resolution;
                 goodMatchFound = true;
@@ -81,7 +81,7 @@ class ViewHelpersResolution {
 
         // If not found, try with any ratio.
         if (!goodMatchFound) {
-            for (Point resolution : bag.supportedPreviewResolutions) {
+            for (Point resolution : bag.allowedPreviewResolutions) {
                 if (resolution.x <= 1980 && resolution.y <= 1080 && (previewResolution == null || (resolution.x > previewResolution.x))) {
                     previewResolution = resolution;
                 }

@@ -198,6 +198,7 @@ class FrameAnalyserManager {
         latestResultTime = Calendar.getInstance();
 
         beepOk();
+        Log.d(TAG, "barcode read: " + result);
         parent.analyserCallback(result, symType, imagePreview);
     }
 

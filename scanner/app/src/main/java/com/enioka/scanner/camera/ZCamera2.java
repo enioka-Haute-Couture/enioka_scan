@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -26,22 +27,27 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
+import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 
+import me.dm7.barcodescanner.core.DisplayUtils;
+
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
-    private static final String TAG = "Camera2Scanner";
+public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, ScannerCallback {
+    private static final String TAG = "BARCODE";
+
     protected static final int RECT_HEIGHT = 10;
     protected static final float MM_INSIDE_INCH = 25.4f;
-
-    Context context;
 
     protected SurfaceView surfaceView = null;
     private Rect cropRect = new Rect();
@@ -51,10 +57,16 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
     private CaptureRequest captureRequest;
     private CameraDevice cameraDevice;
     private ImageReader imageReader;
+    private int cameraNativeOrientation;
 
     private boolean isTorchSupported = false;
-    private Size previewResolution;
+    private Integer controlModeScene = null;
+    private Integer controlModeAf = null;
+
+    private Resolution resolution;
     private Range<Integer> previewFpsRange;
+
+    private FrameAnalyserManager scanner;
 
     /**
      * A {@link Handler} for running technical tasks in the background.
@@ -65,36 +77,38 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
 
     public ZCamera2(@NonNull Context context) {
         super(context);
-        this.context = context;
         init();
     }
 
     public ZCamera2(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        this.context = context;
         init();
     }
 
     private void init() {
         //initOverlay();
         //return;
+
+        // Create resolution manager.
+        resolution = new Resolution(getContext());
+        resolution.useAdaptiveResolution = false; // TODO.
+
+        // The real scanner
+        scanner = new FrameAnalyserManager(this, resolution);
+
+        // A thread for dealing with camera technical operations.
         startBackgroundThread();
-        // This will simply select the camera
-        selectCameraParameters();
-        // This will add the preview view. Its completion callback calls openCamera (and initOverlay), which has a completion callback which starts the preview.
+
+        // This will add the preview view. Its completion callback calls selectCameraParameters, then openCamera (and initOverlay), which has a completion callback which starts the preview.
         initLayout();
     }
 
     private void initLayout() {
-        initSurface();
-    }
-
-    private void initSurface() {
         if (this.surfaceView != null) {
             return;
         }
 
-        surfaceView = new SurfaceView(context);
+        surfaceView = new SurfaceView(getContext());
         this.addView(surfaceView);
         surfaceView.getHolder().addCallback(this); // this calls callback when ready.
     }
@@ -136,7 +150,7 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             throw new RuntimeException("cannot use Camera2 API on a pre-Lollipop device");
         }
-        CameraManager manager = (CameraManager) context.getSystemService(android.content.Context.CAMERA_SERVICE);
+        CameraManager manager = (CameraManager) getContext().getSystemService(android.content.Context.CAMERA_SERVICE);
         if (manager == null) {
             throw new RuntimeException("cannot use Camera2 API on this device - null CameraManager");
         }
@@ -184,10 +198,57 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
                 Boolean hasFlash = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
                 isTorchSupported = hasFlash == null ? false : hasFlash;
                 Log.i(TAG, "Camera supports flash: " + isTorchSupported);
-                previewResolution = selectResolution(map.getOutputSizes(ImageFormat.YUV_420_888));
-                Log.i(TAG, "Camera uses preview resolution: " + previewResolution.getWidth() + "*" + previewResolution.getHeight());
+                selectResolution(map.getOutputSizes(ImageFormat.YUV_420_888));
+                Log.i(TAG, "Camera uses preview resolution: " + resolution.currentPreviewResolution.x + "*" + resolution.currentPreviewResolution.y);
                 previewFpsRange = selectFpsRange(characteristics);
                 Log.i(TAG, "Camera uses FPS range: " + previewFpsRange);
+
+                // Scene. This controls many things, including FPS.
+                int[] sceneModes = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES);
+                if (sceneModes != null && sceneModes.length > 0 && (sceneModes[0] != CameraCharacteristics.CONTROL_SCENE_MODE_DISABLED)) {
+                    ArrayList<Integer> sceneModesList = new ArrayList<>(sceneModes.length);
+                    for (int i : sceneModes) {
+                        sceneModesList.add(i);
+                    }
+
+                    if (sceneModesList.contains(CameraCharacteristics.CONTROL_SCENE_MODE_SPORTS)) {
+                        controlModeScene = CaptureRequest.CONTROL_SCENE_MODE_SPORTS;
+                        Log.i(TAG, "Using scene mode: CONTROL_SCENE_MODE_SPORTS");
+                    } else if (sceneModesList.contains(CameraCharacteristics.CONTROL_SCENE_MODE_ACTION)) {
+                        controlModeScene = CaptureRequest.CONTROL_SCENE_MODE_ACTION;
+                        Log.i(TAG, "Using scene mode: CONTROL_SCENE_MODE_ACTION");
+                    } else if (sceneModesList.contains(CameraCharacteristics.CONTROL_SCENE_MODE_STEADYPHOTO)) {
+                        controlModeScene = CaptureRequest.CONTROL_SCENE_MODE_STEADYPHOTO;
+                        Log.i(TAG, "Using scene mode: CONTROL_SCENE_MODE_STEADYPHOTO");
+                    } else {
+                        Log.i(TAG, "Using scene mode: none");
+                    }
+                }
+
+                // AutoFocus (AF)
+                int[] afModesArray = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
+                if (afModesArray != null && afModesArray.length > 0) {
+                    ArrayList<Integer> modes = new ArrayList<>(afModesArray.length);
+                    for (int i : afModesArray) {
+                        modes.add(i);
+                    }
+
+                    if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_PICTURE)) {
+                        controlModeAf = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
+                        Log.i(TAG, "Usig AF mode: CONTROL_AF_MODE_CONTINUOUS_PICTURE");
+                    } else if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_MACRO)) {
+                        controlModeAf = CaptureRequest.CONTROL_AF_MODE_MACRO;
+                        Log.i(TAG, "Usig AF mode: CONTROL_AF_MODE_MACRO");
+                    } else if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_AUTO)) {
+                        controlModeAf = CaptureRequest.CONTROL_AF_MODE_AUTO;
+                        Log.i(TAG, "Usig AF mode: CONTROL_AF_MODE_AUTO");
+                    } else {
+                        Log.i(TAG, "Usig AF mode: none");
+                    }
+                }
+
+                // Misc
+                cameraNativeOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
 
                 // GO
                 break;
@@ -201,10 +262,11 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
         }
     }
 
-
-    private Size selectResolution(Size[] choices) {
-        return new Size(1440, 1080);
-        //return new Size(800, 600);
+    private void selectResolution(Size[] choices) {
+        for (Size s : choices) {
+            resolution.supportedPreviewResolutions.add(new Point(s.getWidth(), s.getHeight()));
+        }
+        ViewHelpersResolution.setPreviewResolution(getContext(), resolution, this.surfaceView);
     }
 
     private Range<Integer> selectFpsRange(CameraCharacteristics characteristics) {
@@ -226,11 +288,11 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
     }
 
     private void openCamera() {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             throw new RuntimeException("missing use camera permission");
         }
 
-        CameraManager manager = (CameraManager) context.getSystemService(android.content.Context.CAMERA_SERVICE);
+        CameraManager manager = (CameraManager) getContext().getSystemService(android.content.Context.CAMERA_SERVICE);
         if (manager == null) {
             throw new RuntimeException("cannot use Camera2 API on this device - null CameraManager");
         }
@@ -241,7 +303,7 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
         }
     }
 
-    private void closeCamera() {
+    private synchronized void closeCamera() {
         if (null != captureSession) {
             captureSession.close();
             captureSession = null;
@@ -253,6 +315,10 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
         if (null != imageReader) {
             imageReader.close();
             imageReader = null;
+        }
+        if (null != scanner) {
+            scanner.close();
+            scanner = null;
         }
         stopBackgroundThread();
     }
@@ -292,10 +358,18 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        surfaceHolder.setFixedSize(this.previewResolution.getWidth(), this.previewResolution.getHeight());
+        // This will simply select the camera
+        selectCameraParameters();
+
+        // Set the surface buffer size
+        surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
+
+        // Go for camera
         if (!isInEditMode()) {
             openCamera(); // will in turn start the preview.
         }
+
+        // Add targeting rectangle (must be done after everything is drawn and dimensions are known)
         initOverlay();
     }
 
@@ -333,7 +407,7 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
         public void onError(@NonNull CameraDevice cameraDevice, int i) {
             cameraDevice.close();
             ZCamera2.this.cameraDevice = null;
-            Toast toast = Toast.makeText(context, "camera error " + i, Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getContext(), "camera error " + i, Toast.LENGTH_LONG);
             toast.show();
         }
     };
@@ -342,7 +416,7 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
         Surface surface = this.surfaceView.getHolder().getSurface();
 
         try {
-            imageReader = ImageReader.newInstance(previewResolution.getWidth(), previewResolution.getHeight(), ImageFormat.YUV_420_888, 40);
+            imageReader = ImageReader.newInstance(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y, ImageFormat.YUV_420_888, Runtime.getRuntime().availableProcessors() * 2);
             imageReader.setOnImageAvailableListener(imageCallback, backgroundHandler);
 
             final CaptureRequest.Builder captureRequestBuilder = this.cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
@@ -359,12 +433,21 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
 
                             // If here, preview session is open and we can start the actual preview.
                             captureSession = cameraCaptureSession;
-                            captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
-                            captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
-                            captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-                            captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
-                            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                            captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
+
+                            if (controlModeScene != null) {
+                                captureRequestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, controlModeScene);
+                                captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
+                            } else {
+                                captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+                            }
+
+                            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
+                            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+                            //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CmmmmmmmmmmmaptureRequest.CONTROL_AWB_MODE_AUTO);
+
+                            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
+                            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
+
 
                             //captureRequestBuilder.set(CaptureRequest., CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
@@ -380,7 +463,7 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
 
                         @Override
                         public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
-                            Toast toast = Toast.makeText(context, "camera error - could not set preview", Toast.LENGTH_LONG);
+                            Toast toast = Toast.makeText(getContext(), "camera error - could not set preview", Toast.LENGTH_LONG);
                             toast.show();
                         }
                     }, null);
@@ -397,18 +480,33 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
     ImageReader.OnImageAvailableListener imageCallback = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader reader) {
-            Log.i(TAG, "RRRRRRRRRRRR");
-
             Image image = reader.acquireNextImage();
             if (image == null) {
                 return;
             }
-            //image.setCropRect(cropRect);
 
-           /* ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
             byte[] bytes = new byte[buffer.remaining()];
-            Log.i(TAG, "" + bytes.length);
-            buffer.get(bytes);*/
+            buffer.get(bytes);
+
+            FrameAnalysisContext ctx = new FrameAnalysisContext();
+            ctx.frame = bytes;
+            ctx.camViewMeasuredWidth = surfaceView.getMeasuredWidth();
+            ctx.camViewMeasuredHeight = surfaceView.getMeasuredHeight();
+            ctx.vertical = DisplayUtils.getScreenOrientation(getContext()) == 1;
+            ctx.cameraHeight = resolution.currentPreviewResolution.y;
+            ctx.cameraWidth = resolution.currentPreviewResolution.x;
+            ctx.x1 = cropRect.left;
+            ctx.x2 = cropRect.right;
+            ctx.x3 = ctx.x2;
+            ctx.x4 = ctx.x1;
+            ctx.y1 = cropRect.top;
+            ctx.y2 = ctx.y1;
+            ctx.y3 = cropRect.bottom;
+            ctx.y4 = ctx.y3;
+
+            scanner.handleFrame(ctx);
+
             image.close();
         }
     };
@@ -418,5 +516,49 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback {
     // Life cycle handlers
     ///////////////////////////////////////////////////////////////////////////
 
+    @Override
+    public void analyserCallback(String result, int type, byte[] previewData) {
 
+    }
+
+    @Override
+    public void giveBufferBack(FrameAnalysisContext analysisContext) {
+
+    }
+
+    @Override
+    public void setPreviewResolution(Point newResolution) {
+
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Helpers
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public int getCameraDisplayOrientation() {
+        WindowManager wm = (WindowManager) this.getContext().getSystemService(Context.WINDOW_SERVICE);
+        if (wm == null) {
+            Log.w(TAG, "could not get the window manager");
+            return 0;
+        }
+        Display display = wm.getDefaultDisplay();
+        int rotation = display.getRotation();
+        short degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
+        }
+
+        return (cameraNativeOrientation - degrees + 360) % 360;
+    }
 }

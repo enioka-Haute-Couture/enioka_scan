@@ -1,5 +1,6 @@
 package com.enioka.scanner.camera;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.util.Log;
@@ -18,6 +19,15 @@ class ViewHelpersResolution {
 
     static void setPreviewResolution(Context context, Resolution bag, SurfaceView camView) {
         Point previewResolution = null;
+
+        // Get memory limit - we do not want a resolution so high as to cause an OOM with all the buffers
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        int maxMb = 16; // default used to be 16MB - should work on even very old devices
+        if (activityManager != null) {
+            maxMb = activityManager.getMemoryClass();
+        }
+        Log.i(TAG, "Using memory limit (MB): " + maxMb);
+        
 
         // Look for a resolution not too far from the view ratio.
         float preferredRatio = (float) camView.getMeasuredHeight() / (float) camView.getMeasuredWidth();
@@ -41,6 +51,12 @@ class ViewHelpersResolution {
                     Log.d(TAG, "Resolution is forbidden - FPS too low");
                     continue;
                 }
+                int previewBufferSize = (int) (resolution.x * resolution.y * bag.bytesPerPixel);
+                if (previewBufferSize * Runtime.getRuntime().availableProcessors() * 2 / 1024 / 1024 > (maxMb * 0.75)) {
+                    Log.d(TAG, "Resolution is forbidden - too much memory would be used");
+                    continue;
+                }
+
                 bag.allowedPreviewResolutions.add(resolution);
             }
         }

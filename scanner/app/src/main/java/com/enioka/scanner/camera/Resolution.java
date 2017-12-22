@@ -35,6 +35,8 @@ class Resolution {
     boolean usePreviewForPhoto = false;
     boolean useAdaptiveResolution = true;
 
+    float bytesPerPixel;
+
     void persistDefaultPreviewResolution(Point resolution) {
         ViewHelpersPreferences.persistDefaultPreviewResolution(context, resolution);
     }

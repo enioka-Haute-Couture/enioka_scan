@@ -190,25 +190,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
         // A YUV format. NV21 is always available, no need to check if it is supported
         prms.setPreviewFormat(ImageFormat.NV21);
-
-        // Set focus mode to FOCUS_MODE_CONTINUOUS_PICTURE if supported
-        List<String> supportedFocusModes = prms.getSupportedFocusModes();
-        Log.d(TAG, "Supported focus modes: " + supportedFocusModes.toString());
-        if (supportedFocusModes.contains("mw_continuous-picture")) {
-            prms.setFocusMode("mw_continuous-picture");
-            Log.i(TAG, "supportedFocusModes - mw_continuous-picture supported and selected");
-        } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-            Log.i(TAG, "supportedFocusModes - continuous-picture supported and selected");
-        } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-            Log.i(TAG, "supportedFocusModes - auto supported and selected");
-        } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_MACRO)) {
-            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
-            Log.i(TAG, "supportedFocusModes - macro supported and selected");
-        } else {
-            Log.i(TAG, "no autofocus supported");
-        }
+        resolution.bytesPerPixel = ImageFormat.getBitsPerPixel(prms.getPreviewFormat()) / 8f;
 
         // Scene mode. Try to select a mode which will ensure a high FPS rate.
         List<String> supportedSceneModes = prms.getSupportedSceneModes();
@@ -227,6 +209,25 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO)) {
             Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_STEADYPHOTO supported and selected");
             prms.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
+        }
+
+        // Set focus mode to FOCUS_MODE_CONTINUOUS_PICTURE if supported
+        List<String> supportedFocusModes = prms.getSupportedFocusModes();
+        Log.d(TAG, "Supported focus modes: " + supportedFocusModes.toString());
+        if (supportedFocusModes.contains("mw_continuous-picture")) {
+            prms.setFocusMode("mw_continuous-picture");
+            Log.i(TAG, "supportedFocusModes - mw_continuous-picture supported and selected");
+        } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            Log.i(TAG, "supportedFocusModes - continuous-picture supported and selected");
+        } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+            Log.i(TAG, "supportedFocusModes - auto supported and selected");
+        } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_MACRO)) {
+            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
+            Log.i(TAG, "supportedFocusModes - macro supported and selected");
+        } else {
+            Log.i(TAG, "no autofocus supported");
         }
 
         // Set flash mode to torch if supported
@@ -688,6 +689,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     // Lifecycle external toggles
     public void pauseCamera() {
         if (this.cam != null) {
+            this.cam.setPreviewCallbackWithBuffer(null);
             this.cam.stopPreview();
         }
     }
@@ -713,7 +715,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     }
 
     public static void beepOk() {
-        /*ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+       /* ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
         tg.startTone(ToneGenerator.TONE_PROP_PROMPT, 100);
         tg.release();*/
     }

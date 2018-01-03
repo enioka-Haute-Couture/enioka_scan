@@ -1,9 +1,13 @@
 package com.enioka.scanner.activities;
 
+import android.Manifest;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -31,13 +35,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A helper activity which implements all scan functions: laser, camera, HID.<br><br>Basic usage is trivial : just inherit this class, and that's all.<br>
- * You may want to override {@link #onData(List)} to get barcode data, and {@link #onStatusChanged(String)} to display status messages from the scanners.<br>
+ * You may want to override {@link #onData(Scanner, List)} to get barcode data, and {@link #onStatusChanged(String)} to display status messages from the scanners.<br>
  * It is also useful to change  inside onCreate {@link #layoutIdLaser} and {@link #layoutIdCamera} to a layout ID (from R.id...) corresponding to your application.
  * By default, a basic test layout is provided.<br>
  * Also, {@link #zbarViewId} points to the ZBar view inside your Camera layout.
  */
 public class ScannerCompatActivity extends AppCompatActivity implements Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerConnectionHandler, Scanner.ScannerInitCallback {
     protected final static String LOG_TAG = "ScannerActivity";
+    protected final static int PERMISSION_REQUEST_ID_CAMERA = 1790;
+    protected final static int PERMISSION_REQUEST_ID_BT_EMDK = 1791;
 
     /**
      * Don't start camera mode, even if no laser are available
@@ -48,6 +54,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
      * If set to false, ScannerCompatActivity will behave like an standard AppCompatActivity
      */
     protected boolean enableScan = true;
+
+    /**
+     * Helper to go to camera after permission change.
+     */
+    protected boolean goToCamera = false;
 
     /**
      * Scanner instance ; if none is set, activity will instantiate one
@@ -88,48 +99,59 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Common.askForPermission(this);
+        //Common.askForPermission(this); // NO: this actually pauses then resumes the activity.
     }
 
-    public void setAutocompletion(List autocompletion, int threshold) {
+    @SuppressWarnings("unused")
+    public void setAutocompletion(List<String> autocompletion, int threshold) {
         this.autocompletion = autocompletion;
         this.threshold = threshold;
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        // Actual init.
-        if (enableScan) {
-            Log.i(LOG_TAG, "Resuming scanner activity - scanner will be connected");
-
-            // Set content immediately - that way our callbacks can draw on the layout.
-            setContentView(layoutIdLaser);
-
-            intializingScannersCount.set(0);
-            scanners.clear();
-
-            if (findViewById(R.id.scanner_text_last_scan) != null) {
-                ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
-            }
-            if (findViewById(R.id.scanner_text_scanner_status) != null) {
-                ((TextView) findViewById(R.id.scanner_text_scanner_status)).setText(null);
-            }
-
-            if (findViewById(R.id.scanner_bt_camera) != null) {
-                findViewById(R.id.scanner_bt_camera).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        initCamera();
-                    }
-                });
-            }
-
-            // init laser scanner search. If none found this will go to the camera.
-            LaserScanner.getLaserScanner(this, this, ScannerSearchOptions.defaultOptions().getAllAvailableScanners());
+        if (!enableScan) {
+            return;
         }
+
+        if (goToCamera) {
+            initCamera();
+            return;
+        }
+
+        // Actual init.
+        Log.i(LOG_TAG, "Resuming scanner activity - scanner will be connected");
+
+        // Set content immediately - that way our callbacks can draw on the layout.
+        setContentView(layoutIdLaser);
+
+        intializingScannersCount.set(0);
+        scanners.clear();
+
+        if (findViewById(R.id.scanner_text_last_scan) != null) {
+            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
+        }
+        if (findViewById(R.id.scanner_text_scanner_status) != null) {
+            ((TextView) findViewById(R.id.scanner_text_scanner_status)).setText(null);
+        }
+
+        if (findViewById(R.id.scanner_bt_camera) != null) {
+            findViewById(R.id.scanner_bt_camera).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    initCamera();
+                }
+            });
+        }
+
+        // init laser scanner search. If none found this will go on to the camera.
+        initLaserScannerSearch();
+    }
+
+    protected void initLaserScannerSearch() {
+        LaserScanner.getLaserScanner(this, this, ScannerSearchOptions.defaultOptions().getAllAvailableScanners());
     }
 
     @Override
@@ -185,18 +207,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                     df.setDialogInterface(new DialogInterface() {
                         @Override
                         public void cancel() {
-                            if(ScannerCompatActivity.this.scanners  != null)
-                            {
+                            if (ScannerCompatActivity.this.scanners != null) {
                                 for (Scanner scanner : ScannerCompatActivity.this.scanners) {
                                     scanner.resume();
                                 }
                             }
 
                         }
+
                         @Override
                         public void dismiss() {
-                            if(ScannerCompatActivity.this.scanners  != null)
-                            {
+                            if (ScannerCompatActivity.this.scanners != null) {
                                 for (Scanner scanner : ScannerCompatActivity.this.scanners) {
                                     scanner.resume();
                                 }
@@ -229,19 +250,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     @Override
     public void noScannerAvailable() {
-        if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) {
-            // We may have a BT keyboard connected
-            Log.i(LOG_TAG, "No real scanner available but BT keyboard connected");
-            onStatusChanged(getResources().getString(R.string.scanner_using_bt_keyboard));
-        } else {
-            if (!laserModeOnly) {
-                // In that case try to connect to a camera.
-                initCamera();
-                Log.i(LOG_TAG, "All scanner SDKs have failed");
-                onStatusChanged(getResources().getString(R.string.activity_scan_no_compatible_sdk));
-                checkInitializationEnd();
-            }
-        }
+        checkInitializationEnd();
     }
 
     private void checkInitializationEnd() {
@@ -255,6 +264,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                     } else {
                         if (!laserModeOnly) {
                             // In that case try to connect to a camera.
+                            onStatusChanged(getResources().getString(R.string.activity_scan_no_compatible_sdk));
                             initCamera();
                         }
                     }
@@ -291,6 +301,40 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         this.scanners.clear();
         this.intializingScannersCount.set(1);
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            actuallyOpenCamera();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_ID_CAMERA);
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_ID_CAMERA: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    goToCamera = true; // in case the activity was paused by the permission request dialog
+                    actuallyOpenCamera(); // for other cases. May result in double camera init, not an issue as it only happens the first time
+                } else {
+                    Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+            case PERMISSION_REQUEST_ID_BT_EMDK: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    initLaserScannerSearch();
+                } else {
+                    Toast.makeText(this, R.string.scanner_status_disabled, Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+        }
+    }
+
+    private void actuallyOpenCamera() {
+        // The view needs permissions BEFORE initializing. And it initializes as soon as the layout is set.
         setContentView(layoutIdCamera);
 
         ZbarScanView zbarView = (ZbarScanView) findViewById(zbarViewId);

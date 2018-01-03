@@ -64,7 +64,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     boolean allowTargetDrag = true;
     private byte[] lastPreviewData;
 
-    private Resolution resolution = new Resolution(getContext());
+    protected Resolution resolution = new Resolution(getContext());
     private int previewBufferSize;
 
     private FrameAnalyserManager frameAnalyser;
@@ -115,6 +115,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         }
     }
 
+    protected boolean isUsingPreviewForPhoto() {
+        return this.resolution.usePreviewForPhoto;
+    }
 
     /**
      * After this call the camera is selected, with correct parameters and open, ready to be plugged on a preview pane.
@@ -505,11 +508,11 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     /**
      * Sets up the central targeting rectangle. Must be called after surface init.
      */
-    private void computeCropRectangle() {
+    protected void computeCropRectangle() {
         // First, top may be a user preference
         Activity a = ViewHelpersPreferences.getActivity(getContext());
         int top = -1;
-        if (a != null) {
+        if (a != null && allowTargetDrag) {
             try {
                 SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
                 top = p.getInt("y" + getCameraDisplayOrientation(), 0);
@@ -562,42 +565,44 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         Log.i(TAG, "Targeting overlay added");
         this.addView(targetView, prms);
 
-        targetView.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        dragStartY = event.getY();
-                        dragCropTop = cropRect.top;
-                        dragCropBottom = cropRect.bottom;
-                        return true;
-                    case MotionEvent.ACTION_MOVE:
-                        final float dy = event.getY() - dragStartY;
-                        float newTop = dragCropTop + (int) dy;
-                        float newBottom = dragCropBottom + (int) dy;
-                        if (newTop > 0 && newBottom < ZbarScanView.this.camView.getHeight()) {
-                            cropRect.top = (int) newTop;
-                            cropRect.bottom = (int) newBottom;
+        if (allowTargetDrag) {
+            targetView.setOnTouchListener(new OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            dragStartY = event.getY();
+                            dragCropTop = cropRect.top;
+                            dragCropBottom = cropRect.bottom;
+                            return true;
+                        case MotionEvent.ACTION_MOVE:
+                            final float dy = event.getY() - dragStartY;
+                            float newTop = dragCropTop + (int) dy;
+                            float newBottom = dragCropBottom + (int) dy;
+                            if (newTop > 0 && newBottom < ZbarScanView.this.camView.getHeight()) {
+                                cropRect.top = (int) newTop;
+                                cropRect.bottom = (int) newBottom;
 
-                            dragCropTop = newTop;
-                            dragCropBottom = newBottom;
+                                dragCropTop = newTop;
+                                dragCropBottom = newBottom;
 
-                            prms.topMargin = cropRect.top;
-                            targetView.setLayoutParams(prms);
-                        }
+                                prms.topMargin = cropRect.top;
+                                targetView.setLayoutParams(prms);
+                            }
 
-                        return true;
+                            return true;
 
-                    case MotionEvent.ACTION_UP:
-                        dragStartY = 0;
-                        v.performClick();
-                        ViewHelpersPreferences.storePreferences(getContext(), "y" + getCameraDisplayOrientation(), cropRect.top);
-                        break;
+                        case MotionEvent.ACTION_UP:
+                            dragStartY = 0;
+                            v.performClick();
+                            ViewHelpersPreferences.storePreferences(getContext(), "y" + getCameraDisplayOrientation(), cropRect.top);
+                            break;
+                    }
+
+                    return false;
                 }
-
-                return false;
-            }
-        });
+            });
+        }
     }
 
     public void setAllowTargetDrag(boolean allowTargetDrag) {

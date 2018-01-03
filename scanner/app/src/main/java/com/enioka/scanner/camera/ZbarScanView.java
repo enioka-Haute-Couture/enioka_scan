@@ -1,10 +1,12 @@
 package com.enioka.scanner.camera;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
@@ -12,6 +14,7 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -122,6 +125,10 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             return;
         }
 
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            throw new RuntimeException("missing use camera permission");
+        }
+
         try {
             Log.i(TAG, "Camera is being opened. Device is " + android.os.Build.MODEL);
             this.cam = Camera.open();
@@ -155,11 +162,12 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         Camera.Parameters prms = this.cam.getParameters();
 
         // Scene mode. Try to select a mode which will ensure a high FPS rate.
+        // Currently disabled, as on many devices, this disables autofocus without any way to detect it.
         List<String> supportedSceneModes = prms.getSupportedSceneModes();
         if (supportedSceneModes != null) {
             Log.d(TAG, "Supported scene modes: " + supportedSceneModes.toString());
         }
-        if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_BARCODE)) {
+       /* if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_BARCODE)) {
             Log.i(TAG, "supportedSceneModes - scene mode barcode supported and selected");
             prms.setSceneMode(Camera.Parameters.SCENE_MODE_BARCODE);
         } else if (supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_ACTION)) {
@@ -172,6 +180,10 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             Log.i(TAG, "supportedSceneModes - scene mode SCENE_MODE_STEADYPHOTO supported and selected");
             prms.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
         }
+
+        // Immediately set parameters, as the scene mode changes many parameters.
+        setCameraParameters(prms);
+        prms = this.cam.getParameters();*/
 
         // Focus & Metering areas
         setAreas(prms);
@@ -309,8 +321,6 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                 resolution.usePreviewForPhoto = true;
                 Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
                 break;
-            case "TC25":
-                prms.setSceneMode(Camera.Parameters.SCENE_MODE_AUTO); // Disable - bug - AF is disabled if scene mode activated.
             default:
                 Log.i(TAG, "Using preview resolution " + resolution.currentPreviewResolution.x + "*" +
                         resolution.currentPreviewResolution.y + ". Ratio is " +

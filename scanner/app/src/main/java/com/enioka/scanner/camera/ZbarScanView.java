@@ -324,7 +324,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             default:
                 Log.i(TAG, "Using preview resolution " + resolution.currentPreviewResolution.x + "*" +
                         resolution.currentPreviewResolution.y + ". Ratio is " +
-                        ((float) resolution.currentPreviewResolution.x / (float) resolution.currentPreviewResolution.x));
+                        ((float) resolution.currentPreviewResolution.x / ((float) resolution.currentPreviewResolution.x)));
                 resolution.usePreviewForPhoto = resolution.currentPreviewResolution.y >= 1080;
         }
 
@@ -728,9 +728,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     }
 
     public static void beepOk() {
-       /* ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+        ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
         tg.startTone(ToneGenerator.TONE_PROP_PROMPT, 100);
-        tg.release();*/
+        tg.release();
     }
 
     public static void beepWaiting() {

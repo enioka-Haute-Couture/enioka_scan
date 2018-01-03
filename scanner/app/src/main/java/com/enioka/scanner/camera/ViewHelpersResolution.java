@@ -73,7 +73,7 @@ class ViewHelpersResolution {
         // Select the best resolution.
         // First try with only the preferred ratio.
         for (Point resolution : bag.allowedPreviewResolutions) {
-            if (previewResolution == null || (resolution.x > previewResolution.x) && Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.1f) {
+            if (previewResolution == null || (resolution.x > previewResolution.x) && Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.3f) {
                 previewResolution = resolution;
                 goodMatchFound = true;
             }
@@ -139,7 +139,7 @@ class ViewHelpersResolution {
 
         for (Point resolution : bag.supportedPhotoResolutions) {
             Log.d(TAG, "\tsupports picture resolution " + resolution.x + "*" + resolution.y + " - " + ((float) resolution.x / (float) resolution.y));
-            if (Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.1f && resolution.x > pictureSize.x && resolution.x <= 2560 && resolution.y <= 1536) {
+            if (Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.2f && resolution.x > pictureSize.x && resolution.x <= 2560 && resolution.y <= 1536) {
                 pictureSize = resolution;
                 foundWithGoodRatio = true;
             }

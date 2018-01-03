@@ -43,6 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ScannerCompatActivity extends AppCompatActivity implements Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerConnectionHandler, Scanner.ScannerInitCallback {
     protected final static String LOG_TAG = "ScannerActivity";
     protected final static int PERMISSION_REQUEST_ID_CAMERA = 1790;
+    protected final static int PERMISSION_REQUEST_ID_BT_EMDK = 1791;
 
     /**
      * Don't start camera mode, even if no laser are available
@@ -53,6 +54,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
      * If set to false, ScannerCompatActivity will behave like an standard AppCompatActivity
      */
     protected boolean enableScan = true;
+
+    /**
+     * Helper to go to camera after permission change.
+     */
+    protected boolean goToCamera = false;
 
     /**
      * Scanner instance ; if none is set, activity will instantiate one
@@ -96,10 +102,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         //Common.askForPermission(this); // NO: this actually pauses then resumes the activity.
     }
 
-    public void setAutocompletion(List autocompletion, int threshold) {
+    @SuppressWarnings("unused")
+    public void setAutocompletion(List<String> autocompletion, int threshold) {
         this.autocompletion = autocompletion;
         this.threshold = threshold;
-
     }
 
     @Override
@@ -107,6 +113,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         super.onResume();
 
         if (!enableScan) {
+            return;
+        }
+
+        if (goToCamera) {
+            initCamera();
             return;
         }
 
@@ -136,6 +147,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
         }
 
         // init laser scanner search. If none found this will go on to the camera.
+        initLaserScannerSearch();
+    }
+
+    protected void initLaserScannerSearch() {
         LaserScanner.getLaserScanner(this, this, ScannerSearchOptions.defaultOptions().getAllAvailableScanners());
     }
 
@@ -300,10 +315,20 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
             case PERMISSION_REQUEST_ID_CAMERA: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    actuallyOpenCamera();
+                    goToCamera = true; // in case the activity was paused by the permission request dialog
+                    actuallyOpenCamera(); // for other cases. May result in double camera init, not an issue as it only happens the first time
                 } else {
                     Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();
                 }
+                break;
+            }
+            case PERMISSION_REQUEST_ID_BT_EMDK: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    initLaserScannerSearch();
+                } else {
+                    Toast.makeText(this, R.string.scanner_status_disabled, Toast.LENGTH_SHORT).show();
+                }
+                break;
             }
         }
     }

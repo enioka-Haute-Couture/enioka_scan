@@ -23,7 +23,7 @@
 
     <!-- Helper manual scan fragment -->
     <string name="fragment_scan_manual_title">Manual input</string>
-    <string name="fragment_scan_manual_invite">Please enter the barcode value</string>
+    <string name="fragment_scan_manual_invite">Please enter the barcode value, then select one item among the results</string>
     <string name="fragment_scan_manual_hint">0000000000</string>
     <string name="fragment_scan_manual_ok">Send</string>
 </resources>

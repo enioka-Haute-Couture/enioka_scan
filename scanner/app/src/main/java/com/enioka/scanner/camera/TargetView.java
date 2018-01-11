@@ -15,11 +15,11 @@ import android.view.View;
  * The "target visor" view to be drawn on top of the scanner view.
  */
 public class TargetView extends View {
-    private static final String TAG = "Camera2Scanner";
+    protected static final String TAG = "BARCODE";
 
     protected Paint targetRectPaint, guideLinePaint;
-    private Rect wholeView = new Rect();
-    private Rect targetRect = new Rect();
+    protected Rect wholeView = new Rect();
+    protected Rect targetRect = new Rect();
 
     public TargetView(Context context) {
         super(context);
@@ -31,7 +31,7 @@ public class TargetView extends View {
         init();
     }
 
-    private void init() {
+    protected void init() {
         targetRectPaint = new Paint();
         targetRectPaint.setColor(Color.RED);
         targetRectPaint.setStrokeWidth(5);

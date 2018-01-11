@@ -48,7 +48,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     protected static final float MM_INSIDE_INCH = 25.4f;
 
 
-    private float ydpi;
+    protected float ydpi;
     float dragStartY, dragCropTop, dragCropBottom;
 
     private Camera cam;
@@ -556,7 +556,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
      * Adds the targeting view to layout. Must be called after computeCropRectangle was called. Separate from computeCropRectangle
      * because: we want to add this view last, in order to put it on top. (and we need to calculate the crop rectangle early).
      */
-    private void addTargetView() {
+    protected void addTargetView() {
         final View targetView = new TargetView(this.getContext());
         targetView.setId(R.id.barcode_scanner_camera_view);
         final FrameLayout.LayoutParams prms = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, (int) (RECT_HEIGHT / MM_INSIDE_INCH * ydpi));

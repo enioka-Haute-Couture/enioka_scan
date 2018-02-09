@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -422,6 +423,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
         boolean isOn = scanner.isIlluminationOn();
         int iconId = isOn ? R.drawable.icn_flash_off_on : R.drawable.icn_flash_off;
+
+        final int newColor = getResources().getColor(R.color.flashButtonColor);
+        flashlight.setColorFilter(newColor, PorterDuff.Mode.SRC_ATOP);
         flashlight.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), iconId));
     }
 }

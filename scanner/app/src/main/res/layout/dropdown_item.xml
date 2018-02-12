@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -8,17 +8,26 @@
         android:id="@+id/textViewItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"
         android:layout_marginLeft="2dp"
         android:layout_marginStart="2dp"
         android:layout_marginTop="3dp"
-        android:layout_marginBottom="3dp"
         android:ellipsize="none"
         android:text="90000000055"
         android:textSize="13dp" />
 
+    <ImageView
+        android:id="@+id/doneImageView"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_done_black_24dp"/>
+
     <View
         android:layout_width="fill_parent"
         android:layout_height="1dp"
+        android:layout_below="@id/textViewItem"
         android:background="@android:color/darker_gray" />
 
-</LinearLayout>
+</RelativeLayout>

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -83,7 +84,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
      */
     protected int flashlightViewId = R.id.scanner_flashlight;
 
-    protected List<String> autocompletion = new ArrayList<>();
+    protected List<ManualInputItem> items = new ArrayList<>();
     protected int threshold = 5;
 
 
@@ -104,7 +105,15 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     @SuppressWarnings("unused")
     public void setAutocompletion(List<String> autocompletion, int threshold) {
-        this.autocompletion = autocompletion;
+        for(String item : autocompletion) {
+            this.items.add(new ManualInputItem(item, false));
+        }
+        this.threshold = threshold;
+    }
+
+    @SuppressWarnings("unused")
+    public void setAutocompletionItems(List<ManualInputItem> items, int threshold) {
+        this.items = items;
         this.threshold = threshold;
     }
 
@@ -203,7 +212,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                         scanner.pause();
                     }
                     df = ManualInputFragment.newInstance();
-                    df.setAutocompletion(autocompletion, threshold);
+                    df.setAutocompletionItems(items,  threshold);
                     df.setDialogInterface(new DialogInterface() {
                         @Override
                         public void cancel() {
@@ -422,6 +431,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
         boolean isOn = scanner.isIlluminationOn();
         int iconId = isOn ? R.drawable.icn_flash_off_on : R.drawable.icn_flash_off;
+
+        final int newColor = getResources().getColor(R.color.flashButtonColor);
+        flashlight.setColorFilter(newColor, PorterDuff.Mode.SRC_ATOP);
         flashlight.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), iconId));
     }
 }

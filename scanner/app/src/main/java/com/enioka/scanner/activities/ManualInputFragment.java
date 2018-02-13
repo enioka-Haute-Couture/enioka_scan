@@ -4,18 +4,19 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.TextView;
 
 import com.enioka.scanner.R;
@@ -35,12 +36,19 @@ public class ManualInputFragment extends DialogFragment {
     private Scanner.ScannerDataCallback cb;
     private Boolean closeOnValidation;
     private int inviteTextId;
-    protected List<String> autocompletion = new ArrayList<>();
+    protected List<ManualInputItem> items = new ArrayList<>();
     protected int threshold = 5;
     protected DialogInterface di;
 
     public void setAutocompletion(List<String> autocompletion, int threshold) {
-        this.autocompletion = autocompletion;
+        for(String item : autocompletion) {
+            this.items.add(new ManualInputItem(item, false));
+        }
+        this.threshold = threshold;
+    }
+
+    public void setAutocompletionItems(List<ManualInputItem> items, int threshold) {
+        this.items = items;
         this.threshold = threshold;
     }
 
@@ -84,17 +92,14 @@ public class ManualInputFragment extends DialogFragment {
         builder.setView(view);
 
 
-
-
         final Dialog res = builder.create();
 
-        String[] autocompletionArray = new String[autocompletion.size()];
-        autocompletionArray = autocompletion.toArray(autocompletionArray);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), R.layout.dropdown_item, R.id.textViewItem, autocompletionArray);
+        ArrayAdapter<ManualInputItem> adapter = new ManualInputAdapter(this.getContext(), R.id.textViewItem, items);
+
         AutoCompleteTextView textView = (AutoCompleteTextView) view.findViewById(R.id.scanner_manual_input);
         textView.setThreshold(this.threshold);
         textView.setAdapter(adapter);
-        Log.v("ManualInput", "Set " + autocompletionArray.length + " autocompletion elements");
+        Log.v("ManualInput", "Set " + items.size() + " autocompletion elements");
 
         res.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         view.findViewById(R.id.scanner_manual_bt_ok).setOnClickListener(new View.OnClickListener() {
@@ -150,8 +155,7 @@ public class ManualInputFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        if(di!=null)
-        {
+        if (di != null) {
             di.dismiss();
         }
     }
@@ -159,7 +163,7 @@ public class ManualInputFragment extends DialogFragment {
     @Override
     public void onCancel(DialogInterface dialog) {
         super.onCancel(dialog);
-        if(di!=null){
+        if (di != null) {
             di.cancel();
         }
     }
@@ -168,5 +172,86 @@ public class ManualInputFragment extends DialogFragment {
         this.di = di;
     }
 
+    /**
+     * Custom array adapter for AutoCompleteTextView
+     * Allows to declare some items as "done" : green text and tick icon on the left
+     */
+    public class ManualInputAdapter extends ArrayAdapter<ManualInputItem> {
+        private LayoutInflater layoutInflater;
+        List<ManualInputItem> items;
+
+        private Filter filter = new Filter() {
+            @Override
+            public String convertResultToString(Object resultValue) {
+                return ((ManualInputItem) resultValue).getText();
+            }
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results = new FilterResults();
+
+                if (constraint != null) {
+                    ArrayList<ManualInputItem> suggestions = new ArrayList<>();
+                    for (ManualInputItem item : items) {
+                        if (item.getText().toLowerCase().contains(constraint.toString().toLowerCase())) {
+                            suggestions.add(item);
+                        }
+                    }
+
+                    results.values = suggestions;
+                    results.count = suggestions.size();
+                }
+
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                clear();
+                if (results != null && results.count > 0) {
+                    // we have filtered results
+                    addAll((ArrayList<ManualInputItem>) results.values);
+                }
+                notifyDataSetChanged();
+            }
+        };
+
+        ManualInputAdapter(Context context, int textViewResourceId, List<ManualInputItem> items) {
+            super(context, textViewResourceId, items);
+            // copy all the customers into a master list
+            this.items = new ArrayList<ManualInputItem>(items.size());
+            this.items.addAll(items);
+            layoutInflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = convertView;
+
+            if (view == null) {
+                view = layoutInflater.inflate(R.layout.dropdown_item, null);
+            }
+
+            ManualInputItem item = getItem(position);
+
+            TextView textView = (TextView) view.findViewById(R.id.textViewItem);
+            textView.setText(item.getText());
+
+            if(item.isDone()) {
+                textView.setTextColor(getResources().getColor(R.color.doneItemColor));
+                view.findViewById(R.id.doneImageView).setVisibility(View.VISIBLE);
+            } else {
+                textView.setTextColor(getResources().getColor(R.color.defaultItemColor));
+                view.findViewById(R.id.doneImageView).setVisibility(View.INVISIBLE);
+            }
+
+            return view;
+        }
+
+        @Override
+        public Filter getFilter() {
+            return filter;
+        }
+    }
 
 }

@@ -41,20 +41,14 @@ public class ManualInputFragment extends DialogFragment {
     protected DialogInterface di;
 
     public void setAutocompletion(List<String> autocompletion, int threshold) {
-        this.setAutocompletion(autocompletion, null, threshold);
+        for(String item : autocompletion) {
+            this.items.add(new ManualInputItem(item, false));
+        }
+        this.threshold = threshold;
     }
 
-    public void setAutocompletion(List<String> autocompletion, List<Boolean> autocompletionDoneItems, int threshold) {
-        boolean useDoneItems = autocompletionDoneItems != null && autocompletionDoneItems.size() == autocompletion.size();
-
-        // Build array of items
-        for (int i = 0; i < autocompletion.size(); i++) {
-            if (useDoneItems) {
-                items.add(new ManualInputItem(autocompletion.get(i), autocompletionDoneItems.get(i)));
-            } else {
-                items.add(new ManualInputItem(autocompletion.get(i), false));
-            }
-        }
+    public void setAutocompletionItems(List<ManualInputItem> items, int threshold) {
+        this.items = items;
         this.threshold = threshold;
     }
 
@@ -176,28 +170,6 @@ public class ManualInputFragment extends DialogFragment {
 
     public void setDialogInterface(DialogInterface di) {
         this.di = di;
-    }
-
-
-    /**
-     *
-     */
-    public class ManualInputItem {
-        private String text;
-        private boolean done;
-
-        public ManualInputItem(String text, boolean done) {
-            this.text = text;
-            this.done = done;
-        }
-
-        public boolean isDone() {
-            return this.done;
-        }
-
-        public String getText() {
-            return this.text;
-        }
     }
 
     /**

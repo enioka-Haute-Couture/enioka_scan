@@ -84,8 +84,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
      */
     protected int flashlightViewId = R.id.scanner_flashlight;
 
-    protected List<String> autocompletion = new ArrayList<>();
-    protected List<Boolean> autocompletionDoneItems = null;
+    protected List<ManualInputItem> items = new ArrayList<>();
     protected int threshold = 5;
 
 
@@ -106,14 +105,15 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     @SuppressWarnings("unused")
     public void setAutocompletion(List<String> autocompletion, int threshold) {
-        this.autocompletion = autocompletion;
+        for(String item : autocompletion) {
+            this.items.add(new ManualInputItem(item, false));
+        }
         this.threshold = threshold;
     }
 
     @SuppressWarnings("unused")
-    public void setAutocompletion(List<String> autocompletion, List<Boolean> autocompletionDoneItems, int threshold) {
-        this.autocompletion = autocompletion;
-        this.autocompletionDoneItems = autocompletionDoneItems;
+    public void setAutocompletionItems(List<ManualInputItem> items, int threshold) {
+        this.items = items;
         this.threshold = threshold;
     }
 
@@ -212,7 +212,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                         scanner.pause();
                     }
                     df = ManualInputFragment.newInstance();
-                    df.setAutocompletion(autocompletion, autocompletionDoneItems,  threshold);
+                    df.setAutocompletionItems(items,  threshold);
                     df.setDialogInterface(new DialogInterface() {
                         @Override
                         public void cancel() {

@@ -342,6 +342,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
             resolution.supportedPhotoResolutions.add(new Point(size.width, size.height));
         }
         ViewHelpersResolution.setPictureResolution(resolution);
+        prms.setPictureSize(resolution.currentPhotoResolution.x, resolution.currentPhotoResolution.y);
     }
 
     private void setAreas(Camera.Parameters prms) {

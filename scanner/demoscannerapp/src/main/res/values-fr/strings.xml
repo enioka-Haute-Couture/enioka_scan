@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Test scanner</string>
+
+    <string name="packing_scan_to_read">Bordereau %1s</string>
+    <string name="packing_code_not_read">Code du bordereau non trouvé dans le scan</string>
+    <string name="packing_scan_KO">Le bordereau scanné n\'est pas celui attendu, veuillez réessayer"</string>
+    <string name="packing_instruction_initial">Cadrez le bordereau puis appuyez sur le bouton de scan</string>
+    <string name="packing_instruction_scanning">Scan du bordereau en cours</string>
+    <string name="packing_instruction_confirm">Bordereau scanné avec succès, veuillez indiquer si la photo vous convient</string>
+    <string name="packing_instruction_analysis">Bordereau en cours d\'analyse, veuillez patienter...</string>
+</resources>

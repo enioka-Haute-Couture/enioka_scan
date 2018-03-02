@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">DemoScannerApp</string>
+    <string name="app_name">Scanner test</string>
+    <string name="packing_scan_to_read">Slip %1s</string>
+    <string name="packing_code_not_read">Slip code nout found inside scan</string>
+    <string name="packing_scan_KO">Scanned slip is not the expected one, please retry</string>
+    <string name="packing_instruction_initial">Target the slip and press the scan button</string>
+    <string name="packing_instruction_scanning">Slip scan ongoing</string>
+    <string name="packing_instruction_confirm">Slip sucessfully scanned, please choose to keep the scan or retry</string>
+    <string name="packing_instruction_analysis">Slip scan analysis ongoing, please wait...</string>
+
+
 </resources>

@@ -6,9 +6,11 @@ import android.graphics.Point;
 import android.util.Log;
 import android.view.SurfaceView;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,7 +35,7 @@ class ViewHelpersResolution {
         if (preferredRatio < 1) {
             preferredRatio = 1 / preferredRatio;
         }
-        Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio);
+        Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio + ". (view is " + camView.getMeasuredHeight() + "*" + camView.getMeasuredWidth() + ")");
         boolean goodMatchFound = false;
 
         Set<String> forbiddenRezs = ViewHelpersPreferences.getPreferencesStringSet(context, "rezs_too_high");
@@ -42,24 +44,32 @@ class ViewHelpersResolution {
         }
 
         // First simply list resolutions (debug display & sorted res list creation)
+        List<Point> allRatioPreviewResolutions = new ArrayList<>();
         for (Point resolution : bag.supportedPreviewResolutions) {
             Log.d(TAG, "\tsupports preview resolution " + resolution.x + "*" + resolution.y + " - " + ((float) resolution.x / (float) resolution.y));
 
-            if (Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.3f) {
-                if (forbiddenRezs.contains(resolution.x + "*" + resolution.y)) {
-                    Log.d(TAG, "\t\tResolution is forbidden - FPS too low");
-                    continue;
-                }
-                int previewBufferSize = (int) (resolution.x * resolution.y * bag.bytesPerPixel);
-                if (previewBufferSize * Runtime.getRuntime().availableProcessors() * 2 / 1024 / 1024 > (maxMb * 0.75)) {
-                    Log.d(TAG, "\t\tResolution is forbidden - too much memory would be used");
-                    continue;
-                }
+            if (forbiddenRezs.contains(resolution.x + "*" + resolution.y)) {
+                Log.d(TAG, "\t\tResolution is forbidden - FPS too low");
+                continue;
+            }
+            int previewBufferSize = (int) (resolution.x * resolution.y * bag.bytesPerPixel);
+            if (previewBufferSize * Runtime.getRuntime().availableProcessors() * 2 / 1024 / 1024 > (maxMb * 0.75)) {
+                Log.d(TAG, "\t\tResolution is forbidden - too much memory would be used");
+                continue;
+            }
 
+            allRatioPreviewResolutions.add(resolution);
+            if (Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.3f) {
                 bag.allowedPreviewResolutions.add(resolution);
             }
         }
         Collections.sort(bag.allowedPreviewResolutions, new Comparator<Point>() {
+            @Override
+            public int compare(Point o1, Point o2) {
+                return o1.x < o2.x ? -1 : o1.x == o2.x ? 0 : 1;
+            }
+        });
+        Collections.sort(allRatioPreviewResolutions, new Comparator<Point>() {
             @Override
             public int compare(Point o1, Point o2) {
                 return o1.x < o2.x ? -1 : o1.x == o2.x ? 0 : 1;
@@ -73,7 +83,7 @@ class ViewHelpersResolution {
         // Select the best resolution.
         // First try with only the preferred ratio.
         for (Point resolution : bag.allowedPreviewResolutions) {
-            if (previewResolution == null || (resolution.x > previewResolution.x) && Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.3f) {
+            if (previewResolution == null || (resolution.x > previewResolution.x)) {
                 previewResolution = resolution;
                 goodMatchFound = true;
             }
@@ -81,8 +91,9 @@ class ViewHelpersResolution {
 
         // If not found, try with any ratio.
         if (!goodMatchFound) {
+            bag.allowedPreviewResolutions = allRatioPreviewResolutions;
             for (Point resolution : bag.allowedPreviewResolutions) {
-                if (resolution.x <= 1980 && resolution.y <= 1080 && (previewResolution == null || (resolution.x > previewResolution.x))) {
+                if (previewResolution == null || (resolution.x <= 1980 && resolution.y <= 1080 && resolution.x > previewResolution.x)) {
                     previewResolution = resolution;
                 }
             }

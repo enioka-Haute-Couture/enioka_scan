@@ -101,7 +101,7 @@ public class ManualInputFragment extends DialogFragment {
         textView.setAdapter(adapter);
         Log.v("ManualInput", "Set " + items.size() + " autocompletion elements");
 
-        res.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        res.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         view.findViewById(R.id.scanner_manual_bt_ok).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -35,13 +35,13 @@ public class BtZebraProvider implements ScannerProvider {
                 // The stupid API actually lists all BT devices. Only Zebra devices should have a model.
                 continue;
             }*/
-            cb.onProvided(PROVIDER_NAME, "" + s.getScannerID(), new BtZebraScanner(sdkHandler));
+            cb.onScannerCreated(PROVIDER_NAME, "" + s.getScannerID(), new BtZebraScanner(sdkHandler));
             scannerFound = true;
         }
 
         if (!scannerFound) {
             Log.i(LOG_TAG, "Not Zebra BT devices connected to this device");
-            cb.onProvided(PROVIDER_NAME, null, null);
+            cb.onProviderUnavailable(PROVIDER_NAME); // Costly search. We do not want it to do it on each scanner search.
             sdkHandler.dcssdkClose(null);
         }
     }

@@ -24,11 +24,11 @@ public class EmdkZebraProvider implements ScannerProvider {
 
             // Note the use of reflection: otherwise, the class would be loaded even on platform without the Symbol lib available!
             // It would result in ClassNotFoundException at startup.
-            cb.onProvided(PROVIDER_NAME, "r", Class.forName("com.enioka.scanner.sdk.zebra.EmdkZebraScanner").asSubclass(Scanner.class).newInstance());
+            cb.onScannerCreated(PROVIDER_NAME, "r", Class.forName("com.enioka.scanner.sdk.zebra.EmdkZebraScanner").asSubclass(Scanner.class).newInstance());
         } catch (ClassNotFoundException e) {
             // Symbol lib not found => this SDK is not supported on this platform.
             Log.i(LOG_TAG, "Not a Zebra EMDK device");
-            cb.onProvided(PROVIDER_NAME, null, null);
+            cb.onProviderUnavailable(PROVIDER_NAME);
         } catch (Exception e) {
             Log.e(LOG_TAG, "Could not create a Scanner instance - the implementation may lack a default constructor.", e);
             throw new RuntimeException(e);

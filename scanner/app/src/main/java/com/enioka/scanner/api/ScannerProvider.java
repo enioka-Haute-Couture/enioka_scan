@@ -21,13 +21,13 @@ public interface ScannerProvider {
 
     interface ProviderCallback {
         /**
-         * Called when the provider has finished creating a scanner, or has determined it cannot create a scanner.
+         * Called when the provider has finished creating a scanner
          *
          * @param providerKey a unique key identifying the provider.
-         * @param scannerKey  a unique key identifying the connected scanner. Never empty. Only null if s is null.
-         * @param s           the new scanner, or null if the provider is not compatible with the device or if no scanner found.
+         * @param scannerKey  a unique key identifying the connected scanner. Never empty not null.
+         * @param s           the new scanner. Cannot be null.
          */
-        void onProvided(String providerKey, String scannerKey, Scanner s);
+        void onScannerCreated(String providerKey, String scannerKey, Scanner s);
 
         /**
          * Send a localized status message to the end user.
@@ -37,5 +37,12 @@ public interface ScannerProvider {
          * @param message     the message (localized)
          */
         void connectionProgress(String providerKey, String scannerKey, String message);
+
+        /**
+         * Called when the provider has dtermined it cannot run (is not available) on this device and should not be revived.
+         *
+         * @param providerKey a unique key identifying the provider.
+         */
+        void onProviderUnavailable(String providerKey);
     }
 }

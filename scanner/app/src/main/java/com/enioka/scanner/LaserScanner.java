@@ -29,7 +29,7 @@ public final class LaserScanner {
     /**
      * The list of available scanner providers. (manual for now => no useless complicated plugin system)
      */
-    private static final List<ScannerProvider> laserProviders = new ArrayList<>(Arrays.asList(new EmdkZebraProvider(), new HHTProvider(), new AIDCProvider(), new GenericHidProvider()));
+    private static final Set<ScannerProvider> laserProviders = new HashSet<>(Arrays.asList(new EmdkZebraProvider(), new HHTProvider(), new AIDCProvider(), new GenericHidProvider()));
     private static Boolean scannerFound = false;
 
     /**
@@ -60,39 +60,30 @@ public final class LaserScanner {
 
         // Now create a scanner. (iterate on a copy to avoid concurrent list modifications)
         scannerFound = false;
-        final Set<String> compatibleProviders = new HashSet<>();
+        final Set<String> providersHavingAnswered = new HashSet<>();
         for (final ScannerProvider sp : new ArrayList<>(laserProviders)) {
             sp.getScanner(ctx, new ScannerProvider.ProviderCallback() {
                 @Override
-                public void onProvided(String providerKey, String scannerKey, Scanner s) {
-                    if (s != null) {
-                        Log.i(LOG_TAG, providerKey + " scanner found. Id " + scannerKey);
-                        compatibleProviders.add(providerKey);
-                        handler.scannerConnectionProgress(providerKey, scannerKey, "scanner found.");
+                public void onScannerCreated(String providerKey, String scannerKey, Scanner s) {
+                    if (s == null) {
+                        Log.e(LOG_TAG, "Provider  " + providerKey + "has returned a null scanner!");
+                        return;
+                    }
 
-                        synchronized (LaserScanner.class) {
-                            if (!scannerFound || !options.returnOnlyFirst) {
-                                handler.scannerCreated(providerKey, scannerKey, s);
-                                scannerFound = true;
-                            }
-                        }
-                    } else {
-                        Log.i(LOG_TAG, "Scanner provider " + providerKey + " reports there is no available scanner compatible with it and will be disabled");
-                        handler.scannerConnectionProgress(providerKey, null, "No " + providerKey + " scanners available.");
+                    Log.i(LOG_TAG, providerKey + " scanner found. Id " + scannerKey);
+                    handler.scannerConnectionProgress(providerKey, scannerKey, "scanner found.");
 
-                        // Remove the provider for ever - that way future searches are faster.
-                        synchronized (LaserScanner.laserProviders) {
-                            LaserScanner.laserProviders.remove(sp);
-                            if (LaserScanner.laserProviders.isEmpty()) {
-                                Log.i(LOG_TAG, "There are no laser scanners available at all");
-                                handler.noScannerAvailable();
-                            }
+                    synchronized (LaserScanner.class) {
+                        if (!scannerFound || !options.returnOnlyFirst) {
+                            handler.scannerCreated(providerKey, scannerKey, s);
+                            scannerFound = true;
                         }
                     }
 
                     // The end?
+                    providersHavingAnswered.add(providerKey);
                     synchronized (LaserScanner.class) {
-                        if (compatibleProviders.size() == LaserScanner.laserProviders.size()) {
+                        if (providersHavingAnswered.size() == LaserScanner.laserProviders.size()) {
                             handler.endOfScannerSearch();
                         }
                     }
@@ -102,21 +93,30 @@ public final class LaserScanner {
                 public void connectionProgress(String providerKey, String scannerKey, String message) {
                     handler.scannerConnectionProgress(providerKey, scannerKey, message);
                 }
-            }, options);
-        }
-    }
 
-    /**
-     * Optional. Call this to only load the specified provider on next search.
-     *
-     * @param providerKeys the provider keys (from {@link Scanner#getProviderKey()})
-     */
-    public static void actuallyUsedProviders(List<String> providerKeys) {
-        synchronized (LaserScanner.laserProviders) {
-            for (ScannerProvider provider : new ArrayList<>(laserProviders))
-                if (!providerKeys.contains(provider.getKey())) {
-                    LaserScanner.laserProviders.remove(provider);
+                @Override
+                public void onProviderUnavailable(String providerKey) {
+                    Log.i(LOG_TAG, "Scanner provider " + providerKey + " reports it is not compatible with the device and will be disabled");
+                    handler.scannerConnectionProgress(providerKey, null, "No " + providerKey + " scanners available.");
+
+                    // Remove the provider for ever - that way future searches are faster.
+                    synchronized (LaserScanner.laserProviders) {
+                        LaserScanner.laserProviders.remove(sp);
+                        if (LaserScanner.laserProviders.isEmpty()) {
+                            Log.i(LOG_TAG, "There are no laser scanners available at all");
+                            handler.noScannerAvailable();
+                        }
+                    }
+
+                    // The end?
+                    providersHavingAnswered.add(providerKey);
+                    synchronized (LaserScanner.class) {
+                        if (providersHavingAnswered.size() == LaserScanner.laserProviders.size()) {
+                            handler.endOfScannerSearch();
+                        }
+                    }
                 }
+            }, options);
         }
     }
 }

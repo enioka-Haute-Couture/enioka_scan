@@ -23,7 +23,7 @@ public class AIDCProvider implements ScannerProvider {
         // Basic check.
         if (!Common.checkIntentListener("com.honeywell.decode.DecodeService", ctx)) {
             Log.i(LOG_TAG, "This is not an Honeywell/Intermec device");
-            cb.onProvided(PROVIDER_NAME, null, null);
+            cb.onProviderUnavailable(PROVIDER_NAME);
             return;
         }
 
@@ -34,17 +34,17 @@ public class AIDCProvider implements ScannerProvider {
                 if (aidcManager != null && options.waitDisconnected && aidcManager.listBarcodeDevices().size() > 0) {
                     for (BarcodeReaderInfo bri : aidcManager.listBarcodeDevices()) {
                         Log.i(LOG_TAG, "A connected or disconnected barcode device was detected: " + bri.getFriendlyName());
-                        cb.onProvided(PROVIDER_NAME, bri.getScannerId(), new AIDCScanner(aidcManager));
+                        cb.onScannerCreated(PROVIDER_NAME, bri.getScannerId(), new AIDCScanner(aidcManager));
                     }
                     return;
                 } else if (aidcManager != null && !options.waitDisconnected && aidcManager.listConnectedBarcodeDevices().size() > 0) {
                     for (BarcodeReaderInfo bri : aidcManager.listConnectedBarcodeDevices()) {
                         Log.i(LOG_TAG, "A connected barcode device was detected: " + bri.getFriendlyName());
-                        cb.onProvided(PROVIDER_NAME, bri.getScannerId(), new AIDCScanner(aidcManager));
+                        cb.onScannerCreated(PROVIDER_NAME, bri.getScannerId(), new AIDCScanner(aidcManager));
                     }
                     return;
                 }
-                cb.onProvided(PROVIDER_NAME, null, null);
+                cb.onScannerCreated(PROVIDER_NAME, null, null);
             }
         });
         Log.i(LOG_TAG, "End scanner search");

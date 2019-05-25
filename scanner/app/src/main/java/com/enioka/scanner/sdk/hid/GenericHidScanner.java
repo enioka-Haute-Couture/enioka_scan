@@ -16,7 +16,7 @@ import java.util.Collections;
 public class GenericHidScanner implements Scanner {
     private final static String LOG_TAG = "GenericHidScanner";
 
-    private String keyboardInput;
+    private String keyboardInput = "";
     private boolean paused = false;
     private ScannerDataCallback dataCb;
 
@@ -52,7 +52,6 @@ public class GenericHidScanner implements Scanner {
                     // The ending CR is most often a simple UP without DOWN.
                     Barcode b = new Barcode(GenericHidScanner.this.keyboardInput, BarcodeType.UNKNOWN);
                     GenericHidScanner.this.dataCb.onData(null, new ArrayList<>(Collections.singleton(b)));
-                    Log.i(LOG_TAG, GenericHidScanner.this.keyboardInput);
                     GenericHidScanner.this.keyboardInput = "";
                 } else if (!event.isPrintingKey()) {
                     // Skip un-printable characters.

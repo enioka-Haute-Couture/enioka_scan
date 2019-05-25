@@ -270,16 +270,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                 return;
             }
 
-            // If here, laser init has ended. Cache the actually used scanners.
+            // If here, laser init has ended.
             intializingScannersCount.set(0);
-
-            List<String> userProviders = new ArrayList<>();
-            for (Scanner s : scanners) {
-                userProviders.add(s.getProviderKey());
-            }
-            LaserScanner.actuallyUsedProviders(userProviders);
-
-            Log.i(LOG_TAG, "all found scanners have now ended their initialization (or failed to do so)");
+            Log.i(LOG_TAG, "All found scanners have now ended their initialization (or failed to do so)");
         }
     }
 

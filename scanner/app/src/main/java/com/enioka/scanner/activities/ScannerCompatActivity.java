@@ -280,6 +280,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     public void endOfScannerSearch() {
         Log.i(LOG_TAG, "Search for scanners from SDK has ended");
         Log.i(LOG_TAG, intializingScannersCount.get() + " scanners from the different SDKs have reported for duty. Waiting for their initialization.");
+        checkInitializationEnd();
     }
 
     protected void initCamera() {

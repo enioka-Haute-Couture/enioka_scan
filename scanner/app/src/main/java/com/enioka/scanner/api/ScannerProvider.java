@@ -44,5 +44,12 @@ public interface ScannerProvider {
          * @param providerKey a unique key identifying the provider.
          */
         void onProviderUnavailable(String providerKey);
+
+        /**
+         * Should be called if the provider can run, and all scanners have already been created.
+         *
+         * @param providerKey a unique key identifying the provider.
+         */
+        void onAllScannersCreated(String providerKey);
     }
 }

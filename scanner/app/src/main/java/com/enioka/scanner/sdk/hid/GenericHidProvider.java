@@ -18,6 +18,7 @@ public class GenericHidProvider implements ScannerProvider {
 
             cb.onScannerCreated(LOG_TAG, "HID", new GenericHidScanner());
         }
+        cb.onAllScannersCreated(LOG_TAG);
     }
 
     @Override

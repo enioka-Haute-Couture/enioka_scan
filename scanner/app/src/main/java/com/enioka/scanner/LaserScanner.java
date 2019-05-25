@@ -60,6 +60,7 @@ public final class LaserScanner {
 
         // Now create a scanner. (iterate on a copy to avoid concurrent list modifications)
         scannerFound = false;
+        final int expectedProviderCallbacks = laserProviders.size();
         final Set<String> providersHavingAnswered = new HashSet<>();
         for (final ScannerProvider sp : new ArrayList<>(laserProviders)) {
             sp.getScanner(ctx, new ScannerProvider.ProviderCallback() {
@@ -80,13 +81,7 @@ public final class LaserScanner {
                         }
                     }
 
-                    // The end?
-                    providersHavingAnswered.add(providerKey);
-                    synchronized (LaserScanner.class) {
-                        if (providersHavingAnswered.size() == LaserScanner.laserProviders.size()) {
-                            handler.endOfScannerSearch();
-                        }
-                    }
+                    checkEnd(providerKey);
                 }
 
                 @Override
@@ -108,10 +103,22 @@ public final class LaserScanner {
                         }
                     }
 
+                    checkEnd(providerKey);
+                }
+
+                @Override
+                public void onAllScannersCreated(String providerKey) {
+                    Log.i(LOG_TAG, "Scanner provider " + providerKey + " reports it is compatible with current device and has created all its scanners");
+                    handler.scannerConnectionProgress(providerKey, null, "Provider " + providerKey + " has finished initializing.");
+
+                    checkEnd(providerKey);
+                }
+
+                private void checkEnd(String providerKey) {
                     // The end?
                     providersHavingAnswered.add(providerKey);
                     synchronized (LaserScanner.class) {
-                        if (providersHavingAnswered.size() == LaserScanner.laserProviders.size()) {
+                        if (providersHavingAnswered.size() == expectedProviderCallbacks) {
                             handler.endOfScannerSearch();
                         }
                     }

@@ -47,7 +47,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     protected final static int PERMISSION_REQUEST_ID_BT_EMDK = 1791;
 
     /**
-     * Don't start camera mode, even if no laser are available
+     * Don't start camera mode, even if no lasers are available
      */
     protected boolean laserModeOnly = false;
 

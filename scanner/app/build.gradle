@@ -1,11 +1,10 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 26
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 2
         versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -18,20 +17,34 @@ android {
     }
 }
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter()
+    }
+}
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 
-    provided fileTree(include: ['com.symbol.emdk.jar'], dir: 'extlibs')
-    compile fileTree(exclude: ['com.symbol.emdk.jar'], dir: 'extlibs')
+    // Libs contains Honeywell SDK. This lib has to be included as it is not provided by the device.
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile 'me.dm7.barcodescanner:zbar:1.8.3'
+    // Symbol/Zebra EMDK is actually provided by the platform, so exclude from build path
+    compileOnly fileTree(include: ['com.symbol.emdk.jar'], dir: 'extlibs')
+    implementation fileTree(exclude: ['com.symbol.emdk.jar'], dir: 'extlibs')
 
-    compile project(':barcode_scanner_library_v2.0.8.0')
+    // ZBAR = camera. From Maven Central.
+    api 'me.dm7.barcodescanner:zbar:1.8.3'
 
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    // An AAR from Athesi
+    implementation project(':barcode_scanner_library_v2.0.8.0')
+
+    // Test things (useless for now)
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    testImplementation 'junit:junit:4.12'
 }

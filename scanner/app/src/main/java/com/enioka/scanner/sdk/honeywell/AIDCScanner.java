@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * Scanner implementation for Honeywell/Intermec AIDC SDK.
  */
-public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
+public class  AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
     private final static String LOG_TAG = "ScannerHoneywellAidc";
 
     private Scanner selfScanner = this;

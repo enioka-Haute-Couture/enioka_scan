@@ -1,7 +1,7 @@
 package com.enioka.scanner.api;
 
 /**
- * A property bag tweaking the scanner search method. Some providers may ignore the values provided.
+ * A property bag tweaking the scanner search method. Some providers may ignore these options.
  */
 public class ScannerSearchOptions {
     /**

@@ -3,7 +3,6 @@ package com.enioka.scanner.activities;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,7 +11,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -25,12 +23,10 @@ import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.camera.ZbarScanView;
 import com.enioka.scanner.data.Barcode;
-import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
 import com.enioka.scanner.sdk.zbar.ScannerZbarViewImpl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -88,7 +84,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
     protected int threshold = 5;
 
 
-    private String keyboardInput = "";
     protected ManualInputFragment df;
     private AtomicInteger intializingScannersCount = new AtomicInteger(0);
 
@@ -105,7 +100,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     @SuppressWarnings("unused")
     public void setAutocompletion(List<String> autocompletion, int threshold) {
-        for(String item : autocompletion) {
+        for (String item : autocompletion) {
             this.items.add(new ManualInputItem(item, false));
         }
         this.threshold = threshold;
@@ -212,7 +207,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
                         scanner.pause();
                     }
                     df = ManualInputFragment.newInstance();
-                    df.setAutocompletionItems(items,  threshold);
+                    df.setAutocompletionItems(items, threshold);
                     df.setDialogInterface(new DialogInterface() {
                         @Override
                         public void cancel() {
@@ -264,30 +259,27 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
     private void checkInitializationEnd() {
         synchronized (scanners) {
-            if (intializingScannersCount.get() == 0) {
-                if (this.scanners.isEmpty()) {
-                    if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) {
-                        // We may have a BT keyboard connected
-                        Log.i(LOG_TAG, "No real scanner available but BT keyboard connected");
-                        onStatusChanged(getResources().getString(R.string.scanner_using_bt_keyboard));
-                    } else {
-                        if (!laserModeOnly) {
-                            // In that case try to connect to a camera.
-                            onStatusChanged(getResources().getString(R.string.activity_scan_no_compatible_sdk));
-                            initCamera();
-                        }
-                    }
-                }
-                intializingScannersCount.set(0);
-
-                List<String> userProviders = new ArrayList<>();
-                for (Scanner s : scanners) {
-                    userProviders.add(s.getProviderKey());
-                }
-                LaserScanner.actuallyUsedProviders(userProviders);
-
-                Log.i(LOG_TAG, "all found scanners have now ended their initialization (or failed to do so)");
+            if (intializingScannersCount.get() == 0 && this.scanners.isEmpty() && !laserModeOnly) {
+                // In that case try to connect to a camera.
+                onStatusChanged(getResources().getString(R.string.activity_scan_no_compatible_sdk));
+                goToCamera = true; // speed up activity reinit
+                initCamera();
             }
+            if (intializingScannersCount.get() != 0) {
+                // We wait for all scanners
+                return;
+            }
+
+            // If here, laser init has ended. Cache the actually used scanners.
+            intializingScannersCount.set(0);
+
+            List<String> userProviders = new ArrayList<>();
+            for (Scanner s : scanners) {
+                userProviders.add(s.getProviderKey());
+            }
+            LaserScanner.actuallyUsedProviders(userProviders);
+
+            Log.i(LOG_TAG, "all found scanners have now ended their initialization (or failed to do so)");
         }
     }
 
@@ -394,33 +386,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Scanner.
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Keyboard input
+    // Misc
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (!enableScan) {
-            return super.dispatchKeyEvent(event);
-        }
-
-        if (event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-            // The ending CR is most often a simple UP without DOWN.
-            Barcode b = new Barcode(this.keyboardInput, BarcodeType.UNKNOWN);
-            this.onData(null, new ArrayList<>(Collections.singleton(b)));
-            this.keyboardInput = "";
-        } else if (!event.isPrintingKey()) {
-            // Skip un-printable characters.
-            return super.dispatchKeyEvent(event);
-        } else if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            // Only use DOWN event - UP events are not synchronized with SHIFT events.
-            this.keyboardInput += (char) event.getKeyCharacterMap().get(event.getKeyCode(), event.getMetaState());
-        }
-
-        return true;
-    }
-
     /**
-     * Display the torch button "on" or "off" is the device have capability.
+     * Display the torch button "on" or "off" is the device has capability.
      **/
     void displayTorch(Scanner scanner, ImageButton flashlight) {
         if (!scanner.supportsIllumination()) {

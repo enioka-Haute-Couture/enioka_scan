@@ -66,14 +66,6 @@ public interface Scanner {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Called once per application launch.
-     *
-     * @param ctx The application
-     * @param cb1 a callback to call when data is read.
-     */
-    void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode);
-
-    /**
      * Change ScannerDataCallback
      *
      * @param cb a callback to call when data is read.

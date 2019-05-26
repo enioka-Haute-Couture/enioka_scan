@@ -8,6 +8,8 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.zebra.scannercontrol.DCSSDKDefs;
@@ -25,7 +27,7 @@ import java.util.Map;
 /**
  * Scanner provider for external BT Zebra (real Zebra, not Symbol) devices.
  */
-class BtZebraScanner implements Scanner, IDcsSdkApiDelegate {
+class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
     private static final String LOG_TAG = "BtZebraScanner";
 
     private Scanner selfScanner = this;

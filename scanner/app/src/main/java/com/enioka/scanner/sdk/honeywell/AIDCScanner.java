@@ -1,10 +1,12 @@
 package com.enioka.scanner.sdk.honeywell;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.honeywell.aidc.AidcManager;
@@ -22,7 +24,7 @@ import java.util.Map;
 /**
  * Scanner implementation for Honeywell/Intermec AIDC SDK.
  */
-public class  AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
+public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeListener {
     private final static String LOG_TAG = "ScannerHoneywellAidc";
 
     private Scanner selfScanner = this;
@@ -48,7 +50,7 @@ public class  AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
 
 
     @Override
-    public void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
+    public void initialize(Context applicationContext, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
         this.dataCb = cb1;
         this.statusCb = cb2;
 

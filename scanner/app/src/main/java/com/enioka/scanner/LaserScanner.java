@@ -1,8 +1,7 @@
 package com.enioka.scanner;
 
-import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
-import android.view.WindowManager;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerConnectionHandler;
@@ -17,7 +16,6 @@ import com.enioka.scanner.sdk.zebra.EmdkZebraProvider;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -45,10 +43,10 @@ public final class LaserScanner {
      * @param handler the callback.
      * @param options parameters for scanner search.
      */
-    public static void getLaserScanner(Activity ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
-        if (options.keepScreenOn) {
+    public static void getLaserScanner(Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+        /*if (options.keepScreenOn) {
             ctx.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        }
+        }*/
 
         // Trivial
         if (laserProviders.isEmpty()) {

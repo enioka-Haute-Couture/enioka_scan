@@ -20,9 +20,9 @@ import android.widget.Filter;
 import android.widget.TextView;
 
 import com.enioka.scanner.R;
-import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.service.ForegroundScannerClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class ManualInputFragment extends DialogFragment {
 
-    private Scanner.ScannerDataCallback cb;
+    private ForegroundScannerClient cb;
     private Boolean closeOnValidation;
     private int inviteTextId;
     protected List<ManualInputItem> items = new ArrayList<>();
@@ -41,7 +41,7 @@ public class ManualInputFragment extends DialogFragment {
     protected DialogInterface di;
 
     public void setAutocompletion(List<String> autocompletion, int threshold) {
-        for(String item : autocompletion) {
+        for (String item : autocompletion) {
             this.items.add(new ManualInputItem(item, false));
         }
         this.threshold = threshold;
@@ -74,7 +74,7 @@ public class ManualInputFragment extends DialogFragment {
         super.onAttach(activity);
         try {
             // The host should be an activity implementing a barcode listener.
-            cb = (Scanner.ScannerDataCallback) activity;
+            cb = (ForegroundScannerClient) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement Scanner.ScannerDataCallback");
         }
@@ -113,7 +113,7 @@ public class ManualInputFragment extends DialogFragment {
                 List<Barcode> res = new ArrayList<Barcode>(1);
                 Barcode b = new Barcode(txt, BarcodeType.UNKNOWN);
                 res.add(b);
-                cb.onData(null, res);
+                cb.onData(res);
 
                 // Do not always dismiss - let the host do it in some cases (it may want to validate the data).
                 if (closeOnValidation) {
@@ -135,7 +135,7 @@ public class ManualInputFragment extends DialogFragment {
                     List<Barcode> res = new ArrayList<Barcode>(1);
                     Barcode b = new Barcode(txt, BarcodeType.UNKNOWN);
                     res.add(b);
-                    cb.onData(null, res);
+                    cb.onData(res);
 
                     if (closeOnValidation) {
                         dismiss();
@@ -237,7 +237,7 @@ public class ManualInputFragment extends DialogFragment {
             TextView textView = (TextView) view.findViewById(R.id.textViewItem);
             textView.setText(item.getText());
 
-            if(item.isDone()) {
+            if (item.isDone()) {
                 textView.setTextColor(getResources().getColor(R.color.doneItemColor));
                 view.findViewById(R.id.doneImageView).setVisibility(View.VISIBLE);
             } else {

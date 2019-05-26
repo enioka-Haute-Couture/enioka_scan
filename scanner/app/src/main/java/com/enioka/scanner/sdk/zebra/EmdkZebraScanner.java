@@ -1,6 +1,5 @@
 package com.enioka.scanner.sdk.zebra;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -9,6 +8,7 @@ import android.util.Log;
 
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Zebra implementation for internal SYMBOL (not real Zebra) scanners.
  */
-public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.symbol.emdk.barcode.Scanner.StatusListener, com.symbol.emdk.barcode.Scanner.DataListener {
+public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKListener, com.symbol.emdk.barcode.Scanner.StatusListener, com.symbol.emdk.barcode.Scanner.DataListener {
     private final static String LOG_TAG = "ScannerZebra";
 
     private Scanner selfScanner = this;
@@ -383,7 +383,7 @@ public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
+    public void initialize(Context ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
         this.initCb = cb0;
         this.dataCb = cb1;
         this.statusCb = cb2;

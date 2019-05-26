@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.camera.ZbarScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 /**
  */
-public class ScannerZbarViewImpl implements Scanner, ZbarScanView.ResultHandler {
+public class ScannerZbarViewImpl implements ScannerForeground, ZbarScanView.ResultHandler {
     private static final String LOG_TAG = "ScannerZbarViewImpl";
 
     private static final Map<Integer, BarcodeType> barcodeTypesMapping;

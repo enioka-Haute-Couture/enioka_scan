@@ -1,6 +1,5 @@
 package com.enioka.scanner.sdk.athesi;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -12,6 +11,7 @@ import android.util.Log;
 
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.camera.ZbarScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
@@ -24,7 +24,7 @@ import java.util.Set;
 /**
  * Scanner provider for HHT Wrapper Layer (i.e. SPA43)
  */
-public class HHTScanner extends BroadcastReceiver implements Scanner {
+public class HHTScanner extends BroadcastReceiver implements ScannerBackground {
     private static final String LOG_TAG = "HHTScanner";
 
     // Initial parameters for SOFTSCANTRIGGER action.
@@ -49,7 +49,7 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
 
     private static final Uri scannerSettingsUri = Uri.parse("content://com.oem.startup.ScannerParaProvider/settings");
 
-    private Activity ctx;
+    private Context ctx;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // LIFE CYCLE
@@ -61,7 +61,7 @@ public class HHTScanner extends BroadcastReceiver implements Scanner {
 
 
     @Override
-    public void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
+    public void initialize(Context ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
         this.ctx = ctx;
         this.dataCb = cb1;
         this.statusCb = cb2;

@@ -7,13 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class GenericHidScanner implements Scanner {
+public class GenericHidScanner implements ScannerForeground {
     private final static String LOG_TAG = "GenericHidScanner";
 
     private String keyboardInput = "";

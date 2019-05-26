@@ -18,6 +18,11 @@
         <uses-library
             android:name="com.symbol.emdk"
             android:required="false" />
+
+        <service
+            android:name=".service.ScannerService"
+            android:description="@string/service_description"
+            android:exported="false" />
     </application>
 
     <!-- Only available on API >= 19 so override -->

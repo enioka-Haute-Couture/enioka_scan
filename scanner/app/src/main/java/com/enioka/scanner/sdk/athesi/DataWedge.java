@@ -171,7 +171,7 @@ public class DataWedge {
     public static final String DISABLE_UPCA_REPORT_CHK_DGT = "DISABLE_UPCA_REPORT_CHK_DGT";
     public static final String ENABLE_UPCA_REPORT_CHK_DGT = "ENABLE_UPCA_REPORT_CHK_DGT";
 
-        public static final String DISABLE_UPCA_PREAMBLE = "DISABLE_UPCA_PREAMBLE";                        //Disable Preamble
+    public static final String DISABLE_UPCA_PREAMBLE = "DISABLE_UPCA_PREAMBLE";                        //Disable Preamble
     public static final String ENABLE_UPCA_PREAMBLE = "ENABLE_UPCA_PREAMBLE";                        //Enable Preamble - Sys Char ONLY
     public static final String ENABLE_UPCA_PREAMBLE_COUNTSYS = "ENABLE_UPCA_PREAMBLE_COUNTSYS";            //Enable Preamble - Country Code and Sys Char
     public static final String UPCA_PREAMBLE_ENABLED = "UPCA_PREAMBLE_ENABLED";
@@ -388,4 +388,19 @@ public class DataWedge {
     public static final String DISABLE_HAN_XIN = "DISABLE_HAN_XIN";
     public static final String ENABLE_HAN_XIN = "ENABLE_HAN_XIN";
     public static final String HAN_XIN_ENABLED = "HAN_XIN_ENABLED";
+
+
+    ///
+    // Misc added later to datawedge.
+    public static final String DISABLE_JAPAN = "DISABLE_JAPAN";
+    public static final String ENABLE_JAPAN = "ENABLE_JAPAN";
+    public static final String JAPAN_ENABLED = "JAPAN_ENABLED";
+
+    public static final String DISABLE_KIXCODE = "DISABLE_KIXCODE";
+    public static final String ENABLE_KIXCODE = "ENABLE_KIXCODE";
+    public static final String KIXCODE_ENABLED = "KIXCODE_ENABLED";
+
+    public static final String DISABLE_RSS_AUSTRALIA = "DISABLE_RSS_AUSTRALIA";
+    public static final String ENABLE_RSS_AUSTRALIA = "ENABLE_RSS_AUSTRALIA";
+    public static final String RSS_AUSTRALIA_ENABLED = "RSS_AUSTRALIA_ENABLED";
 }

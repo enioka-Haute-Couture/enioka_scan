@@ -38,11 +38,45 @@ enum HHTSymbology {
     CNVT_I25_TO_EAN13(DataWedge.ENABLE_CNVT_I25_TO_EAN13, DataWedge.DISABLE_CNVT_I25_TO_EAN13, null, null),
     CODE93(DataWedge.ENABLE_CODE93, DataWedge.DISABLE_CODE93, null, null),
 
+    UPCA(DataWedge.ENABLE_UPCA, DataWedge.DISABLE_UPCA, null, null),
+    UPCA_PREAMBLE(DataWedge.ENABLE_UPCA_PREAMBLE, DataWedge.DISABLE_UPCA_PREAMBLE, null, null),
+    UPCE(DataWedge.ENABLE_UPCE, DataWedge.DISABLE_UPCE, null, null),
+    UPCE1(DataWedge.ENABLE_UPCE1, DataWedge.DISABLE_UPCE1, null, null),
+    EAN8(DataWedge.ENABLE_EAN8, DataWedge.DISABLE_EAN8, null, null),
+    BOOKLAND_EAN(DataWedge.ENABLE_BOOKLAND_EAN, DataWedge.DISABLE_BOOKLAND_EAN, null, null),
+    UCC_EXT_CODE(DataWedge.ENABLE_UCC_EXT_CODE, DataWedge.DISABLE_UCC_EXT_CODE, null, null),
+    MSI(DataWedge.ENABLE_MSI, DataWedge.DISABLE_MSI, null, null),
+    RSS_14(DataWedge.ENABLE_RSS_14, DataWedge.DISABLE_RSS_14, null, null),
+    CHINA(DataWedge.ENABLE_CHINA, DataWedge.DISABLE_CHINA, null, null),
+    KOREAN35(DataWedge.ENABLE_KOREAN35, DataWedge.DISABLE_KOREAN35, null, null),
+    MATRIX25(DataWedge.ENABLE_MATRIX25, DataWedge.DISABLE_MATRIX25, null, null),
+
+    US_POSTNET(DataWedge.ENABLE_US_POSTNET, DataWedge.DISABLE_US_POSTNET, null, null),
+    US_PLANET(DataWedge.ENABLE_US_PLANET, DataWedge.DISABLE_US_PLANET, null, null),
+    UK_POSTAL(DataWedge.ENABLE_UK_POSTAL, DataWedge.DISABLE_UK_POSTAL, null, null),
+    JAPAN_POSTAL(DataWedge.ENABLE_JAPAN_POSTAL, DataWedge.DISABLE_JAPAN_POSTAL, null, null),
+    AUSTRALIA_POST(DataWedge.ENABLE_AUSTRALIA_POST, DataWedge.DISABLE_AUSTRALIA_POST, null, null),
+    KIX_CODE(DataWedge.ENABLE_KIX_CODE, DataWedge.DISABLE_KIX_CODE, null, null),
+    ONE_CODE(DataWedge.ENABLE_ONE_CODE, DataWedge.DISABLE_ONE_CODE, null, null),
+    UPU_FICS_POSTAL(DataWedge.ENABLE_UPU_FICS_POSTAL, DataWedge.DISABLE_UPU_FICS_POSTAL, null, null),
+
+    PDF417(DataWedge.ENABLE_PDF417, DataWedge.DISABLE_PDF417, null, null),
+    MICROPDF417(DataWedge.ENABLE_MICROPDF417, DataWedge.DISABLE_MICROPDF417, null, null),
+    CODE128EML(DataWedge.ENABLE_CODE128EML, DataWedge.DISABLE_CODE128EML, null, null),
+    DATAMATRIX(DataWedge.ENABLE_DATAMATRIX, DataWedge.DISABLE_DATAMATRIX, null, null),
+    MAXICODE(DataWedge.ENABLE_MAXICODE, DataWedge.DISABLE_MAXICODE, null, null),
+    QRCODE(DataWedge.ENABLE_QRCODE, DataWedge.DISABLE_QRCODE, BarcodeType.QRCODE, 28),
+    MICROQR(DataWedge.ENABLE_MICROQR, DataWedge.DISABLE_MICROQR, null, null),
+    AZTEC(DataWedge.ENABLE_AZTEC, DataWedge.DISABLE_AZTEC, null, null),
+    HAN_XIN(DataWedge.ENABLE_HAN_XIN, DataWedge.DISABLE_HAN_XIN, null, null),
+
+    JAPAN(DataWedge.ENABLE_JAPAN, DataWedge.DISABLE_JAPAN, null, null),
+    KIXCODE(DataWedge.ENABLE_KIXCODE, DataWedge.DISABLE_KIXCODE, null, null),
+    RSS_AUSTRALIA(DataWedge.ENABLE_RSS_AUSTRALIA, DataWedge.DISABLE_RSS_AUSTRALIA, null, null),
+
     BOOKLAND_ISBN(DataWedge.ENABLE_BOOKLAND_ISBN, DataWedge.DISABLE_BOOKLAND_ISBN, null, null, "Scanner_BOOKLANDISBN"),
     ISSN_EAN(DataWedge.ENABLE_ISSN_EAN, DataWedge.DISABLE_ISSN_EAN, null, null, "Scanner_ISSNEAN"),
     UPCA_PREAMBLE_COUNTSYS(DataWedge.ENABLE_UPCA_PREAMBLE_COUNTSYS, "DISABLE_UPCA_PREAMBLE_COUNTSYS", null, null, "Scanner_UPCA_PREAMBLE_COUNTRY_SYS");
-
-    //TODO: finish the list. Items not in list are not disabled on startup.
 
     public String activation, deactivation, prmPropertyName;
     public BarcodeType type;

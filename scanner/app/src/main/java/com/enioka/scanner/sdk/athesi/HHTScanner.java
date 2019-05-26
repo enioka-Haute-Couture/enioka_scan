@@ -45,6 +45,7 @@ public class HHTScanner extends BroadcastReceiver implements ScannerBackground {
         activeSymbologies.add(HHTSymbology.CODE128);
         activeSymbologies.add(HHTSymbology.INT25);
         activeSymbologies.add(HHTSymbology.EAN13);
+        activeSymbologies.add(HHTSymbology.QRCODE);
     }
 
     private static final Uri scannerSettingsUri = Uri.parse("content://com.oem.startup.ScannerParaProvider/settings");

@@ -158,6 +158,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
             return;
         }
 
+        // Reset data fields
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
         }
@@ -169,8 +170,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         resetCameraButton();
         displayManualInputButton();
 
-        // init laser scanner search. If none found this will go on to the camera.
+        // Register this activity on the scanner service (hooks onData) and ask it to hook possible scanners needing foreground control onto this activity.
+        // If no scanners are available at all, this will still call onForegroundScannerInitEnded with 0 scanners, and the activity will launch the camera.
         if (serviceBound) {
+            scannerService.resume(); // does nothing if not init.
             scannerService.takeForegroundControl(this, this);
         }
     }
@@ -320,7 +323,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
 
     @Override
     public void onForegroundScannerInitEnded(int foregroundScannerCount, int backgroundScannerCount) {
-        Log.i(LOG_TAG, "Activity can now use all received scanners (" + foregroundScannerCount + " - " + backgroundScannerCount + ")");
+        Log.i(LOG_TAG, "Activity can now use all received scanners (foreground " + foregroundScannerCount + " - background " + backgroundScannerCount + ")");
 
         if (foregroundScannerCount + backgroundScannerCount == 0 && !laserModeOnly) {
             // In that case try to connect to a camera.

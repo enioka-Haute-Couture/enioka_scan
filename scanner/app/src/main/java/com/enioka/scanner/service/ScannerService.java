@@ -24,9 +24,11 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A bound service handling all the different scanner life cycles. Should usually be bound to the app itself.
+ * A bound service handling all the different scanner life cycles. Should usually be bound to the app itself.<br><br>
+ * Note that the public API of this service is described in {@link ScannerServiceApi}, which the type obtained by binding to this service.
+ * The other methods of this class should not be accessed by clients.
  */
-public class ScannerService extends Service implements ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback {
+public class ScannerService extends Service implements ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerServiceApi {
 
     protected final static String LOG_TAG = "ScannerService";
 
@@ -73,20 +75,22 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
      * We only allow app-local bind.
      */
     public class LocalBinder extends Binder {
-        public ScannerService getService() {
-            // Return this instance of LocalService so clients can call public methods
+        public ScannerServiceApi getService() {
+            // Return this instance of ScannerService so clients can call public methods
             return ScannerService.this;
         }
     }
 
-    // Binder given to clients
-    private final IBinder binder = new LocalBinder();
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return binder;
+        return new LocalBinder();
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // SERVICE LIFECYCLE
+    ////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void onCreate() {
@@ -97,6 +101,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void onDestroy() {
+        Log.i(LOG_TAG, "Destroying scanner service");
         this.disconnect();
         super.onDestroy();
     }

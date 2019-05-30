@@ -29,6 +29,7 @@ import com.enioka.scanner.helpers.Common;
 import com.enioka.scanner.sdk.zbar.ScannerZbarViewImpl;
 import com.enioka.scanner.service.ForegroundScannerClient;
 import com.enioka.scanner.service.ScannerService;
+import com.enioka.scanner.service.ScannerServiceApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +97,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     /**
      * Actual access to the scanners.
      */
-    private ScannerService scannerService;
+    private ScannerServiceApi scannerService;
     private boolean serviceBound = false;
 
     /**
@@ -129,7 +130,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            // We've bound to ScannerService, cast the IBinder and get the ScannerServiceApi instance
             ScannerService.LocalBinder binder = (ScannerService.LocalBinder) service;
             scannerService = binder.getService();
             serviceBound = true;

@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.enioka.scanner.camera.ZbarScanView;
+import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.demo.R;
 import com.enioka.scanner.demo.WelcomeActivity;
 
@@ -116,7 +117,7 @@ public class SlipScanActivity extends AppCompatActivity implements ZbarScanView.
      * @param code scanned code
      */
     @Override
-    public void handleScanResult(final String code, int type) {
+    public void handleScanResult(final String code, BarcodeType type) {
         boolean codeOk = true;
         int colorText = R.color.colorAccent;
 

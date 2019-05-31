@@ -22,4 +22,5 @@
     <string name="service_description">Service d\'assistance à la gestion des scanners</string>
     <string name="scanner_service_no_compatible_sdk">Aucun scanner de code barre matériel compatible n\'est disponible sur cet appareil</string>
     <string name="scanner_service_sdk_search_end">Tous les fournisseurs de scanners matériels ont répondu</string>
+    <string name="activity_scan_use_zxing">ZXing</string>
 </resources>

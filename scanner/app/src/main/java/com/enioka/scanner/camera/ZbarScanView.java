@@ -28,6 +28,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.enioka.scanner.R;
+import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     private int previewBufferSize;
 
     private FrameAnalyserManager frameAnalyser;
+    private CameraReader readerMode = CameraReader.ZBAR;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,6 +81,9 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
     public ZbarScanView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
+        if (attributeSet.getAttributeValue(null, "readerMode") != null) {
+            readerMode = CameraReader.valueOf(attributeSet.getAttributeValue(null, "readerMode"));
+        }
         initOnce(context);
     }
     //
@@ -90,7 +95,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         if (!this.isInEditMode()) {
             // ZBar is a native library
             System.loadLibrary("iconv");
-            frameAnalyser = new FrameAnalyserManager(this, resolution);
+            frameAnalyser = new FrameAnalyserManager(this, resolution, readerMode);
         }
 
         // If the preview does not take all the space
@@ -107,12 +112,18 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     /**
      * Default is simply CODE_128. Use the Symbol static fields to specify a symbology.
      *
-     * @param s the ID of the symbology (ZBAR coding)
+     * @param barcodeType the symbology
      */
-    public void addSymbology(int s) {
+    public void addSymbology(BarcodeType barcodeType) {
         if (frameAnalyser != null) {
-            frameAnalyser.addSymbology(s);
+            frameAnalyser.addSymbology(barcodeType);
         }
+    }
+
+    public void setReaderMode(CameraReader readerMode) {
+        this.readerMode = readerMode;
+        frameAnalyser.close();
+        frameAnalyser = new FrameAnalyserManager(this, resolution, readerMode);
     }
 
     protected boolean isUsingPreviewForPhoto() {
@@ -675,7 +686,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         frameAnalyser.handleFrame(ctx);
     }
 
-    public void analyserCallback(final String result, final int type, byte[] previewData) {
+    public void analyserCallback(final String result, final BarcodeType type, byte[] previewData) {
         if (resolution.usePreviewForPhoto) {
             lastPreviewData = previewData;
         }
@@ -822,7 +833,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
     }
 
     public interface ResultHandler {
-        void handleScanResult(String result, int type);
+        void handleScanResult(String result, BarcodeType type);
     }
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////

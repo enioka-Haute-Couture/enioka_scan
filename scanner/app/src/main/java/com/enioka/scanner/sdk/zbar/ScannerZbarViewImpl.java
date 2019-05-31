@@ -3,33 +3,19 @@ package com.enioka.scanner.sdk.zbar;
 import android.app.Activity;
 import android.util.Log;
 
-import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.camera.ZbarScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 
-import net.sourceforge.zbar.Symbol;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
+ *
  */
 public class ScannerZbarViewImpl implements ScannerForeground, ZbarScanView.ResultHandler {
     private static final String LOG_TAG = "ScannerZbarViewImpl";
-
-    private static final Map<Integer, BarcodeType> barcodeTypesMapping;
-
-    static {
-        barcodeTypesMapping = new HashMap<>();
-        barcodeTypesMapping.put(Symbol.CODE39, BarcodeType.CODE39);
-        barcodeTypesMapping.put(Symbol.CODE128, BarcodeType.CODE128);
-        barcodeTypesMapping.put(Symbol.I25, BarcodeType.INT25);
-        barcodeTypesMapping.put(Symbol.EAN13, BarcodeType.EAN13);
-    }
 
     private ZbarScanView scanner;
     private ScannerDataCallback dataDb;
@@ -38,10 +24,12 @@ public class ScannerZbarViewImpl implements ScannerForeground, ZbarScanView.Resu
         this.dataDb = mHandler;
 
         this.scanner = zbarScanView;
-        //128 enabled by default
-        scanner.addSymbology(Symbol.CODE39);
-        scanner.addSymbology(Symbol.EAN13);
-        scanner.addSymbology(Symbol.I25);
+
+        scanner.addSymbology(BarcodeType.CODE128);
+        scanner.addSymbology(BarcodeType.CODE39);
+        scanner.addSymbology(BarcodeType.EAN13);
+        scanner.addSymbology(BarcodeType.INT25);
+
         scanner.setResultHandler(this);
         scanner.setTorch(false);
     }
@@ -88,11 +76,11 @@ public class ScannerZbarViewImpl implements ScannerForeground, ZbarScanView.Resu
     }
 
     @Override
-    public void handleScanResult(String code, int type) {
-        Log.v(LOG_TAG, "handleScanResult " + code + " - " + type);
+    public void handleScanResult(String code, BarcodeType barcodeType) {
+        Log.v(LOG_TAG, "handleScanResult " + code + " - " + barcodeType);
         if (dataDb != null) {
             List<Barcode> res = new ArrayList<>(1);
-            res.add(new Barcode(code.trim(), barcodeTypesMapping.get(type)));
+            res.add(new Barcode(code.trim(), barcodeType));
             dataDb.onData(this, res);
         }
     }

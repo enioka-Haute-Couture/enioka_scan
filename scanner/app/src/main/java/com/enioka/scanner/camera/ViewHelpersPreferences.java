@@ -18,6 +18,12 @@ class ViewHelpersPreferences {
     private static final String PREFERENCE_PREFERRED_PREVIEW_REZ_X = "preferred_preview_rez_x";
     private static final String PREFERENCE_PREFERRED_PREVIEW_REZ_Y = "preferred_preview_rez_y";
 
+    /**
+     * Fetch the activity containing a context (often a view) by going up to parents. Null if not found, not an activity, etc.
+     *
+     * @param context the context to find containing activity of.
+     * @return null if nt found
+     */
     static Activity getActivity(Context context) {
         while (context instanceof ContextWrapper) {
             if (context instanceof Activity) {

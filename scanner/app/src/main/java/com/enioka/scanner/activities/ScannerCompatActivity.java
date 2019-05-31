@@ -17,12 +17,15 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.camera.CameraReader;
 import com.enioka.scanner.camera.ZbarScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.helpers.Common;
@@ -78,6 +81,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
      * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
      */
     protected int flashlightViewId = R.id.scanner_flashlight;
+
+    /**
+     * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
+     */
+    protected int scannerModeToggleViewId = R.id.scanner_switch_zxing;
 
     /**
      * An optional fragment allowing to input a value with the soft keyboard (for cases when scanners do not work).
@@ -273,6 +281,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         }
         displayTorch();
         displayManualInputButton();
+        displayCameraReaderToggle();
     }
 
 
@@ -459,5 +468,21 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
                 }
             });
         }
+    }
+
+    protected void displayCameraReaderToggle() {
+        final Switch toggle = findViewById(scannerModeToggleViewId);
+        if (toggle == null) {
+            return;
+        }
+
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.i(LOG_TAG, "Changing reader mode");
+                ZbarScanView zbarView = findViewById(zbarViewId);
+                zbarView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
+            }
+        });
     }
 }

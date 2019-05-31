@@ -13,7 +13,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" >
+    </com.enioka.scanner.camera.ZbarScanView>
 
     <TextView
         android:id="@+id/scanner_text_last_scan"
@@ -63,4 +64,12 @@
         android:src="@drawable/icn_keyboard"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/scanner_flashlight" />
+
+    <Switch
+        android:id="@+id/scanner_switch_zxing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/activity_scan_use_zxing"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/scanner_bt_keyboard" />
 </android.support.constraint.ConstraintLayout>

@@ -2,6 +2,8 @@ package com.enioka.scanner.camera;
 
 import android.graphics.Point;
 
+import com.enioka.scanner.data.BarcodeType;
+
 /**
  * Methods needed by the {@link FrameAnalyserManager}
  */
@@ -17,7 +19,7 @@ interface ScannerCallback {
      * @param type        barcode type (as in Symbol class)
      * @param previewData the buffer used for this analysis.
      */
-    void analyserCallback(final String result, final int type, byte[] previewData);
+    void analyserCallback(final String result, final BarcodeType type, byte[] previewData);
 
     /**
      * To be called after each analysis.

@@ -36,8 +36,9 @@ dependencies {
     compileOnly fileTree(include: ['com.symbol.emdk.jar'], dir: 'extlibs')
     implementation fileTree(exclude: ['com.symbol.emdk.jar'], dir: 'extlibs')
 
-    // ZBAR = camera. From Maven Central.
+    // ZBAR & ZXING (Zebra Crossing) = camera. From Maven Central.
     api 'me.dm7.barcodescanner:zbar:1.8.3'
+    api 'com.google.zxing:core:3.4.0'
 
     // An AAR from Athesi
     implementation project(':barcode_scanner_library_v2.0.8.0')

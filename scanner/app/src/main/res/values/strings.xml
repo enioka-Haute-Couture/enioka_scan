@@ -25,6 +25,7 @@
     <string name="activity_scan_scanner_not_initialized">main_scanner_status_placeholder</string>
     <string name="scanner_using_bt_keyboard">Using Bluetooth scanner or keyboard</string>
     <string name="activity_scan_no_compatible_sdk">There are no compatible scanners on this device</string>
+    <string name="activity_scan_use_zxing">ZXing</string>
 
     <!-- Helper manual scan fragment -->
     <string name="fragment_scan_manual_title">Manual input</string>

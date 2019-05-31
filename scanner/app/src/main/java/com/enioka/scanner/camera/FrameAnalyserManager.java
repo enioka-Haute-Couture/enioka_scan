@@ -3,6 +3,8 @@ package com.enioka.scanner.camera;
 import android.graphics.Point;
 import android.util.Log;
 
+import com.enioka.scanner.data.BarcodeType;
+
 import java.util.ArrayDeque;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -55,7 +57,7 @@ class FrameAnalyserManager {
     private Queue<FrameAnalyser> analysers = new ArrayDeque<>(NUMBER_OF_CORES);
     private BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(2 * NUMBER_OF_CORES, false);
 
-    FrameAnalyserManager(ScannerCallback parent, Resolution bag) {
+    FrameAnalyserManager(ScannerCallback parent, Resolution bag, CameraReader readerToUse) {
         this.parent = parent;
         this.resolution = bag;
 
@@ -66,8 +68,13 @@ class FrameAnalyserManager {
         }
 
         // Create threads
+        FrameAnalyser frameAnalyser;
         for (int i = 0; i < NUMBER_OF_CORES; i++) {
-            FrameAnalyser frameAnalyser = new FrameAnalyser(queue, this);
+            if (readerToUse == CameraReader.ZBAR) {
+                frameAnalyser = new ZBarFrameAnalyser(queue, this);
+            } else {
+                frameAnalyser = new ZXingFrameAnalyser(queue, this);
+            }
             new Thread(frameAnalyser).start();
             analysers.add(frameAnalyser);
         }
@@ -185,7 +192,7 @@ class FrameAnalyserManager {
     /**
      * Called after each successful analysis.
      */
-    synchronized void handleResult(String result, int symType, byte[] imagePreview) {
+    synchronized void handleResult(String result, BarcodeType symType, byte[] imagePreview) {
         if (result == null) {
             return;
         }
@@ -207,7 +214,7 @@ class FrameAnalyserManager {
      *
      * @param s the ID of the symbology (ZBAR coding)
      */
-    void addSymbology(int s) {
+    void addSymbology(BarcodeType s) {
         for (FrameAnalyser frameAnalyser : analysers) {
             frameAnalyser.addSymbology(s);
         }

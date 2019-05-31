@@ -36,6 +36,8 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.enioka.scanner.data.BarcodeType;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,7 +96,7 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
         resolution.useAdaptiveResolution = false; // TODO.
 
         // The real scanner
-        scanner = new FrameAnalyserManager(this, resolution);
+        scanner = new FrameAnalyserManager(this, resolution, CameraReader.ZBAR);
 
         // A thread for dealing with camera technical operations.
         startBackgroundThread();
@@ -517,7 +519,7 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void analyserCallback(String result, int type, byte[] previewData) {
+    public void analyserCallback(String result, BarcodeType type, byte[] previewData) {
 
     }
 

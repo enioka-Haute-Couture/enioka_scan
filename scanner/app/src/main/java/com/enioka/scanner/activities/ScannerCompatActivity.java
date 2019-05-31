@@ -26,10 +26,10 @@ import android.widget.Toast;
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.camera.CameraReader;
-import com.enioka.scanner.camera.ZbarScanView;
+import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.helpers.Common;
-import com.enioka.scanner.sdk.zbar.ScannerZbarViewImpl;
+import com.enioka.scanner.sdk.camera.CameraBarcodeScanViewScanner;
 import com.enioka.scanner.service.ForegroundScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
@@ -42,7 +42,7 @@ import java.util.List;
  * You may want to override {@link #onData(List)} to get barcode data, and {@link #onStatusChanged(String)} to display status messages from the scanners.<br>
  * It is also useful to change  inside onCreate {@link #layoutIdLaser} and {@link #layoutIdCamera} to a layout ID (from R.id...) corresponding to your application.
  * By default, a basic test layout is provided.<br>
- * Also, {@link #zbarViewId} points to the ZBar view inside your Camera layout.
+ * Also, {@link #cameraViewId} points to the camera view inside your camera layout.
  */
 public class ScannerCompatActivity extends AppCompatActivity implements ForegroundScannerClient {
     protected final static String LOG_TAG = "ScannerActivity";
@@ -69,13 +69,18 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
      */
     protected int layoutIdLaser = R.layout.activity_main;
     /**
-     * The layout to use when using ZBar.
+     * The layout to use when using camera scanner.
      */
     protected int layoutIdCamera = R.layout.activity_main_alt;
     /**
-     * The ID of the {@link ZbarScanView} inside the {@link #layoutIdCamera} layout.
+     * Use {@link #cameraViewId} instead.
      */
-    protected int zbarViewId = R.id.zbar_scan_view;
+    @Deprecated
+    protected Integer zbarViewId = null;
+    /**
+     * The ID of the {@link CameraBarcodeScanView} inside the {@link #layoutIdCamera} layout.
+     */
+    protected int cameraViewId = R.id.camera_scan_view;
 
     /**
      * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
@@ -111,7 +116,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     /**
      * Optional camera scanner
      */
-    private ScannerZbarViewImpl cameraScanner;
+    private CameraBarcodeScanViewScanner cameraScanner;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -129,6 +134,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         // Bind to ScannerService service
         Intent intent = new Intent(this, ScannerService.class);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
+
+        // Ascending compatibility
+        if (zbarViewId != null) {
+            cameraViewId = zbarViewId;
+        }
     }
 
     /**
@@ -263,13 +273,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     }
 
     private void actuallyOpenCamera() {
-        ZbarScanView zbarView = findViewById(zbarViewId);
-        if (zbarView == null) {
+        CameraBarcodeScanView cameraView = findViewById(cameraViewId);
+        if (cameraView == null) {
             Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        cameraScanner = new ScannerZbarViewImpl(zbarView, new Scanner.ScannerDataCallback() {
+        cameraScanner = new CameraBarcodeScanViewScanner(cameraView, new Scanner.ScannerDataCallback() {
             @Override
             public void onData(Scanner s, List<Barcode> data) {
                 ScannerCompatActivity.this.onData(data);
@@ -480,8 +490,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Log.i(LOG_TAG, "Changing reader mode");
-                ZbarScanView zbarView = findViewById(zbarViewId);
-                zbarView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
+                CameraBarcodeScanView cameraView = findViewById(cameraViewId);
+                cameraView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
             }
         });
     }

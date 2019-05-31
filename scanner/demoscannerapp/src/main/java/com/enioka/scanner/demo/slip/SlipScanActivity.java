@@ -16,7 +16,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.enioka.scanner.camera.ZbarScanView;
+import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.demo.R;
 import com.enioka.scanner.demo.WelcomeActivity;
@@ -31,7 +31,7 @@ import java.util.Iterator;
 /**
  * Provide an Packing slip scan capability on current consignment
  */
-public class SlipScanActivity extends AppCompatActivity implements ZbarScanView.ResultHandler, SlipScanView.PictureHandler {
+public class SlipScanActivity extends AppCompatActivity implements CameraBarcodeScanView.ResultHandler, SlipScanView.PictureHandler {
     private static String LOG_TAG = "PackingSlipScan";
 
     /**

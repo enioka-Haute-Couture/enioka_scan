@@ -6,15 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".activities.ScannerCompatActivity">
 
-    <com.enioka.scanner.camera.ZbarScanView
-        android:id="@+id/zbar_scan_view"
+    <com.enioka.scanner.camera.CameraBarcodeScanView
+        android:id="@+id/camera_scan_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" >
-    </com.enioka.scanner.camera.ZbarScanView>
+    </com.enioka.scanner.camera.CameraBarcodeScanView>
 
     <TextView
         android:id="@+id/scanner_text_last_scan"

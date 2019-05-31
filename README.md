@@ -9,7 +9,7 @@ It is compatible with:
 * Athesi SPA43
 * All hardware scanners acting as keyboards (HID), like most BlueTooth cheap handled scanners.
 
-When there are no compatible hardware devices available, the library provides a camera reader based on ZBar.
+When there are no compatible hardware devices available, the library provides a camera reader based on ZBar or ZXing.
 
 Through a common abstraction, it provides access to the following methods (provided the hardware supports them):
 * pause/resume scanning

@@ -12,9 +12,9 @@
     <string name="scanner_status_no_camera">No camera available</string>
 
     <!-- ZBar specific -->
-    <string name="scanner_zbar_open_error_title">Cannot connect to camera service</string>
-    <string name="scanner_zbar_open_error">"Please check that no other applications (including scan helpers like ScanWedge) are using the camera. Also check if the Android camera app is working.\nApplication will now crash."</string>
-    <string name="scanner_zbar_no_camera">No fallback camera available on device. Please plugin your laser barcode scanner and restart application. Application will now crash.</string>
+    <string name="scanner_camera_open_error_title">Cannot connect to camera service</string>
+    <string name="scanner_camera_open_error">"Please check that no other applications (including scan helpers like ScanWedge) are using the camera. Also check if the Android camera app is working.\nApplication will now crash."</string>
+    <string name="scanner_camera_no_camera">No fallback camera available on device. Please plugin your laser barcode scanner and restart application. Application will now crash.</string>
 
     <!-- Scanner Service -->
     <string name="scanner_service_no_compatible_sdk">There are no compatible hardware barcode scanners on this device</string>

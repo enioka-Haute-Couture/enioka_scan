@@ -1,10 +1,10 @@
-package com.enioka.scanner.sdk.zbar;
+package com.enioka.scanner.sdk.camera;
 
 import android.app.Activity;
 import android.util.Log;
 
 import com.enioka.scanner.api.ScannerForeground;
-import com.enioka.scanner.camera.ZbarScanView;
+import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 
@@ -14,16 +14,16 @@ import java.util.List;
 /**
  *
  */
-public class ScannerZbarViewImpl implements ScannerForeground, ZbarScanView.ResultHandler {
-    private static final String LOG_TAG = "ScannerZbarViewImpl";
+public class CameraBarcodeScanViewScanner implements ScannerForeground, CameraBarcodeScanView.ResultHandler {
+    private static final String LOG_TAG = "CameraBarcodeScanViewScanner";
 
-    private ZbarScanView scanner;
+    private CameraBarcodeScanView scanner;
     private ScannerDataCallback dataDb;
 
-    public ScannerZbarViewImpl(ZbarScanView zbarScanView, ScannerDataCallback mHandler) {
+    public CameraBarcodeScanViewScanner(CameraBarcodeScanView cameraBarcodeScanView, ScannerDataCallback mHandler) {
         this.dataDb = mHandler;
 
-        this.scanner = zbarScanView;
+        this.scanner = cameraBarcodeScanView;
 
         scanner.addSymbology(BarcodeType.CODE128);
         scanner.addSymbology(BarcodeType.CODE39);
@@ -36,7 +36,7 @@ public class ScannerZbarViewImpl implements ScannerForeground, ZbarScanView.Resu
 
     @Override
     public void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
-        // Do nothing. The Zbar implementation is special, as it is built directly and not through the LaserScanner.
+        // Do nothing. The camera view implementation is special, as it is built directly and not through the LaserScanner.
         cb0.onConnectionSuccessful(this);
     }
 
@@ -62,17 +62,17 @@ public class ScannerZbarViewImpl implements ScannerForeground, ZbarScanView.Resu
 
     @Override
     public void beepScanSuccessful() {
-        ZbarScanView.beepOk();
+        CameraBarcodeScanView.beepOk();
     }
 
     @Override
     public void beepScanFailure() {
-        ZbarScanView.beepKo();
+        CameraBarcodeScanView.beepKo();
     }
 
     @Override
     public void beepPairingCompleted() {
-        ZbarScanView.beepWaiting();
+        CameraBarcodeScanView.beepWaiting();
     }
 
     @Override
@@ -117,6 +117,6 @@ public class ScannerZbarViewImpl implements ScannerForeground, ZbarScanView.Resu
 
     @Override
     public String getProviderKey() {
-        return "ZBAR";
+        return "CAMERA_SCANNER";
     }
 }

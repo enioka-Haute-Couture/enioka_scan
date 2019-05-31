@@ -14,7 +14,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static com.enioka.scanner.camera.ZbarScanView.beepOk;
+import static com.enioka.scanner.camera.CameraBarcodeScanView.beepOk;
 
 /**
  * Holder for analyser thread pool.
@@ -212,11 +212,11 @@ class FrameAnalyserManager {
     /**
      * Default is simply CODE_128. Use the Symbol static fields to specify a symbology.
      *
-     * @param s the ID of the symbology (ZBAR coding)
+     * @param barcodeType the symbology to add to the allowed symbologies. Less is best in terms of performance.
      */
-    void addSymbology(BarcodeType s) {
+    void addSymbology(BarcodeType barcodeType) {
         for (FrameAnalyser frameAnalyser : analysers) {
-            frameAnalyser.addSymbology(s);
+            frameAnalyser.addSymbology(barcodeType);
         }
     }
 }

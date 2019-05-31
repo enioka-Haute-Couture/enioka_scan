@@ -44,6 +44,9 @@ import java.util.Arrays;
 
 import me.dm7.barcodescanner.core.DisplayUtils;
 
+/**
+ * Experimental. Should NOT be used.
+ */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, ScannerCallback {
     private static final String TAG = "BARCODE";

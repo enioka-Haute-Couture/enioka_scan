@@ -36,13 +36,13 @@ import java.util.List;
 import me.dm7.barcodescanner.core.DisplayUtils;
 
 /**
- * Helper view that encapsulates the ZBar barcode analysis engine.
+ * Helper view that encapsulates the ZBar (default) and ZXing (option) barcode analysis engines.
  * To be directly reused in layouts.
  * We are using deprecated Camera API because old Android.
  */
-@SuppressWarnings({"deprecation", "unused"})
+@SuppressWarnings({"unused"})
 // Deprecation: using CameraV1. Unused: some methods only used in clients.
-public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback, SurfaceHolder.Callback, ScannerCallback {
+public class CameraBarcodeScanView extends FrameLayout implements Camera.PreviewCallback, SurfaceHolder.Callback, ScannerCallback {
     private static final String TAG = "BARCODE";
 
     protected static final int RECT_HEIGHT = 10;
@@ -74,12 +74,12 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Stupid constructors
-    public ZbarScanView(Context context) {
+    public CameraBarcodeScanView(Context context) {
         super(context);
         initOnce(context);
     }
 
-    public ZbarScanView(Context context, AttributeSet attributeSet) {
+    public CameraBarcodeScanView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
         if (attributeSet.getAttributeValue(null, "readerMode") != null) {
             readerMode = CameraReader.valueOf(attributeSet.getAttributeValue(null, "readerMode"));
@@ -149,8 +149,8 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         } catch (final Exception e) {
             failed = true;
             e.printStackTrace();
-            new AlertDialog.Builder(getContext()).setTitle(getResources().getString(R.string.scanner_zbar_open_error_title)).
-                    setMessage(getResources().getString(R.string.scanner_zbar_open_error)).
+            new AlertDialog.Builder(getContext()).setTitle(getResources().getString(R.string.scanner_camera_open_error_title)).
+                    setMessage(getResources().getString(R.string.scanner_camera_open_error)).
                     setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -162,8 +162,8 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
 
         if (this.cam == null) {
             failed = true;
-            new AlertDialog.Builder(getContext()).setTitle(getResources().getString(R.string.scanner_zbar_open_error_title)).
-                    setMessage(getResources().getString(R.string.scanner_zbar_no_camera)).
+            new AlertDialog.Builder(getContext()).setTitle(getResources().getString(R.string.scanner_camera_open_error_title)).
+                    setMessage(getResources().getString(R.string.scanner_camera_no_camera)).
                     setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
@@ -591,7 +591,7 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
                             final float dy = event.getY() - dragStartY;
                             float newTop = dragCropTop + (int) dy;
                             float newBottom = dragCropBottom + (int) dy;
-                            if (newTop > 0 && newBottom < ZbarScanView.this.camView.getHeight()) {
+                            if (newTop > 0 && newBottom < CameraBarcodeScanView.this.camView.getHeight()) {
                                 cropRect.top = (int) newTop;
                                 cropRect.bottom = (int) newBottom;
 
@@ -699,8 +699,8 @@ public class ZbarScanView extends FrameLayout implements Camera.PreviewCallback,
         this.post(new Runnable() {
             @Override
             public void run() {
-                if (ZbarScanView.this.handler != null) {
-                    ZbarScanView.this.handler.handleScanResult(result, type);
+                if (CameraBarcodeScanView.this.handler != null) {
+                    CameraBarcodeScanView.this.handler.handleScanResult(result, type);
                 }
             }
         });

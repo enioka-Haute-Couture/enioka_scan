@@ -12,7 +12,7 @@ import android.util.Log;
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.camera.ZbarScanView;
+import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 
@@ -191,15 +191,15 @@ public class HHTScanner extends BroadcastReceiver implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void beepScanSuccessful() {
-        ZbarScanView.beepOk();
+        CameraBarcodeScanView.beepOk();
     }
 
     public void beepScanFailure() {
-        ZbarScanView.beepKo();
+        CameraBarcodeScanView.beepKo();
     }
 
     public void beepPairingCompleted() {
-        ZbarScanView.beepWaiting();
+        CameraBarcodeScanView.beepWaiting();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -7,13 +7,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
-import com.enioka.scanner.camera.ZbarScanView;
+import com.enioka.scanner.camera.CameraBarcodeScanView;
 
 /**
  * Build a view for packing slip scanning
  */
 @SuppressWarnings("deprecation")
-public class SlipScanView extends ZbarScanView implements Camera.PictureCallback {
+public class SlipScanView extends CameraBarcodeScanView implements Camera.PictureCallback {
 
     private static final String TAG = "SLIP";
 

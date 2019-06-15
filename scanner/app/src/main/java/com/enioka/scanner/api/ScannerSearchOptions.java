@@ -19,6 +19,11 @@ public class ScannerSearchOptions {
      */
     public boolean keepScreenOn = true;
 
+    /**
+     * If true, bluetooth devices will be searched for scanners.
+     */
+    public boolean useBlueTooth = false;
+
     public static ScannerSearchOptions defaultOptions() {
         return new ScannerSearchOptions();
     }

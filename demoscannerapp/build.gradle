@@ -23,7 +23,7 @@ android {
 
 dependencies {
     // Reference our own library, directly compiled from its project
-    implementation project(":app");
+    implementation project(':enioka_scan');
 
     // Android stuff
     implementation 'com.android.support:appcompat-v7:26.1.0'

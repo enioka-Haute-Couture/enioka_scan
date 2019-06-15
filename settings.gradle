@@ -1,0 +1,1 @@
+include ':enioka_scan', ':barcode_scanner_library', ':demoscannerapp'

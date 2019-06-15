@@ -40,8 +40,8 @@ dependencies {
     api 'me.dm7.barcodescanner:zbar:1.8.3'
     api 'com.google.zxing:core:3.4.0'
 
-    // An AAR from Athesi
-    implementation project(':barcode_scanner_library_v2.0.8.0')
+    // Zebra BT scanning library
+    implementation project(':barcode_scanner_library')
 
     // Test things (useless for now)
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {

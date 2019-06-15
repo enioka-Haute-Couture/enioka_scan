@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('barcode_scanner_library_v2.4.5.0.aar'))

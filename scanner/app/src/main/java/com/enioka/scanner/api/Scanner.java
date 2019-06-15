@@ -142,5 +142,8 @@ public interface Scanner {
      */
     boolean supportsIllumination();
 
+    /**
+     * For logging and sorting purpose, this is the key of the SDK behing this scanner (same as {@link ScannerProvider#getKey()}.
+     */
     String getProviderKey();
 }

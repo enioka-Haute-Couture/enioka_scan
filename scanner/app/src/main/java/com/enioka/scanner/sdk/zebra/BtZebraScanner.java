@@ -6,9 +6,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.Xml;
 
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
@@ -19,6 +19,11 @@ import com.zebra.scannercontrol.IDcsSdkApiDelegate;
 import com.zebra.scannercontrol.RMDAttributes;
 import com.zebra.scannercontrol.SDKHandler;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -141,7 +146,7 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
         // We would like to subscribe to all barcode events
         notificationsMask |= DCSSDKDefs.DCSSDK_EVENT.DCSSDK_EVENT_BARCODE.value;
         // subscribe to events set in notification mask
-        sdkHandler.dcssdkSubsribeForEvents(notificationsMask);
+        sdkHandler.dcssdkSubsribeForEvents(notificationsMask); // | 20 | 21
 
         connectToAvailableScanner(new ScannerInitCallback() {
             @Override
@@ -206,18 +211,20 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
             Log.i(LOG_TAG, "disconnect");
             sdkHandler.dcssdkTerminateCommunicationSession(scannerId);
             sdkHandler.dcssdkUnsubsribeForEvents(notificationsMask);
-            sdkHandler.dcssdkClose(this);
+            sdkHandler.dcssdkClose();
         }
     }
 
     @Override
     public void pause() {
-
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_DISABLE, null).execute(inXML);
     }
 
     @Override
     public void resume() {
-
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_ENABLE, null).execute(inXML);
     }
 
     @Override
@@ -244,6 +251,11 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
         new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, null).execute(inXML);
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // COMMAND ASYNC HANDLING METHODS
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * Send a command "inXml" to the scanner, output in "outXml"
      */
@@ -254,7 +266,7 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
                 outXML = new StringBuilder();
             }
             DCSSDKDefs.DCSSDK_RESULT result = sdkHandler.dcssdkExecuteCommandOpCodeInXMLForScanner(opCode, inXML, outXML, scannerId);
-            Log.i(LOG_TAG, "executeCommand : inXml = " + inXML + " - outXml = " + outXML);
+            Log.i(LOG_TAG, "executeCommand " + opCode + " done with code " + result + ": inXml = " + inXML + " - outXml = " + outXML);
             if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_SUCCESS)
                 return true;
             else if (result == DCSSDKDefs.DCSSDK_RESULT.DCSSDK_RESULT_FAILURE)
@@ -263,16 +275,27 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
         return false;
     }
 
+    private interface ExecuteCommandAsyncCallback {
+        void run(String resultString);
+    }
+
     /**
      * Background task for executeCommands
      */
     private class ExecuteCommandAsync extends AsyncTask<String, Integer, Boolean> {
         DCSSDKDefs.DCSSDK_COMMAND_OPCODE opcode;
         StringBuilder outXML;
+        ExecuteCommandAsyncCallback backgroundCb, foregroundCb;
 
         ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE opcode, StringBuilder outXML) {
+            this(opcode, outXML, null, null);
+        }
+
+        ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE opcode, StringBuilder outXML, ExecuteCommandAsyncCallback backgroundCb, ExecuteCommandAsyncCallback foregroundCb) {
             this.opcode = opcode;
             this.outXML = outXML;
+            this.backgroundCb = backgroundCb;
+            this.foregroundCb = foregroundCb;
         }
 
         @Override
@@ -282,22 +305,33 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
 
         @Override
         protected Boolean doInBackground(String... strings) {
-            return executeCommand(sdkHandler, scannerId, opcode, strings[0], outXML);
+            boolean result = executeCommand(sdkHandler, scannerId, opcode, strings[0], outXML);
+
+            if (result && this.backgroundCb != null) {
+                this.backgroundCb.run(outXML.toString());
+            }
+            return result;
         }
 
         @Override
         protected void onPostExecute(Boolean result) {
-            super.onPostExecute(result);
+            if (result && this.foregroundCb != null) {
+                this.foregroundCb.run(outXML.toString());
+            }
         }
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Driver callbacks
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * "Barcode Event" notification informs about reception of a particular barcode of a particular type from a particular active scanner.
      */
     @Override
     public void dcssdkEventBarcode(byte[] barcodeData, int barcodeType, int fromScannerID) {
-        Log.i(LOG_TAG, "dcssdkEventBarcode");
-        Log.i(LOG_TAG, "************ " + barcodeType);
+        Log.i(LOG_TAG, "dcssdkEventBarcode type " + barcodeType + " - data length is " + barcodeData.length);
 
         if (dataCb != null) {
             final List<Barcode> res = new ArrayList<>(1);
@@ -341,6 +375,11 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
         Log.i(LOG_TAG, "dcssdkEventFirmwareUpdate");
     }
 
+    @Override
+    public void dcssdkEventAuxScannerAppeared(DCSScannerInfo dcsScannerInfo, DCSScannerInfo dcsScannerInfo1) {
+        Log.i(LOG_TAG, "dcssdkEventAuxScannerAppeared");
+    }
+
     /**
      * "Image Event" notification is triggered when an active imaging scanner captures images in image mode.
      */
@@ -373,29 +412,49 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
         Log.i(LOG_TAG, "dcssdkEventVideo");
     }
 
+    @Override
+    public void dcssdkEventBinaryData(byte[] bytes, int i) {
+        Log.i(LOG_TAG, "dcssdkEventBinaryData");
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // ILLUMINATION
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private boolean illuminated = true;
+
     @Override
     public void enableIllumination() {
-        //TODO.
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_AIM_ON, null).execute(inXML);
+        illuminated = true;
     }
 
     @Override
     public void disableIllumination() {
-        //TODO.
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_AIM_OFF, null).execute(inXML);
+        illuminated = false;
+
     }
 
     @Override
     public void toggleIllumination() {
-        //TODO
+        beepScanSuccessful();
+        if (illuminated) {
+            disableIllumination();
+        } else {
+            enableIllumination();
+        }
+
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_PULL_TRIGGER, null).execute(inXML);
     }
 
     @Override
     public boolean supportsIllumination() {
-        return false;
+        return true;
     }
 
     @Override
@@ -406,5 +465,70 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
     @Override
     public String getProviderKey() {
         return BtZebraProvider.PROVIDER_NAME;
+    }
+
+    private void debugDumpParameters() {
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
+        StringBuilder sb = new StringBuilder();
+        ExecuteCommandAsync ea = new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_GETALL, sb, new ExecuteCommandAsyncCallback() {
+            @Override
+            public void run(String resultString) {
+                List<String> paramNames = new ArrayList<>();
+
+                try {
+                    XmlPullParser parser = Xml.newPullParser();
+                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+                    parser.setInput(new StringReader(resultString));
+
+                    String latestOpenedTag = "";
+
+                    int eventType = parser.getEventType();
+                    while (eventType != XmlPullParser.END_DOCUMENT) {
+                        if (eventType == XmlPullParser.START_DOCUMENT) {
+                            Log.d(LOG_TAG, "Start document");
+                        } else if (eventType == XmlPullParser.START_TAG) {
+                            //Log.d(LOG_TAG, "Start tag " + parser.getName());
+                            latestOpenedTag = parser.getName();
+                        } else if (eventType == XmlPullParser.END_TAG) {
+                            //Log.d(LOG_TAG, "End tag " + parser.getName());
+                            latestOpenedTag = "";
+                        } else if (eventType == XmlPullParser.TEXT) {
+                            //Log.d(LOG_TAG, "Text " + parser.getText());
+                            if (latestOpenedTag.equals("attribute")) {
+                                paramNames.add(parser.getText());
+                            }
+                        }
+                        eventType = parser.next();
+                    }
+                } catch (XmlPullParserException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                for (String prm : paramNames) {
+                    Log.d(LOG_TAG, "Param ID found: " + prm);
+                }
+
+                // Ask param values per small blocks, else the driver explodes.
+                int i = 0;
+                while (i < paramNames.size()) {
+                    String in_xml = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-xml><attrib_list>";
+
+                    for (int j = 0; j < 10 && i < paramNames.size(); j++) {
+                        String attributeName = paramNames.get(i++);
+                        if (attributeName.equals("255")) {
+                            continue;
+                        }
+                        in_xml += attributeName + ",";
+                    }
+                    in_xml = in_xml.substring(0, in_xml.length() - 2);
+                    in_xml += "</attrib_list></arg-xml></cmdArgs></inArgs>";
+
+                    new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_GET, null).execute(in_xml);
+                }
+            }
+        }, null);
+        ea.execute(inXML);
     }
 }

@@ -42,7 +42,7 @@ public class BtZebraProvider implements ScannerProvider {
         if (!scannerFound) {
             Log.i(LOG_TAG, "Not Zebra BT devices connected to this device");
             cb.onProviderUnavailable(PROVIDER_NAME); // Costly search. We do not want it to do it on each scanner search.
-            sdkHandler.dcssdkClose(null);
+            sdkHandler.dcssdkClose();
         }
     }
 

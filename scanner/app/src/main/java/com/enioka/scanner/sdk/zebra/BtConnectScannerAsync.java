@@ -9,6 +9,7 @@ import com.zebra.scannercontrol.RMDAttributes;
 import com.zebra.scannercontrol.SDKHandler;
 
 /**
+ *
  */
 class BtConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
     private static final String LOG_TAG = "BtConnectScannerAsync";
@@ -20,7 +21,7 @@ class BtConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
 
     private static boolean isConfigured = false;
 
-    public BtConnectScannerAsync(Scanner.ScannerInitCallback callback, SDKHandler sdkHandler, int scannerId, Scanner scanner) {
+    public BtConnectScannerAsync(Scanner.ScannerInitCallback callback, SDKHandler sdkHandler, int scannerId, BtZebraScanner scanner) {
         this.callback = callback;
         this.sdkHandler = sdkHandler;
         this.scannerId = scannerId;
@@ -47,14 +48,12 @@ class BtConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
                     "<attribute><id>" + RMDAttributes.RMD_ATTR_BEEPER_FREQUENCY + "</id><datatype>B</datatype>" +
                     "<value>" + RMDAttributes.RMD_ATTR_VALUE_BEEPER_FREQ_MEDIUM + "</value></attribute>"
                     + "</attrib_list></arg-xml></cmdArgs></inArgs>";
-
             BtZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
 
             inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-xml><attrib_list>" +
                     "<attribute><id>" + RMDAttributes.RMD_ATTR_BEEPER_VOLUME + "</id><datatype>B</datatype>" +
                     "<value>" + RMDAttributes.RMD_ATTR_VALUE_BEEPER_VOLUME_HIGH + "</value></attribute>" +
                     "</attrib_list></arg-xml></cmdArgs></inArgs>";
-
             BtZebraScanner.executeCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_RSM_ATTR_SET, inXML, null);
 
             // Set authorized symbologies
@@ -84,6 +83,7 @@ class BtConnectScannerAsync extends AsyncTask<Void, Void, Boolean> {
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
         if (result) {
+            this.scanner.resume();
             if (callback != null) {
                 callback.onConnectionSuccessful(scanner);
             }

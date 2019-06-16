@@ -474,6 +474,8 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
     public void resume() {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
         new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_ENABLE, null).execute(inXML);
+
+        pullTrigger();
     }
 
 

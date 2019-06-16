@@ -2,6 +2,8 @@ package com.enioka.scanner.service;
 
 import android.app.Activity;
 
+import com.enioka.scanner.api.Color;
+
 /**
  * The public API of the {@link ScannerService}. Obtained by binding to the service.
  */
@@ -65,4 +67,20 @@ public interface ScannerServiceApi {
      * Disconnect scanners from the App (the app does not need the scanner anymore).
      */
     void disconnect();
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // BUZZER
+    ////////////////////////////////////////////////////////////////////////////
+
+    void beep();
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // LIGHTS
+    ////////////////////////////////////////////////////////////////////////////
+
+    void ledColorOn(Color color);
+
+    void ledColorOff(Color color);
 }

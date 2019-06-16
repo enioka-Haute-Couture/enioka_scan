@@ -8,6 +8,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.Xml;
 
+import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.data.Barcode;
@@ -215,42 +216,6 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
         }
     }
 
-    @Override
-    public void pause() {
-        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
-        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_DISABLE, null).execute(inXML);
-    }
-
-    @Override
-    public void resume() {
-        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
-        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_ENABLE, null).execute(inXML);
-    }
-
-    @Override
-    public void beepScanSuccessful() {
-        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" +
-                +BEEP_HIGH_SHORT_1 + "</arg-int></cmdArgs></inArgs>";
-
-        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, null).execute(inXML);
-    }
-
-    @Override
-    public void beepScanFailure() {
-        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" +
-                +BEEP_LOW_LONG_2 + "</arg-int></cmdArgs></inArgs>";
-
-        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, null).execute(inXML);
-    }
-
-    @Override
-    public void beepPairingCompleted() {
-        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" +
-                +BEEP_HIGH_LOW_HIGH + "</arg-int></cmdArgs></inArgs>";
-
-        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, null).execute(inXML);
-    }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // COMMAND ASYNC HANDLING METHODS
@@ -447,9 +412,6 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
         } else {
             enableIllumination();
         }
-
-        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
-        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_PULL_TRIGGER, null).execute(inXML);
     }
 
     @Override
@@ -462,9 +424,100 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
         return false;
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // LED
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void ledColorOn(Color color) {
+        int attrCode;
+        if (color == Color.GREEN) {
+            attrCode = 43;
+        } else if (color == Color.RED) {
+            attrCode = 47;
+        } else {
+            attrCode = 45;
+        }
+
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" + attrCode + "</arg-int></cmdArgs></inArgs>";
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, null).execute(inXML);
+    }
+
+    @Override
+    public void ledColorOff(Color color) {
+        int attrCode;
+        if (color == Color.GREEN) {
+            attrCode = 42;
+        } else if (color == Color.RED) {
+            attrCode = 48;
+        } else {
+            attrCode = 46;
+        }
+
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" + attrCode + "</arg-int></cmdArgs></inArgs>";
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, null).execute(inXML);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // PAUSE/RESUME
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void pause() {
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_DISABLE, null).execute(inXML);
+    }
+
+    @Override
+    public void resume() {
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_ENABLE, null).execute(inXML);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // BEEP
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void beepScanSuccessful() {
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" +
+                +BEEP_HIGH_SHORT_1 + "</arg-int></cmdArgs></inArgs>";
+
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, null).execute(inXML);
+    }
+
+    @Override
+    public void beepScanFailure() {
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" +
+                +BEEP_LOW_LONG_2 + "</arg-int></cmdArgs></inArgs>";
+
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, null).execute(inXML);
+    }
+
+    @Override
+    public void beepPairingCompleted() {
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" +
+                +BEEP_HIGH_LOW_HIGH + "</arg-int></cmdArgs></inArgs>";
+
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, null).execute(inXML);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // MISC
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     public String getProviderKey() {
         return BtZebraProvider.PROVIDER_NAME;
+    }
+
+    private void pullTrigger() {
+        String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
+        new ExecuteCommandAsync(DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_PULL_TRIGGER, null).execute(inXML);
     }
 
     private void debugDumpParameters() {

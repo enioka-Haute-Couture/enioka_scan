@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.enioka.scanner.R;
+import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
@@ -221,6 +222,14 @@ public class HHTScanner extends BroadcastReceiver implements ScannerBackground {
     @Override
     public boolean isIlluminationOn() {
         return false;
+    }
+
+    @Override
+    public void ledColorOn(Color color) {
+    }
+
+    @Override
+    public void ledColorOff(Color color) {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

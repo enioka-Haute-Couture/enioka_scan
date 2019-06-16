@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.enioka.scanner.R;
+import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.data.Barcode;
@@ -484,6 +485,14 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
     @Override
     public boolean isIlluminationOn() {
         return false;
+    }
+
+    @Override
+    public void ledColorOn(Color color) {
+    }
+
+    @Override
+    public void ledColorOff(Color color) {
     }
 
     @Override

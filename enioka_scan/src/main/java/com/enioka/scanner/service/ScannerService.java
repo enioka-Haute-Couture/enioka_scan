@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.R;
+import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.api.ScannerConnectionHandler;
@@ -307,6 +308,24 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     public void disconnect() {
         for (Scanner s : this.scanners) {
             s.disconnect();
+        }
+    }
+
+    public void beep() {
+        for (Scanner s : this.scanners) {
+            s.beepScanSuccessful();
+        }
+    }
+
+    public void ledColorOn(Color color) {
+        for (Scanner s : this.scanners) {
+            s.ledColorOn(color);
+        }
+    }
+
+    public void ledColorOff(Color color) {
+        for (Scanner s : this.scanners) {
+            s.ledColorOff(color);
         }
     }
 }

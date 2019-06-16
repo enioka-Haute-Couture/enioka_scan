@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.data.Barcode;
@@ -161,6 +162,14 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
     @Override
     public boolean supportsIllumination() {
         return false;
+    }
+
+    @Override
+    public void ledColorOn(Color color) {
+    }
+
+    @Override
+    public void ledColorOff(Color color) {
     }
 
     private class AsyncResultHandler extends AsyncTask<BarcodeReadEvent, Void, Barcode> {

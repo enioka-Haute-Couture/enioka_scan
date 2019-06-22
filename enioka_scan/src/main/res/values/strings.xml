@@ -8,8 +8,16 @@
     <string name="scanner_status_waiting">Scanner ready to scan on trigger press</string>
     <string name="scanner_status_disabled">Scanner is disabled</string>
     <string name="scanner_status_initialized">Scanner is correctly initialized</string>
+    <string name="scanner_status_initializing">Scanner is initializing</string>
     <string name="scanner_status_initialization_failure">Scanner was found but failed to initialize</string>
     <string name="scanner_status_no_camera">No camera available</string>
+
+    <!-- Connection status -->
+    <string name="scanner_status_connected">Scanner connected</string>
+    <string name="scanner_status_connecting">Scanner connecting</string>
+    <string name="scanner_status_listen">Scanner is waiting for a connection</string>
+    <string name="scanner_status_lost">Scanner connection lost</string>
+    <string name="scanner_status_unknown">Scanner connection is weird</string>
 
     <!-- ZBar specific -->
     <string name="scanner_camera_open_error_title">Cannot connect to camera service</string>

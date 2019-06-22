@@ -123,7 +123,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
-        Log.d(LOG_TAG, "Service has received a new scanner from provider " + providerKey + " - key is " + scannerKey);
+        Log.d(LOG_TAG, "Service has received a new scanner from provider " + providerKey + " and will initialize it. Its key is " + scannerKey);
 
         if (s instanceof ScannerBackground) {
             initializingScannersCount.incrementAndGet();

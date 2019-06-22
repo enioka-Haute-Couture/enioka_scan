@@ -23,4 +23,10 @@
     <string name="scanner_service_no_compatible_sdk">Aucun scanner de code barre matériel compatible n\'est disponible sur cet appareil</string>
     <string name="scanner_service_sdk_search_end">Tous les fournisseurs de scanners matériels ont répondu</string>
     <string name="activity_scan_use_zxing">ZXing</string>
+    <string name="scanner_status_connected">Scanner connecté</string>
+    <string name="scanner_status_connecting">Scanner en cours de connection</string>
+    <string name="scanner_status_initializing">Scanner en cours d\'initialisation</string>
+    <string name="scanner_status_listen">Scanner en attente de connection</string>
+    <string name="scanner_status_lost">Perte de la connection au scanner</string>
+    <string name="scanner_status_unknown">Scanner déconnecté de façon étrange</string>
 </resources>

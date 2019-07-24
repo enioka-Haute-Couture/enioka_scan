@@ -70,6 +70,7 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
     private int previewBufferSize;
 
     private FrameAnalyserManager frameAnalyser;
+    private List<BarcodeType> symbologies = new ArrayList<BarcodeType>();
     private CameraReader readerMode = CameraReader.ZBAR;
 
 
@@ -96,7 +97,7 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
         if (!this.isInEditMode()) {
             // ZBar is a native library
             System.loadLibrary("iconv");
-            frameAnalyser = new FrameAnalyserManager(this, resolution, readerMode);
+            reinitialiseFrameAnalyser();
         }
 
         // If the preview does not take all the space
@@ -110,12 +111,25 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
         camView.getHolder().addCallback(this);
     }
 
+    private void reinitialiseFrameAnalyser() {
+        if (this.frameAnalyser != null) {
+            this.frameAnalyser.close();
+        }
+
+        this.frameAnalyser = new FrameAnalyserManager(this, resolution, readerMode);
+
+        for (BarcodeType symbology : this.symbologies) {
+            this.frameAnalyser.addSymbology(symbology);
+        }
+    }
+
     /**
      * Default is simply CODE_128. Use the Symbol static fields to specify a symbology.
      *
      * @param barcodeType the symbology
      */
     public void addSymbology(BarcodeType barcodeType) {
+        this.symbologies.add(barcodeType);
         if (frameAnalyser != null) {
             frameAnalyser.addSymbology(barcodeType);
         }
@@ -123,8 +137,7 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
 
     public void setReaderMode(CameraReader readerMode) {
         this.readerMode = readerMode;
-        frameAnalyser.close();
-        frameAnalyser = new FrameAnalyserManager(this, resolution, readerMode);
+        reinitialiseFrameAnalyser();
     }
 
     protected boolean isUsingPreviewForPhoto() {
@@ -173,6 +186,8 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
                     }).show();
             return;
         }
+
+        reinitialiseFrameAnalyser();
 
         Camera.Parameters prms = this.cam.getParameters();
 
@@ -777,7 +792,8 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
             this.cam.stopPreview();
             this.setOnClickListener(null);
             this.lastPreviewData = null;
-            frameAnalyser.close();
+            this.frameAnalyser.close();
+            this.frameAnalyser = null;
         }
         closeCamera();
     }

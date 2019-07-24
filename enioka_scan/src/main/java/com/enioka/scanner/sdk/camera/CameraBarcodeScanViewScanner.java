@@ -16,7 +16,7 @@ import java.util.List;
  *
  */
 public class CameraBarcodeScanViewScanner implements ScannerForeground, CameraBarcodeScanView.ResultHandler {
-    private static final String LOG_TAG = "CameraBarcodeScanViewScanner";
+    private static final String LOG_TAG = "CamBarcodeScanVScanner";
 
     private CameraBarcodeScanView scanner;
     private ScannerDataCallback dataDb;

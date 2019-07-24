@@ -61,6 +61,7 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
     protected boolean scanningStarted = true;
     private boolean failed = false;
 
+    private View targetView;
     protected Rect cropRect = new Rect(); // The "targeting" rectangle.
     boolean allowTargetDrag = true;
     private byte[] lastPreviewData;
@@ -576,6 +577,7 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
 
         Log.i(TAG, "Targeting overlay added");
         this.addView(targetView, prms);
+        this.targetView = targetView;
 
         if (allowTargetDrag) {
             targetView.setOnTouchListener(new OnTouchListener() {
@@ -643,7 +645,9 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
         } catch (Exception e) {
             throw new RuntimeException("Could not start camera preview and preview data analysis", e);
         }
-        addTargetView();
+        if (this.targetView == null) {
+            addTargetView();
+        }
     }
 
     @Override

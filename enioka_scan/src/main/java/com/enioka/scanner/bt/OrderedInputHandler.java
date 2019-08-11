@@ -1,9 +1,12 @@
 package com.enioka.scanner.bt;
 
+import android.util.Log;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class OrderedInputHandler implements BtDeviceInputHandler {
+    private static final String LOG_TAG = "InternalBtDevice";
     private byte[] terminator = new byte[]{0xD, 0x0A}; // CRLF
 
     private Queue<BtCommandWithAnswer> expectedAnswers = new LinkedList<>();
@@ -31,7 +34,7 @@ public class OrderedInputHandler implements BtDeviceInputHandler {
         }
 
         boolean terminated = true;
-        for (int i = dataLength - 1; i >= 0 && i >= dataLength + actualTerminator.length; i--) {
+        for (int i = dataLength - 1; i >= 0 && i >= dataLength - actualTerminator.length; i--) {
             if (buffer[i] != actualTerminator[i - dataLength + actualTerminator.length]) {
                 terminated = false;
                 break;
@@ -39,6 +42,9 @@ public class OrderedInputHandler implements BtDeviceInputHandler {
         }
 
         if (terminated) {
+            if (terminator.length > 0) {
+                Log.d(LOG_TAG, "terminated with " + terminator.length + " bytes");
+            }
             handler.process(buffer, offset, dataLength - terminator.length);
             handler.endOfTransmission();
             expectedAnswers.poll();

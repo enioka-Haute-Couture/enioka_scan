@@ -100,6 +100,22 @@ public class BtDevice implements Closeable {
 
     }
 
+    /**
+     * Helper to discover SPP protocols. Debug only.
+     */
+    private void discoverCodes() {
+        for (int i = 2043; i < 2126; i++) {
+            String cmd = "{G" + i + "?}{G1026}";
+            Log.i(LOG_TAG, cmd);
+            this.outputStreamWriter.write(cmd);
+            try {
+                Thread.sleep(150);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void runCommand(BtCommand command) {
         if (command instanceof BtCommandWithAnswer) {
             this.inputHandler.expectAnswer((BtCommandWithAnswer) command);

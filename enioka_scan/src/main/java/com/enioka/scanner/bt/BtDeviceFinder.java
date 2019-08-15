@@ -44,7 +44,8 @@ public class BtDeviceFinder {
             Log.i(LOG_TAG, desc);
             Log.i(LOG_TAG, "Class major: " + BtConstHelpers.getBtMajorClassDescription(bt.getBluetoothClass().getMajorDeviceClass()) + " - Minor: " + BtConstHelpers.getBtClassDescription(bt.getBluetoothClass().getDeviceClass()));
 
-            if (bt.getName().startsWith("GS")) {
+            //if (bt.getName().startsWith("GS")) {
+            if (bt.getName().startsWith("Voyager")) {
                 tmp2 = bt;
             }
         }

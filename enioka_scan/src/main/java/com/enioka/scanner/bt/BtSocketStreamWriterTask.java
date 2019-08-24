@@ -30,7 +30,7 @@ public class BtSocketStreamWriterTask implements Runnable {
     @Override
     public void run() {
         try {
-            Log.d(LOG_TAG, "writing data on output stream. byte count: " + this.length);
+            Log.d(LOG_TAG, "writing data on output stream. byte count: " + this.length + " - " + LoggingInputHandler.byteArrayToHex(this.buffer, length));
             this.outputStream.write(buffer, offset, length);
             this.outputStream.flush();
             Log.d(LOG_TAG, "writing done");

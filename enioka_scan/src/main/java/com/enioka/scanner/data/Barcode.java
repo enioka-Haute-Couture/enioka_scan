@@ -19,4 +19,9 @@ public class Barcode {
     public BarcodeType getBarcodeType() {
         return barcodeType;
     }
+
+    @Override
+    public String toString() {
+        return this.barcode + " (" + this.barcodeType.code + ")";
+    }
 }

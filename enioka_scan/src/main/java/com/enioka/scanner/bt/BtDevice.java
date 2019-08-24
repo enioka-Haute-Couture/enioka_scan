@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.enioka.scanner.sdk.generalscan.commands.GetBatteryLevel;
+import com.enioka.scanner.sdk.zebraoss.SsiParser;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -17,7 +17,6 @@ public class BtDevice implements Closeable {
     private static final String LOG_TAG = "InternalBtDevice";
 
     private final BluetoothDevice rawDevice;
-    private final BluetoothAdapter bluetoothAdapter;
     private ConnectToBtDeviceThread connectionThread;
 
     private final String name;
@@ -26,17 +25,36 @@ public class BtDevice implements Closeable {
     private BtSocketStreamReader inputStreamReader;
     private BtSocketStreamWriter outputStreamWriter;
 
-    private final OrderedInputHandler inputHandler;
+    private final BtInputHandler inputHandler;
 
-
-    BtDevice(BluetoothDevice device, BluetoothAdapter bluetoothAdapter) {
+    /**
+     * Create an unconnected device from a cached device definition. Need to call {@link #connect(BluetoothAdapter)} before any interaction with the device.
+     *
+     * @param device a device definition
+     */
+    BtDevice(BluetoothDevice device) {
         this.rawDevice = device;
-        this.bluetoothAdapter = bluetoothAdapter;
         this.name = this.rawDevice.getName();
-        this.inputHandler = new OrderedInputHandler();
+        this.inputHandler = new SsiParser();
     }
 
-    void connect() {
+    /**
+     * Create a connected device from an already open bluetooth socket.
+     *
+     * @param socket a socket to a bluetooth device (male or slave - do not care).
+     */
+    BtDevice(BluetoothSocket socket) {
+        this.rawDevice = socket.getRemoteDevice();
+        this.name = this.rawDevice.getName();
+        this.inputHandler = new SsiParser();
+
+        this.clientSocket = socket;
+        this.connectStreams();
+        Log.i(LOG_TAG, "Device " + BtDevice.this.name + " reports it is connected");
+        //this.outputStreamWriter.write(new byte[]{0x5, (byte) 0x70, 0x4, 0, (byte) 0xFE, (byte) 0xFE, (byte) 0x89});
+    }
+
+    void connect(BluetoothAdapter bluetoothAdapter) {
         Log.i(LOG_TAG, "Starting connection to device " + BtDevice.this.name);
         connectionThread = new ConnectToBtDeviceThread(rawDevice, bluetoothAdapter, new ConnectToBtDeviceThread.OnConnectedCallback() {
             @Override
@@ -47,9 +65,18 @@ public class BtDevice implements Closeable {
                 connectStreams();
 
                 // TEMP
-                //BtDevice.this.outputStreamWriter.write(0);
-                BtDevice.this.runCommand(new GetBatteryLevel());
-                BtDevice.this.outputStreamWriter.write("{G2108}");
+                //BtDevice.this.runCommand(new GetBatteryLevel());
+                //BtDevice.this.outputStreamWriter.write("{G2043/1/\r\n}{G1026}");
+                //BtDevice.this.outputStreamWriter.write("{G1026?}");
+                //BtDevice.this.outputStreamWriter.write("{G3010/0}");
+                //BtDevice.this.outputStreamWriter.write("{G2351?}");
+                //BtDevice.this.runCommand(new SetBeepLevel());
+                //discoverCodes();
+                //BtDevice.this.outputStreamWriter.write(Character.toString((char) 22) + "U" + Character.toString((char) 13));
+
+                // BtDevice.this.outputStreamWriter.write(new byte[] {0x5, (byte)0xC7, 0x4, 0, (byte)0xFE, (byte)0xFE, (byte)0x32}); // Should work for ds3600
+                //BtDevice.this.outputStreamWriter.write(new byte[]{0x5, (byte) 0x70, 0x4, 0, (byte) 0xFE, (byte) 0xFE, (byte) 0x89});
+                //BtDevice.this.outputStreamWriter.write("HOUBA");
             }
 
             @Override
@@ -74,7 +101,7 @@ public class BtDevice implements Closeable {
         }
 
         try {
-            this.inputStreamReader = new BtSocketStreamReader(this.clientSocket.getInputStream(), this.inputHandler);
+            this.inputStreamReader = new BtSocketStreamReader(this.clientSocket.getInputStream(), this);
             this.inputStreamReader.start();
 
             this.outputStreamWriter = new BtSocketStreamWriter(this.clientSocket.getOutputStream());
@@ -96,8 +123,6 @@ public class BtDevice implements Closeable {
         if (this.clientSocket != null) {
             this.clientSocket.close();
         }
-
-
     }
 
     /**
@@ -116,12 +141,25 @@ public class BtDevice implements Closeable {
         }
     }
 
-    private void runCommand(BtCommand command) {
-        if (command instanceof BtCommandWithAnswer) {
+    public void runCommand(BtCommand command) {
+        /*if (command instanceof BtCommandWithAnswer) {
             this.inputHandler.expectAnswer((BtCommandWithAnswer) command);
-        }
+        }*/
         String cmd = command.getCommand();
         Log.d(LOG_TAG, "Running command " + cmd);
         this.outputStreamWriter.write(cmd);
+    }
+
+    void handleInputBuffer(byte[] buffer, int offset, int length) {
+        BtParsingResult res = this.inputHandler.process(buffer, offset, length);
+        if (res.data != null) {
+            Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString());
+
+            if (res.acknowledger != null) {
+                this.outputStreamWriter.write(res.acknowledger.getOkCommand());
+            }
+        } else {
+            Log.d(LOG_TAG, "Data was not interpreted yet " + res.result + " - expecting more: " + res.expectingMoreData);
+        }
     }
 }

@@ -8,7 +8,11 @@ import android.util.Log;
 public class SsiPacket {
     private static final String LOG_TAG = "SsiPacket";
 
+    /**
+     * Helper for stream reading.
+     */
     private byte readBytes = 0;
+
     protected byte opCode;
     protected byte status = 0;
     private byte packetLengthWithoutCheckSum;
@@ -16,6 +20,22 @@ public class SsiPacket {
     protected byte[] data = new byte[0];
     private byte checkSumMsb;
     private byte checkSumLsb;
+
+    /**
+     * Create a Packet for reading data. All data comes from later {@link #addData(byte[], int, int)} calls.
+     */
+    SsiPacket() {}
+
+    /**
+     * Create a packet for sending data. All data is given here.
+     * @param opCode
+     */
+    public SsiPacket(byte opCode, byte[] data) {
+        this.opCode = opCode;
+        this.data = data;
+
+        this.updateComputedFields();
+    }
 
     /**
      * @param buffer       data from scanner stream
@@ -35,7 +55,7 @@ public class SsiPacket {
             readBytes++;
             bufferIndex++;
 
-            if (packetLengthWithoutCheckSum < 6) {
+            if (packetLengthWithoutCheckSum < 4) {
                 Log.e(LOG_TAG, "Received a message with an impossible length - ignored");
                 return false; // Packet is weird. Stop reading it at once.
             }

@@ -5,5 +5,7 @@ public enum MessageRejectionReason {
     UNDESIRED_MESSAGE,
     INVALID_PARAMETER,
     INVALID_OPERATION,
-    CANNOT_PARSE;
+    CANNOT_PARSE,
+    DENIED,
+    UNKWOWN;
 }

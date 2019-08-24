@@ -3,6 +3,8 @@ package com.enioka.scanner.sdk.zebraoss;
 import com.enioka.scanner.bt.Acknowledger;
 import com.enioka.scanner.sdk.zebraoss.acknowledgers.AckNack;
 import com.enioka.scanner.sdk.zebraoss.parsers.BarcodeParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.CapabilitiesParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.ErrorParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.PayloadParser;
 
 public enum SsiMessage {
@@ -15,11 +17,11 @@ public enum SsiMessage {
     BATCH_REQUEST(0xD5, SsiSource.HOST),
     BEEP(0xE6, SsiSource.HOST),
     CAPABILITIES_REQUEST(0xD3, SsiSource.HOST),
-    CAPABILITIES_REPLY(0xD4, SsiSource.DECODER), // No ACK ever
+    CAPABILITIES_REPLY(0xD4, SsiSource.DECODER, new CapabilitiesParser()), // No ACK ever
     CHANGE_ALL_CODE_TYPES(0xC9, SsiSource.HOST),
     CMD_ACK(0xD0, SsiSource.BOTH), // No ACK ever
     CMD_ACK_ACTION(0xD8, SsiSource.HOST), // No ACK ever // Actual use??
-    CMD_NACK(0xD1, SsiSource.BOTH), // No ACK ever
+    CMD_NACK(0xD1, SsiSource.BOTH, new ErrorParser()), // No ACK ever
     CUSTOM_DEFAULTS(0x12, SsiSource.HOST),
     DECODE_DATA(0xF3, SsiSource.DECODER, AckNack.instance, new BarcodeParser()),
     EVENT(0xF6, SsiSource.DECODER, AckNack.instance),

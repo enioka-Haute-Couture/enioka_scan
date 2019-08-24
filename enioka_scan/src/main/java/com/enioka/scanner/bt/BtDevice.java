@@ -5,10 +5,16 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.enioka.scanner.api.Color;
 import com.enioka.scanner.sdk.zebraoss.SsiParser;
+import com.enioka.scanner.sdk.zebraoss.commands.CapabilitiesRequest;
+import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
+import com.enioka.scanner.sdk.zebraoss.commands.LedOn;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Internal class used as the main interaction entry point for bluetooth devices.
@@ -26,6 +32,8 @@ public class BtDevice implements Closeable {
     private BtSocketStreamWriter outputStreamWriter;
 
     private final BtInputHandler inputHandler;
+
+    private final Map<String, CommandCallback<?>> commandCallbacks = new HashMap<>();
 
     /**
      * Create an unconnected device from a cached device definition. Need to call {@link #connect(BluetoothAdapter)} before any interaction with the device.
@@ -52,6 +60,7 @@ public class BtDevice implements Closeable {
         this.connectStreams();
         Log.i(LOG_TAG, "Device " + BtDevice.this.name + " reports it is connected");
         //this.outputStreamWriter.write(new byte[]{0x5, (byte) 0x70, 0x4, 0, (byte) 0xFE, (byte) 0xFE, (byte) 0x89});
+
     }
 
     void connect(BluetoothAdapter bluetoothAdapter) {
@@ -141,25 +150,29 @@ public class BtDevice implements Closeable {
         }
     }
 
-    public void runCommand(BtCommand command) {
-        /*if (command instanceof BtCommandWithAnswer) {
-            this.inputHandler.expectAnswer((BtCommandWithAnswer) command);
-        }*/
-        String cmd = command.getCommand();
-        Log.d(LOG_TAG, "Running command " + cmd);
+    public <T> void runCommand(ICommand<T> command) {
+        byte[] cmd = command.getCommand();
+        Log.d(LOG_TAG, "Running command " + command.getClass().getSimpleName());
         this.outputStreamWriter.write(cmd);
     }
 
     void handleInputBuffer(byte[] buffer, int offset, int length) {
         BtParsingResult res = this.inputHandler.process(buffer, offset, length);
-        if (res.data != null) {
+        if (!res.expectingMoreData && res.data != null) {
             Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString());
 
             if (res.acknowledger != null) {
                 this.outputStreamWriter.write(res.acknowledger.getOkCommand());
+                // this.runCommand(new LedOn(Color.RED)); // DEBUG
+                this.runCommand(new CapabilitiesRequest()); // DEBUG
+            }
+        } else if (!res.expectingMoreData) {
+            Log.d(LOG_TAG, "Message was interpreted as: message without additional data");
+            if (res.acknowledger != null) {
+                this.outputStreamWriter.write(res.acknowledger.getOkCommand());
             }
         } else {
-            Log.d(LOG_TAG, "Data was not interpreted yet " + res.result + " - expecting more: " + res.expectingMoreData);
+            Log.d(LOG_TAG, "Data was not interpreted yet as we are expecting more data");
         }
     }
 }

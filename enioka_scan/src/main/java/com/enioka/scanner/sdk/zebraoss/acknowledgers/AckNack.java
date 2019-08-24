@@ -12,9 +12,7 @@ public class AckNack implements Acknowledger {
     public static AckNack instance = new AckNack();
 
     static {
-        ack = new SsiPacket();
-        ack.setOpCode((byte) 0xD0);
-        ack.updateComputedFields();
+        ack = new SsiPacket((byte) 0xD0, new byte[0]);
     }
 
     private AckNack() {
@@ -43,13 +41,7 @@ public class AckNack implements Acknowledger {
             default:
                 reasonCode = 0x2;
         }
-        SsiPacket nack = new SsiPacket();
-        nack.setOpCode((byte) 0xD1);
-        nack.setMessageData(new byte[]{
-                reasonCode
-        });
-        nack.updateComputedFields();
-
+        SsiPacket nack = new SsiPacket((byte) 0xD1, new byte[]{reasonCode});
         return nack.getMessageData();
     }
 }

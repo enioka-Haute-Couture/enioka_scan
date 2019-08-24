@@ -1,5 +1,10 @@
 package com.enioka.scanner.bt;
 
+/**
+ * The result of parsing data coming from the device input stream.
+ *
+ * @param <T>
+ */
 public class BtParsingResult<T> {
 
     /**

@@ -78,7 +78,7 @@ public enum SsiMessage {
         this.parser = parser;
     }
 
-    public int getValue() {
+    public byte getValue() {
         return opCode;
     }
 

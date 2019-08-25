@@ -9,9 +9,9 @@ public interface ICommand<T> {
     byte[] getCommand();
 
     /**
-     * A callback to use on command completion, or null if fire and forget. This allows to give data to th caller.
+     * A callback to use on command completion, or null if fire and forget. This allows to give data back to the caller and warn them of the actual end of the command.
      *
      * @return callback to run when command is done.
      */
-    CommandCallback<T> getCallback();
+    CommandCallbackHolder<T> getCallback();
 }

@@ -68,19 +68,49 @@ The library remembers associations between device and connector, so the detectio
 
 (TODO - notes)
 
-BtDevice.runCommand => asynchronous.
+The main goal of a connector is to translate API verbs into something which can be understood by the scanner and vice-versa.
+Most interactions take place in what we call a "command".
 
-A single command is run at a time. Commands are queued. End of command: a callback?
-* issue: command not responding/weird device state. => timeout + always ACK after command.
+A command is a way to run operations on the scanner: make it beep, enable a LED, etc.
 
-Results: they are given on the BtDevice.inputHandler (buffer!)
+They are asynchronous, as bluetooth operations should always be asynchronous (and like most IO operations, BT or not, should be).
 
 
+
+Only a single command is run at a time. This is a simplification, as some devices *may* allow multiple commands at the same time. This is however rare - most protocols are half-duplex anyway. Therefore, for sanity's sake, the SDK will always wait for an ACK of some form for the current command before sending another. Commands are queued. Callbacks are used to signal end of commands.
+
+Note: there is no need to implement every possible command! Just think extensible and implement what is needed for the Scanner interface.
+
+TODO: timeouts.
+
+
+### Parsing data from the scanner
+
+The scanner sends data, either as the result of a command (such as: give me the value of configuration XXX) or as the result of an operation on the scanner itself (such as: new data scanned).
+
+Parsing this data is highly specific to the device familly and is the second main work of a SPP connector. This is done by implementing the BtInputHandler interface.
+How the connector actually implements the interface is free. Please note that:
+
+* the data given to the parser may be chunked (multiple buffers, and therefore multiple calls to the parser, for a single "message") (layer 4)
+* the scanner protocol may itself feature chunking (layer 7)
+
+A normalization of errors exists in MessageRejectionReason.
+
+Most parsers will use two steps:
+* parse the enveloppe/tokenize the stream. For example, identify the fixed header defined by the protocol and the data/payload part of the message.
+* parse payload itself. For example, parse the "parameter value" payload (isolated in step one).
+
+At the end of the parsing, the actual payload (if any) is returned by the parser in a BtParsingResult structure. The payload can be an instance of any Java class - this is highly device specific too. Some shared payloads can of course be reused, such as the Barcode class.
+
+The SDK will then use this to call any callbacks **registered on this data type**.
+
+
+### Notes to sort
+
+#### ACK handling.
 Some commands do not receive any ACK from the device. (GeneralScan...)
 Most just wait for ACK.
 Some commands have multiple answers (Honeywell) or answer a different command (GS) !
-
-De façon générale, le parseur est assez spécifique à chaque SDK... On verra après comment factoriser si besoin.
 
 Retour d'information : spécifique selon commande. Par exemple : détection nuémro de version.
 
@@ -88,50 +118,15 @@ Reste la gestion du timeout.
 
 Besoin d'une commande SDK qu fait ACK pour tout simplifier.
 
-
-But:
-* identifier le device
-* permettre de faire la conf initiale (dont symbologies)
-* beep
-* illumination
-* mode de scan
-* LED
-
-Côté provider : rendre synchrone ou pas ?
-* en tout cas âs le pb du SDK BT - pb côté provider.
-
 React to unsollcitied data! (get parameter barcode read for example...)
-
-**When data comes from the stream, the goal is to parse the data correctly and call the right callback with said data.**
-data from stream => response parser, specific to each language.
-Parser 
-* tokenizes the stream. (cut ! This highly depends on the structure of the scanner protcol)
-* selects the GUT sub message parser according to the opcode of the tokens
-* gives data to the sub parser.
-* sub parser calls callback COMING FROM ?????
-* sub parser sends ACK if needed.
 
 Partage de clef pour le callback... comment le rendre regardable ?  TYPE: btDevice.runCommand(new LedOn(RED), new Callback {....}).
 => faut que la commande donne sa clef... et donc lien entre la clef du subparser et commande... BOF.
 en même temps : dans l'enum, on peut préciser une assocaition non ?
 
-Callback : enregistrer par op^code ??????? de tte façon pas sur que réponse = celle attendue par cette instanc de commande.
-
-Comment passer des paramètres de façon générique ????
-
-Passer les paramètres :
-* constructeur de la commande. => une instance par commande, bouh mais pas trop.
-* un truc générique dans une méthode de la commande de base... (pas typé : bouh !)
-* des options sur instance unique et donc pb potentiel d'état réutilisé...
-
 Aussi, une commande doit pouvoir lister les valeurs autorisées de façon dynamique.
 
 
-*Syndrome du callback.*
-Un parseur doit apeller le "bon" callback. I.e. celui avec la bonne classe de données. (? extends basedata, Null possible)
-
-
-No need for every possible command! Just think extensible.
 
 ## Conventions
 

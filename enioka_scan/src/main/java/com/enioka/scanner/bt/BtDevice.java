@@ -10,9 +10,11 @@ import com.enioka.scanner.sdk.zebraoss.SsiParser;
 import com.enioka.scanner.sdk.zebraoss.commands.CapabilitiesRequest;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOn;
+import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +35,7 @@ public class BtDevice implements Closeable {
 
     private final BtInputHandler inputHandler;
 
-    private final Map<String, CommandCallback<?>> commandCallbacks = new HashMap<>();
+    private final Map<String, CommandCallbackHolder<?>> commandCallbacks = new HashMap<>();
 
     /**
      * Create an unconnected device from a cached device definition. Need to call {@link #connect(BluetoothAdapter)} before any interaction with the device.
@@ -152,7 +154,13 @@ public class BtDevice implements Closeable {
 
     public <T> void runCommand(ICommand<T> command) {
         byte[] cmd = command.getCommand();
-        Log.d(LOG_TAG, "Running command " + command.getClass().getSimpleName());
+
+        CommandCallbackHolder cbHolder = command.getCallback();
+        if (cbHolder != null && cbHolder.getCallback() != null) {
+            this.commandCallbacks.put(cbHolder.getCommandReturnType().getCanonicalName(), cbHolder);
+        }
+
+        Log.d(LOG_TAG, "Queuing for dispatch command " + command.getClass().getSimpleName());
         this.outputStreamWriter.write(cmd);
     }
 
@@ -161,10 +169,21 @@ public class BtDevice implements Closeable {
         if (!res.expectingMoreData && res.data != null) {
             Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString());
 
+            // Callbacks?
+            if (this.commandCallbacks.containsKey(res.data.getClass().getCanonicalName())) {
+                CommandCallbackHolder cbHolder = this.commandCallbacks.get(res.data.getClass().getCanonicalName());
+                cbHolder.getCallback().onSuccess(res.data);
+            }
+
             if (res.acknowledger != null) {
                 this.outputStreamWriter.write(res.acknowledger.getOkCommand());
                 // this.runCommand(new LedOn(Color.RED)); // DEBUG
-                this.runCommand(new CapabilitiesRequest()); // DEBUG
+                this.runCommand(new CapabilitiesRequest(new CommandCallback<CapabilitiesReply>() {
+                    @Override
+                    public void onSuccess(CapabilitiesReply data) {
+                        Log.i(LOG_TAG, "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
+                    }
+                })); // DEBUG
             }
         } else if (!res.expectingMoreData) {
             Log.d(LOG_TAG, "Message was interpreted as: message without additional data");

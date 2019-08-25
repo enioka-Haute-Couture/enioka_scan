@@ -58,10 +58,6 @@ public class AcceptBtConnectionThread extends Thread {
                 break;
             }
         }
-
-        // The connection attempt succeeded. Perform work associated with
-        // the connection in a separate thread.
-        this.onConnectedCallback.connected(clientSocket);
     }
 
     // Closes the client socket and causes the thread to finish.

@@ -53,19 +53,19 @@ public class BtDeviceFinder {
             }
         }
 
-        temp = new BtDevice(tmp2);
+        //temp = new BtDevice(tmp2);
         //temp.connect();
 
         server = new AcceptBtConnectionThread(btAdapter, new ConnectToBtDeviceThread.OnConnectedCallback() {
             @Override
             public void connected(BluetoothSocket bluetoothSocket) {
-                Log.i(LOG_TAG, "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
+                Log.i(LOG_TAG, "Received new BT incoming connection");
                 temp = new BtDevice(bluetoothSocket);
             }
 
             @Override
             public void failed() {
-
+                Log.i(LOG_TAG, "WWWWWWWWWWWWW");
             }
         });
         server.start();

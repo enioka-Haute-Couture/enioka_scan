@@ -9,13 +9,11 @@ import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.sdk.athesi.HHTProvider;
 import com.enioka.scanner.sdk.hid.GenericHidProvider;
-import com.enioka.scanner.sdk.honeywell.AIDCProvider;
-import com.enioka.scanner.sdk.zebra.BtZebraProvider;
-import com.enioka.scanner.sdk.zebra.EmdkZebraProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -27,8 +25,30 @@ public final class LaserScanner {
     /**
      * The list of available scanner providers. (manual for now => no useless complicated plugin system)
      */
-    private static final Set<ScannerProvider> laserProviders = new HashSet<>(Arrays.asList(new EmdkZebraProvider(), new HHTProvider(), new AIDCProvider(), new GenericHidProvider(), new BtZebraProvider()));
+    private static final Set<ScannerProvider> laserProviders = new HashSet<>(createProviderList());
     private static Boolean scannerFound = false;
+
+    private static List<ScannerProvider> createProviderList() {
+        ArrayList<ScannerProvider> result = new ArrayList<>(Arrays.asList(new HHTProvider(), new GenericHidProvider()));
+        List<String> extraProviderNames = Arrays.asList(
+                "com.enioka.scanner.sdk.honeywell.AIDCProvider",
+                "com.enioka.scanner.sdk.zebra.BtZebraProvider",
+                "com.enioka.scanner.sdk.zebra.EmdkZebraProvider",
+                "com.enioka.scanner.sdk.koamtac.KoamtacScannerProvider"
+        );
+
+        for (final String extraProviderName : extraProviderNames) {
+            try {
+                Class extraProviderClass = Class.forName(extraProviderName);
+                result.add((ScannerProvider) extraProviderClass.newInstance());
+            } catch(ClassNotFoundException e) {
+            } catch(InstantiationException e) {
+            } catch(IllegalAccessException e) {
+            }
+        }
+
+        return result;
+    }
 
     /**
      * Private constructor to prevent ever creating an instance from this class.

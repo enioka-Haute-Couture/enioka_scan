@@ -26,12 +26,16 @@ allprojects {
 }
 
 dependencies {
+    implementation project(':enioka_scan')
+
     implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 
-    // ZBAR & ZXING (Zebra Crossing) = camera. From Maven Central.
-    api 'me.dm7.barcodescanner:zbar:1.8.3'
-    api 'com.google.zxing:core:3.4.0'
+    // Libs contains Zebra SDK. This lib has to be included as it is not provided by the device.
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
+
+    // Symbol/Zebra EMDK is actually provided by the platform, so exclude from build path
+    compileOnly 'com.symbol:emdk:7.3.14'
 
     // Test things (useless for now)
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {

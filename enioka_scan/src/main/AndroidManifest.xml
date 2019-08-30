@@ -2,30 +2,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.enioka.scanner">
 
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="com.symbol.emdk.permission.EMDK" />
-    <uses-permission android:name="com.honeywell.decode.permission.DECODE" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
-
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true">
-        <uses-library
-            android:name="com.symbol.emdk"
-            android:required="false" />
-
         <service
             android:name=".service.ScannerService"
             android:description="@string/service_description"
             android:exported="false" />
+
+        <service
+            android:name=".sdk.generalscan.GsSppScannerProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".sdk.zebraoss.ZebraOssSppScannerProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
+        <uses-library
+            android:name="com.symbol.emdk"
+            android:required="false" />
     </application>
+
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature android:name="android.hardware.camera" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="com.symbol.emdk.permission.EMDK" />
+    <uses-permission android:name="com.honeywell.decode.permission.DECODE" />
 
     <!-- Only available on API >= 19 so override -->
     <uses-sdk tools:overrideLibrary="com.zebra.scannercontrol" />
-
 </manifest>

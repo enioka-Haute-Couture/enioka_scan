@@ -5,6 +5,7 @@ import android.util.Log;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 public class BtSocketStreamReader extends Thread implements Closeable {
     private static final String LOG_TAG = "InternalBtDevice";
@@ -28,7 +29,7 @@ public class BtSocketStreamReader extends Thread implements Closeable {
         while (true) {
             try {
                 byteCount = this.inputStream.read(buffer);
-                Log.d(LOG_TAG, "Read " + byteCount + " bytes from device: " + LoggingInputHandler.byteArrayToHex(buffer, byteCount));
+                Log.d(LOG_TAG, "Read " + byteCount + " bytes from device: " + LoggingInputHandler.byteArrayToHex(buffer, byteCount) + " - ASCII: " + new String(buffer, 0, byteCount, Charset.forName("ASCII")));
                 this.device.handleInputBuffer(buffer, 0, byteCount);
             } catch (IOException e) {
                 Log.d(LOG_TAG, "Input stream was disconnected", e);

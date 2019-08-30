@@ -10,6 +10,7 @@ import com.enioka.scanner.sdk.zebraoss.SsiParser;
 import com.enioka.scanner.sdk.zebraoss.commands.CapabilitiesRequest;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOn;
+import com.enioka.scanner.sdk.zebraoss.commands.RequestRevision;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 
 import java.io.Closeable;
@@ -65,7 +66,7 @@ public class BtDevice implements Closeable {
 
     }
 
-    void connect(BluetoothAdapter bluetoothAdapter) {
+    void connect(BluetoothAdapter bluetoothAdapter, final ConnectToBtDeviceThread.OnConnectedCallback callback) {
         Log.i(LOG_TAG, "Starting connection to device " + BtDevice.this.name);
         connectionThread = new ConnectToBtDeviceThread(rawDevice, bluetoothAdapter, new ConnectToBtDeviceThread.OnConnectedCallback() {
             @Override
@@ -75,6 +76,7 @@ public class BtDevice implements Closeable {
                 BtDevice.this.clientSocket = bluetoothSocket;
                 connectStreams();
 
+                callback.connected(bluetoothSocket);
                 // TEMP
                 //BtDevice.this.runCommand(new GetBatteryLevel());
                 //BtDevice.this.outputStreamWriter.write("{G2043/1/\r\n}{G1026}");
@@ -92,7 +94,7 @@ public class BtDevice implements Closeable {
 
             @Override
             public void failed() {
-
+                callback.failed();
             }
         });
         connectionThread.start();
@@ -178,12 +180,13 @@ public class BtDevice implements Closeable {
             if (res.acknowledger != null) {
                 this.outputStreamWriter.write(res.acknowledger.getOkCommand());
                 // this.runCommand(new LedOn(Color.RED)); // DEBUG
-                this.runCommand(new CapabilitiesRequest(new CommandCallback<CapabilitiesReply>() {
+                /*this.runCommand(new CapabilitiesRequest(new CommandCallback<CapabilitiesReply>() {
                     @Override
                     public void onSuccess(CapabilitiesReply data) {
                         Log.i(LOG_TAG, "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
                     }
-                })); // DEBUG
+                }));*/ // DEBUG
+                this.runCommand(new RequestRevision()); // DEBUG
             }
         } else if (!res.expectingMoreData) {
             Log.d(LOG_TAG, "Message was interpreted as: message without additional data");

@@ -2,10 +2,12 @@ package com.enioka.scanner.sdk.zebraoss;
 
 import com.enioka.scanner.bt.Acknowledger;
 import com.enioka.scanner.sdk.zebraoss.acknowledgers.AckNack;
+import com.enioka.scanner.sdk.zebraoss.data.ReplyRevision;
 import com.enioka.scanner.sdk.zebraoss.parsers.BarcodeParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.CapabilitiesParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.ErrorParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.PayloadParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.ReplyRevisionParser;
 
 public enum SsiMessage {
     // Only messages coming from the scanner are actually needed here. For completion sake, all messages were added.
@@ -37,7 +39,7 @@ public enum SsiMessage {
     PARAM_DEFAULTS(0xC8, SsiSource.HOST),
     PARAM_REQUEST(0xC7, SsiSource.HOST),
     PARAM_SEND(0xC6, SsiSource.BOTH), // No ACK ever
-    REPLY_REVISION(0xA4, SsiSource.DECODER), // No ACK ever
+    REPLY_REVISION(0xA4, SsiSource.DECODER, new ReplyRevisionParser()), // No ACK ever
     REQUEST_REVISION(0xA3, SsiSource.HOST),
     SCAN_DISABLE(0xEA, SsiSource.HOST),
     SCAN_ENABLE(0xE9, SsiSource.HOST),

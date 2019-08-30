@@ -1,7 +1,6 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
 import com.enioka.scanner.api.Color;
-import com.enioka.scanner.bt.CommandCallback;
 import com.enioka.scanner.bt.CommandCallbackHolder;
 import com.enioka.scanner.bt.ICommand;
 import com.enioka.scanner.sdk.zebraoss.SsiPacket;

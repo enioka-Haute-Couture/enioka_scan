@@ -24,9 +24,15 @@ android {
 dependencies {
     // Reference our own library, directly compiled from its project
     implementation project(':enioka_scan');
-    implementation project(':enioka_scan_honeywell');
-    implementation project(':enioka_scan_koamtac');
-    implementation project(':enioka_scan_zebra');
+
+    if (rootProject.ext.withHoneywell)
+        implementation project(':enioka_scan_honeywell');
+
+    if (rootProject.ext.withKoamtac)
+        implementation project(':enioka_scan_koamtac');
+
+    if (rootProject.ext.withZebra)
+        implementation project(':enioka_scan_zebra');
 
     // Android stuff
     implementation 'com.android.support:appcompat-v7:26.1.0'

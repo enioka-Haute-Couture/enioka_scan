@@ -11,6 +11,7 @@ import com.enioka.scanner.bt.BtDeviceFinder;
 import com.enioka.scanner.sdk.athesi.HHTProvider;
 import com.enioka.scanner.sdk.hid.GenericHidProvider;
 import com.enioka.scanner.sdk.honeywell.AIDCProvider;
+import com.enioka.scanner.sdk.koamtac.KoamtacScannerProvider;
 import com.enioka.scanner.sdk.zebra.BtZebraProvider;
 import com.enioka.scanner.sdk.zebra.EmdkZebraProvider;
 
@@ -28,7 +29,7 @@ public final class LaserScanner {
     /**
      * The list of available scanner providers. (manual for now => no useless complicated plugin system)
      */
-    private static final Set<ScannerProvider> laserProviders = new HashSet<>(Arrays.asList(new EmdkZebraProvider(), new HHTProvider(), new AIDCProvider(), new GenericHidProvider()));
+    private static final Set<ScannerProvider> laserProviders = new HashSet<>(Arrays.asList((ScannerProvider) new GenericHidProvider()));
     private static Boolean scannerFound = false;
 
     /**
@@ -48,6 +49,9 @@ public final class LaserScanner {
         /*if (options.keepScreenOn) {
             ctx.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }*/
+
+        BtDeviceFinder.getProviders(ctx);
+        BtDeviceFinder.getDevices();
 
         // Trivial
         if (laserProviders.isEmpty()) {

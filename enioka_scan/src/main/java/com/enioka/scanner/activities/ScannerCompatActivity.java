@@ -52,7 +52,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     /**
      * Don't start camera mode, even if no lasers are available
      */
-    protected boolean laserModeOnly = false;
+    protected boolean laserModeOnly = true;
 
     /**
      * If set to false, ScannerCompatActivity will behave like an standard AppCompatActivity

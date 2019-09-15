@@ -62,7 +62,7 @@ In both cases, the connector is responsible for identifying if it can handle a B
 	* different SDKs do expect different protocols, including different ways to acknowledge a command. This means a command from one SDK may put the scanner in a weird state when trying commands for another scanner type! Therefore, a connector must always begins its detection sequence with an ACK or any equivalent way to clear state.
 	* This method also has the advantage of allowing to take device version into account
 
-The library remembers associations between device and connector, so the detection is only run once for the same device, even across reboots.
+The library remembers (successful) associations between device and connector, so the detection is only run once for the same device, even across reboots.
 
 ## Commands
 

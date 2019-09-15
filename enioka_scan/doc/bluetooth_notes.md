@@ -58,9 +58,8 @@ In both cases, the connector is responsible for identifying if it can handle a B
 * Commands
   * All devices have specific commands (and giving a simple API to them is the very goal of this library!). So trying to run a command, like "give me your model and version", available on most devices, is often the best way to discriminate between devices. That being said:
     * remember to always set a low timeout for detection commands - on a wrong device, the detection commands will likely do not return anything at all, and certainly not the expected end of answer delimitor.
-	* different SDKs do expect different protocols, including different ways to acknowledge a command. This means a command from one SDK may put the scanner in a weird state when trying commands for another scanner type! Therefore, the library will always reset the Bluetooth socket (disconnect/reconnect) before proposign it to the connector. This makes that kind of detection rather costly, and visible to the user as devices tend to beep on connection. DOES NOT WORK FOR MASTER DEVICES ARGH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	* different SDKs do expect different protocols, including different ways to acknowledge a command. This means a command from one SDK may put the scanner in a weird state when trying commands for another scanner type! Therefore, a connector must always begins its detection sequence with an ACK or any equivalent way to clear state.
-	* This method also has the advantage of allowing to take device version into account
+	* This method also has the advantage of allowing to take device version into account.
 
 The library remembers (successful) associations between device and connector, so the detection is only run once for the same device, even across reboots.
 
@@ -88,7 +87,7 @@ TODO: timeouts.
 
 The scanner sends data, either as the result of a command (such as: give me the value of configuration XXX) or as the result of an operation on the scanner itself (such as: new data scanned).
 
-Parsing this data is highly specific to the device familly and is the second main work of a SPP connector. This is done by implementing the BtInputHandler interface.
+Parsing this data is highly specific to the device familly and is the one of the two main roles of a SPP connector. This is done by implementing the BtInputHandler interface.
 How the connector actually implements the interface is free. Please note that:
 
 * the data given to the parser may be chunked (multiple buffers, and therefore multiple calls to the parser, for a single "message") (layer 4)

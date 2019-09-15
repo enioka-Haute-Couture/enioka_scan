@@ -12,4 +12,9 @@ public interface BtSppScannerProvider {
      * @return true if compatible.
      */
     boolean canManageDevice(BtDevice device);
+
+    /**
+     * The {@link BtInputHandler} which should be used to parse results.
+     */
+    BtInputHandler getInputHandler();
 }

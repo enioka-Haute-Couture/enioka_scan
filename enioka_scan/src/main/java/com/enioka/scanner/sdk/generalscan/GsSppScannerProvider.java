@@ -7,6 +7,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.enioka.scanner.bt.BtDevice;
+import com.enioka.scanner.bt.BtInputHandler;
 import com.enioka.scanner.bt.BtSppScannerProvider;
 import com.enioka.scanner.bt.BtSppScannerProviderServiceBinder;
 
@@ -21,7 +22,12 @@ public class GsSppScannerProvider extends Service implements BtSppScannerProvide
 
     @Override
     public boolean canManageDevice(BtDevice device) {
-        return true;
+        return false;
+    }
+
+    @Override
+    public BtInputHandler getInputHandler() {
+        return new Parser();
     }
 
 }

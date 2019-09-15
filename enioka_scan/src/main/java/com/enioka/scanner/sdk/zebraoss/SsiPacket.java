@@ -11,11 +11,11 @@ public class SsiPacket {
     /**
      * Helper for stream reading.
      */
-    private byte readBytes = 0;
+    private int readBytes = 0;
 
     protected byte opCode;
     protected byte status = 0;
-    private byte packetLengthWithoutCheckSum;
+    private int packetLengthWithoutCheckSum;
     protected byte source = 0x04;
     protected byte[] data = new byte[0];
     private byte checkSumMsb;
@@ -24,10 +24,12 @@ public class SsiPacket {
     /**
      * Create a Packet for reading data. All data comes from later {@link #addData(byte[], int, int)} calls.
      */
-    SsiPacket() {}
+    SsiPacket() {
+    }
 
     /**
      * Create a packet for sending data. All data is given here.
+     *
      * @param opCode
      */
     public SsiPacket(byte opCode, byte[] data) {
@@ -49,9 +51,9 @@ public class SsiPacket {
         }
 
         // First byte is packet length.
-        byte bufferIndex = (byte) offset;
+        int bufferIndex = (byte) offset;
         if (readBytes == 0 && bufferLength > 0) {
-            packetLengthWithoutCheckSum = buffer[bufferIndex];
+            packetLengthWithoutCheckSum = (0xFF & buffer[bufferIndex]);
             readBytes++;
             bufferIndex++;
 
@@ -104,6 +106,9 @@ public class SsiPacket {
         }
 
         // Done. Is this the packet end?
+        if (readBytes != packetLengthWithoutCheckSum + 2) {
+            Log.d(LOG_TAG, "Still missing bytes to complete SSI packet: " + (packetLengthWithoutCheckSum + 2 - readBytes));
+        }
         return readBytes != packetLengthWithoutCheckSum + 2;
     }
 
@@ -128,7 +133,11 @@ public class SsiPacket {
     }
 
     boolean isRetransmit() {
-        return (this.status & 0b10000000) != 0;
+        return (this.status & 0b00000001) != 0;
+    }
+
+    boolean isMultiPacket() {
+        return (this.status & 0b00000010) != 0;
     }
 
     boolean isTransientChange() {

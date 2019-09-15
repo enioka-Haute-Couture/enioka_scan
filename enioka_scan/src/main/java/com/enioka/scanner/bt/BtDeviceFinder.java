@@ -13,23 +13,27 @@ import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.util.Log;
 
-import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.sdk.zebraoss.commands.RequestParam;
+import com.enioka.scanner.sdk.zebraoss.commands.TempCommand;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 /**
- * Helpers to find bound devices.
+ * Responsible for finding bluetooth devices and starting their initialization, converting them to {@link BtDevice} and {@link com.enioka.scanner.api.Scanner}.
  */
 public class BtDeviceFinder {
-    private static final String LOG_TAG = "BtDeviceFinder";
-    private static BtDevice temp;
+    private static final String LOG_TAG = "InternalBtDevice";
     private static AcceptBtConnectionThread server;
 
     private static List<BtSppScannerProvider> scannerProviders = new ArrayList<>();
     private static List<ServiceConnection> connections = new ArrayList<>();
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Provider discovery
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Callbacks for bound service connections (useful since SPP providers are services).
@@ -48,6 +52,7 @@ public class BtDeviceFinder {
         public void onServiceDisconnected(ComponentName arg0) {
             for (ServiceConnection sc : connections) {
                 //if (connection.get)
+                // TODO: remove from collection, close everything related to this provider.
             }
         }
     };
@@ -57,7 +62,11 @@ public class BtDeviceFinder {
      *
      * @param ctx a context used to retrieve a PackageManager
      */
-    public static void getProviders(Context ctx) {
+    private static void getProviders(Context ctx) {
+        if (!scannerProviders.isEmpty()) {
+            return;
+        }
+
         PackageManager pkManager = ctx.getPackageManager();
 
         Intent i = new Intent("com.enioka.scan.PROVIDE_SPP_SCANNER");
@@ -72,16 +81,28 @@ public class BtDeviceFinder {
         }
     }
 
-    public static Set<BluetoothDevice> getDevices() {
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Provider use: scanner search.
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static void getDevices(Context ctx) {
+        // Init providers if needed.
+        getProviders(ctx);
+
+        // Init bluetooth
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         if (btAdapter == null) {
-            return new HashSet<>();
+            return;
         }
 
-        BluetoothDevice tmp2 = null;
+        // Try to contact already paired devices.
         Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
         for (BluetoothDevice bt : pairedDevices) {
-            // Compensate for lack of lambdas and String.join in API16.
+            /////////////////////////////////////////////////////////////
+            // Log
+
+            // Compensate for lack of lambdas and String.join in API19.
             List<String> uuids = new ArrayList<>();
             String uuidString = "";
             if (bt.getUuids() != null) {
@@ -101,50 +122,68 @@ public class BtDeviceFinder {
 
             // Sample name start: GS, Voyager, RS6000
 
+            // end log
+            /////////////////////////////////////////////////////////////
+
+
             // We only allow SPP devices.
             if (!uuids.contains(ConnectToBtDeviceThread.SERVER_BT_SERVICE_UUID.toString())) {
                 continue;
             }
 
             // Launch device resolution
-            final BtDevice btDevice = new BtDevice(bt);
-            btDevice.connect(btAdapter, new ConnectToBtDeviceThread.OnConnectedCallback() {
-                @Override
-                public void connected(BluetoothSocket bluetoothSocket) {
-                    new Thread(new BtSppScannerResolutionThread(btDevice, scannerProviders, new BtSppScannerResolutionThread.ScannerResolutionCallback() {
-                        @Override
-                        public void onConnection(Scanner scanner) {
-                            Log.i(LOG_TAG, "A scanner was found compatible with a provider!");
-                        }
-
-                        @Override
-                        public void notCompatible(BtDevice device) {
-                            Log.i(LOG_TAG, "Scanner " + device + " could not be bound to a provider");
-                        }
-                    })).start();
-                }
-
-                @Override
-                public void failed() {
-                    Log.i(LOG_TAG, "Failure to connect to scanner");
-                }
-            });
+            BtDevice btDevice = new BtDevice(bt);
+            btDevice.connect(btAdapter, new ConnectionCallback(btDevice));
         }
 
-        server = new AcceptBtConnectionThread(btAdapter, new ConnectToBtDeviceThread.OnConnectedCallback() {
-            @Override
-            public void connected(BluetoothSocket bluetoothSocket) {
-                Log.i(LOG_TAG, "Received new BT incoming connection");
-                temp = new BtDevice(bluetoothSocket);
-            }
-
-            @Override
-            public void failed() {
-                Log.i(LOG_TAG, "WWWWWWWWWWWWW");
-            }
-        });
+        // Start incoming SPP server listener.
+        server = new AcceptBtConnectionThread(btAdapter, new ConnectionCallback(null));
         server.start();
 
-        return pairedDevices;
+        // Done.
+    }
+
+    /**
+     * What to do when a connection is successful (i.e. socket opened): try to resolve the provider associated to the device.
+     */
+    private static class ConnectionCallback implements ConnectToBtDeviceThread.OnConnectedCallback {
+        private BtDevice btDevice;
+
+        // btDevice cas be null - created from socket in that case. (master scanner).
+        private ConnectionCallback(BtDevice btDevice) {
+            this.btDevice = btDevice;
+        }
+
+        @Override
+        public void connected(BluetoothSocket bluetoothSocket) {
+            if (btDevice == null) {
+                Log.d(LOG_TAG, "A new BT connection was made (scanner is master). Launching provider resolution.");
+                btDevice = new BtDevice(bluetoothSocket);
+            } else {
+                Log.d(LOG_TAG, "A new BT connection was made (scanner is slave). Launching provider resolution.");
+            }
+
+            new Thread(new BtSppScannerResolutionThread(btDevice, scannerProviders, new BtSppScannerResolutionThread.ScannerResolutionCallback() {
+                @Override
+                public void onConnection(BtDevice scanner, BtSppScannerProvider compatibleProvider) {
+                    Log.i(LOG_TAG, "Scanner " + btDevice.getName() + " was found compatible with provider " + compatibleProvider.getClass().getSimpleName());
+
+                    // Set the provider inside the BtDevice - it is needed for parsing data.
+                    btDevice.setProvider(compatibleProvider);
+
+                    btDevice.runCommand(new TempCommand());
+                }
+
+                @Override
+                public void notCompatible(BtDevice device) {
+                    Log.i(LOG_TAG, "Scanner " + device + " could not be bound to a provider");
+                }
+            })).start();
+        }
+
+        @Override
+        public void failed() {
+            Log.i(LOG_TAG, "Failure to connect to scanner");
+        }
     }
 }

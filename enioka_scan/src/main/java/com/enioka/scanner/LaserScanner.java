@@ -139,8 +139,7 @@ public final class LaserScanner {
             ctx.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }*/
 
-        BtDeviceFinder.getProviders(ctx);
-        BtDeviceFinder.getDevices();
+        BtDeviceFinder.getDevices(ctx);
 
         // Trivial
         if (laserProviders.isEmpty()) {

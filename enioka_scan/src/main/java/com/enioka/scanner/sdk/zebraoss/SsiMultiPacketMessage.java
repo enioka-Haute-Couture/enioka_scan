@@ -36,14 +36,24 @@ public class SsiMultiPacketMessage {
 
         boolean incompletePacket = currentPacket.addData(buffer, offset, length);
         if (!incompletePacket) {
+            Log.d(LOG_TAG, "Read a full SSI packet (as many bytes as announced)");
+
             if (!this.currentPacket.isChecksumValid()) {
                 Log.e(LOG_TAG, "Received a message with an invalid checksum - ignored");
+                fullyLoaded = false;
                 return false; // We do not expect another packet. Note fullyLoaded stays false.
             }
             this.packets.add(this.currentPacket); // Only valid packets are added to the list.
 
             if (this.currentPacket.isRetransmit()) {
-                Log.w(LOG_TAG, "Received a retransmitted message");
+                Log.w(LOG_TAG, "Received a retransmitted message (just for information)");
+            }
+
+            if (this.currentPacket.isMultiPacket()) {
+                Log.w(LOG_TAG, "Received an intermediary message - awaiting next one.");
+                this.currentPacket = null;
+                fullyLoaded = false;
+                return true;
             }
 
             if (this.currentPacket.isLastPacket()) {
@@ -51,9 +61,6 @@ public class SsiMultiPacketMessage {
                 fullyLoaded = true;
                 return false;
             }
-
-            // If here, go to next packet.
-            this.currentPacket = null;
         }
 
         return true;
@@ -97,6 +104,9 @@ public class SsiMultiPacketMessage {
         return this.packets.get(0).getSource();
     }
 
+    /**
+     * Return true if we are not expecting any more data.
+     */
     boolean isDataUsable() {
         return fullyLoaded;
     }

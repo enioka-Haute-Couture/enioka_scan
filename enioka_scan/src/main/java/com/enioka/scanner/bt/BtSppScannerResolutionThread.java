@@ -16,7 +16,8 @@ class BtSppScannerResolutionThread implements Runnable {
     private ScannerResolutionCallback callback;
 
     interface ScannerResolutionCallback {
-        void onConnection(Scanner scanner);
+        //TODO: return Scanner and not BtDevice.
+        void onConnection(BtDevice scanner, BtSppScannerProvider compatibleProvider);
 
         void notCompatible(BtDevice device);
     }
@@ -31,7 +32,7 @@ class BtSppScannerResolutionThread implements Runnable {
     public void run() {
         for (BtSppScannerProvider provider : scannerProviders) {
             if (provider.canManageDevice(device)) {
-                callback.onConnection(null);
+                callback.onConnection(device, provider);
                 return;
             }
         }

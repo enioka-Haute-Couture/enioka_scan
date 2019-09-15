@@ -32,8 +32,10 @@ class BtSocketStreamReader extends Thread implements Closeable {
         while (true) {
             try {
                 byteCount = this.inputStream.read(buffer);
-                Log.d(LOG_TAG, "Read " + byteCount + " bytes from device: " + LogHelpers.byteArrayToHex(buffer, byteCount) + " - ASCII: " + new String(buffer, 0, byteCount, Charset.forName("ASCII")));
-                this.device.handleInputBuffer(buffer, 0, byteCount);
+                if (byteCount > 0) {
+                    Log.d(LOG_TAG, "Read " + byteCount + " bytes from device: " + LogHelpers.byteArrayToHex(buffer, byteCount) + " - ASCII: " + new String(buffer, 0, byteCount, Charset.forName("ASCII")));
+                    this.device.handleInputBuffer(buffer, 0, byteCount);
+                }
             } catch (IOException e) {
                 Log.d(LOG_TAG, "Input stream was disconnected", e);
                 break;

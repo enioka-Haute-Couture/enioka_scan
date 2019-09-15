@@ -5,6 +5,9 @@ import android.util.Log;
 import com.enioka.scanner.bt.BtInputHandler;
 import com.enioka.scanner.bt.BtParsingResult;
 import com.enioka.scanner.bt.MessageRejectionReason;
+import com.enioka.scanner.sdk.zebraoss.commands.Ack;
+import com.enioka.scanner.sdk.zebraoss.commands.Nack;
+import com.enioka.scanner.sdk.zebraoss.parsers.GenericParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.PayloadParser;
 
 /**
@@ -17,38 +20,56 @@ public class SsiParser implements BtInputHandler {
     private SsiMultiPacketMessage message = new SsiMultiPacketMessage();
 
     public BtParsingResult process(byte[] buffer, int offset, int dataLength) {
-        if (!message.addData(buffer, offset, dataLength)) {
+        BtParsingResult res = new BtParsingResult();
+
+        boolean needMoreData = message.addData(buffer, offset, dataLength);
+        if (!needMoreData) {
             // Done with extracting data from messages. Now do the op-code specific parsing.
             if (message.isDataUsable()) {
-                // Find the message type.
-                SsiMessage command = SsiMessage.GetValue(message.getOpCode());
+                res.expectingMoreData = false;
+                res.rejected = false;
 
-                if (command == SsiMessage.NONE) {
-                    Log.e(LOG_TAG, "Unsupported op code received: " + message.getOpCode() + ". Message is ignored.");
+                // Find the message type.
+                SsiMessage messageMeta = SsiMessage.GetValue(this.message.getOpCode());
+
+                if (messageMeta == SsiMessage.NONE) {
+                    Log.e(LOG_TAG, "Unsupported op code received: " + this.message.getOpCode() + ". Message is ignored.");
                     return new BtParsingResult(MessageRejectionReason.INVALID_OPERATION);
                 }
 
-                // Actual parsing.
-                PayloadParser parser = command.getParser();
-                byte[] data = message.getData();
-                if (parser != null && data.length > 0) {
-                    parser.parseData(data);
-
-                    BtParsingResult res = new BtParsingResult<>(parser.parseData(data));
-                    res.acknowledger = command.getAcknowledger();
-                    this.message = new SsiMultiPacketMessage();
-                    return res;
-                } else if (parser == null && data.length > 0) {
-                    Log.w(LOG_TAG, "Received data for opcode " + message.getOpCode() + " but no parser is known for this code - may be a connector limitation. Data is ignored.");
+                if (messageMeta.needsAck()) {
+                    res.acknowledger = new Ack();
                 }
+
+                PayloadParser parser = messageMeta.getParser();
+                if (parser == null) {
+                    Log.w(LOG_TAG, "Received data for opcode " + this.message.getOpCode() + " but no parser is known for this code - may be a connector limitation. Using default parser instead - this will only log.");
+                    parser = new GenericParser();
+                }
+
+                // Actual parsing.
+                byte[] data = this.message.getData();
+
+                // Note that data can be null - for example with an ACK. But we still want a parsing to occur in order to have a specific payload in the result.
+                res.data = parser.parseData(data);
+
+                // Start anew.
                 this.message = new SsiMultiPacketMessage();
-                return new BtParsingResult((byte[]) null);
+
+                // Return element with data.
+                return res;
             } else {
-                return new BtParsingResult(MessageRejectionReason.CHECKSUM_FAILURE);
+                // Not expecting more data but not usable means: wrong checksum!
+                res = new BtParsingResult(MessageRejectionReason.CHECKSUM_FAILURE); //TODO: sigh.
+                res.acknowledger = new Nack(MessageRejectionReason.CHECKSUM_FAILURE);
+                this.message = new SsiMultiPacketMessage();
+                return res;
             }
         } else {
             // If here, message is still incomplete.
-            return new BtParsingResult();
+            res = new BtParsingResult();
+            res.acknowledger = new Ack();
+            return res;
         }
     }
 }

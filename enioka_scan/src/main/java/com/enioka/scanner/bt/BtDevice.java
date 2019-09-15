@@ -27,7 +27,7 @@ public class BtDevice implements Closeable {
     private BtSocketStreamReader inputStreamReader;
     private BtSocketStreamWriter outputStreamWriter;
 
-    private final BtInputHandler inputHandler;
+    private BtInputHandler inputHandler;
 
     private final Map<String, CommandCallbackHolder<?>> commandCallbacks = new HashMap<>();
 
@@ -55,8 +55,11 @@ public class BtDevice implements Closeable {
         this.clientSocket = socket;
         this.connectStreams();
         Log.i(LOG_TAG, "Device " + BtDevice.this.name + " reports it is connected");
-        //this.outputStreamWriter.write(new byte[]{0x5, (byte) 0x70, 0x4, 0, (byte) 0xFE, (byte) 0xFE, (byte) 0x89});
 
+    }
+
+    void setProvider(BtSppScannerProvider provider) {
+        this.inputHandler = provider.getInputHandler();
     }
 
     void connect(BluetoothAdapter bluetoothAdapter, final ConnectToBtDeviceThread.OnConnectedCallback callback) {
@@ -70,19 +73,6 @@ public class BtDevice implements Closeable {
                 connectStreams();
 
                 callback.connected(bluetoothSocket);
-                // TEMP
-                //BtDevice.this.runCommand(new GetBatteryLevel());
-                //BtDevice.this.outputStreamWriter.write("{G2043/1/\r\n}{G1026}");
-                //BtDevice.this.outputStreamWriter.write("{G1026?}");
-                //BtDevice.this.outputStreamWriter.write("{G3010/0}");
-                //BtDevice.this.outputStreamWriter.write("{G2351?}");
-                //BtDevice.this.runCommand(new SetBeepLevel());
-                //discoverCodes();
-                //BtDevice.this.outputStreamWriter.write(Character.toString((char) 22) + "U" + Character.toString((char) 13));
-
-                // BtDevice.this.outputStreamWriter.write(new byte[] {0x5, (byte)0xC7, 0x4, 0, (byte)0xFE, (byte)0xFE, (byte)0x32}); // Should work for ds3600
-                //BtDevice.this.outputStreamWriter.write(new byte[]{0x5, (byte) 0x70, 0x4, 0, (byte) 0xFE, (byte) 0xFE, (byte) 0x89});
-                //BtDevice.this.outputStreamWriter.write("HOUBA");
             }
 
             @Override
@@ -147,6 +137,10 @@ public class BtDevice implements Closeable {
         }
     }
 
+    String getName() {
+        return this.name;
+    }
+
     /**
      * Run a command on the scanner. Asynchronous - this call returns before the command is actually sent to the scanner.<br>
      * If the command expects an answer, it will be received as any data from the scanner and sent to the registered {@link BtInputHandler}
@@ -180,18 +174,27 @@ public class BtDevice implements Closeable {
 
             if (res.acknowledger != null) {
                 this.outputStreamWriter.endOfCommand();
-                this.outputStreamWriter.write(res.acknowledger.getOkCommand());
+                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
             }
 
             this.outputStreamWriter.endOfCommand();
-        } else if (!res.expectingMoreData) {
+        } else if (!res.expectingMoreData && !res.rejected) {
             Log.d(LOG_TAG, "Message was interpreted as: message without additional data");
             if (res.acknowledger != null) {
-                this.outputStreamWriter.write(res.acknowledger.getOkCommand());
+                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+            }
+            this.outputStreamWriter.endOfCommand();
+        } else if (!res.expectingMoreData && res.rejected) {
+            Log.d(LOG_TAG, "Message was rejected " + res.result);
+            if (res.acknowledger != null) {
+                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
             }
             this.outputStreamWriter.endOfCommand();
         } else {
             Log.d(LOG_TAG, "Data was not interpreted yet as we are expecting more data");
+            if (res.acknowledger != null) {
+                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+            }
         }
     }
 }

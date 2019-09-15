@@ -9,4 +9,7 @@
     <string name="packing_instruction_scanning">Scan du bordereau en cours</string>
     <string name="packing_instruction_confirm">Bordereau scanné avec succès, veuillez indiquer si la photo vous convient</string>
     <string name="packing_instruction_analysis">Bordereau en cours d\'analyse, veuillez patienter...</string>
+    <string name="scanner_tester">Testeur de scanner</string>
+    <string name="test_scan">Tester la librairie de scan</string>
+    <string name="test_camera2">Tester le scan via camera2 (non terminé)</string>
 </resources>

@@ -27,11 +27,7 @@ public class BtSocketStreamWriter {
     }
 
     public synchronized void write(byte[] buffer, int offset, int length) {
-        try {
-            pool.submit(new BtSocketStreamWriterTask(this.outputStream, buffer, offset, length));
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Could not write to internal buffer", e);
-        }
+        pool.submit(new BtSocketStreamWriterTask(this.outputStream, buffer, offset, length, this));
     }
 
     public void write(byte[] buffer) {

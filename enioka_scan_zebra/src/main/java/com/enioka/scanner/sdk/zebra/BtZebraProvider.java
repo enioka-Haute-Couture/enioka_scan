@@ -1,9 +1,14 @@
 package com.enioka.scanner.sdk.zebra;
 
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.ScannerProvider;
+import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.zebra.scannercontrol.DCSSDKDefs;
 import com.zebra.scannercontrol.DCSScannerInfo;
@@ -15,9 +20,17 @@ import java.util.List;
 /**
  * Provider for the BT Zebra SDK.
  */
-public class BtZebraProvider implements ScannerProvider {
+public class BtZebraProvider extends Service implements ScannerProvider {
     private static final String LOG_TAG = "BtZebraProvider";
     static final String PROVIDER_NAME = "Zebra Bluetooth";
+
+    private final IBinder binder = new ScannerProviderBinder(this);
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
@@ -46,7 +59,7 @@ public class BtZebraProvider implements ScannerProvider {
         }
 
         if (!scannerFound) {
-            Log.i(LOG_TAG, "Not Zebra BT devices connected to this device");
+            Log.i(LOG_TAG, "No Zebra BT devices connected to this device");
             cb.onProviderUnavailable(PROVIDER_NAME); // Costly search. We do not want it to do it on each scanner search.
             sdkHandler.dcssdkClose();
         }
@@ -56,4 +69,6 @@ public class BtZebraProvider implements ScannerProvider {
     public String getKey() {
         return PROVIDER_NAME;
     }
+
+
 }

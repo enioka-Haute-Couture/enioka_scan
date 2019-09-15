@@ -10,6 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity" />
+        <activity android:name=".ScannerTesterActivity" />
         <activity android:name=".Scan2Activity" />
         <activity android:name=".WelcomeActivity">
             <intent-filter>
@@ -22,4 +23,5 @@
             android:screenOrientation="landscape" />
     </application>
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 </manifest>

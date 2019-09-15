@@ -60,7 +60,7 @@ public class BtDeviceFinder {
     public static void getProviders(Context ctx) {
         PackageManager pkManager = ctx.getPackageManager();
 
-        Intent i = new Intent("com.enioka.scan.PROVIDE_SCANNER");
+        Intent i = new Intent("com.enioka.scan.PROVIDE_SPP_SCANNER");
         List<ResolveInfo> ris = pkManager.queryIntentServices(i, PackageManager.GET_META_DATA);
 
         for (ResolveInfo ri : ris) {

@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:onClick="onClickBt1"
-        android:text="TEST SCANNER CODE BARRE"
+        android:text="@string/test_scan"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -34,8 +34,19 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:onClick="onClickBt3"
-        android:text="TEST SCANNER CAMERA2 (PAS FINI)"
+        android:text="@string/test_camera2"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bt_bdx" />
+
+    <Button
+        android:id="@+id/bt_tester"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:onClick="onClickBt4"
+        android:text="@string/scanner_tester"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bt_camera2" />
 </android.support.constraint.ConstraintLayout>

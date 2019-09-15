@@ -1,1 +1,1 @@
-include ':enioka_scan', ':barcode_scanner_library', ':demoscannerapp'
+include ':enioka_scan', ':enioka_scan_honeywell', ':enioka_scan_koamtac', ':enioka_scan_zebra', ':demoscannerapp'

@@ -5,8 +5,6 @@ import com.enioka.scanner.data.BarcodeType;
 import java.util.HashMap;
 import java.util.Map;
 
-import koamtac.kdc.sdk.KDCConstants;
-
 public class ZebraOssDataTranslator {
     private final static Map<Byte, BarcodeType> sdk2Api = new HashMap<>();
 

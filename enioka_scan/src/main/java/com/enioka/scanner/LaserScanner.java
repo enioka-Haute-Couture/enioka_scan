@@ -1,11 +1,18 @@
 package com.enioka.scanner;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
+import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.sdk.athesi.HHTProvider;
 import com.enioka.scanner.sdk.hid.GenericHidProvider;
@@ -15,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 
 /**
  * The factory for laser scanners.
@@ -25,36 +33,91 @@ public final class LaserScanner {
     /**
      * The list of available scanner providers. (manual for now => no useless complicated plugin system)
      */
-    private static final Set<ScannerProvider> laserProviders = new HashSet<>(createProviderList());
+    private static final Set<ScannerProvider> laserProviders = new HashSet<>();
     private static Boolean scannerFound = false;
 
-    private static List<ScannerProvider> createProviderList() {
-        ArrayList<ScannerProvider> result = new ArrayList<>(Arrays.asList(new HHTProvider(), new GenericHidProvider()));
-        List<String> extraProviderNames = Arrays.asList(
-                "com.enioka.scanner.sdk.honeywell.AIDCProvider",
-                "com.enioka.scanner.sdk.zebra.BtZebraProvider",
-                "com.enioka.scanner.sdk.zebra.EmdkZebraProvider",
-                "com.enioka.scanner.sdk.koamtac.KoamtacScannerProvider"
-        );
 
-        for (final String extraProviderName : extraProviderNames) {
-            try {
-                Class extraProviderClass = Class.forName(extraProviderName);
-                result.add((ScannerProvider) extraProviderClass.newInstance());
-            } catch(ClassNotFoundException e) {
-            } catch(InstantiationException e) {
-            } catch(IllegalAccessException e) {
-            }
-        }
-
-        return result;
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Construction
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Private constructor to prevent ever creating an instance from this class.
      */
     private LaserScanner() {
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Scanner provider discovery
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static Semaphore waitingForConnection = new Semaphore(0);
+    private static OnProvidersDiscovered cb;
+
+    /**
+     * Callbacks for bound service connections (used for scanner provider discovery).
+     */
+    private static ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            ScannerProviderBinder binder = (ScannerProviderBinder) service;
+            ScannerProvider provider = binder.getService();
+
+            Log.i(LOG_TAG, "ScannerProvider service " + provider.getClass().getSimpleName() + " was registered");
+            laserProviders.add(provider);
+
+            try {
+                waitingForConnection.acquire(1);
+                if (waitingForConnection.availablePermits() == 0) {
+                    // All scanner providers have reported for duty, launch scanner search.
+                    // TODO: we should not wait for all providers to be available to start looking for scanners.
+                    cb.discoveryDone();
+                }
+            } catch (InterruptedException e) {
+                Log.e(LOG_TAG, "Could not wait for provider service initialization. Ignoring.", e);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Log.i(LOG_TAG, "scanner provider was disconnected");
+        }
+    };
+
+    /**
+     * Retrieve scanner providers through service intent.
+     *
+     * @param ctx a context used to retrieve a PackageManager
+     */
+    private static void getProviders(Context ctx, OnProvidersDiscovered cb) {
+        Log.i(LOG_TAG, "Starting service discovery");
+        LaserScanner.cb = cb;
+        PackageManager pkManager = ctx.getPackageManager();
+        Intent i = new Intent("com.enioka.scan.PROVIDE_SCANNER");
+        List<ResolveInfo> ris = pkManager.queryIntentServices(i, PackageManager.GET_META_DATA);
+
+        waitingForConnection.release(ris.size());
+        Log.i(LOG_TAG, "There are " + ris.size() + " scanner provider service(s) available");
+
+        for (ResolveInfo ri : ris) {
+            ComponentName name = new ComponentName(ri.serviceInfo.packageName, ri.serviceInfo.name);
+            Intent boundServiceIntent = new Intent();
+            boundServiceIntent.setClassName(ctx, name.getClassName());
+            Log.d(LOG_TAG, "Trying to bind to service " + name.getClassName());
+            ctx.bindService(boundServiceIntent, connection, Context.BIND_AUTO_CREATE);
+        }
+    }
+
+    private interface OnProvidersDiscovered {
+        void discoveryDone();
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Get scanner through providers
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Get a new laser scanner. The scanner is provided through a callback. There is a specific callback when no scanner is available.
@@ -63,7 +126,16 @@ public final class LaserScanner {
      * @param handler the callback.
      * @param options parameters for scanner search.
      */
-    public static void getLaserScanner(Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+    public static void getLaserScanner(final Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+        getProviders(ctx, new OnProvidersDiscovered() {
+            @Override
+            public void discoveryDone() {
+                startLaserSearchInProviders(ctx, handler, options);
+            }
+        });
+    }
+
+    private static void startLaserSearchInProviders(Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
         /*if (options.keepScreenOn) {
             ctx.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }*/
@@ -79,8 +151,10 @@ public final class LaserScanner {
         // Now create a scanner. (iterate on a copy to avoid concurrent list modifications)
         scannerFound = false;
         final int expectedProviderCallbacks = laserProviders.size();
+        Log.i(LOG_TAG, "There are " + expectedProviderCallbacks + " providers which are going to be invoked for fresh laser scanners");
         final Set<String> providersHavingAnswered = new HashSet<>();
         for (final ScannerProvider sp : new ArrayList<>(laserProviders)) {
+            Log.i(LOG_TAG, "Starting search on provider " + sp.getKey());
             sp.getScanner(ctx, new ScannerProvider.ProviderCallback() {
                 @Override
                 public void onScannerCreated(String providerKey, String scannerKey, Scanner s) {

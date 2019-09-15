@@ -2,13 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.enioka.scanner">
 
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
-
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
@@ -18,5 +11,33 @@
             android:name=".service.ScannerService"
             android:description="@string/service_description"
             android:exported="false" />
+
+        <service
+            android:name=".sdk.hid.GenericHidProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".sdk.athesi.HHTProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
     </application>
+
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature android:name="android.hardware.camera" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 </manifest>

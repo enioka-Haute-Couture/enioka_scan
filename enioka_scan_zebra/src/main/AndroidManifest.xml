@@ -2,18 +2,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.enioka.scanner.sdk.zebra">
 
-    <uses-permission android:name="com.symbol.emdk.permission.EMDK" />
-
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true">
+
+        <service
+            android:name=".BtZebraProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".EmdkZebraProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
         <uses-library
             android:name="com.symbol.emdk"
             android:required="false" />
     </application>
 
-    <!-- Only available on API >= 19 so override -->
-    <uses-sdk tools:overrideLibrary="com.zebra.scannercontrol" />
+    <uses-permission android:name="com.symbol.emdk.permission.EMDK" />
 
 </manifest>

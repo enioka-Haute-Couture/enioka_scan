@@ -1,9 +1,14 @@
 package com.enioka.scanner.sdk.honeywell;
 
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.ScannerProvider;
+import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.Common;
 import com.honeywell.aidc.AidcManager;
@@ -12,9 +17,17 @@ import com.honeywell.aidc.BarcodeReaderInfo;
 /**
  * For the Honeywell PDA "Android data collection (AIDC)" SDK. This is actually the Intermec SDK.
  */
-public class AIDCProvider implements ScannerProvider {
+public class AIDCProvider extends Service implements ScannerProvider {
     static final String PROVIDER_NAME = "HONEYWELL_AIDC";
     private static final String LOG_TAG = "AIDCProvider";
+
+    private final IBinder binder = new ScannerProviderBinder(this);
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
 
     @Override
     public void getScanner(Context ctx, final ProviderCallback cb, final ScannerSearchOptions options) {

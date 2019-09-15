@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.enioka.scanner">
+    package="com.enioka.scanner.sdk.zebra">
 
     <application
         android:allowBackup="true"
@@ -8,12 +8,7 @@
         android:supportsRtl="true">
 
         <service
-            android:name=".service.ScannerService"
-            android:description="@string/service_description"
-            android:exported="false" />
-
-        <service
-            android:name=".sdk.hid.GenericHidProvider"
+            android:name=".BtZebraProvider"
             android:description="@string/service_description"
             android:exported="false">
 
@@ -23,7 +18,7 @@
         </service>
 
         <service
-            android:name=".sdk.athesi.HHTProvider"
+            android:name=".EmdkZebraProvider"
             android:description="@string/service_description"
             android:exported="false">
 
@@ -32,12 +27,11 @@
             </intent-filter>
         </service>
 
+        <uses-library
+            android:name="com.symbol.emdk"
+            android:required="false" />
     </application>
 
-    <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-feature android:name="android.hardware.camera" />
+    <uses-permission android:name="com.symbol.emdk.permission.EMDK" />
 
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 </manifest>

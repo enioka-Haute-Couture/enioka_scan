@@ -1,9 +1,14 @@
 package com.enioka.scanner.sdk.zebra;
 
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.ScannerProvider;
+import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.zebra.scannercontrol.DCSSDKDefs;
 import com.zebra.scannercontrol.DCSScannerInfo;
@@ -15,9 +20,17 @@ import java.util.List;
 /**
  * Provider for the BT Zebra SDK.
  */
-public class BtZebraProvider implements ScannerProvider {
+public class BtZebraProvider extends Service implements ScannerProvider {
     private static final String LOG_TAG = "BtZebraProvider";
     static final String PROVIDER_NAME = "Zebra Bluetooth";
+
+    private final IBinder binder = new ScannerProviderBinder(this);
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
@@ -56,4 +69,6 @@ public class BtZebraProvider implements ScannerProvider {
     public String getKey() {
         return PROVIDER_NAME;
     }
+
+
 }

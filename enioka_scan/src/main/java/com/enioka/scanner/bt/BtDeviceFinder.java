@@ -101,6 +101,11 @@ public class BtDeviceFinder {
 
             // Sample name start: GS, Voyager, RS6000
 
+            // We only allow SPP devices.
+            if (!uuids.contains(ConnectToBtDeviceThread.SERVER_BT_SERVICE_UUID.toString())) {
+                continue;
+            }
+
             // Launch device resolution
             final BtDevice btDevice = new BtDevice(bt);
             btDevice.connect(btAdapter, new ConnectToBtDeviceThread.OnConnectedCallback() {

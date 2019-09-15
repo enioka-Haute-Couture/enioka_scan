@@ -1,5 +1,8 @@
 package com.enioka.scanner.bt;
 
+/**
+ * Why a message cannot be processed. (normalization attempt).
+ */
 public enum MessageRejectionReason {
     CHECKSUM_FAILURE,
     UNDESIRED_MESSAGE,
@@ -7,5 +10,6 @@ public enum MessageRejectionReason {
     INVALID_OPERATION,
     CANNOT_PARSE,
     DENIED,
-    UNKWOWN;
+    OTHER,
+    UNKNOWN
 }

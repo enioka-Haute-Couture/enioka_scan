@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 
-public class BtSocketStreamReader extends Thread implements Closeable {
+/**
+ * A thread dedicated to listening data incoming from a socket.
+ */
+class BtSocketStreamReader extends Thread implements Closeable {
     private static final String LOG_TAG = "InternalBtDevice";
 
     private final BtDevice device;
@@ -29,7 +32,7 @@ public class BtSocketStreamReader extends Thread implements Closeable {
         while (true) {
             try {
                 byteCount = this.inputStream.read(buffer);
-                Log.d(LOG_TAG, "Read " + byteCount + " bytes from device: " + LoggingInputHandler.byteArrayToHex(buffer, byteCount) + " - ASCII: " + new String(buffer, 0, byteCount, Charset.forName("ASCII")));
+                Log.d(LOG_TAG, "Read " + byteCount + " bytes from device: " + LogHelpers.byteArrayToHex(buffer, byteCount) + " - ASCII: " + new String(buffer, 0, byteCount, Charset.forName("ASCII")));
                 this.device.handleInputBuffer(buffer, 0, byteCount);
             } catch (IOException e) {
                 Log.d(LOG_TAG, "Input stream was disconnected", e);

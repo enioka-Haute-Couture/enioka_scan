@@ -1,5 +1,8 @@
 package com.enioka.scanner.bt;
 
+/**
+ * The interface through which data from the scanner is poured into the device-specific adapter.
+ */
 public interface BtInputHandler {
     /**
      * Do something with the data returned by the bluetooth device. Not called on the UI thread.

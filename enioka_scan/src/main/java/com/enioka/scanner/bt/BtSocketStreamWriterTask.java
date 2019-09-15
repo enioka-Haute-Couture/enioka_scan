@@ -29,7 +29,7 @@ public class BtSocketStreamWriterTask implements Runnable {
     public void run() {
         try {
             this.parent.waitForCommandAllowed();
-            Log.d(LOG_TAG, "writing " + this.length + " bytes on output stream: " + LoggingInputHandler.byteArrayToHex(this.buffer, length));
+            Log.d(LOG_TAG, "writing " + this.length + " bytes on output stream: " + LogHelpers.byteArrayToHex(this.buffer, length));
             this.outputStream.write(buffer, offset, length);
             this.outputStream.flush();
             Log.d(LOG_TAG, "writing done");

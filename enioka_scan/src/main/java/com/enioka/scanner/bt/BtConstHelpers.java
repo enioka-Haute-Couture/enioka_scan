@@ -114,7 +114,7 @@ class BtConstHelpers {
         }
     }
 
-    public static String getBtMajorClassDescription(int btMajorClass) {
+    static String getBtMajorClassDescription(int btMajorClass) {
         switch (btMajorClass) {
             case BluetoothClass.Device.Major.AUDIO_VIDEO:
                 return "AUDIO_VIDEO";
@@ -143,7 +143,7 @@ class BtConstHelpers {
         }
     }
 
-    public static String getBondStateDescription(int bondState) {
+    static String getBondStateDescription(int bondState) {
         switch (bondState) {
             case BluetoothDevice.BOND_BONDED:
                 return "BONDED";

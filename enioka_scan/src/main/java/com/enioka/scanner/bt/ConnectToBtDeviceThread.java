@@ -8,11 +8,14 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.UUID;
 
-public class ConnectToBtDeviceThread extends Thread {
+/**
+ * A thread which attempts (once) to connect to a given BT SPP slave device.
+ */
+class ConnectToBtDeviceThread extends Thread {
     private static final String LOG_TAG = "InternalBtDevice";
 
     // This is the SPP service UUID. From http://sviluppomobile.blogspot.com/2012/11/bluetooth-services-uuids.html
-    protected static final UUID SERVER_BT_SERVICE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    static final UUID SERVER_BT_SERVICE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     private final BluetoothSocket clientSocket;
     private final BluetoothAdapter bluetoothAdapter;
@@ -24,7 +27,7 @@ public class ConnectToBtDeviceThread extends Thread {
         void failed();
     }
 
-    public ConnectToBtDeviceThread(BluetoothDevice bluetoothDevice, BluetoothAdapter bluetoothAdapter, OnConnectedCallback callback) {
+    ConnectToBtDeviceThread(BluetoothDevice bluetoothDevice, BluetoothAdapter bluetoothAdapter, OnConnectedCallback callback) {
         this.bluetoothAdapter = bluetoothAdapter;
         this.onConnectedCallback = callback;
 
@@ -64,7 +67,7 @@ public class ConnectToBtDeviceThread extends Thread {
     }
 
     // Closes the client socket and causes the thread to finish.
-    public void cancel() {
+    void cancel() {
         try {
             clientSocket.close();
         } catch (IOException e) {

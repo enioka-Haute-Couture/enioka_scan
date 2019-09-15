@@ -31,7 +31,7 @@ public class ErrorParser implements PayloadParser<MessageRejectionReason> {
                 return MessageRejectionReason.UNDESIRED_MESSAGE;
             default:
                 Log.w(LOG_TAG, "Cannot determine SDK cause for SSI cause " + buffer[0]);
-                return MessageRejectionReason.UNKWOWN;
+                return MessageRejectionReason.UNKNOWN;
         }
     }
 }

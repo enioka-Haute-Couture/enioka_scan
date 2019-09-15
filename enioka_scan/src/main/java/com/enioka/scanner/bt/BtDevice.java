@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import com.enioka.scanner.sdk.zebraoss.SsiParser;
-import com.enioka.scanner.sdk.zebraoss.commands.RequestRevision;
 
 import java.io.Closeable;
 import java.io.IOException;

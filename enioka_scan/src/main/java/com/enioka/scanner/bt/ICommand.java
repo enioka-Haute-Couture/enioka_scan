@@ -1,5 +1,10 @@
 package com.enioka.scanner.bt;
 
+/**
+ * A command which ca be sent to the scanner.
+ *
+ * @param <T> Type of data expected in return (can be Void).
+ */
 public interface ICommand<T> {
     /**
      * The command to send on the bluetooth socket.

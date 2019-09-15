@@ -40,6 +40,11 @@ public class WelcomeActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void onClickBt4(View v) {
+        Intent intent = new Intent(this, ScannerTesterActivity.class);
+        startActivity(intent);
+    }
+
     private void openSlipScan() {
         Intent intent = new Intent(this, SlipScanActivity.class);
         startActivity(intent);

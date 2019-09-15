@@ -7,6 +7,9 @@
     <string name="packing_instruction_scanning">Slip scan ongoing</string>
     <string name="packing_instruction_confirm">Slip sucessfully scanned, please choose to keep the scan or retry</string>
     <string name="packing_instruction_analysis">Slip scan analysis ongoing, please wait...</string>
+    <string name="scanner_tester">Scanner tester</string>
+    <string name="test_scan">Test scanner library</string>
+    <string name="test_camera2">Test unfinished camera2 scanner</string>
 
 
 </resources>

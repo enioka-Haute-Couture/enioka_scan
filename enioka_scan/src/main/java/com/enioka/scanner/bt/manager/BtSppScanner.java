@@ -1,10 +1,16 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.manager;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.enioka.scanner.bt.api.ScannerDataParser;
+import com.enioka.scanner.bt.api.ParsingResult;
+import com.enioka.scanner.bt.api.Scanner;
+import com.enioka.scanner.bt.api.BtSppScannerProvider;
+import com.enioka.scanner.bt.api.DataSubscriptionCallback;
+import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.sdk.zebraoss.SsiParser;
 
 import java.io.Closeable;
@@ -19,8 +25,8 @@ import java.util.TimerTask;
 /**
  * Internal class used as the main interaction entry point for bluetooth devices.
  */
-public class BtDevice implements Closeable {
-    private static final String LOG_TAG = "InternalBtDevice";
+class BtSppScanner implements Closeable, Scanner {
+    private static final String LOG_TAG = "BtSppSdk";
 
     private final BluetoothDevice rawDevice;
     private ConnectToBtDeviceThread connectionThread;
@@ -29,10 +35,10 @@ public class BtDevice implements Closeable {
     private final String name;
 
     private BluetoothSocket clientSocket;
-    private BtSocketStreamReader inputStreamReader;
-    private BtSocketStreamWriter outputStreamWriter;
+    private SocketStreamReader inputStreamReader;
+    private SocketStreamWriter outputStreamWriter;
 
-    private BtInputHandler inputHandler;
+    private ScannerDataParser inputHandler;
 
     /**
      * All the callbacks which are registered to run on received data (post-parsing). Key is data class name.
@@ -44,7 +50,7 @@ public class BtDevice implements Closeable {
      *
      * @param device a device definition
      */
-    BtDevice(BluetoothDevice device) {
+    BtSppScanner(BluetoothDevice device) {
         this.rawDevice = device;
         this.name = this.rawDevice.getName();
         this.inputHandler = new SsiParser();
@@ -56,7 +62,7 @@ public class BtDevice implements Closeable {
      *
      * @param socket a socket to a bluetooth device (male or slave - do not care).
      */
-    BtDevice(BluetoothSocket socket) {
+    BtSppScanner(BluetoothSocket socket) {
         this.rawDevice = socket.getRemoteDevice();
         this.name = this.rawDevice.getName();
         this.inputHandler = new SsiParser();
@@ -64,7 +70,7 @@ public class BtDevice implements Closeable {
         this.clientSocket = socket;
         this.connectStreams();
         this.setUpTimeoutTimer();
-        Log.i(LOG_TAG, "Device " + BtDevice.this.name + " reports it is connected");
+        Log.i(LOG_TAG, "Device " + BtSppScanner.this.name + " reports it is connected");
 
     }
 
@@ -103,13 +109,13 @@ public class BtDevice implements Closeable {
     }
 
     void connect(BluetoothAdapter bluetoothAdapter, final ConnectToBtDeviceThread.OnConnectedCallback callback) {
-        Log.i(LOG_TAG, "Starting connection to device " + BtDevice.this.name);
+        Log.i(LOG_TAG, "Starting connection to device " + BtSppScanner.this.name);
         connectionThread = new ConnectToBtDeviceThread(rawDevice, bluetoothAdapter, new ConnectToBtDeviceThread.OnConnectedCallback() {
             @Override
             public void connected(BluetoothSocket bluetoothSocket) {
-                BtDevice.this.connectionThread = null;
-                Log.i(LOG_TAG, "Device " + BtDevice.this.name + " reports it is connected");
-                BtDevice.this.clientSocket = bluetoothSocket;
+                BtSppScanner.this.connectionThread = null;
+                Log.i(LOG_TAG, "Device " + BtSppScanner.this.name + " reports it is connected");
+                BtSppScanner.this.clientSocket = bluetoothSocket;
                 connectStreams();
 
                 callback.connected(bluetoothSocket);
@@ -137,10 +143,10 @@ public class BtDevice implements Closeable {
         }
 
         try {
-            this.inputStreamReader = new BtSocketStreamReader(this.clientSocket.getInputStream(), this);
+            this.inputStreamReader = new SocketStreamReader(this.clientSocket.getInputStream(), this);
             this.inputStreamReader.start();
 
-            this.outputStreamWriter = new BtSocketStreamWriter(this.clientSocket.getOutputStream());
+            this.outputStreamWriter = new SocketStreamWriter(this.clientSocket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -181,21 +187,13 @@ public class BtDevice implements Closeable {
         }
     }
 
-    String getName() {
+    @Override
+    public String getName() {
         return this.name;
     }
 
-
-    /**
-     * Run a command on the scanner. Asynchronous - this call returns before the command is actually sent to the scanner.<br>
-     * If the command expects an answer, it will be received as any data from the scanner and sent to the registered {@link BtInputHandler}
-     * (there is no direct "link" between command and response).
-     *
-     * @param command      what should be run
-     * @param subscription an optional subscription waiting for an asnwer to the command
-     * @param <T>          expected return type of the command (implicit, found from command argument)
-     */
-    public <T> void runCommand(ICommand<T> command, CommandCallback<T> subscription) {
+    @Override
+    public <T> void runCommand(Command<T> command, DataSubscriptionCallback<T> subscription) {
         byte[] cmd = command.getCommand();
 
         if (subscription != null) {
@@ -210,7 +208,7 @@ public class BtDevice implements Closeable {
     }
 
     void handleInputBuffer(byte[] buffer, int offset, int length) {
-        BtParsingResult res = this.inputHandler.process(buffer, offset, length);
+        ParsingResult res = this.inputHandler.parse(buffer, offset, length);
         if (!res.expectingMoreData && res.data != null) {
             Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString());
 
@@ -218,7 +216,7 @@ public class BtDevice implements Closeable {
             synchronized (dataSubscriptions) {
                 if (this.dataSubscriptions.containsKey(res.data.getClass().getCanonicalName())) {
                     DataSubscription subscription = this.dataSubscriptions.get(res.data.getClass().getCanonicalName());
-                    CommandCallback callback = subscription.getCallback();
+                    DataSubscriptionCallback callback = subscription.getCallback();
                     callback.onSuccess(res.data);
 
                     if (!subscription.isPermanent()) {

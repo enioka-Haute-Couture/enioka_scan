@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.manager;
 
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -10,21 +10,21 @@ import java.util.concurrent.Semaphore;
 /**
  * As some write operations can be blocking, we use a dedicated thread. There is a single write thread running at a given time.
  */
-class BtSocketStreamWriter {
-    private static final String LOG_TAG = "InternalBtDevice";
+class SocketStreamWriter {
+    private static final String LOG_TAG = "BtSppSdk";
 
     private final OutputStream outputStream;
     private final ExecutorService pool;
 
     private Semaphore commandAllowed = new Semaphore(1);
 
-    BtSocketStreamWriter(OutputStream outputStream) {
+    SocketStreamWriter(OutputStream outputStream) {
         this.outputStream = outputStream;
         this.pool = Executors.newFixedThreadPool(1);
     }
 
     synchronized void write(byte[] buffer, int offset, int length, boolean ackType) {
-        pool.submit(new BtSocketStreamWriterTask(this.outputStream, buffer, offset, length, this, ackType));
+        pool.submit(new SocketStreamWriterTask(this.outputStream, buffer, offset, length, this, ackType));
     }
 
     void write(byte[] buffer, int offset, int length) {

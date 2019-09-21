@@ -1,6 +1,8 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.manager;
 
 import android.util.Log;
+
+import com.enioka.scanner.bt.api.Helpers;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -10,13 +12,13 @@ import java.nio.charset.Charset;
 /**
  * A thread dedicated to listening data incoming from a socket.
  */
-class BtSocketStreamReader extends Thread implements Closeable {
-    private static final String LOG_TAG = "InternalBtDevice";
+class SocketStreamReader extends Thread implements Closeable {
+    private static final String LOG_TAG = "BtSppSdk";
 
-    private final BtDevice device;
+    private final BtSppScanner device;
     private final InputStream inputStream;
 
-    BtSocketStreamReader(InputStream inputStream, BtDevice device) {
+    SocketStreamReader(InputStream inputStream, BtSppScanner device) {
         this.inputStream = inputStream;
         this.device = device;
     }
@@ -33,7 +35,7 @@ class BtSocketStreamReader extends Thread implements Closeable {
             try {
                 byteCount = this.inputStream.read(buffer);
                 if (byteCount > 0) {
-                    Log.d(LOG_TAG, "Read " + byteCount + " bytes from device: " + LogHelpers.byteArrayToHex(buffer, byteCount) + " - ASCII: " + new String(buffer, 0, byteCount, Charset.forName("ASCII")));
+                    Log.d(LOG_TAG, "Read " + byteCount + " bytes from device: " + Helpers.byteArrayToHex(buffer, byteCount) + " - ASCII: " + new String(buffer, 0, byteCount, Charset.forName("ASCII")));
                     this.device.handleInputBuffer(buffer, 0, byteCount);
                 }
             } catch (IOException e) {

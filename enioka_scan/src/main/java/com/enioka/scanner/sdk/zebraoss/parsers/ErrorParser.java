@@ -2,11 +2,7 @@ package com.enioka.scanner.sdk.zebraoss.parsers;
 
 import android.util.Log;
 
-import com.enioka.scanner.bt.MessageRejectionReason;
-import com.enioka.scanner.data.Barcode;
-import com.enioka.scanner.sdk.zebraoss.ZebraOssDataTranslator;
-
-import java.nio.charset.Charset;
+import com.enioka.scanner.bt.api.MessageRejectionReason;
 
 /**
  * Responsible for handling NAK data

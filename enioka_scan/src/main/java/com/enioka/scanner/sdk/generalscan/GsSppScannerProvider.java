@@ -5,11 +5,11 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.enioka.scanner.bt.BtDevice;
-import com.enioka.scanner.bt.BtInputHandler;
-import com.enioka.scanner.bt.BtSppScannerProvider;
-import com.enioka.scanner.bt.BtSppScannerProviderServiceBinder;
-import com.enioka.scanner.bt.CommandCallback;
+import com.enioka.scanner.bt.api.ScannerDataParser;
+import com.enioka.scanner.bt.api.Scanner;
+import com.enioka.scanner.bt.api.BtSppScannerProvider;
+import com.enioka.scanner.bt.api.BtSppScannerProviderServiceBinder;
+import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.sdk.generalscan.commands.GetDeviceId;
 import com.enioka.scanner.sdk.generalscan.data.DeviceId;
 
@@ -23,8 +23,8 @@ public class GsSppScannerProvider extends Service implements BtSppScannerProvide
     }
 
     @Override
-    public void canManageDevice(BtDevice device, final ManagementCallback callback) {
-        device.runCommand(new GetDeviceId(), new CommandCallback<DeviceId>() {
+    public void canManageDevice(Scanner device, final ManagementCallback callback) {
+        device.runCommand(new GetDeviceId(), new DataSubscriptionCallback<DeviceId>() {
             @Override
             public void onSuccess(DeviceId data) {
                 callback.canManage();
@@ -43,7 +43,7 @@ public class GsSppScannerProvider extends Service implements BtSppScannerProvide
     }
 
     @Override
-    public BtInputHandler getInputHandler() {
+    public ScannerDataParser getInputHandler() {
         return new Parser();
     }
 

@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.manager;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -12,7 +12,7 @@ import java.util.UUID;
  * A thread which attempts (once) to connect to a given BT SPP slave device.
  */
 class ConnectToBtDeviceThread extends Thread {
-    private static final String LOG_TAG = "InternalBtDevice";
+    private static final String LOG_TAG = "BtSppSdk";
 
     // This is the SPP service UUID. From http://sviluppomobile.blogspot.com/2012/11/bluetooth-services-uuids.html
     static final UUID SERVER_BT_SERVICE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");

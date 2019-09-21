@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.api;
 
 /**
  * Why a message cannot be processed. (normalization attempt).

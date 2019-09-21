@@ -1,6 +1,6 @@
 package com.enioka.scanner.sdk.zebraoss.data;
 
-import com.enioka.scanner.bt.LogHelpers;
+import com.enioka.scanner.bt.api.Helpers;
 
 public class Event {
     private byte[] data;
@@ -11,6 +11,6 @@ public class Event {
 
     @Override
     public String toString() {
-        return "Event code " + LogHelpers.byteArrayToHex(data, data.length);
+        return "Event code " + Helpers.byteArrayToHex(data, data.length);
     }
 }

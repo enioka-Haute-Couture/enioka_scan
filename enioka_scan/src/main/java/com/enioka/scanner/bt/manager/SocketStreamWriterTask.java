@@ -1,6 +1,8 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.manager;
 
 import android.util.Log;
+
+import com.enioka.scanner.bt.api.Helpers;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,17 +10,17 @@ import java.io.OutputStream;
 /**
  * Actual socket writing. Used in executor.
  */
-public class BtSocketStreamWriterTask implements Runnable {
-    private static final String LOG_TAG = "InternalBtDevice";
+class SocketStreamWriterTask implements Runnable {
+    private static final String LOG_TAG = "BtSppSdk";
 
     private final OutputStream outputStream;
     private final byte[] buffer;
     private final int offset;
     private final int length;
     private final boolean ackType;
-    private final BtSocketStreamWriter parent;
+    private final SocketStreamWriter parent;
 
-    BtSocketStreamWriterTask(OutputStream outputStream, byte[] buffer, int offset, int length, BtSocketStreamWriter writer, boolean ackType) {
+    SocketStreamWriterTask(OutputStream outputStream, byte[] buffer, int offset, int length, SocketStreamWriter writer, boolean ackType) {
         this.outputStream = outputStream;
         this.buffer = buffer;
         this.length = length;
@@ -33,7 +35,7 @@ public class BtSocketStreamWriterTask implements Runnable {
             if (!this.ackType) {
                 this.parent.waitForCommandAllowed();
             }
-            Log.d(LOG_TAG, "writing " + this.length + " bytes on output stream: " + LogHelpers.byteArrayToHex(this.buffer, length));
+            Log.d(LOG_TAG, "writing " + this.length + " bytes on output stream: " + Helpers.byteArrayToHex(this.buffer, length));
             this.outputStream.write(buffer, offset, length);
             this.outputStream.flush();
             Log.d(LOG_TAG, "writing done");

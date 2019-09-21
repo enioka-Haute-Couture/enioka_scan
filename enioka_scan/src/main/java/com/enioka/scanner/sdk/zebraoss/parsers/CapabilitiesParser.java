@@ -1,13 +1,8 @@
 package com.enioka.scanner.sdk.zebraoss.parsers;
 
-import android.util.Log;
-
-import com.enioka.scanner.bt.MessageRejectionReason;
-import com.enioka.scanner.sdk.zebraoss.SsiMessage;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**

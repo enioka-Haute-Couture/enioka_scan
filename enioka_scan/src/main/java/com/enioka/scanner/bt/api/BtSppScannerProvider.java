@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.api;
 
 /**
  * A specialized form of {@link com.enioka.scanner.api.ScannerProvider} for Bluetooth Serial Port Profile scanners.<br>
@@ -11,12 +11,12 @@ public interface BtSppScannerProvider {
      * @param device a connected device, ready to run commands.
      * @return true if compatible.
      */
-    void canManageDevice(BtDevice device, ManagementCallback callback);
+    void canManageDevice(Scanner device, ManagementCallback callback);
 
     /**
-     * The {@link BtInputHandler} which should be used to parse results.
+     * The {@link ScannerDataParser} which should be used to parse results.
      */
-    BtInputHandler getInputHandler();
+    ScannerDataParser getInputHandler();
 
     /**
      * A way to signal that this provider can or cannot manage a device.

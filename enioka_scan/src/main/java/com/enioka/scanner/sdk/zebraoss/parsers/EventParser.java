@@ -1,8 +1,5 @@
 package com.enioka.scanner.sdk.zebraoss.parsers;
 
-import android.util.Log;
-
-import com.enioka.scanner.bt.MessageRejectionReason;
 import com.enioka.scanner.sdk.zebraoss.data.Event;
 
 /**

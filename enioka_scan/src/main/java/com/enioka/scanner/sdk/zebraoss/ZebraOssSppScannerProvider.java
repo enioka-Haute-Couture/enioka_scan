@@ -5,18 +5,18 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.enioka.scanner.bt.BtDevice;
-import com.enioka.scanner.bt.BtInputHandler;
-import com.enioka.scanner.bt.BtSppScannerProvider;
-import com.enioka.scanner.bt.BtSppScannerProviderServiceBinder;
-import com.enioka.scanner.bt.CommandCallback;
+import com.enioka.scanner.bt.api.ScannerDataParser;
+import com.enioka.scanner.bt.api.Scanner;
+import com.enioka.scanner.bt.api.BtSppScannerProvider;
+import com.enioka.scanner.bt.api.BtSppScannerProviderServiceBinder;
+import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.sdk.zebraoss.commands.CapabilitiesRequest;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 
 public class ZebraOssSppScannerProvider extends Service implements BtSppScannerProvider {
     private final IBinder binder = new BtSppScannerProviderServiceBinder(this);
 
-    private final BtInputHandler inputHandler = new SsiParser();
+    private final ScannerDataParser inputHandler = new SsiParser();
 
     @Nullable
     @Override
@@ -25,9 +25,9 @@ public class ZebraOssSppScannerProvider extends Service implements BtSppScannerP
     }
 
     @Override
-    public void canManageDevice(BtDevice device, final ManagementCallback callback) {
+    public void canManageDevice(Scanner device, final ManagementCallback callback) {
 
-        device.runCommand(new CapabilitiesRequest(), new CommandCallback<CapabilitiesReply>() {
+        device.runCommand(new CapabilitiesRequest(), new DataSubscriptionCallback<CapabilitiesReply>() {
             @Override
             public void onSuccess(CapabilitiesReply data) {
                 callback.canManage();
@@ -46,7 +46,7 @@ public class ZebraOssSppScannerProvider extends Service implements BtSppScannerP
     }
 
     @Override
-    public BtInputHandler getInputHandler() {
+    public ScannerDataParser getInputHandler() {
         return inputHandler;
     }
 

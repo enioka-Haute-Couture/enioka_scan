@@ -1,21 +1,22 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.manager;
 
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.bt.api.BtSppScannerProvider;
 
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
- * Responsible for transforming {@link BtDevice} into {@link Scanner}. As this is a long and costly operation
+ * Responsible for transforming {@link BtSppScanner} into {@link Scanner}. As this is a long and costly operation
  * (as providers may need to wait for device answer timeout to their "are you a type XXX device" questions)
  * there is one thread per BT device.
  */
-class BtSppScannerResolutionThread implements Runnable, BtSppScannerProvider.ManagementCallback {
-    private static final String LOG_TAG = "InternalBtDevice";
+class ScannerResolutionThread implements Runnable, BtSppScannerProvider.ManagementCallback {
+    private static final String LOG_TAG = "BtSppSdk";
 
-    private BtDevice device;
+    private BtSppScanner device;
     private List<BtSppScannerProvider> scannerProviders;
     private ScannerResolutionCallback callback;
     private final Semaphore providerLock = new Semaphore(0);
@@ -23,13 +24,13 @@ class BtSppScannerResolutionThread implements Runnable, BtSppScannerProvider.Man
 
 
     interface ScannerResolutionCallback {
-        //TODO: return Scanner and not BtDevice.
-        void onConnection(BtDevice scanner, BtSppScannerProvider compatibleProvider);
+        //TODO: return Scanner and not BtSppScanner.
+        void onConnection(BtSppScanner scanner, BtSppScannerProvider compatibleProvider);
 
-        void notCompatible(BtDevice device);
+        void notCompatible(BtSppScanner device);
     }
 
-    BtSppScannerResolutionThread(BtDevice device, List<BtSppScannerProvider> scannerProviders, ScannerResolutionCallback callback) {
+    ScannerResolutionThread(BtSppScanner device, List<BtSppScannerProvider> scannerProviders, ScannerResolutionCallback callback) {
         this.device = device;
         this.scannerProviders = scannerProviders;
         this.callback = callback;

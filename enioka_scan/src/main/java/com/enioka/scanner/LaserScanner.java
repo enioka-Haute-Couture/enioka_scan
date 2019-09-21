@@ -14,7 +14,7 @@ import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
-import com.enioka.scanner.bt.BtDeviceFinder;
+import com.enioka.scanner.bt.manager.BtDeviceFinder;
 
 import java.util.ArrayList;
 import java.util.HashSet;

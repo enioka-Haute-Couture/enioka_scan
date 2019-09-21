@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.manager;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
@@ -10,8 +10,8 @@ import java.io.IOException;
 /**
  * A SPP service listener thread on a bluetooth adapter. Used by master BT devices to connect to the phone. Closes after the first connection (OK or not). No timeout.
  */
-public class AcceptBtConnectionThread extends Thread {
-    private static final String LOG_TAG = "InternalBtDevice";
+class AcceptBtConnectionThread extends Thread {
+    private static final String LOG_TAG = "BtSppSdk";
 
     private final BluetoothServerSocket serverSocket;
     private final BluetoothAdapter bluetoothAdapter;

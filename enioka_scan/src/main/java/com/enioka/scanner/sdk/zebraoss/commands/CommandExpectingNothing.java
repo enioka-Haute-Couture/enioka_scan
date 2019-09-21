@@ -1,9 +1,9 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
-import com.enioka.scanner.bt.ICommand;
+import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.sdk.zebraoss.SsiPacket;
 
-public abstract class CommandExpectingNothing extends SsiPacket implements ICommand<Void> {
+public abstract class CommandExpectingNothing extends SsiPacket implements Command<Void> {
     public CommandExpectingNothing(byte opCode, byte[] data) {
         super(opCode, data);
     }

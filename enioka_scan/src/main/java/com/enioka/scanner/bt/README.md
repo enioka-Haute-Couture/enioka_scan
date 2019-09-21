@@ -4,7 +4,7 @@
 
 The library provides a small SDK to help creating connectors to most Bluetooth (BT) scanners (handheld matchbox scanners, ring scanners...)
 
-It is centered on devices which use the SPP (Serial Port Profile) BT profile - the case for most if not all evolved BT scanners (with simple/cheap BT scanners being dumb HID/keyboards without SPP).
+It is centered on devices which use the SPP (Serial Port Profile) BT profile - the case for most if not all evolved BT scanners (while simple/cheap BT scanners are most often dumb HID/keyboards without SPP).
 Note that most devices that are MFi-certified (Made For iOS) are also SPP compatible.
 
 All the connection details are handled by the SDK, and the connector simply has to deal with the specific protocol needed by a device category, using a set of provided interfaces.
@@ -13,7 +13,7 @@ This protocol is usually described inside the integration documentation or the p
 ## Why this SDK
 
 Most of the time, the device manufacturer provides a dedicated SDK for their devices.
-So instead of using this generic SDK, it is simpler to just create a connector using the vendor SDK (and some are actually available from us).
+So instead of using this generic SDK, it is simpler to just create a connector using the vendor SDK (and some are actually available from the authors of this library).
 
 However:
 * Most vendor SDK (perhaps even all?) are rather OSS unfriendly and just cannot be redistributed or even linked to.
@@ -26,11 +26,11 @@ Therefore, a generic BT SDK was created. Note however that the connectors made u
 
 Coming soon(TM).
 
-For now, the SDK only deals with BT devices which are already paired with the Android device.
+For now, the SDK only deals with BT slave devices which are already paired with the Android device, and master devices.
 
 ## Device discovery process
 
-On startup, the library lists all BT provider services.
+On startup, the library lists all BT provider services. A provider implements BtSppScannerProvider, extends Service and references itself in the manifest, allowing it to be used as a bound service. 
 
 ### Slave devices (Android opens the connection to the scanners)
 
@@ -65,29 +65,28 @@ The library remembers (successful) associations between device and connector, so
 
 ## Commands
 
-(TODO - notes)
-
 The main goal of a connector is to translate API verbs into something which can be understood by the scanner and vice-versa.
 Most interactions take place in what we call a "command".
 
 A command is a way to run operations on the scanner: make it beep, enable a LED, etc.
 
-They are asynchronous, as bluetooth operations should always be asynchronous (and like most IO operations, BT or not, should be).
+Each command should be a dedicated class implementing Command<ExpectedResultClass>.
 
+Commands are asynchronous, as bluetooth operations should always be asynchronous (and like most IO operations, BT or not, should be).
 
 
 Only a single command is run at a time. This is a simplification, as some devices *may* allow multiple commands at the same time. This is however rare - most protocols are half-duplex anyway. Therefore, for sanity's sake, the SDK will always wait for an ACK of some form for the current command before sending another. Commands are queued. Callbacks are used to signal end of commands.
 
 Note: there is no need to implement every possible command! Just think extensible and implement what is needed for the Scanner interface.
 
-TODO: timeouts.
+Also, each command is associated to a specific timeout.
 
 
 ### Parsing data from the scanner
 
 The scanner sends data, either as the result of a command (such as: give me the value of configuration XXX) or as the result of an operation on the scanner itself (such as: new data scanned).
 
-Parsing this data is highly specific to the device familly and is the one of the two main roles of a SPP connector. This is done by implementing the BtInputHandler interface.
+Parsing this data is highly specific to the device familly and is the one of the two main roles of a SPP connector. This is done by implementing the ScannerDataParser interface.
 How the connector actually implements the interface is free. Please note that:
 
 * the data given to the parser may be chunked (multiple buffers, and therefore multiple calls to the parser, for a single "message") (layer 4)
@@ -102,29 +101,6 @@ Most parsers will use two steps:
 At the end of the parsing, the actual payload (if any) is returned by the parser in a BtParsingResult structure. The payload can be an instance of any Java class - this is highly device specific too. Some shared payloads can of course be reused, such as the Barcode class.
 
 The SDK will then use this to call any callbacks **registered on this data type**.
-
-
-### Notes to sort
-
-#### ACK handling.
-Some commands do not receive any ACK from the device. (GeneralScan...)
-Most just wait for ACK.
-Some commands have multiple answers (Honeywell) or answer a different command (GS) !
-
-Retour d'information : spécifique selon commande. Par exemple : détection nuémro de version.
-
-Reste la gestion du timeout.
-
-Besoin d'une commande SDK qu fait ACK pour tout simplifier.
-
-React to unsollcitied data! (get parameter barcode read for example...)
-
-Partage de clef pour le callback... comment le rendre regardable ?  TYPE: btDevice.runCommand(new LedOn(RED), new Callback {....}).
-=> faut que la commande donne sa clef... et donc lien entre la clef du subparser et commande... BOF.
-en même temps : dans l'enum, on peut préciser une assocaition non ?
-
-Aussi, une commande doit pouvoir lister les valeurs autorisées de façon dynamique.
-
 
 
 ## Conventions

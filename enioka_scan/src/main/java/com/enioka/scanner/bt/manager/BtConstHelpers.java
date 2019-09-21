@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.manager;
 
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;

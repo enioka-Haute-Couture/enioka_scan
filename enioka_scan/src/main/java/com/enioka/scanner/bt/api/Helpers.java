@@ -1,6 +1,6 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.api;
 
-public class LogHelpers {
+public class Helpers {
     public static String byteArrayToHex(byte[] buffer, int length) {
         StringBuilder sb = new StringBuilder(length * 2);
         for (int i = 0; i < length; i++) {

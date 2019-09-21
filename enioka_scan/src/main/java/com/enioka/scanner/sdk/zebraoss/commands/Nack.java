@@ -1,6 +1,6 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
-import com.enioka.scanner.bt.MessageRejectionReason;
+import com.enioka.scanner.bt.api.MessageRejectionReason;
 
 /**
  * A message or segment explicit NON acknowledgment.

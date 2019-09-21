@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.api;
 
 // TODO: simplify this, remove public access...
 
@@ -7,14 +7,14 @@ package com.enioka.scanner.bt;
  *
  * @param <T>
  */
-public class BtParsingResult<T> {
+public class ParsingResult<T> {
 
     /**
      * Constructs a result "All is OK, here is the data".
      *
      * @param data parsed data which could be given to callers.
      */
-    public BtParsingResult(T data) {
+    public ParsingResult(T data) {
         this.data = data;
         expectingMoreData = false;
         rejected = false;
@@ -25,7 +25,7 @@ public class BtParsingResult<T> {
      *
      * @param result
      */
-    public BtParsingResult(MessageRejectionReason result) {
+    public ParsingResult(MessageRejectionReason result) {
         this.result = result;
         expectingMoreData = false;
         rejected = true;
@@ -34,14 +34,14 @@ public class BtParsingResult<T> {
     /**
      * Constructs a result "need more data to continue".
      */
-    public BtParsingResult() {
+    public ParsingResult() {
     }
 
     public boolean expectingMoreData = true;
     public boolean rejected = false;
     public MessageRejectionReason result;
     public T data;
-    public ICommand acknowledger = null;
+    public Command acknowledger = null;
 
     MessageRejectionReason getResult() {
         return this.result;

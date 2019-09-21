@@ -1,4 +1,6 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.manager;
+
+import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 
 import java.util.Calendar;
 
@@ -6,11 +8,11 @@ import java.util.Calendar;
  * Helper class storing execution context around a command callback.
  */
 class DataSubscription {
-    private final CommandCallback<?> callback;
+    private final DataSubscriptionCallback<?> callback;
     private Calendar timeOut = null;
     private final boolean permanent;
 
-    DataSubscription(CommandCallback<?> callback, int timeOutMs, boolean permanent) {
+    DataSubscription(DataSubscriptionCallback<?> callback, int timeOutMs, boolean permanent) {
         this.callback = callback;
         this.permanent = permanent;
 
@@ -24,7 +26,7 @@ class DataSubscription {
         return this.timeOut != null && this.timeOut.before(Calendar.getInstance());
     }
 
-    public CommandCallback<?> getCallback() {
+    public DataSubscriptionCallback<?> getCallback() {
         return callback;
     }
 

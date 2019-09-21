@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt;
+package com.enioka.scanner.bt.api;
 
 import android.os.Binder;
 
@@ -12,7 +12,7 @@ public class BtSppScannerProviderServiceBinder extends Binder {
         this.providerInstance = providerInstance;
     }
 
-    BtSppScannerProvider getService() {
+    public BtSppScannerProvider getService() {
         return providerInstance;
     }
 }

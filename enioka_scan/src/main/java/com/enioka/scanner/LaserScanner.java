@@ -14,7 +14,6 @@ import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
-import com.enioka.scanner.bt.manager.BtDeviceFinder;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -139,8 +138,6 @@ public final class LaserScanner {
             ctx.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }*/
 
-        BtDeviceFinder.getDevices(ctx);
-
         // Trivial
         if (laserProviders.isEmpty()) {
             Log.i(LOG_TAG, "There are no laser scanners available at all");
@@ -158,7 +155,7 @@ public final class LaserScanner {
             Log.i(LOG_TAG, "Starting search on provider " + sp.getKey());
             sp.getScanner(ctx, new ScannerProvider.ProviderCallback() {
                 @Override
-                public void onScannerCreated(String providerKey, String scannerKey, Scanner s) {
+                public void onScannerCreated(final String providerKey, final String scannerKey, Scanner s) {
                     if (s == null) {
                         Log.e(LOG_TAG, "Provider  " + providerKey + "has returned a null scanner!");
                         return;

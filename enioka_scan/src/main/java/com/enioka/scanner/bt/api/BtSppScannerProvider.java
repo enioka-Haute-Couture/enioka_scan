@@ -22,7 +22,7 @@ public interface BtSppScannerProvider {
      * A way to signal that this provider can or cannot manage a device.
      */
     interface ManagementCallback {
-        void canManage();
+        void canManage(com.enioka.scanner.api.Scanner libraryScanner);
 
         void cannotManage();
     }

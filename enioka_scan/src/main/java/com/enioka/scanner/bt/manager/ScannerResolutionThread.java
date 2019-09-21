@@ -20,12 +20,11 @@ class ScannerResolutionThread implements Runnable, BtSppScannerProvider.Manageme
     private List<BtSppScannerProvider> scannerProviders;
     private ScannerResolutionCallback callback;
     private final Semaphore providerLock = new Semaphore(0);
-    private boolean found = false;
+    private com.enioka.scanner.api.Scanner foundLibraryScanner;
 
 
     interface ScannerResolutionCallback {
-        //TODO: return Scanner and not BtSppScanner.
-        void onConnection(BtSppScanner scanner, BtSppScannerProvider compatibleProvider);
+        void onConnection(Scanner scanner, BtSppScannerProvider compatibleProvider);
 
         void notCompatible(BtSppScanner device);
     }
@@ -48,9 +47,9 @@ class ScannerResolutionThread implements Runnable, BtSppScannerProvider.Manageme
                 e.printStackTrace();
             }
 
-            if (found) {
+            if (foundLibraryScanner != null) {
                 Log.i(LOG_TAG, "Scanner " + device.getName() + " is compatible with provider " + provider.getClass().getSimpleName());
-                callback.onConnection(device, provider);
+                callback.onConnection(foundLibraryScanner, provider);
                 return;
             }
 
@@ -66,8 +65,8 @@ class ScannerResolutionThread implements Runnable, BtSppScannerProvider.Manageme
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void canManage() {
-        found = true;
+    public void canManage(Scanner libraryScanner) {
+        foundLibraryScanner = libraryScanner;
         providerLock.release(1);
     }
 

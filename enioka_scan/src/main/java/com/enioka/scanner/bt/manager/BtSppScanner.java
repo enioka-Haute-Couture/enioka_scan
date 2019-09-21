@@ -207,6 +207,15 @@ class BtSppScanner implements Closeable, Scanner {
         this.outputStreamWriter.write(cmd);
     }
 
+    public <T> void registerSubscription(DataSubscriptionCallback<T> subscription, Class<? extends T> targetType) {
+        if (subscription != null) {
+            synchronized (dataSubscriptions) {
+                String expectedDataClass = targetType.getCanonicalName();
+                this.dataSubscriptions.put(expectedDataClass, new DataSubscription(subscription, 0, true));
+            }
+        }
+    }
+
     void handleInputBuffer(byte[] buffer, int offset, int length) {
         ParsingResult res = this.inputHandler.parse(buffer, offset, length);
         if (!res.expectingMoreData && res.data != null) {

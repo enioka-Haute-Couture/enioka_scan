@@ -23,11 +23,11 @@ public class GsSppScannerProvider extends Service implements BtSppScannerProvide
     }
 
     @Override
-    public void canManageDevice(Scanner device, final ManagementCallback callback) {
+    public void canManageDevice(final Scanner device, final ManagementCallback callback) {
         device.runCommand(new GetDeviceId(), new DataSubscriptionCallback<DeviceId>() {
             @Override
             public void onSuccess(DeviceId data) {
-                callback.canManage();
+                callback.canManage(new GsSppScanner(device));
             }
 
             @Override

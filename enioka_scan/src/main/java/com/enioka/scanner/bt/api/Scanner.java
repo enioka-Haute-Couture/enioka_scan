@@ -19,4 +19,11 @@ public interface Scanner {
      * @return the BT name
      */
     String getName();
+
+    /**
+     * Fully disconnects from the device. It will not try to reconnect.
+     */
+    void disconnect();
+
+    <T> void registerSubscription(DataSubscriptionCallback<T> subscription, Class<? extends T> targetType);
 }

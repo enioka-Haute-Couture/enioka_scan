@@ -44,7 +44,6 @@ class SocketStreamWriter {
     }
 
     void write(String data) {
-
         write(data.getBytes(Charset.forName("ASCII")));
     }
 

@@ -5,7 +5,7 @@ import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import java.util.Calendar;
 
 /**
- * Helper class storing execution context around a command callback.
+ * Helper class storing execution context for callbacks on parsed data.
  */
 class DataSubscription {
     private final DataSubscriptionCallback<?> callback;

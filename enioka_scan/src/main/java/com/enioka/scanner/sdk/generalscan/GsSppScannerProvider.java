@@ -46,5 +46,4 @@ public class GsSppScannerProvider extends Service implements BtSppScannerProvide
     public ScannerDataParser getInputHandler() {
         return new Parser();
     }
-
 }

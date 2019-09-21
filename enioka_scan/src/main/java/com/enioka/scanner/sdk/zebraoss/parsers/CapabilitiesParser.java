@@ -9,8 +9,6 @@ import java.util.Set;
  * CAPABILITIES_REPLY parser.
  */
 public class CapabilitiesParser implements PayloadParser<CapabilitiesReply> {
-    private static final String LOG_TAG = "CapabilitiesParser";
-
     @Override
     public CapabilitiesReply parseData(byte[] buffer) {
         if (buffer.length < 4) {

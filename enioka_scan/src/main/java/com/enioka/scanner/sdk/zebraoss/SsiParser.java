@@ -15,7 +15,7 @@ import com.enioka.scanner.sdk.zebraoss.parsers.PayloadParser;
  * SSI answers are all in the same form as the queries.
  */
 public class SsiParser implements ScannerDataParser {
-    private static final String LOG_TAG = "OssBtZebraSsiProvider";
+    private static final String LOG_TAG = "SsiParser";
 
     private SsiMultiPacketMessage message = new SsiMultiPacketMessage();
 

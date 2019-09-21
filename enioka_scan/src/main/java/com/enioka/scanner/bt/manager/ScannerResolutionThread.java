@@ -22,10 +22,24 @@ class ScannerResolutionThread implements Runnable, BtSppScannerProvider.Manageme
     private final Semaphore providerLock = new Semaphore(0);
     private com.enioka.scanner.api.Scanner foundLibraryScanner;
 
-
+    /**
+     * Methods to call at the end of the analysis of a given scanner by all provider.
+     * ScannerResolutionThread uses this interface to communicate its asynchronous results.
+     */
     interface ScannerResolutionCallback {
+        /**
+         * At least one provider is compatible with the scanner.
+         *
+         * @param scanner            the scanner which was analysed
+         * @param compatibleProvider the compatible provider
+         */
         void onConnection(Scanner scanner, BtSppScannerProvider compatibleProvider);
 
+        /**
+         * The scanner is not compatible with any known provider.
+         *
+         * @param device the scanner which failed to find a home provider. Very sad.
+         */
         void notCompatible(BtSppScanner device);
     }
 
@@ -41,12 +55,15 @@ class ScannerResolutionThread implements Runnable, BtSppScannerProvider.Manageme
             Log.d(LOG_TAG, "Testing compatibility of scanner " + device.getName() + " with provider " + provider.getClass().getSimpleName());
             device.setProvider(provider); // Analyse returned data with the current provider.
             provider.canManageDevice(device, this);
+
+            // We now wait. Because only one provider is allowed to do its analysis at a time - there is only one socket available to the scanner!
             try {
                 providerLock.acquire(1);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
+            // Callbacks canManage and cannotManage do set foundLibraryScanner if provider is compatible.
             if (foundLibraryScanner != null) {
                 Log.i(LOG_TAG, "Scanner " + device.getName() + " is compatible with provider " + provider.getClass().getSimpleName());
                 callback.onConnection(foundLibraryScanner, provider);
@@ -72,6 +89,7 @@ class ScannerResolutionThread implements Runnable, BtSppScannerProvider.Manageme
 
     @Override
     public void cannotManage() {
+        foundLibraryScanner = null;
         providerLock.release(1);
     }
 

@@ -155,7 +155,7 @@ public final class LaserScanner {
             Log.i(LOG_TAG, "Starting search on provider " + sp.getKey());
             sp.getScanner(ctx, new ScannerProvider.ProviderCallback() {
                 @Override
-                public void onScannerCreated(final String providerKey, final String scannerKey, Scanner s) {
+                public void onScannerCreated(String providerKey, String scannerKey, Scanner s) {
                     if (s == null) {
                         Log.e(LOG_TAG, "Provider  " + providerKey + "has returned a null scanner!");
                         return;

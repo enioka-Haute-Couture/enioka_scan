@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 
 /**
  * A very simple parser - GS only uses ASCII strings, without ACK or anything.
+ * It only uses \r\n as an end of data indicator.
  */
 public class Parser implements ScannerDataParser {
     private String currentData = null;

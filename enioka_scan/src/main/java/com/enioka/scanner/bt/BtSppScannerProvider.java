@@ -11,10 +11,19 @@ public interface BtSppScannerProvider {
      * @param device a connected device, ready to run commands.
      * @return true if compatible.
      */
-    boolean canManageDevice(BtDevice device);
+    void canManageDevice(BtDevice device, ManagementCallback callback);
 
     /**
      * The {@link BtInputHandler} which should be used to parse results.
      */
     BtInputHandler getInputHandler();
+
+    /**
+     * A way to signal that this provider can or cannot manage a device.
+     */
+    interface ManagementCallback {
+        void canManage();
+
+        void cannotManage();
+    }
 }

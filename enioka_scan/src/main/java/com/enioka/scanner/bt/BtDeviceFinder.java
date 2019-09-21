@@ -13,9 +13,6 @@ import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.util.Log;
 
-import com.enioka.scanner.sdk.zebraoss.commands.RequestParam;
-import com.enioka.scanner.sdk.zebraoss.commands.TempCommand;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -170,8 +167,6 @@ public class BtDeviceFinder {
 
                     // Set the provider inside the BtDevice - it is needed for parsing data.
                     btDevice.setProvider(compatibleProvider);
-
-                    btDevice.runCommand(new TempCommand());
                 }
 
                 @Override

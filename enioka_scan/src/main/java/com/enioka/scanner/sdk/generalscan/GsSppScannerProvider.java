@@ -21,8 +21,8 @@ public class GsSppScannerProvider extends Service implements BtSppScannerProvide
     }
 
     @Override
-    public boolean canManageDevice(BtDevice device) {
-        return false;
+    public void canManageDevice(BtDevice device, ManagementCallback callback) {
+        callback.cannotManage();
     }
 
     @Override

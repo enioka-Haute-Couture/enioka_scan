@@ -23,6 +23,6 @@ public class CapabilitiesRequest extends SsiPacket implements ICommand<Capabilit
 
     @Override
     public CommandCallbackHolder<CapabilitiesReply> getCallback() {
-        return new CommandCallbackHolder<>(CapabilitiesReply.class, this.callback, false);
+        return new CommandCallbackHolder<>(CapabilitiesReply.class, this.callback, false, 100);
     }
 }

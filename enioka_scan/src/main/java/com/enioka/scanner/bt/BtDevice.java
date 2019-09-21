@@ -9,8 +9,12 @@ import com.enioka.scanner.sdk.zebraoss.SsiParser;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Internal class used as the main interaction entry point for bluetooth devices.
@@ -20,6 +24,7 @@ public class BtDevice implements Closeable {
 
     private final BluetoothDevice rawDevice;
     private ConnectToBtDeviceThread connectionThread;
+    private Timer timeoutHunter;
 
     private final String name;
 
@@ -29,7 +34,10 @@ public class BtDevice implements Closeable {
 
     private BtInputHandler inputHandler;
 
-    private final Map<String, CommandCallbackHolder<?>> commandCallbacks = new HashMap<>();
+    /**
+     * All the callbacks which are registered to run on received data (post-parsing). Key is data class name.
+     */
+    private final Map<String, DataSubscription> dataSubscriptions = new HashMap<>();
 
     /**
      * Create an unconnected device from a cached device definition. Need to call {@link #connect(BluetoothAdapter, ConnectToBtDeviceThread.OnConnectedCallback)} before any interaction with the device.
@@ -40,6 +48,7 @@ public class BtDevice implements Closeable {
         this.rawDevice = device;
         this.name = this.rawDevice.getName();
         this.inputHandler = new SsiParser();
+        this.setUpTimeoutTimer();
     }
 
     /**
@@ -54,8 +63,35 @@ public class BtDevice implements Closeable {
 
         this.clientSocket = socket;
         this.connectStreams();
+        this.setUpTimeoutTimer();
         Log.i(LOG_TAG, "Device " + BtDevice.this.name + " reports it is connected");
 
+    }
+
+    /**
+     * Start a timer which checks if data subscribers are timed-out and deals with the consequences.
+     */
+    private void setUpTimeoutTimer() {
+        this.timeoutHunter = new Timer();
+        this.timeoutHunter.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                synchronized (dataSubscriptions) {
+                    List<String> toRemove = new ArrayList<>(0);
+                    for (DataSubscription cb : dataSubscriptions.values()) {
+                        if (cb.isTimedOut()) {
+                            Log.d(LOG_TAG, "A data subscriber has timed out");
+                            toRemove.add(cb.getCallback().getCommandReturnType().getCanonicalName());
+                            cb.getCallback().getCallback().onTimeout();
+                        }
+                    }
+
+                    for (String key : toRemove) {
+                        dataSubscriptions.remove(key);
+                    }
+                }
+            }
+        }, 0, 100);
     }
 
     void setProvider(BtSppScannerProvider provider) {
@@ -119,6 +155,10 @@ public class BtDevice implements Closeable {
         if (this.clientSocket != null) {
             this.clientSocket.close();
         }
+        if (this.timeoutHunter != null) {
+            this.timeoutHunter.cancel();
+            this.timeoutHunter = null;
+        }
     }
 
     /**
@@ -144,7 +184,7 @@ public class BtDevice implements Closeable {
     /**
      * Run a command on the scanner. Asynchronous - this call returns before the command is actually sent to the scanner.<br>
      * If the command expects an answer, it will be received as any data from the scanner and sent to the registered {@link BtInputHandler}
-     * (there is no "link" between command and response).
+     * (there is no direct "link" between command and response).
      *
      * @param command what should be run
      * @param <T>     expected return type of the command (implicit, found from command argument)
@@ -154,7 +194,9 @@ public class BtDevice implements Closeable {
 
         CommandCallbackHolder cbHolder = command.getCallback();
         if (cbHolder != null && cbHolder.getCallback() != null) {
-            this.commandCallbacks.put(cbHolder.getCommandReturnType().getCanonicalName(), cbHolder);
+            synchronized (dataSubscriptions) {
+                this.dataSubscriptions.put(cbHolder.getCommandReturnType().getCanonicalName(), new DataSubscription(cbHolder));
+            }
         }
 
         Log.d(LOG_TAG, "Queuing for dispatch command " + command.getClass().getSimpleName());
@@ -166,10 +208,16 @@ public class BtDevice implements Closeable {
         if (!res.expectingMoreData && res.data != null) {
             Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString());
 
-            // Callbacks?
-            if (this.commandCallbacks.containsKey(res.data.getClass().getCanonicalName())) {
-                CommandCallbackHolder cbHolder = this.commandCallbacks.get(res.data.getClass().getCanonicalName());
-                cbHolder.getCallback().onSuccess(res.data);
+            // Subscriptions to fulfill on that data type?
+            synchronized (dataSubscriptions) {
+                if (this.dataSubscriptions.containsKey(res.data.getClass().getCanonicalName())) {
+                    CommandCallbackHolder cbHolder = this.dataSubscriptions.get(res.data.getClass().getCanonicalName()).getCallback();
+                    cbHolder.getCallback().onSuccess(res.data);
+
+                    if (!cbHolder.isPermanent()) {
+                        this.dataSubscriptions.remove(res.data.getClass().getCanonicalName());
+                    }
+                }
             }
 
             if (res.acknowledger != null) {

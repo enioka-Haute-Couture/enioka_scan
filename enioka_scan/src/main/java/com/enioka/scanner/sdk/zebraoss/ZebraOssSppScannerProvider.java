@@ -27,7 +27,7 @@ public class ZebraOssSppScannerProvider extends Service implements BtSppScannerP
     @Override
     public void canManageDevice(BtDevice device, final ManagementCallback callback) {
 
-        device.runCommand(new CapabilitiesRequest(new CommandCallback<CapabilitiesReply>() {
+        device.runCommand(new CapabilitiesRequest(), new CommandCallback<CapabilitiesReply>() {
             @Override
             public void onSuccess(CapabilitiesReply data) {
                 callback.canManage();
@@ -42,7 +42,7 @@ public class ZebraOssSppScannerProvider extends Service implements BtSppScannerP
             public void onFailure() {
                 callback.cannotManage();
             }
-        }));
+        });
     }
 
     @Override

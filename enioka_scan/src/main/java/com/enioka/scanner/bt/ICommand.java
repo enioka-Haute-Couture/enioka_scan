@@ -14,9 +14,17 @@ public interface ICommand<T> {
     byte[] getCommand();
 
     /**
-     * A callback to use on command completion, or null if fire and forget. This allows to give data back to the caller and warn them of the actual end of the command.
+     * The expected return type of the command (as in: the class returned by the parser when parsing an incoming stream from the scanner). Can be null.<br>
+     * Only useful because of Java generic type erasure - otherwise, we know it's the generic parameter T!
      *
-     * @return callback to run when command is done.
+     * @return a type deriving from T
      */
-    CommandCallbackHolder<T> getCallback();
+    Class<? extends T> getReturnType();
+
+    /**
+     * Every command may have a different timeout waiting for an answer. 0 means no timeout. Ignored when the command expects no answer (T is Void).
+     *
+     * @return time out in milliseconds.
+     */
+    int getTimeOut();
 }

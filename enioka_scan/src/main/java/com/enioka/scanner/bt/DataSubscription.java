@@ -6,15 +6,17 @@ import java.util.Calendar;
  * Helper class storing execution context around a command callback.
  */
 class DataSubscription {
-    private final CommandCallbackHolder<?> callback;
+    private final CommandCallback<?> callback;
     private Calendar timeOut = null;
+    private final boolean permanent;
 
-    DataSubscription(CommandCallbackHolder callback) {
+    DataSubscription(CommandCallback<?> callback, int timeOutMs, boolean permanent) {
         this.callback = callback;
+        this.permanent = permanent;
 
-        if (callback.getTimeOutMs() > 0) {
+        if (timeOutMs > 0) {
             timeOut = Calendar.getInstance();
-            timeOut.add(Calendar.MILLISECOND, callback.getTimeOutMs());
+            timeOut.add(Calendar.MILLISECOND, timeOutMs);
         }
     }
 
@@ -22,7 +24,11 @@ class DataSubscription {
         return this.timeOut != null && this.timeOut.before(Calendar.getInstance());
     }
 
-    public CommandCallbackHolder<?> getCallback() {
+    public CommandCallback<?> getCallback() {
         return callback;
+    }
+
+    boolean isPermanent() {
+        return this.permanent;
     }
 }

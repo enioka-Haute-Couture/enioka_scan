@@ -1,6 +1,5 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
-import com.enioka.scanner.bt.CommandCallbackHolder;
 import com.enioka.scanner.bt.ICommand;
 import com.enioka.scanner.sdk.zebraoss.SsiPacket;
 import com.enioka.scanner.sdk.zebraoss.data.ReplyRevision;
@@ -13,12 +12,7 @@ public class RequestRevision extends SsiPacket implements ICommand<ReplyRevision
     }
 
     @Override
-    public byte[] getCommand() {
-        return this.getMessageData();
-    }
-
-    @Override
-    public CommandCallbackHolder<ReplyRevision> getCallback() {
-        return null;
+    public Class<? extends ReplyRevision> getReturnType() {
+        return ReplyRevision.class;
     }
 }

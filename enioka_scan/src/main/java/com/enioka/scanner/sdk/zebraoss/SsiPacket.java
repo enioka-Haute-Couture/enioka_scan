@@ -30,11 +30,24 @@ public class SsiPacket {
     /**
      * Create a packet for sending data. All data is given here.
      *
-     * @param opCode
+     * @param opCode SSI operation code
+     * @param data   buffer containing the payload of the message
      */
     public SsiPacket(byte opCode, byte[] data) {
         this.opCode = opCode;
         this.data = data;
+
+        this.updateComputedFields();
+    }
+
+    /**
+     * Create a packet for sending data. All data is given here.
+     *
+     * @param opCode SSI operation code
+     */
+    public SsiPacket(byte opCode) {
+        this.opCode = opCode;
+        this.data = new byte[0];
 
         this.updateComputedFields();
     }
@@ -200,5 +213,13 @@ public class SsiPacket {
         }
 
         return (short) (0x10000 - byteSum);
+    }
+
+    public int getTimeOut() {
+        return 100;
+    }
+
+    public byte[] getCommand() {
+        return this.getMessageData();
     }
 }

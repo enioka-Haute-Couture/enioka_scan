@@ -78,11 +78,14 @@ public class BtDevice implements Closeable {
             public void run() {
                 synchronized (dataSubscriptions) {
                     List<String> toRemove = new ArrayList<>(0);
-                    for (DataSubscription cb : dataSubscriptions.values()) {
-                        if (cb.isTimedOut()) {
-                            Log.d(LOG_TAG, "A data subscriber has timed out");
-                            toRemove.add(cb.getCallback().getCommandReturnType().getCanonicalName());
-                            cb.getCallback().getCallback().onTimeout();
+                    for (Map.Entry<String, DataSubscription> entry : dataSubscriptions.entrySet()) {
+                        DataSubscription subscription = entry.getValue();
+                        String expectedDataClass = entry.getKey();
+
+                        if (subscription.isTimedOut()) {
+                            Log.d(LOG_TAG, "A data subscription has timed out");
+                            toRemove.add(expectedDataClass);
+                            subscription.getCallback().onTimeout();
                             outputStreamWriter.endOfCommand();
                         }
                     }
@@ -182,21 +185,23 @@ public class BtDevice implements Closeable {
         return this.name;
     }
 
+
     /**
      * Run a command on the scanner. Asynchronous - this call returns before the command is actually sent to the scanner.<br>
      * If the command expects an answer, it will be received as any data from the scanner and sent to the registered {@link BtInputHandler}
      * (there is no direct "link" between command and response).
      *
-     * @param command what should be run
-     * @param <T>     expected return type of the command (implicit, found from command argument)
+     * @param command      what should be run
+     * @param subscription an optional subscription waiting for an asnwer to the command
+     * @param <T>          expected return type of the command (implicit, found from command argument)
      */
-    public <T> void runCommand(ICommand<T> command) {
+    public <T> void runCommand(ICommand<T> command, CommandCallback<T> subscription) {
         byte[] cmd = command.getCommand();
 
-        CommandCallbackHolder cbHolder = command.getCallback();
-        if (cbHolder != null && cbHolder.getCallback() != null) {
+        if (subscription != null) {
             synchronized (dataSubscriptions) {
-                this.dataSubscriptions.put(cbHolder.getCommandReturnType().getCanonicalName(), new DataSubscription(cbHolder));
+                String expectedDataClass = command.getReturnType().getCanonicalName();
+                this.dataSubscriptions.put(expectedDataClass, new DataSubscription(subscription, command.getTimeOut(), false));
             }
         }
 
@@ -212,10 +217,11 @@ public class BtDevice implements Closeable {
             // Subscriptions to fulfill on that data type?
             synchronized (dataSubscriptions) {
                 if (this.dataSubscriptions.containsKey(res.data.getClass().getCanonicalName())) {
-                    CommandCallbackHolder cbHolder = this.dataSubscriptions.get(res.data.getClass().getCanonicalName()).getCallback();
-                    cbHolder.getCallback().onSuccess(res.data);
+                    DataSubscription subscription = this.dataSubscriptions.get(res.data.getClass().getCanonicalName());
+                    CommandCallback callback = subscription.getCallback();
+                    callback.onSuccess(res.data);
 
-                    if (!cbHolder.isPermanent()) {
+                    if (!subscription.isPermanent()) {
                         this.dataSubscriptions.remove(res.data.getClass().getCanonicalName());
                     }
                 }

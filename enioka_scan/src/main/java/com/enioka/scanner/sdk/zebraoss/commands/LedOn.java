@@ -1,13 +1,8 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
 import com.enioka.scanner.api.Color;
-import com.enioka.scanner.bt.CommandCallbackHolder;
-import com.enioka.scanner.bt.ICommand;
-import com.enioka.scanner.sdk.zebraoss.SsiPacket;
 
-public class LedOn extends SsiPacket implements ICommand<Void> {
-    private static final String LOG_TAG = "LedOn";
-
+public class LedOn extends CommandExpectingAck {
     public LedOn(Color color) {
         super((byte) 0xE7, new byte[]{getColorMask(color)});
     }
@@ -24,15 +19,5 @@ public class LedOn extends SsiPacket implements ICommand<Void> {
                 break;
         }
         return colorMask;
-    }
-
-    @Override
-    public byte[] getCommand() {
-        return this.getMessageData();
-    }
-
-    @Override
-    public CommandCallbackHolder<Void> getCallback() {
-        return null;
     }
 }

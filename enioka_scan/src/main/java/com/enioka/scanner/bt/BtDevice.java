@@ -83,6 +83,7 @@ public class BtDevice implements Closeable {
                             Log.d(LOG_TAG, "A data subscriber has timed out");
                             toRemove.add(cb.getCallback().getCommandReturnType().getCanonicalName());
                             cb.getCallback().getCallback().onTimeout();
+                            outputStreamWriter.endOfCommand();
                         }
                     }
 

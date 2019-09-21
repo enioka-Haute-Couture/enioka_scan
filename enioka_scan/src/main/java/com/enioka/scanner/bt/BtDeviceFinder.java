@@ -172,6 +172,7 @@ public class BtDeviceFinder {
                 @Override
                 public void notCompatible(BtDevice device) {
                     Log.i(LOG_TAG, "Scanner " + device + " could not be bound to a provider");
+                    btDevice.disconnect();
                 }
             })).start();
         }

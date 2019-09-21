@@ -39,6 +39,7 @@ class BtSppScannerResolutionThread implements Runnable, BtSppScannerProvider.Man
     public void run() {
         for (BtSppScannerProvider provider : scannerProviders) {
             Log.d(LOG_TAG, "Testing compatibility of scanner " + device.getName() + " with provider " + provider.getClass().getSimpleName());
+            device.setProvider(provider); // Analyse returned data with the current provider.
             provider.canManageDevice(device, this);
             try {
                 providerLock.acquire(1);

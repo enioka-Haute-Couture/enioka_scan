@@ -17,6 +17,7 @@ class SocketStreamReader extends Thread implements Closeable {
 
     private final BtSppScanner device;
     private final InputStream inputStream;
+    private boolean closed = false;
 
     SocketStreamReader(InputStream inputStream, BtSppScanner device) {
         this.inputStream = inputStream;
@@ -37,8 +38,13 @@ class SocketStreamReader extends Thread implements Closeable {
                 if (byteCount > 0) {
                     Log.d(LOG_TAG, "Read " + byteCount + " bytes from device: " + Helpers.byteArrayToHex(buffer, byteCount) + " - ASCII: " + new String(buffer, 0, byteCount, Charset.forName("ASCII")));
                     this.device.handleInputBuffer(buffer, 0, byteCount);
+                } else {
+                    Log.d(LOG_TAG, "Received an empty buffer from device");
                 }
             } catch (IOException e) {
+                if (closed) {
+                    break;
+                }
                 Log.d(LOG_TAG, "Input stream was disconnected", e);
                 break;
             }
@@ -47,6 +53,7 @@ class SocketStreamReader extends Thread implements Closeable {
 
     @Override
     public void close() throws IOException {
+        closed = true;
         inputStream.close();
     }
 }

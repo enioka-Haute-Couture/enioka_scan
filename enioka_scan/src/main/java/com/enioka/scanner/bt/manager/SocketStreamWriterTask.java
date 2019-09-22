@@ -6,6 +6,7 @@ import com.enioka.scanner.bt.api.Helpers;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 /**
  * Actual socket writing. Used in executor.
@@ -35,7 +36,7 @@ class SocketStreamWriterTask implements Runnable {
             if (!this.ackType) {
                 this.parent.waitForCommandAllowed();
             }
-            Log.d(LOG_TAG, "writing " + this.length + " bytes on output stream: " + Helpers.byteArrayToHex(this.buffer, length));
+            Log.d(LOG_TAG, "writing " + this.length + " bytes on output stream: " + Helpers.byteArrayToHex(this.buffer, length) + "  ASCII: " + new String(buffer, 0, this.length, Charset.forName("ASCII")));
             this.outputStream.write(buffer, offset, length);
             this.outputStream.flush();
             Log.d(LOG_TAG, "writing done");

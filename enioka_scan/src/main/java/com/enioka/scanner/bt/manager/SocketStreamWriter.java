@@ -1,16 +1,19 @@
 package com.enioka.scanner.bt.manager;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * As some write operations can be blocking, we use a dedicated thread. There is a single write thread running at a given time.
  */
-class SocketStreamWriter {
+class SocketStreamWriter implements Closeable {
     private static final String LOG_TAG = "BtSppSdk";
 
     private final OutputStream outputStream;
@@ -53,5 +56,20 @@ class SocketStreamWriter {
 
     void waitForCommandAllowed() throws InterruptedException {
         this.commandAllowed.acquire();
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (pool != null) {
+            pool.shutdown();
+            try {
+                pool.awaitTermination(1, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (outputStream != null) {
+            outputStream.close();
+        }
     }
 }

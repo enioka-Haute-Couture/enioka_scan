@@ -7,6 +7,10 @@ import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.sdk.generalscan.commands.Bell;
+import com.enioka.scanner.sdk.generalscan.commands.CloseRead;
+import com.enioka.scanner.sdk.generalscan.commands.EnableBarcodeSuffix;
+import com.enioka.scanner.sdk.generalscan.commands.OpenRead;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +45,9 @@ class GsSppScanner implements ScannerBackground {
 
     @Override
     public void beepScanSuccessful() {
-
+        this.btScanner.runCommand(new CloseRead(), null);
+        this.btScanner.runCommand(new Bell(), null);
+        this.btScanner.runCommand(new OpenRead(), null);
     }
 
     @Override
@@ -66,7 +72,7 @@ class GsSppScanner implements ScannerBackground {
 
     @Override
     public void toggleIllumination() {
-
+        this.beepScanSuccessful();
     }
 
     @Override
@@ -124,6 +130,9 @@ class GsSppScanner implements ScannerBackground {
                 // Ignore - no timeouts on persistent subscriptions.
             }
         }, Barcode.class);
+
+        // Without a suffix, we cannot parse results. Great.
+        this.btScanner.runCommand(new EnableBarcodeSuffix(), null);
 
         // We are already connected if the scanner could be created...
         initCallback.onConnectionSuccessful(this);

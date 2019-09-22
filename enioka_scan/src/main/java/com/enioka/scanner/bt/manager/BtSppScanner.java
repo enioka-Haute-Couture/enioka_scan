@@ -129,9 +129,10 @@ class BtSppScanner implements Closeable, Scanner {
         connectionThread.start();
     }
 
+    @Override
     public void disconnect() {
         try {
-            this.clientSocket.close();
+            this.close();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Could not close the connect socket", e);
         }
@@ -162,28 +163,15 @@ class BtSppScanner implements Closeable, Scanner {
         if (this.inputStreamReader != null) {
             this.inputStreamReader.close();
         }
+        if (this.outputStreamWriter != null) {
+            this.outputStreamWriter.close();
+        }
         if (this.clientSocket != null) {
             this.clientSocket.close();
         }
         if (this.timeoutHunter != null) {
             this.timeoutHunter.cancel();
             this.timeoutHunter = null;
-        }
-    }
-
-    /**
-     * Helper to discover SPP protocols. Debug only.
-     */
-    private void discoverCodes() {
-        for (int i = 2043; i < 2126; i++) {
-            String cmd = "{G" + i + "?}{G1026}";
-            Log.i(LOG_TAG, cmd);
-            this.outputStreamWriter.write(cmd);
-            try {
-                Thread.sleep(150);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -201,6 +189,9 @@ class BtSppScanner implements Closeable, Scanner {
                 String expectedDataClass = command.getReturnType().getCanonicalName();
                 this.dataSubscriptions.put(expectedDataClass, new DataSubscription(subscription, command.getTimeOut(), false));
             }
+        } else {
+            // Nothing is expected in return, so no need to wait before running the next command.
+            this.outputStreamWriter.endOfCommand();
         }
 
         Log.d(LOG_TAG, "Queuing for dispatch command " + command.getClass().getSimpleName());

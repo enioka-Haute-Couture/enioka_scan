@@ -12,6 +12,28 @@
             android:description="@string/service_description"
             android:exported="false" />
 
+        <!-- SPP providers -->
+        <service
+            android:name=".sdk.generalscan.GsSppScannerProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".sdk.zebraoss.ZebraOssSppScannerProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
+            </intent-filter>
+        </service>
+
+        <!-- Other scanner providers -->
         <service
             android:name=".sdk.hid.GenericHidProvider"
             android:description="@string/service_description"
@@ -32,6 +54,16 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name=".bt.manager.BtSppScannerProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
     </application>
 
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -40,4 +72,5 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
 </manifest>

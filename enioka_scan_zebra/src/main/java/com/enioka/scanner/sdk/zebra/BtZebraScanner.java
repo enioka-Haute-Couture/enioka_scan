@@ -333,7 +333,7 @@ class BtZebraScanner implements ScannerForeground, IDcsSdkApiDelegate {
     }
 
     /**
-     * "Firmware Update Event" notification informs about status in firmware update process
+     * "Firmware Update Event" notification informs about status in firmware update parse
      */
     @Override
     public void dcssdkEventFirmwareUpdate(FirmwareUpdateEvent firmwareUpdateEvent) {

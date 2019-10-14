@@ -14,11 +14,8 @@ import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
-import com.enioka.scanner.sdk.athesi.HHTProvider;
-import com.enioka.scanner.sdk.hid.GenericHidProvider;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +31,7 @@ public final class LaserScanner {
      * The list of available scanner providers. (manual for now => no useless complicated plugin system)
      */
     private static final Set<ScannerProvider> laserProviders = new HashSet<>();
+
     private static Boolean scannerFound = false;
 
 

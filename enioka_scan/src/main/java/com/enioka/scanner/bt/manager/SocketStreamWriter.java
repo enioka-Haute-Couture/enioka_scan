@@ -16,13 +16,15 @@ import java.util.concurrent.TimeUnit;
 class SocketStreamWriter implements Closeable {
     private static final String LOG_TAG = "BtSppSdk";
 
+    private final BtSppScanner device;
     private final OutputStream outputStream;
     private final ExecutorService pool;
 
     private Semaphore commandAllowed = new Semaphore(1);
 
-    SocketStreamWriter(OutputStream outputStream) {
+    SocketStreamWriter(OutputStream outputStream, BtSppScanner device) {
         this.outputStream = outputStream;
+        this.device = device;
         this.pool = Executors.newFixedThreadPool(1);
     }
 
@@ -56,6 +58,10 @@ class SocketStreamWriter implements Closeable {
 
     void waitForCommandAllowed() throws InterruptedException {
         this.commandAllowed.acquire();
+    }
+
+    void onConnectionFailure() {
+        this.device.onConnectionFailure();
     }
 
     @Override

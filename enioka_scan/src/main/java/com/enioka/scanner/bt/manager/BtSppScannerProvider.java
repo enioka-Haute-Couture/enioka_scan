@@ -34,11 +34,11 @@ import java.util.concurrent.Semaphore;
  */
 public class BtSppScannerProvider extends Service implements ScannerProvider {
     private static final String LOG_TAG = "BtSppSdk";
-    private static AcceptBtConnectionThread server;
 
     private static List<com.enioka.scanner.bt.api.BtSppScannerProvider> scannerProviders = new ArrayList<>();
     private static List<ServiceConnection> connections = new ArrayList<>();
 
+    private AcceptBtConnectionThread server;
     private ProviderCallback providerCallback;
     private Semaphore waitForScanners = new Semaphore(0);
     private int passiveScannersCount = 0;
@@ -70,6 +70,27 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
     @Override
     public String getKey() {
         return LOG_TAG;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Misc
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Allow new master BT SPP devices to connect to the Android device.
+     */
+    void resetListener(BluetoothAdapter bluetoothAdapter) {
+        if (server == null || server.isDone()) {
+            server = new AcceptBtConnectionThread(bluetoothAdapter, new ConnectionCallback(null, this));
+            server.start();
+        }
+    }
+
+    void stopMasterListener() {
+        if (server != null && !server.isDone()) {
+            server.cancel();
+        }
     }
 
 
@@ -138,7 +159,10 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
             return;
         }
 
-        // Try to contact already paired devices.
+        // Cancel discovery because it otherwise slows down the connection.
+        btAdapter.cancelDiscovery();
+
+        // Try to contact already paired devices (slave devices).
         Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
         for (BluetoothDevice bt : pairedDevices) {
             logDeviceInfo(bt);
@@ -159,13 +183,13 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
             }
 
             // Launch device resolution
-            BtSppScanner btDevice = new BtSppScanner(bt);
-            btDevice.connect(btAdapter, new ConnectionCallback(btDevice));
+            BtSppScanner btDevice = new BtSppScanner(bt, this);
+            btDevice.connect(new ConnectionCallback(btDevice, this));
             passiveScannersCount++;
         }
 
-        // Start incoming SPP server listener.
-        server = new AcceptBtConnectionThread(btAdapter, new ConnectionCallback(null));
+        // Start incoming SPP server listener (for master devices).
+        server = new AcceptBtConnectionThread(btAdapter, new ConnectionCallback(null, this));
         server.start();
 
         // Done.
@@ -189,7 +213,6 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
         String desc = bt.getAddress() + " - Name: " + bt.getName() + " - Bond state: " + BtConstHelpers.getBondStateDescription(bt.getBondState()) /*+ bt.getType() + " - " */ + " - Features: " + uuidString;
         Log.i(LOG_TAG, desc);
         Log.i(LOG_TAG, "Class major: " + BtConstHelpers.getBtMajorClassDescription(bt.getBluetoothClass().getMajorDeviceClass()) + " - Minor: " + BtConstHelpers.getBtClassDescription(bt.getBluetoothClass().getDeviceClass()));
-
     }
 
     /**
@@ -198,17 +221,19 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
     private class ConnectionCallback implements ConnectToBtDeviceThread.OnConnectedCallback {
         private BtSppScanner btDevice;
         private Handler uiHandler = new Handler(Looper.getMainLooper());
+        private final BtSppScannerProvider parentProvider;
 
-        // btDevice cas be null - created from socket in that case. (master scanner).
-        private ConnectionCallback(BtSppScanner btDevice) {
+        // btDevice can be null - created from socket in that case. (master scanner).
+        private ConnectionCallback(BtSppScanner btDevice, BtSppScannerProvider parentProvider) {
             this.btDevice = btDevice;
+            this.parentProvider = parentProvider;
         }
 
         @Override
         public void connected(BluetoothSocket bluetoothSocket) {
             if (btDevice == null) {
                 Log.d(LOG_TAG, "A new BT connection was made (scanner is master). Launching provider resolution.");
-                btDevice = new BtSppScanner(bluetoothSocket);
+                btDevice = new BtSppScanner(bluetoothSocket, parentProvider);
             } else {
                 Log.d(LOG_TAG, "A new BT connection was made (scanner is slave). Launching provider resolution.");
             }

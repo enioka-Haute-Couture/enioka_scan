@@ -45,7 +45,8 @@ class SocketStreamReader extends Thread implements Closeable {
                 if (closed) {
                     break;
                 }
-                Log.d(LOG_TAG, "Input stream was disconnected", e);
+                Log.d(LOG_TAG, "Input stream was unexpectedly disconnected", e);
+                this.device.onConnectionFailure();
                 break;
             }
         }

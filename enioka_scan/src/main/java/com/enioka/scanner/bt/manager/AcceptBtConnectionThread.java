@@ -17,6 +17,8 @@ class AcceptBtConnectionThread extends Thread {
     private final BluetoothAdapter bluetoothAdapter;
     private final ConnectToBtDeviceThread.OnConnectedCallback onConnectedCallback;
 
+    private boolean done = false;
+
     AcceptBtConnectionThread(BluetoothAdapter bluetoothAdapter, ConnectToBtDeviceThread.OnConnectedCallback callback) {
         this.bluetoothAdapter = bluetoothAdapter;
         this.onConnectedCallback = callback;
@@ -31,17 +33,14 @@ class AcceptBtConnectionThread extends Thread {
     }
 
     public void run() {
-        // Cancel discovery because it otherwise slows down the connection.
-        bluetoothAdapter.cancelDiscovery();
         BluetoothSocket clientSocket;
-
         Log.i(LOG_TAG, "Starting bluetooth slave server and waiting for incoming connections");
 
         while (true) {
             try {
                 // Connect to the remote device through the socket. This call blocks until it succeeds or throws an exception.
                 clientSocket = this.serverSocket.accept();
-                Log.i(LOG_TAG, "Connection received!");
+                Log.i(LOG_TAG, "BT master connection received!");
             } catch (IOException connectException) {
                 // Unable to connect; close the socket and return.
                 Log.e(LOG_TAG, "Could not accept device connection. " + connectException.getMessage());
@@ -58,14 +57,21 @@ class AcceptBtConnectionThread extends Thread {
                 break;
             }
         }
+
+        Log.d(LOG_TAG, "BT slave server stops listening for incoming connections");
+        this.done = true;
     }
 
     // Closes the client socket and causes the thread to finish.
-    public void cancel() {
+    void cancel() {
         try {
             this.serverSocket.close();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Could not close the client socket", e);
         }
+    }
+
+    boolean isDone() {
+        return this.done;
     }
 }

@@ -28,11 +28,17 @@ import java.util.TimerTask;
 class BtSppScanner implements Closeable, Scanner {
     private static final String LOG_TAG = "BtSppSdk";
 
+    private final com.enioka.scanner.bt.manager.BtSppScannerProvider parentProvider;
     private final BluetoothDevice rawDevice;
     private ConnectToBtDeviceThread connectionThread;
     private Timer timeoutHunter;
 
     private final String name;
+    private boolean masterBtDevice = false;
+
+    private final int maxReconnectionAttempts = 60;
+    private final int reconnectionIntervalMs = 1000;
+    private int connectionFailures = 0;
 
     private BluetoothSocket clientSocket;
     private SocketStreamReader inputStreamReader;
@@ -46,32 +52,37 @@ class BtSppScanner implements Closeable, Scanner {
     private final Map<String, DataSubscription> dataSubscriptions = new HashMap<>();
 
     /**
-     * Create an unconnected device from a cached device definition. Need to call {@link #connect(BluetoothAdapter, ConnectToBtDeviceThread.OnConnectedCallback)} before any interaction with the device.
+     * Create an <strong>unconnected</strong> device from a cached device definition.<br>
+     * Need to call {@link #connect(ConnectToBtDeviceThread.OnConnectedCallback)} before any interaction with the device.<br>
+     * Used for slave BT devices.
      *
      * @param device a device definition
      */
-    BtSppScanner(BluetoothDevice device) {
+    BtSppScanner(BluetoothDevice device, com.enioka.scanner.bt.manager.BtSppScannerProvider parentProvider) {
         this.rawDevice = device;
+        this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
         this.inputHandler = new SsiParser();
         this.setUpTimeoutTimer();
     }
 
     /**
-     * Create a connected device from an already open bluetooth socket.
+     * Create a <strong>connected</strong> device from an already open bluetooth socket.<br>
+     * Used for master BT devices.
      *
-     * @param socket a socket to a bluetooth device (male or slave - do not care).
+     * @param socket a socket to a bluetooth device.
      */
-    BtSppScanner(BluetoothSocket socket) {
+    BtSppScanner(BluetoothSocket socket, com.enioka.scanner.bt.manager.BtSppScannerProvider parentProvider) {
         this.rawDevice = socket.getRemoteDevice();
+        this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
         this.inputHandler = new SsiParser();
+        this.masterBtDevice = true;
 
         this.clientSocket = socket;
         this.connectStreams();
         this.setUpTimeoutTimer();
         Log.i(LOG_TAG, "Device " + BtSppScanner.this.name + " reports it is connected");
-
     }
 
     /**
@@ -108,9 +119,9 @@ class BtSppScanner implements Closeable, Scanner {
         this.inputHandler = provider.getInputHandler();
     }
 
-    void connect(BluetoothAdapter bluetoothAdapter, final ConnectToBtDeviceThread.OnConnectedCallback callback) {
+    void connect(final ConnectToBtDeviceThread.OnConnectedCallback callback) {
         Log.i(LOG_TAG, "Starting connection to device " + BtSppScanner.this.name);
-        connectionThread = new ConnectToBtDeviceThread(rawDevice, bluetoothAdapter, new ConnectToBtDeviceThread.OnConnectedCallback() {
+        connectionThread = new ConnectToBtDeviceThread(rawDevice, new ConnectToBtDeviceThread.OnConnectedCallback() {
             @Override
             public void connected(BluetoothSocket bluetoothSocket) {
                 BtSppScanner.this.connectionThread = null;
@@ -118,12 +129,16 @@ class BtSppScanner implements Closeable, Scanner {
                 BtSppScanner.this.clientSocket = bluetoothSocket;
                 connectStreams();
 
-                callback.connected(bluetoothSocket);
+                if (callback != null) {
+                    callback.connected(bluetoothSocket);
+                }
             }
 
             @Override
             public void failed() {
-                callback.failed();
+                if (callback != null) {
+                    callback.failed();
+                }
             }
         });
         connectionThread.start();
@@ -131,11 +146,7 @@ class BtSppScanner implements Closeable, Scanner {
 
     @Override
     public void disconnect() {
-        try {
-            this.close();
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Could not close the connect socket", e);
-        }
+        this.close();
     }
 
     private void connectStreams() {
@@ -147,32 +158,103 @@ class BtSppScanner implements Closeable, Scanner {
             this.inputStreamReader = new SocketStreamReader(this.clientSocket.getInputStream(), this);
             this.inputStreamReader.start();
 
-            this.outputStreamWriter = new SocketStreamWriter(this.clientSocket.getOutputStream());
+            this.outputStreamWriter = new SocketStreamWriter(this.clientSocket.getOutputStream(), this);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (this.connectionThread != null) {
             this.connectionThread.cancel();
             this.connectionThread = null;
         }
 
-        if (this.inputStreamReader != null) {
-            this.inputStreamReader.close();
-        }
-        if (this.outputStreamWriter != null) {
-            this.outputStreamWriter.close();
-        }
-        if (this.clientSocket != null) {
-            this.clientSocket.close();
-        }
+        this.closeStreams();
+
         if (this.timeoutHunter != null) {
             this.timeoutHunter.cancel();
             this.timeoutHunter = null;
         }
+    }
+
+    private void closeStreams() {
+        if (this.inputStreamReader != null) {
+            try {
+                this.inputStreamReader.close();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Could not close reader", e);
+            }
+        }
+        if (this.outputStreamWriter != null) {
+            try {
+                this.outputStreamWriter.close();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Could not close writer", e);
+            }
+        }
+        if (this.clientSocket != null) {
+            try {
+                this.clientSocket.close();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Could not close socket", e);
+            }
+        }
+    }
+
+    void onConnectionFailure() {
+        Log.w(LOG_TAG, "A connection to an SPP BT device was lost");
+
+        this.closeStreams();
+
+        if (this.masterBtDevice) {
+            Log.w(LOG_TAG, "Reconnection will not be attempted as it was a master device - the device itself should reconnect.");
+            this.parentProvider.resetListener(BluetoothAdapter.getDefaultAdapter());
+            return;
+        }
+
+        Log.w(LOG_TAG, "This is a slave device, attempting reconnection");
+
+        // We choose to disable master connection if socket is still open - that way devices which are both master and slave will not reconnect the "wrong" way.
+        this.parentProvider.stopMasterListener();
+
+        // Go for reconnection loop.
+        this.reconnect();
+    }
+
+    private void reconnect() {
+        Log.w(LOG_TAG, "Reconnection attempt " + (this.connectionFailures + 1) + " out of " + this.maxReconnectionAttempts);
+
+        // Always sleeps first (and not only in case of failure) as sockets take time to close for small ring scanners.
+        try {
+            Thread.sleep(reconnectionIntervalMs); // Allowed: we are in a dedicated thread which has nothing to do anyway.
+        } catch (InterruptedException e) {
+            // Ignore.
+        }
+
+        connectionThread = new ConnectToBtDeviceThread(rawDevice, new ConnectToBtDeviceThread.OnConnectedCallback() {
+            @Override
+            public void connected(BluetoothSocket bluetoothSocket) {
+                BtSppScanner.this.connectionThread = null;
+                Log.i(LOG_TAG, "Device " + BtSppScanner.this.name + " reports it has reconnected");
+                BtSppScanner.this.connectionFailures = 0;
+                BtSppScanner.this.clientSocket = bluetoothSocket;
+                connectStreams();
+            }
+
+            @Override
+            public void failed() {
+                BtSppScanner.this.connectionFailures++;
+
+                if (BtSppScanner.this.connectionFailures < BtSppScanner.this.maxReconnectionAttempts) {
+                    BtSppScanner.this.reconnect();
+                } else {
+                    Log.w(LOG_TAG, "Giving up on dead scanner " + BtSppScanner.this.name);
+                }
+            }
+        });
+        connectionThread.start();
     }
 
     @Override

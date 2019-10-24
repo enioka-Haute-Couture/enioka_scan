@@ -42,6 +42,7 @@ class SocketStreamWriterTask implements Runnable {
             Log.d(LOG_TAG, "writing done");
         } catch (IOException e) {
             Log.d(LOG_TAG, "Output stream failure", e);
+            this.parent.onConnectionFailure();
         } catch (InterruptedException e) {
             Log.d(LOG_TAG, "A write was abandoned before starting as thread was interrupted", e);
         }

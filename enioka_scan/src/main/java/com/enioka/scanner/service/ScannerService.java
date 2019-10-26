@@ -205,6 +205,18 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         }
     }
 
+    @Override
+    public void onScannerDisconnected(Scanner s) {
+        scanners.remove(s);
+        if (s instanceof ScannerForeground) {
+            foregroundScanners.remove(s);
+        }
+    }
+
+    @Override
+    public void onScannerReconnecting(Scanner s) {
+        // Nothing to do.
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     // SCANNER DATA HANDLERS

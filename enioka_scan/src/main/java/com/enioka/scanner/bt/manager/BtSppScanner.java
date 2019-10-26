@@ -3,6 +3,8 @@ package com.enioka.scanner.bt.manager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.enioka.scanner.bt.api.ScannerDataParser;
@@ -45,6 +47,9 @@ class BtSppScanner implements Closeable, Scanner {
     private SocketStreamWriter outputStreamWriter;
 
     private ScannerDataParser inputHandler;
+
+    private SppScannerStatusCallback statusCallback;
+    private Handler uiHandler = new Handler(Looper.getMainLooper());
 
     /**
      * All the callbacks which are registered to run on received data (post-parsing). Key is data class name.
@@ -211,10 +216,26 @@ class BtSppScanner implements Closeable, Scanner {
         if (this.masterBtDevice) {
             Log.w(LOG_TAG, "Reconnection will not be attempted as it was a master device - the device itself should reconnect.");
             this.parentProvider.resetListener(BluetoothAdapter.getDefaultAdapter());
+            if (this.statusCallback != null) {
+                uiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        BtSppScanner.this.statusCallback.onScannerDisconnected();
+                    }
+                });
+            }
             return;
         }
 
         Log.w(LOG_TAG, "This is a slave device, attempting reconnection");
+        if (this.statusCallback != null) {
+            uiHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    BtSppScanner.this.statusCallback.onScannerReconnecting();
+                }
+            });
+        }
 
         // We choose to disable master connection if socket is still open - that way devices which are both master and slave will not reconnect the "wrong" way.
         this.parentProvider.stopMasterListener();
@@ -241,6 +262,15 @@ class BtSppScanner implements Closeable, Scanner {
                 BtSppScanner.this.connectionFailures = 0;
                 BtSppScanner.this.clientSocket = bluetoothSocket;
                 connectStreams();
+
+                if (BtSppScanner.this.statusCallback != null) {
+                    uiHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            BtSppScanner.this.statusCallback.onScannerConnected();
+                        }
+                    });
+                }
             }
 
             @Override
@@ -251,6 +281,14 @@ class BtSppScanner implements Closeable, Scanner {
                     BtSppScanner.this.reconnect();
                 } else {
                     Log.w(LOG_TAG, "Giving up on dead scanner " + BtSppScanner.this.name);
+                    if (BtSppScanner.this.statusCallback != null) {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                BtSppScanner.this.statusCallback.onScannerDisconnected();
+                            }
+                        });
+                    }
                 }
             }
         });
@@ -287,6 +325,11 @@ class BtSppScanner implements Closeable, Scanner {
                 this.dataSubscriptions.put(expectedDataClass, new DataSubscription(subscription, 0, true));
             }
         }
+    }
+
+    @Override
+    public void registerStatusCallback(SppScannerStatusCallback statusCallback) {
+        this.statusCallback = statusCallback;
     }
 
     void handleInputBuffer(byte[] buffer, int offset, int length) {

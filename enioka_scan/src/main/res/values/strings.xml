@@ -17,6 +17,7 @@
     <string name="scanner_status_connecting">Scanner connecting</string>
     <string name="scanner_status_listen">Scanner is waiting for a connection</string>
     <string name="scanner_status_lost">Scanner connection lost</string>
+    <string name="scanner_status_reconnecting">Scanner connection is being restored</string>
     <string name="scanner_status_unknown">Scanner connection is weird</string>
 
     <!-- ZBar specific -->

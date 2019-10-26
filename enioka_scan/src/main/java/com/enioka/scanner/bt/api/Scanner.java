@@ -26,4 +26,29 @@ public interface Scanner {
     void disconnect();
 
     <T> void registerSubscription(DataSubscriptionCallback<T> subscription, Class<? extends T> targetType);
+
+    /**
+     * @param statusCallback
+     */
+    void registerStatusCallback(SppScannerStatusCallback statusCallback);
+
+    /**
+     * For receiving notifications of the BT lifecycle.
+     */
+    interface SppScannerStatusCallback {
+        /**
+         * Scanner is available.
+         */
+        void onScannerConnected();
+
+        /**
+         * Scanner is temporarily unavailable, trying to reconnect. It may fail, in which case {@link #onScannerDisconnected()} is called.
+         */
+        void onScannerReconnecting();
+
+        /**
+         * The scanner is no longer available and will not come back automatically.
+         */
+        void onScannerDisconnected();
+    }
 }

@@ -28,5 +28,6 @@
     <string name="scanner_status_initializing">Scanner en cours d\'initialisation</string>
     <string name="scanner_status_listen">Scanner en attente de connection</string>
     <string name="scanner_status_lost">Perte de la connection au scanner</string>
+    <string name="scanner_status_reconnecting">La connection au scanner est en cours de rétablissement</string>
     <string name="scanner_status_unknown">Scanner déconnecté de façon étrange</string>
 </resources>

@@ -22,7 +22,6 @@ import koamtac.kdc.sdk.KDCReader;
 import koamtac.kdc.sdk.KDCSymbology;
 
 class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListener, KDCConnectionListener {
-
     private KDCReader scanner;
     private BluetoothDevice btDevice;
     private ScannerDataCallback dataCallback;
@@ -42,12 +41,20 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
         this.initCallback = initCallback;
 
         scanner = new KDCReader(null, this, null, null, null, this, false);
-        scanner.Connect(this.btDevice); // callbacks are called in ConnectionChanged method.
+        scanner.SetConnectionMode(KDCConstants.ConnectionMode.BLUETOOTH_CLASSIC);
+        scanner.EnableAttachType(true);
+        scanner.EnableAttachSerialNumber(true);
+        scanner.EnableAttachTimestamp(true);
+        scanner.EnableAttachLocation(true);
+        scanner.SetDataDelimiter(KDCConstants.DataDelimiter.SEMICOLON);
+        scanner.SetRecordDelimiter(KDCConstants.RecordDelimiter.LF);
+        //scanner.Connect(this.btDevice); // callbacks are called in ConnectionChanged method.
+        scanner.Connect(this.btDevice);
     }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // KOAMTACK CALLBACKS & METHODS
+    // KOAMTAC CALLBACKS & METHODS
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -136,6 +143,8 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
         this.scanner.DisableAllSymbologies();
         KDCSymbology s = this.scanner.GetSymbology();
         s.Enable(KDCConstants.Symbology.CODE128, true);
+        s.Enable(KDCConstants.Symbology.I2OF5, true);
+        s.Enable(KDCConstants.Symbology.CODE35, true);
         this.scanner.SetSymbology(s, scanner.GetKDCDeviceInfo());
     }
 
@@ -153,6 +162,9 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
     public void disconnect() {
         if (this.scanner != null && this.scanner.IsConnected()) {
             this.scanner.Disconnect();
+        }
+        if (this.scanner != null) {
+            this.scanner.Dispose();
         }
     }
 
@@ -237,6 +249,4 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
     public String getProviderKey() {
         return KoamtacScannerProvider.PROVIDER_KEY;
     }
-
-
 }

@@ -35,6 +35,11 @@ public class BtZebraProvider extends Service implements ScannerProvider {
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
         Log.i(LOG_TAG, "Starting scanner search");
+        try {
+            this.getClassLoader().loadClass("com.zebra.scannercontrol.SDKHandler");
+        } catch (ClassNotFoundException e) {
+            cb.onProviderUnavailable(PROVIDER_NAME);
+        }
 
         SDKHandler sdkHandler = new SDKHandler(ctx);
         sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_BT_NORMAL);

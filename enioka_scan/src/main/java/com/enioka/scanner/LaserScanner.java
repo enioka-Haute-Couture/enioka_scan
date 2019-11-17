@@ -215,8 +215,8 @@ public final class LaserScanner {
                 public void run() {
                     if (btProviderKeys.contains(sp.getKey())) {
                         try {
-                            Log.d(LOG_TAG, "Acquiring BT mutex for provider " + sp.getKey());
                             btResolutionMutex.acquire();
+                            Log.d(LOG_TAG, "Acquired BT mutex for provider " + sp.getKey());
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                             return;

@@ -220,7 +220,6 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
      */
     private class ConnectionCallback implements ConnectToBtDeviceThread.OnConnectedCallback {
         private BtSppScanner btDevice;
-        private Handler uiHandler = new Handler(Looper.getMainLooper());
         private final BtSppScannerProvider parentProvider;
 
         // btDevice can be null - created from socket in that case. (master scanner).
@@ -246,18 +245,9 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
                     // Set the provider inside the BtSppScanner - it is needed for parsing data.
                     btDevice.setProvider(compatibleProvider);
 
-                    uiHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            providerCallback.onScannerCreated(getKey(), btDevice.getName(), scanner);
-                            waitForScanners.release(1);
-
-                            if (waitForScanners.tryAcquire(passiveScannersCount)) {
-                                Log.i(LOG_TAG, "Slave BT SPP scanners are all initialized. Count is " + passiveScannersCount + ". Master scanners connect later.");
-                                providerCallback.onAllScannersCreated(getKey());
-                            }
-                        }
-                    });
+                    providerCallback.onScannerCreated(getKey(), btDevice.getName(), scanner);
+                    waitForScanners.release(1);
+                    checkEnd();
                 }
 
                 @Override
@@ -265,6 +255,7 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
                     Log.i(LOG_TAG, "Scanner " + device + " could not be bound to a provider");
                     btDevice.disconnect();
                     waitForScanners.release(1);
+                    checkEnd();
                 }
             })).start();
         }
@@ -272,6 +263,15 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
         @Override
         public void failed() {
             Log.i(LOG_TAG, "Failure to connect to scanner");
+            waitForScanners.release(1);
+            checkEnd();
+        }
+
+        private void checkEnd() {
+            if (waitForScanners.tryAcquire(passiveScannersCount)) {
+                Log.i(LOG_TAG, "Slave BT SPP scanners are all initialized. Count is " + passiveScannersCount + ". Master scanners connect later.");
+                providerCallback.onAllScannersCreated(getKey());
+            }
         }
     }
 }

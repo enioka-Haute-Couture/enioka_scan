@@ -59,6 +59,9 @@
             android:description="@string/service_description"
             android:exported="false">
 
+            <meta-data
+                android:name="bluetooth"
+                android:value="true" />
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
             </intent-filter>

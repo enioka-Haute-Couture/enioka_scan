@@ -28,11 +28,6 @@ public class KoamtacScannerProvider extends Service implements ScannerProvider {
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
-        if (!options.useBlueTooth) {
-            cb.onProviderUnavailable(PROVIDER_KEY);
-            return;
-        }
-
         List<BluetoothDevice> devices = KDCReader.GetAvailableDeviceList();
         if (devices.isEmpty()) {
             cb.onAllScannersCreated(PROVIDER_KEY);

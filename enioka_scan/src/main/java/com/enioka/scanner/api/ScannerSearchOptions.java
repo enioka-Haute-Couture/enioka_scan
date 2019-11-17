@@ -22,7 +22,7 @@ public class ScannerSearchOptions {
     /**
      * If true, bluetooth devices will be searched for scanners.
      */
-    public boolean useBlueTooth = false;
+    public boolean useBlueTooth = true;
 
     public static ScannerSearchOptions defaultOptions() {
         return new ScannerSearchOptions();

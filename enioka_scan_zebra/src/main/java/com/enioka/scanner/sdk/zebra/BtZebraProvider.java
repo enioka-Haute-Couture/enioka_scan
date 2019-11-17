@@ -36,11 +36,6 @@ public class BtZebraProvider extends Service implements ScannerProvider {
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
         Log.i(LOG_TAG, "Starting scanner search");
 
-        if (!options.useBlueTooth) {
-            cb.onProviderUnavailable(PROVIDER_NAME);
-            return;
-        }
-
         SDKHandler sdkHandler = new SDKHandler(ctx);
         sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_BT_NORMAL);
 

@@ -8,6 +8,7 @@ import com.enioka.scanner.sdk.zebraoss.parsers.EventParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.GenericParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.PayloadParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.ReplyRevisionParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.ScannerInitParser;
 
 public enum SsiMessage {
     // Only messages coming from the scanner are actually needed here. For completion sake, all messages were added.
@@ -43,6 +44,7 @@ public enum SsiMessage {
     REQUEST_REVISION(0xA3, SsiSource.HOST),
     SCAN_DISABLE(0xEA, SsiSource.HOST),
     SCAN_ENABLE(0xE9, SsiSource.HOST),
+    SCANNER_INIT(0x91, SsiSource.DECODER, new ScannerInitParser()),
     SLEEP(0xEB, SsiSource.HOST),
     SSI_MGMT_COMMAND(0x80, SsiSource.BOTH),
     START_SESSION(0xE4, SsiSource.HOST),

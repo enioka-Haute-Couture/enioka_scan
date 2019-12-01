@@ -10,6 +10,7 @@ import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.zebraoss.commands.Beep;
+import com.enioka.scanner.sdk.zebraoss.commands.InitCommand;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOn;
 import com.enioka.scanner.sdk.zebraoss.commands.ScanDisable;
@@ -175,6 +176,11 @@ class ZebraOssScanner implements ScannerBackground {
                 // Ignore - no timeouts on persistent subscriptions.
             }
         }, Barcode.class);
+
+        this.btScanner.runCommand(new InitCommand(), null);
+        //this.btScanner.runCommand(new ScanEnable(), null);
+        //this.btScanner.runCommand(new StartSession(), null);
+        //this.btScanner.runCommand(new RequestParam(), null);
 
         // We are already connected if the scanner could be created...
         initCallback.onConnectionSuccessful(this);

@@ -216,7 +216,7 @@ public class SsiPacket {
     }
 
     public int getTimeOut() {
-        return 100;
+        return 1000;
     }
 
     public byte[] getCommand() {

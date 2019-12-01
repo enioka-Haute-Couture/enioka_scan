@@ -1,9 +1,9 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
 /**
- * A message or segment acknowledgment.
+ * Equivalent to pulling the trigger.
  */
-public class StartSession extends CommandExpectingNothing {
+public class StartSession extends CommandExpectingAck {
 
     public StartSession() {
         super((byte) 0xE4);

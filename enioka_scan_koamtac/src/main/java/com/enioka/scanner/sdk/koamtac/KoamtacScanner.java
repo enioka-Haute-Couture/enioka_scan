@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
@@ -18,10 +19,14 @@ import koamtac.kdc.sdk.KDCBarcodeDataReceivedListener;
 import koamtac.kdc.sdk.KDCConnectionListener;
 import koamtac.kdc.sdk.KDCConstants;
 import koamtac.kdc.sdk.KDCData;
+import koamtac.kdc.sdk.KDCDevice;
+import koamtac.kdc.sdk.KDCErrorListener;
 import koamtac.kdc.sdk.KDCReader;
 import koamtac.kdc.sdk.KDCSymbology;
 
-class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListener, KDCConnectionListener {
+class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListener, KDCConnectionListener, KDCErrorListener {
+    private static final String LOG_TAG = "KoamtacScanner";
+
     private KDCReader scanner;
     private BluetoothDevice btDevice;
     private ScannerDataCallback dataCallback;
@@ -40,16 +45,28 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
         this.statusCallback = statusCallback;
         this.initCallback = initCallback;
 
+        Log.i(LOG_TAG, "Start of initialization of Koamtac scanner " + btDevice.getName() + ". SDK version " + KDCReader.GetKDCReaderVersion());
+
         scanner = new KDCReader(null, this, null, null, null, this, false);
-        scanner.SetConnectionMode(KDCConstants.ConnectionMode.BLUETOOTH_CLASSIC);
-        scanner.EnableAttachType(true);
+
+        scanner.EnableAutoConnectionMode(false);
+        scanner.SetContext(applicationContext); // Compulsory for BLE.
+        scanner.SetKDCErrorListener(this);
+
+        scanner.SetConnectionMode(KDCConstants.ConnectionMode.BLUETOOTH_SMART);
+
+        /*scanner.EnableAttachType(true);
         scanner.EnableAttachSerialNumber(true);
         scanner.EnableAttachTimestamp(true);
         scanner.EnableAttachLocation(true);
         scanner.SetDataDelimiter(KDCConstants.DataDelimiter.SEMICOLON);
-        scanner.SetRecordDelimiter(KDCConstants.RecordDelimiter.LF);
-        //scanner.Connect(this.btDevice); // callbacks are called in ConnectionChanged method.
-        scanner.Connect(this.btDevice);
+        scanner.SetRecordDelimiter(KDCConstants.RecordDelimiter.LF);*/
+
+        if (scanner.IsConnected()) {
+            //scanner.Disconnect();
+        }
+        Log.d(LOG_TAG, "Calling connect");
+        scanner.Connect(this.btDevice);  // callbacks are called in ConnectionChanged method.
     }
 
 
@@ -146,6 +163,11 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
         s.Enable(KDCConstants.Symbology.I2OF5, true);
         s.Enable(KDCConstants.Symbology.CODE35, true);
         this.scanner.SetSymbology(s, scanner.GetKDCDeviceInfo());
+    }
+
+    @Override
+    public void ErrorReceived(KDCDevice<?> kdcDevice, int i) {
+        Log.e(LOG_TAG, "ERROR in KDC SCANNER: RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR " + i);
     }
 
 

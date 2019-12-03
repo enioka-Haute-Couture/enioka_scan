@@ -24,6 +24,11 @@ public class ScannerSearchOptions {
      */
     public boolean useBlueTooth = true;
 
+    /**
+     * If true, some providers may retrieve scanners after initial search.
+     */
+    public boolean allowLaterConnections = false;
+
     public static ScannerSearchOptions defaultOptions() {
         return new ScannerSearchOptions();
     }

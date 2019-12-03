@@ -64,7 +64,7 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
         this.providerCallback = cb;
-        this.getDevices(ctx);
+        this.getDevices(ctx, options);
     }
 
     @Override
@@ -149,7 +149,7 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
     // Provider use: scanner search.
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void getDevices(Context ctx) {
+    private void getDevices(Context ctx, ScannerSearchOptions options) {
         // Init providers if needed.
         getProviders(ctx);
 
@@ -189,8 +189,14 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
         }
 
         // Start incoming SPP server listener (for master devices).
-        server = new AcceptBtConnectionThread(btAdapter, new ConnectionCallback(null, this));
-        server.start();
+        if (options.allowLaterConnections) {
+            server = new AcceptBtConnectionThread(btAdapter, new ConnectionCallback(null, this));
+            server.start();
+        }
+
+        if (passiveScannersCount == 0) {
+            this.providerCallback.onAllScannersCreated(LOG_TAG);
+        }
 
         // Done.
     }

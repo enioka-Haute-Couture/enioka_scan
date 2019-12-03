@@ -137,7 +137,8 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
                 message = this.ctx.getResources().getString(R.string.scanner_status_lost);
                 break;
             case KDCConstants.CONNECTION_STATE_NONE:
-                message = this.ctx.getResources().getString(R.string.scanner_status_unknown);
+                // Not doing anything.
+                message = null; // this.ctx.getResources().getString(R.string.scanner_status_unknown);
                 break;
         }
 

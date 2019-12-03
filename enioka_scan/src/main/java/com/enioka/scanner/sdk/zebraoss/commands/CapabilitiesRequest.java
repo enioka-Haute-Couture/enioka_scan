@@ -13,4 +13,9 @@ public class CapabilitiesRequest extends SsiPacket implements Command<Capabiliti
     public Class<? extends CapabilitiesReply> getReturnType() {
         return CapabilitiesReply.class;
     }
+
+    @Override
+    public int getTimeOut() {
+        return 2000;
+    }
 }

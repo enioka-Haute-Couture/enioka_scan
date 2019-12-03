@@ -17,6 +17,6 @@ public class GetDeviceId implements Command<DeviceId> {
 
     @Override
     public int getTimeOut() {
-        return 200;
+        return 1000;
     }
 }

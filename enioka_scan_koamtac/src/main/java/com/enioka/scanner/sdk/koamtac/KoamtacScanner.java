@@ -63,7 +63,7 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
         scanner.SetRecordDelimiter(KDCConstants.RecordDelimiter.LF);*/
 
         if (scanner.IsConnected()) {
-            //scanner.Disconnect();
+            scanner.Disconnect();
         }
         Log.d(LOG_TAG, "Calling connect");
         scanner.Connect(this.btDevice);  // callbacks are called in ConnectionChanged method.
@@ -167,7 +167,7 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
 
     @Override
     public void ErrorReceived(KDCDevice<?> kdcDevice, int i) {
-        Log.e(LOG_TAG, "ERROR in KDC SCANNER: RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR " + i);
+        Log.e(LOG_TAG, "ERROR in KDC SCANNER: " + i);
     }
 
 

@@ -14,7 +14,6 @@ import com.enioka.scanner.api.ScannerSearchOptions;
 
 import java.util.List;
 
-import koamtac.kdc.sdk.KDCConstants;
 import koamtac.kdc.sdk.KDCReader;
 
 public class KoamtacScannerProvider extends Service implements ScannerProvider {
@@ -36,7 +35,7 @@ public class KoamtacScannerProvider extends Service implements ScannerProvider {
         } catch (ClassNotFoundException e) {
             cb.onProviderUnavailable(PROVIDER_KEY);
         }
-        KDCReader.EnableDebug(KDCConstants.DebugCategory.ALL_CATEGORY, true);
+        //KDCReader.EnableDebug(KDCConstants.DebugCategory.ALL_CATEGORY, true);
 
         List<BluetoothDevice> devices = KDCReader.GetAvailableDeviceList();
         if (devices.isEmpty()) {

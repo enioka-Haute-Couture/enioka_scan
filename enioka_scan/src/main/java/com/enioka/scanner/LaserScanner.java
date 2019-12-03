@@ -174,12 +174,17 @@ public final class LaserScanner {
      * @param options parameters for scanner search.
      */
     public static void getLaserScanner(final Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
-        getProviders(ctx, new OnProvidersDiscovered() {
-            @Override
-            public void discoveryDone() {
-                startLaserSearchInProviders(ctx, handler, options);
-            }
-        });
+        if (laserProviders.isEmpty()) {
+            getProviders(ctx, new OnProvidersDiscovered() {
+                @Override
+                public void discoveryDone() {
+                    startLaserSearchInProviders(ctx, handler, options);
+                }
+            });
+        } else {
+            // We are here if this was called a second time. In this case just launch scanner search from existing providers.
+            startLaserSearchInProviders(ctx, handler, options);
+        }
     }
 
     private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandler handler, final ScannerSearchOptions options) {

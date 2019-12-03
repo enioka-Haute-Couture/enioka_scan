@@ -112,7 +112,12 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     // SCANNER PROVIDER CONNECTION HANDLERS
     ////////////////////////////////////////////////////////////////////////////
 
-    protected void initLaserScannerSearch() {
+    public void restartScannerDiscovery() {
+        this.disconnect();
+        this.initLaserScannerSearch();
+    }
+
+    protected synchronized void initLaserScannerSearch() {
         LaserScanner.getLaserScanner(this.getApplicationContext(), this, ScannerSearchOptions.defaultOptions().getAllAvailableScanners());
     }
 

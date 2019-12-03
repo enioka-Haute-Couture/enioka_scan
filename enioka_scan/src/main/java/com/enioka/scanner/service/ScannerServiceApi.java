@@ -68,6 +68,11 @@ public interface ScannerServiceApi {
      */
     void disconnect();
 
+    /**
+     * Will do the same as on service startup after resetting all open scanners. Returns immediately.
+     */
+    void restartScannerDiscovery();
+
 
     ////////////////////////////////////////////////////////////////////////////
     // BUZZER

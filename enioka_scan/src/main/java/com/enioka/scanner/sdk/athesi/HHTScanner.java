@@ -1,21 +1,15 @@
 package com.enioka.scanner.sdk.athesi;
 
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-import com.enioka.scanner.R;
-import com.enioka.scanner.api.Color;
-import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.helpers.intent.IntentScanner;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,7 +19,7 @@ import java.util.Set;
 /**
  * Scanner provider for HHT Wrapper Layer (i.e. SPA43)
  */
-public class HHTScanner extends BroadcastReceiver implements ScannerBackground {
+public class HHTScanner extends IntentScanner<String> {
     private static final String LOG_TAG = "HHTScanner";
 
     // Initial parameters for SOFTSCANTRIGGER action.
@@ -51,91 +45,39 @@ public class HHTScanner extends BroadcastReceiver implements ScannerBackground {
 
     private static final Uri scannerSettingsUri = Uri.parse("content://com.oem.startup.ScannerParaProvider/settings");
 
-    private Context ctx;
+    @Override
+    protected void configureProvider() {
+        disableTrigger = newIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.DISABLE_TRIGGERBUTTON, DataWedge.STOP_SCANNING});
+        enableTrigger = newIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.ENABLE_TRIGGERBUTTON, DataWedge.START_SCANNING});
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // LIFE CYCLE
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private Scanner.ScannerDataCallback dataCb = null;
-    private Scanner.ScannerStatusCallback statusCb = null;
-    private Scanner.Mode mode;
-
-
     @Override
-    public void initialize(Context ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
-        this.ctx = ctx;
-        this.dataCb = cb1;
-        this.statusCb = cb2;
-        this.mode = mode;
-
-        IntentFilter intentFilter = new IntentFilter("DATA_SCAN");
-        ctx.registerReceiver(this, intentFilter);
-
-        Intent intent = new Intent();
-        intent.setAction(DataWedge.SCANNERINPUTPLUGIN);
-        intent.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.ENABLE_PLUGIN);
-        ctx.sendBroadcast(intent);
+    protected void configureAfterInit(Context ctx) {
+        // Enable the service
+        broadcastIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.ENABLE_PLUGIN);
 
         // Set trigger and buzzer settings
         for (String initialSetting : initialSettingsSoftScan) {
-            intent.setAction(DataWedge.SOFTSCANTRIGGER);
-            intent.putExtra(DataWedge.EXTRA_PARAMETER, initialSetting);
-            ctx.sendBroadcast(intent);
+            broadcastIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETER, initialSetting);
         }
 
         // Set symbologies
-        syncConfig();
-
-        // Done - signal client.
-        if (cb0 != null) {
-            cb0.onConnectionSuccessful(this);
-        }
-
-        if (cb2 != null) {
-            cb2.onStatusChanged(ctx.getString(R.string.scanner_status_waiting));
-        }
-    }
-
-    @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
-        this.dataCb = cb;
+        syncConfig(ctx);
     }
 
     @Override
     public void disconnect() {
-        Intent TriggerButtonIntent = new Intent();
-        TriggerButtonIntent.setAction(DataWedge.SOFTSCANTRIGGER);
-        TriggerButtonIntent.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_TRIGGERBUTTON);
-        ctx.sendBroadcast(TriggerButtonIntent);
-
-        Intent i = new Intent();
-        i.setAction(DataWedge.SCANNERINPUTPLUGIN);
-        i.putExtra(DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_PLUGIN);
-        ctx.sendBroadcast(i);
-
-        ctx.unregisterReceiver(this);
+        broadcastIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_TRIGGERBUTTON);
+        broadcastIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_PLUGIN);
+        super.disconnect();
     }
 
-    @Override
-    public void pause() {
-        Log.d(LOG_TAG, "Sending intent to scanner to disable the trigger");
-        Intent i = new Intent();
-        i.setAction(DataWedge.SOFTSCANTRIGGER);
-        i.putExtra(DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.DISABLE_TRIGGERBUTTON, DataWedge.STOP_SCANNING});
-        ctx.sendBroadcast(i);
-    }
-
-    @Override
-    public void resume() {
-        Log.d(LOG_TAG, "Sending intent to scanner to enable the trigger");
-        Intent i = new Intent();
-        i.setAction(DataWedge.SOFTSCANTRIGGER);
-        i.putExtra(DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.ENABLE_TRIGGERBUTTON, DataWedge.START_SCANNING});
-        ctx.sendBroadcast(i);
-    }
-
-    private void syncConfig() {
+    private void syncConfig(Context ctx) {
         ContentResolver r = ctx.getContentResolver();
         Cursor c = r.query(scannerSettingsUri, null, null, null, null);
         if (c == null) {
@@ -147,7 +89,7 @@ public class HHTScanner extends BroadcastReceiver implements ScannerBackground {
         Set<String> ignored = new HashSet<>();
         int numRow = c.getCount();
         String name;
-        Boolean enabled;
+        boolean enabled;
         HHTSymbology sym;
         c.moveToFirst();
 
@@ -180,66 +122,13 @@ public class HHTScanner extends BroadcastReceiver implements ScannerBackground {
         c.close();
 
         // Apply changes.
-        Intent intent = new Intent();
-        intent.setAction(DataWedge.SCANNERINPUTPLUGIN);
-        intent.putExtra(DataWedge.EXTRA_PARAMETERS, confChanges.toArray(new String[0]));
-        ctx.sendBroadcast(intent);
+        broadcastIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETERS, confChanges.toArray(new String[0]));
     }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // BEEPS
+    // EXTERNAL INTENT SERVICE CALLBACK
     ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void beepScanSuccessful() {
-        CameraBarcodeScanView.beepOk();
-    }
-
-    public void beepScanFailure() {
-        CameraBarcodeScanView.beepKo();
-    }
-
-    public void beepPairingCompleted() {
-        CameraBarcodeScanView.beepWaiting();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // ILLUMINATION
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void enableIllumination() {
-    }
-
-    @Override
-    public void disableIllumination() {
-    }
-
-    @Override
-    public void toggleIllumination() {
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return false;
-    }
-
-    @Override
-    public void ledColorOn(Color color) {
-    }
-
-    @Override
-    public void ledColorOff(Color color) {
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // FUNCTION SUPPORT
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public boolean supportsIllumination() {
-        return false;
-    }
 
     @Override
     public void onReceive(final Context context, final Intent intent) {

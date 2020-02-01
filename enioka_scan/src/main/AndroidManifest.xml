@@ -55,6 +55,16 @@
         </service>
 
         <service
+            android:name=".sdk.bluebird.BluebirdProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name=".bt.manager.BtSppScannerProvider"
             android:description="@string/service_description"
             android:exported="false">

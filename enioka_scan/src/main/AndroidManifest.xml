@@ -33,6 +33,17 @@
             </intent-filter>
         </service>
 
+        <!-- DISABLED: never tested, so rather incomplete and likely buggy.
+        <service
+            android:name=".sdk.postech.PostechSppScannerProvider"
+            android:description="@string/service_description"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
+            </intent-filter>
+        </service> -->
+
         <!-- Other scanner providers -->
         <service
             android:name=".sdk.hid.GenericHidProvider"

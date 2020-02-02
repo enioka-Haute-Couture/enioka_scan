@@ -23,7 +23,7 @@ public class BluebirdScanner extends IntentScanner<Integer> {
 
     @Override
     protected void configureProvider() {
-        broadcastIntentFilter = "kr.co.bluebird.android.bbapi.action.BARCODE_CALLBACK_DECODING_DATA";
+        broadcastIntentFilters.add("kr.co.bluebird.android.bbapi.action.BARCODE_CALLBACK_DECODING_DATA");
 
         disableTrigger = newIntent("kr.co.bluebird.android.bbapi.action.BARCODE_SET_TRIGGER", "EXTRA_INT_DATA2", 0);
         enableTrigger = newIntent("kr.co.bluebird.android.bbapi.action.BARCODE_SET_TRIGGER", "EXTRA_INT_DATA2", 1);

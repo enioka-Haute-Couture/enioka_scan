@@ -49,13 +49,23 @@
         app:layout_constraintRight_toRightOf="parent" />
 
     <ImageButton
+        android:id="@+id/scanner_red_led"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:background="@color/viewfinder_laser"
+        android:src="@drawable/icn_flash_off_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="@id/scanner_flashlight" />
+
+    <ImageButton
         android:id="@+id/scanner_flashlight"
         android:layout_width="wrap_content"
         android:layout_height="45dp"
         android:background="@null"
         android:src="@drawable/icn_flash_off"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintLeft_toLeftOf="@id/scanner_red_led"
         app:layout_constraintRight_toRightOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

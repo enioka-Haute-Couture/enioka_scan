@@ -13,7 +13,10 @@ import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.BarcodeType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -32,7 +35,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     /**
      * The broadcast Action this scanner should subscribe to.
      */
-    protected String broadcastIntentFilter = "DATA_SCAN";
+    protected List<String> broadcastIntentFilters = new ArrayList<>();
 
     /**
      * A translation table between vendor-specific codification and our own barcode API.
@@ -63,9 +66,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         configureProvider();
 
         // Register the broadcast receiver.
-        Log.i(getProviderKey(), "Registering an intent receiver with intent filter " + broadcastIntentFilter);
-        IntentFilter intentFilter = new IntentFilter(broadcastIntentFilter);
-        ctx.registerReceiver(this, intentFilter);
+        registerReceivers(ctx, initCallback, statusCallback);
 
         // Let the child provider do anything it wants with the scanner (like setting available sympbologies).
         configureAfterInit(ctx);
@@ -78,6 +79,16 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         if (this.statusCb != null) {
             this.statusCb.onStatusChanged(ctx.getString(R.string.scanner_status_waiting));
         }
+    }
+
+    protected void registerReceivers(Context ctx, ScannerInitCallback initCallback, ScannerStatusCallback statusCallback) {
+        IntentFilter intentFilter = new IntentFilter();
+        for (String f : broadcastIntentFilters) {
+            Log.i(getProviderKey(), "Registering an intent receiver with intent filter " + f);
+            intentFilter.addAction(f);
+        }
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+        ctx.registerReceiver(this, intentFilter);
     }
 
     /**
@@ -213,6 +224,11 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         broadcastIntent(intent);
     }
 
+    protected void broadcastIntent(String action) {
+        Intent intent = newIntent(action);
+        broadcastIntent(intent);
+    }
+
     protected Intent newIntent(String action, Map<String, String> extras) {
         Intent intent = new Intent();
         intent.setAction(action);
@@ -240,6 +256,12 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         Intent intent = new Intent();
         intent.setAction(action);
         intent.putExtra(parameter1Key, parameter1Value);
+        return intent;
+    }
+
+    protected Intent newIntent(String action) {
+        Intent intent = new Intent();
+        intent.setAction(action);
         return intent;
     }
 }

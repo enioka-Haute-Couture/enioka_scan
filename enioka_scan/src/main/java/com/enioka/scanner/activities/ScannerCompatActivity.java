@@ -134,6 +134,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
 
         // Bind to ScannerService service
         Intent intent = new Intent(this, ScannerService.class);
+        //intent.putExtra("useBlueTooth", false);
+        //intent.putExtra("allowedProviderKeys", "Koamtac");
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
         // Ascending compatibility

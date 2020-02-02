@@ -191,11 +191,20 @@ public final class LaserScanner {
         }
     }
 
-    private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandler handler, final ScannerSearchOptions options) {
-        /*if (options.keepScreenOn) {
-            ctx.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        }*/
+    /**
+     * Some options have an influence on whether a provider should be used or not. All the afferent rules are inside this method.
+     */
+    private static boolean shouldProviderBeUsed(ProviderServiceHolder psh, ScannerSearchOptions options) {
+        if (psh.getMeta().isBluetooth() && !options.useBlueTooth) {
+            return false;
+        }
+        if (options.allowedProviderKeys != null && !options.allowedProviderKeys.isEmpty() && !options.allowedProviderKeys.contains(psh.getMeta().getProviderKey())) {
+            return false;
+        }
+        return true;
+    }
 
+    private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandler handler, final ScannerSearchOptions options) {
         final ScannerConnectionHandler handlerProxy = new ScannerConnectionHandlerProxy(handler);
 
         // Trivial
@@ -208,14 +217,9 @@ public final class LaserScanner {
 
         // Count providers which should actually be used.
         providersExpectedToAnswerCount = 0;
-        if (options.useBlueTooth) {
-            providersExpectedToAnswerCount = providerServices.size();
-        } else {
-            // (iterate on a copy to avoid concurrent list modifications from other threads)
-            for (ProviderServiceHolder holder : new ArrayList<>(providerServices)) {
-                if (!holder.getMeta().isBluetooth()) {
-                    providersExpectedToAnswerCount++;
-                }
+        for (ProviderServiceHolder psh : new ArrayList<>(providerServices)) {
+            if (shouldProviderBeUsed(psh, options)) {
+                providersExpectedToAnswerCount++;
             }
         }
 
@@ -228,13 +232,12 @@ public final class LaserScanner {
         Collections.sort(sortedProviders, Collections.reverseOrder()); // priority then name
         int previousPriority = sortedProviders.isEmpty() ? 0 : sortedProviders.get(0).getMeta().getPriority();
         int launchedThreads = 0;
-        for (final ProviderServiceHolder sph : sortedProviders) {
-            if (sph.getMeta().isBluetooth() && !options.useBlueTooth) {
-                // Bluetooth can be disabled.
+        for (final ProviderServiceHolder psh : sortedProviders) {
+            if (!shouldProviderBeUsed(psh, options)) {
                 continue;
             }
 
-            if (previousPriority != sph.getMeta().getPriority()) {
+            if (previousPriority != psh.getMeta().getPriority()) {
                 // New group! wait.
                 Log.i(LOG_TAG, "Waiting for the end of priority group " + previousPriority);
                 try {
@@ -243,28 +246,28 @@ public final class LaserScanner {
                     e.printStackTrace();
                 }
                 providersHavingAnswered.release(launchedThreads);
-                Log.i(LOG_TAG, "Starting scanner search in priority group " + sph.getMeta().getPriority());
+                Log.i(LOG_TAG, "Starting scanner search in priority group " + psh.getMeta().getPriority());
             }
 
             new Thread() {
                 public void run() {
-                    if (sph.getMeta().isBluetooth()) {
+                    if (psh.getMeta().isBluetooth()) {
                         try {
                             btResolutionMutex.acquire();
-                            Log.d(LOG_TAG, "Acquired BT mutex for provider " + sph.getProvider().getKey());
+                            Log.d(LOG_TAG, "Acquired BT mutex for provider " + psh.getProvider().getKey());
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                             return;
                         }
                     }
 
-                    Log.i(LOG_TAG, "Starting search on provider " + sph.getProvider().getKey());
-                    sph.getProvider().getScanner(ctx, providerCallback, options);
+                    Log.i(LOG_TAG, "Starting search on provider " + psh.getProvider().getKey());
+                    psh.getProvider().getScanner(ctx, providerCallback, options);
                 }
             }.start();
 
             launchedThreads++;
-            previousPriority = sph.getMeta().getPriority();
+            previousPriority = psh.getMeta().getPriority();
         }
     }
 

@@ -1,5 +1,7 @@
 package com.enioka.scanner.api;
 
+import java.util.Set;
+
 /**
  * A property bag tweaking the scanner search method. Some providers may ignore these options.
  */
@@ -15,11 +17,6 @@ public class ScannerSearchOptions {
     public boolean returnOnlyFirst = true;
 
     /**
-     * If true (the default) will try to prevent a screen shutdown. If false, system or activity defaults are used.
-     */
-    public boolean keepScreenOn = true;
-
-    /**
      * If true, bluetooth devices will be searched for scanners.
      */
     public boolean useBlueTooth = true;
@@ -27,20 +24,20 @@ public class ScannerSearchOptions {
     /**
      * If true, some providers may retrieve scanners after initial search.
      */
-    public boolean allowLaterConnections = false;
+    public boolean allowLaterConnections = true;
+
+    /**
+     * If true, the providers which need a pairing done by their own SDKs (like a BLE on the fly pairing) will be allowed to do so.
+     */
+    public boolean allowPairingFlow = false;
+
+    /**
+     * Restrict search to this list of providers. Ignored if null or empty.
+     */
+    public Set<String> allowedProviderKeys = null;
 
     public static ScannerSearchOptions defaultOptions() {
         return new ScannerSearchOptions();
-    }
-
-    public ScannerSearchOptions keepScreenOn() {
-        keepScreenOn = true;
-        return this;
-    }
-
-    public ScannerSearchOptions keepScreenOn(boolean b) {
-        keepScreenOn = b;
-        return this;
     }
 
     public ScannerSearchOptions getAllAvailableScanners() {

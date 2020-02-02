@@ -3,6 +3,7 @@ package com.enioka.scanner.sdk.proglove;
 import android.content.Context;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.intent.IntentScannerProvider;
 import com.enioka.scanner.sdk.bluebird.BluebirdScanner;
 
@@ -23,7 +24,7 @@ public class ProgloveProvider extends IntentScannerProvider {
     }
 
     @Override
-    protected Scanner createNewScanner(Context ctx) {
-        return new ProgloveScanner();
+    protected Scanner createNewScanner(Context ctx, ScannerSearchOptions options) {
+        return new ProgloveScanner(options);
     }
 }

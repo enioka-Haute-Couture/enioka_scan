@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.enioka.scanner.api.Color;
+import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
@@ -20,6 +21,11 @@ import java.util.List;
 public class ProgloveScanner extends IntentScanner<String> {
     private static final String LOG_TAG = "ProgloveScanner";
     private int connectionAttempts = 0;
+    private ScannerSearchOptions options;
+
+    ProgloveScanner(ScannerSearchOptions options) {
+        this.options = options;
+    }
 
     @Override
     protected void configureProvider() {
@@ -103,6 +109,7 @@ public class ProgloveScanner extends IntentScanner<String> {
 
     private void handleStatusIntent(Intent intent) {
         String status = intent.getStringExtra("com.proglove.api.extra.SCANNER_STATE");
+        Log.d(LOG_TAG, "Received status update from scanner " + status);
         switch (status) {
             case "RECONNECTING":
                 this.statusCb.onScannerReconnecting(this);
@@ -116,10 +123,8 @@ public class ProgloveScanner extends IntentScanner<String> {
                 broadcastIntent("com.proglove.api.GET_CONFIG");
                 break;
             case "SEARCHING":
-                // Nothing to do.
-                break;
             case "DISCONNECTED":
-                if (++connectionAttempts <= 2) {
+                if (options.allowPairingFlow && ++connectionAttempts <= 2) {
                     broadcastIntent("com.proglove.api.CONNECT");
                 }
                 break;

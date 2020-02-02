@@ -31,7 +31,7 @@ public class HHTProvider extends IntentScannerProvider {
     }
 
     @Override
-    protected Scanner createNewScanner(Context ctx) {
+    protected Scanner createNewScanner(Context ctx, ScannerSearchOptions options) {
         return new HHTScanner();
     }
 }

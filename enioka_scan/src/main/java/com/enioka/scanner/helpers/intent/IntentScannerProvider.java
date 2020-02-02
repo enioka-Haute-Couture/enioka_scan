@@ -88,12 +88,12 @@ public abstract class IntentScannerProvider extends Service implements ScannerPr
         }
 
         if (compatible) {
-            cb.onScannerCreated(getKey(), "internal", createNewScanner(ctx));
+            cb.onScannerCreated(getKey(), "internal", createNewScanner(ctx, options));
             cb.onAllScannersCreated(getKey());
         } else {
             cb.onProviderUnavailable(getKey());
         }
     }
 
-    protected abstract Scanner createNewScanner(Context ctx);
+    protected abstract Scanner createNewScanner(Context ctx, ScannerSearchOptions options);
 }

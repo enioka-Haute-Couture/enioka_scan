@@ -15,6 +15,10 @@
             <meta-data
                 android:name="bluetooth"
                 android:value="true" />
+            <meta-data
+                android:name="priority"
+                android:value="1" />
+
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
             </intent-filter>

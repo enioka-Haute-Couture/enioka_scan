@@ -258,7 +258,7 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
 
                 @Override
                 public void notCompatible(BtSppScanner device) {
-                    Log.i(LOG_TAG, "Scanner " + device + " could not be bound to a provider");
+                    Log.i(LOG_TAG, "Scanner " + device + " could not be bound to a provider and will be disconnected");
                     btDevice.disconnect();
                     waitForScanners.release(1);
                     checkEnd();

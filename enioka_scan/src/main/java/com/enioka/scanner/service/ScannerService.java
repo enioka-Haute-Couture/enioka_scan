@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -19,6 +20,7 @@ import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +65,11 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
      */
     protected final List<EndOfInitCallback> endOfInitCallbacks = new ArrayList<>();
 
+    /**
+     * The options (which can be adapted from intent extra data) with which we look for scanners on this device.
+     */
+    private ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions().getAllAvailableScanners();
+
     private interface EndOfInitCallback {
         void run();
     }
@@ -85,6 +92,20 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            scannerSearchOptions.useBlueTooth = extras.getBoolean("useBlueTooth", scannerSearchOptions.useBlueTooth);
+            scannerSearchOptions.allowLaterConnections = extras.getBoolean("allowLaterConnections", scannerSearchOptions.allowLaterConnections);
+            scannerSearchOptions.allowPairingFlow = extras.getBoolean("allowPairingFlow", scannerSearchOptions.allowPairingFlow);
+
+            String allowedProviderKeys = extras.getString("allowedProviderKeys");
+            if (allowedProviderKeys != null && !allowedProviderKeys.isEmpty()) {
+                scannerSearchOptions.allowedProviderKeys = new HashSet<>();
+                for (String s : allowedProviderKeys.split(",")) {
+                    scannerSearchOptions.allowedProviderKeys.add(s);
+                }
+            }
+        }
         return new LocalBinder();
     }
 
@@ -118,7 +139,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     }
 
     protected synchronized void initLaserScannerSearch() {
-        LaserScanner.getLaserScanner(this.getApplicationContext(), this, ScannerSearchOptions.defaultOptions().getAllAvailableScanners());
+        LaserScanner.getLaserScanner(this.getApplicationContext(), this, scannerSearchOptions);
     }
 
     @Override

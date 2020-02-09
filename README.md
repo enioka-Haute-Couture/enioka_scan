@@ -22,6 +22,34 @@ Also of note, even if the OS actually provides direct HID integration, they were
 Finally, it provides a ready to use Service as well as an Activity, as well as a sample demo
 application, allowing to use scanners in a matter of minutes.
 
+# Compatibility matrix
+
+The different plugins do not all have the same capabilities. The following table sums up what is possible to do with this library on common device families.
+
+* "?" means the library does not support the function, but the underlying SDK or device may support it and the capability may be added later.
+* "N/A" means this would make no sense on this device.
+* "All 1D" symbologies means code 128, 39, I25, D25, EAN13. (some devices also provide QR code and other 2D symbologies)
+* "Plugin AAR needed" means an additional aar must be used for this device. This is likely because it contains non-OSS code and cannot be distributed freely.
+* "SDK needed" means the library will need the manufacturer SDK to work. This SDK likely could not be included for licence reasons, and must be provided by valid SDK license holder.
+
+
+Manufacturer | Device family        | Plugin AAR needed | SDK needed | Connection | Notes                          | Basic scanning | Symbologies recognized      | Symbologies detection | Symbology configuration | Illumination control | Disable trigger | LED control | Beep control
+------------ | -------------------- | ----------------- | ---------- | ---------- | ------------------------------ | -------------- | --------------------------- | --------------------- | ----------------------- | -------------------- | --------------- | ----------- | ------------
+Zebra        | Integrated: TC25...  | Yes               | No         | Integrated | EMDK devices                   | Yes            | All 1D                      | Yes                   | On startup              | No                   | Yes             | N/A         | No?
+Zebra        | BT ring RS6000       | Yes               | Yes        | BT SPP     | Startup issue with workaround  | Yes            | All 1D                      | Yes                   | On startup              | No                   | Yes             | Yes         | Yes?
+Zebra        | BT ring RS5100       | Yes               | Yes        | BT SPP?    | Waiting for recent SDK         |                |                             | Yes                   |                         |                      |                 |             |    
+Bluebird     | Integrated: EF500... | No                | No         | Integrated |                                | Yes            | Most, save D25              | Yes                   | ?                       | No                   | Yes             | N/A         | ?
+Athesi       | Integrated: SPA43... | No                | No         | Integrated |                                | Yes            | All 1D                      | Yes                   | On startup              | No                   | Yes             | N/A         | No?
+Honeywell    | Integrated: EDA50... | Yes               | Yes        | Integrated | AIDC devices (Intermec)        | Yes            | All 1D                      | Yes                   | On startup              | No                   | ?               | N/A         | No?
+GeneralScan  | BT ring R5000BT      | No                | No         | BT SPP     |                                | Yes            | All 1D                      | No                    | ?                       | No                   | No              | No          | No
+ProGlove     | BT glove Mark II     | Yes               | No         | BT BLE     | ProGlove app needed            | Yes            | All 1D                      | Yes                   | ?                       | No                   | No              | Yes         | No?
+Koamtac      | BT KDC (180...)      | Yes               | No         | BT BLE     | Device must be named KDC*      | Yes            | All 1D                      | Yes                   | ?                       | No                   | Yes             | Yes         | Yes
+M3           | RingScanners         | Yes               | No         | BT SPP     | M3 app needed                  | Yes            | All 1D                      | No                    | No                      | No                   | Yes             | No          | No
+Camera       | Devices with camera  | No                | No         | Integrated | Capabilities depend on device  | Yes            | All 1D                      | Yes                   | On startup              | Yes (flash light)    | Yes             | N/A         | Yes
+
+There also are traces of Postech BT ring scanner compatibility - their communication protocol is like the GeneralScan one, but the authors of the library lacked a test device to finish it, so it disabled.
+
+
 # Adding the library to an Android application
 
 TODO: upload to Maven Central and rewrite this.

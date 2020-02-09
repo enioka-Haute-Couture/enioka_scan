@@ -34,6 +34,9 @@ dependencies {
     if (rootProject.ext.withZebra)
         implementation project(':enioka_scan_zebra');
 
+    if (rootProject.ext.withM3)
+        implementation project(':enioka_scan_m3');
+
     // Android stuff
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

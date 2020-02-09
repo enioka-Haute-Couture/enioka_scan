@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enioka.scanner.R;
+import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.camera.CameraReader;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
@@ -133,6 +134,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
 
         // Bind to ScannerService service
         Intent intent = new Intent(this, ScannerService.class);
+        //intent.putExtra("useBlueTooth", false);
+        //intent.putExtra("allowedProviderKeys", "Koamtac");
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
         // Ascending compatibility
@@ -351,6 +354,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         }
 
         displayTorch();
+        displayToggleLedButton();
+        displayEnableScanButton();
+        displayDisableScanButton();
     }
 
 
@@ -494,5 +500,38 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
                 cameraView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
             }
         });
+    }
+
+    private void displayToggleLedButton() {
+        if (findViewById(R.id.scanner_red_led) != null) {
+            findViewById(R.id.scanner_red_led).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ScannerCompatActivity.this.scannerService.ledColorOn(Color.RED);
+                }
+            });
+        }
+    }
+
+    private void displayEnableScanButton() {
+        if (findViewById(R.id.scanner_trigger_off) != null) {
+            findViewById(R.id.scanner_trigger_off).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ScannerCompatActivity.this.scannerService.pause();
+                }
+            });
+        }
+    }
+
+    private void displayDisableScanButton() {
+        if (findViewById(R.id.scanner_trigger_on) != null) {
+            findViewById(R.id.scanner_trigger_on).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ScannerCompatActivity.this.scannerService.resume();
+                }
+            });
+        }
     }
 }

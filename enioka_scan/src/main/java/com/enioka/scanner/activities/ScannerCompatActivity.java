@@ -355,6 +355,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
 
         displayTorch();
         displayToggleLedButton();
+        displayEnableScanButton();
+        displayDisableScanButton();
     }
 
 
@@ -506,6 +508,28 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
                 @Override
                 public void onClick(View view) {
                     ScannerCompatActivity.this.scannerService.ledColorOn(Color.RED);
+                }
+            });
+        }
+    }
+
+    private void displayEnableScanButton() {
+        if (findViewById(R.id.scanner_trigger_off) != null) {
+            findViewById(R.id.scanner_trigger_off).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ScannerCompatActivity.this.scannerService.pause();
+                }
+            });
+        }
+    }
+
+    private void displayDisableScanButton() {
+        if (findViewById(R.id.scanner_trigger_on) != null) {
+            findViewById(R.id.scanner_trigger_on).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ScannerCompatActivity.this.scannerService.resume();
                 }
             });
         }

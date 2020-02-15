@@ -177,7 +177,7 @@ class ZebraOssScanner implements ScannerBackground {
             }
         }, Barcode.class);
 
-        this.btScanner.runCommand(new InitCommand(), null);
+        //this.btScanner.runCommand(new InitCommand(), null);
         //this.btScanner.runCommand(new ScanEnable(), null);
         //this.btScanner.runCommand(new StartSession(), null);
         //this.btScanner.runCommand(new RequestParam(), null);

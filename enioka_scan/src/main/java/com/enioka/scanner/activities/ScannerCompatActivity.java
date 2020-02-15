@@ -502,12 +502,19 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         });
     }
 
+    private boolean ledToggle = false;
+
     private void displayToggleLedButton() {
         if (findViewById(R.id.scanner_red_led) != null) {
             findViewById(R.id.scanner_red_led).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ScannerCompatActivity.this.scannerService.ledColorOn(Color.RED);
+                    if (!ledToggle) {
+                        ScannerCompatActivity.this.scannerService.ledColorOn(Color.RED);
+                    } else {
+                        ScannerCompatActivity.this.scannerService.ledColorOff(Color.RED);
+                    }
+                    ledToggle = !ledToggle;
                 }
             });
         }

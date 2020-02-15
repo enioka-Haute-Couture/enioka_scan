@@ -1,5 +1,6 @@
 package com.enioka.scanner;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
 import com.enioka.scanner.helpers.ProviderServiceHolder;
 import com.enioka.scanner.helpers.ProviderServiceMeta;
 import com.enioka.scanner.helpers.ScannerConnectionHandlerProxy;
@@ -42,6 +44,8 @@ public final class LaserScanner {
      * The list of scanner providers which could actually be created.
      */
     private static final Set<ProviderServiceHolder> providerServices = new HashSet<>();
+
+    private static BtScannerConnectionRegistry btRegistry = new BtScannerConnectionRegistry();
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -207,6 +211,10 @@ public final class LaserScanner {
     private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandler handler, final ScannerSearchOptions options) {
         final ScannerConnectionHandler handlerProxy = new ScannerConnectionHandlerProxy(handler);
 
+        if (options.useBlueTooth) {
+            btRegistry.register(ctx);
+        }
+
         // Trivial
         if (providerServices.isEmpty()) {
             Log.i(LOG_TAG, "There are no laser scanners available at all");
@@ -331,6 +339,11 @@ public final class LaserScanner {
                 handler.scannerConnectionProgress(providerKey, null, "Provider " + providerKey + " has finished initializing.");
 
                 checkEnd(providerKey);
+            }
+
+            @Override
+            public boolean isAlreadyConnected(BluetoothDevice device) {
+                return btRegistry.isAlreadyConnected(device);
             }
 
             private void checkEnd(String providerKey) {

@@ -1,5 +1,6 @@
 package com.enioka.scanner.api;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 
 /**
@@ -51,5 +52,13 @@ public interface ScannerProvider {
          * @param providerKey a unique key identifying the provider.
          */
         void onAllScannersCreated(String providerKey);
+
+        /**
+         * Check if a bluetooth device was already taken by a previous provider.
+         *
+         * @param device the device to test
+         * @return true if it should be ignored.
+         */
+        boolean isAlreadyConnected(BluetoothDevice device);
     }
 }

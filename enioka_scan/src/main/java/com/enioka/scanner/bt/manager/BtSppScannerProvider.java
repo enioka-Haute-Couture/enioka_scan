@@ -10,9 +10,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.ParcelUuid;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -166,6 +164,11 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
         Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
         for (BluetoothDevice bt : pairedDevices) {
             logDeviceInfo(bt);
+
+            // Some devices may be already used by another SDK
+            if (this.providerCallback.isAlreadyConnected(bt)) {
+                Log.i(LOG_TAG, "Ignoring device - it is already connected to another app or SDK");
+            }
 
             // We only allow SPP devices.
             boolean found = false;

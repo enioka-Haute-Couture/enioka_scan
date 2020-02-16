@@ -87,9 +87,21 @@
         android:background="@null"
         android:scaleType="fitCenter"
         android:src="@drawable/scan_inactive"
+        app:layout_constraintBottom_toTopOf="@id/scanner_bell"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/scanner_trigger_on" />
+
+    <ImageButton
+        android:id="@+id/scanner_bell"
+        android:layout_width="75dp"
+        android:layout_height="45dp"
+        android:background="@null"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_bell"
+        android:tint="@android:color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@id/scanner_trigger_on" />
+        app:layout_constraintTop_toBottomOf="@id/scanner_trigger_off" />
 
 
 </android.support.constraint.ConstraintLayout>

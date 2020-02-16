@@ -161,34 +161,36 @@ public class BtSppScannerProvider extends Service implements ScannerProvider {
         btAdapter.cancelDiscovery();
 
         // Try to contact already paired devices (slave devices).
-        Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
-        for (BluetoothDevice bt : pairedDevices) {
-            logDeviceInfo(bt);
+        if (options.allowInitialSearch) {
+            Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
+            for (BluetoothDevice bt : pairedDevices) {
+                logDeviceInfo(bt);
 
-            // Some devices may be already used by another SDK
-            if (this.providerCallback.isAlreadyConnected(bt)) {
-                Log.i(LOG_TAG, "Ignoring device - it is already connected to another app or SDK");
-            }
-
-            // We only allow SPP devices.
-            boolean found = false;
-            if (bt.getUuids() == null) {
-                continue;
-            }
-            for (ParcelUuid uuid : bt.getUuids()) {
-                if (uuid.getUuid().equals(ConnectToBtDeviceThread.SERVER_BT_SERVICE_UUID)) {
-                    found = true;
-                    break;
+                // Some devices may be already used by another SDK
+                if (this.providerCallback.isAlreadyConnected(bt)) {
+                    Log.i(LOG_TAG, "Ignoring device - it is already connected to another app or SDK");
                 }
-            }
-            if (!found) {
-                continue;
-            }
 
-            // Launch device resolution
-            BtSppScanner btDevice = new BtSppScanner(bt, this);
-            btDevice.connect(new ConnectionCallback(btDevice, this));
-            passiveScannersCount++;
+                // We only allow SPP devices.
+                boolean found = false;
+                if (bt.getUuids() == null) {
+                    continue;
+                }
+                for (ParcelUuid uuid : bt.getUuids()) {
+                    if (uuid.getUuid().equals(ConnectToBtDeviceThread.SERVER_BT_SERVICE_UUID)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    continue;
+                }
+
+                // Launch device resolution
+                BtSppScanner btDevice = new BtSppScanner(bt, this);
+                btDevice.connect(new ConnectionCallback(btDevice, this));
+                passiveScannersCount++;
+            }
         }
 
         // Start incoming SPP server listener (for master devices).

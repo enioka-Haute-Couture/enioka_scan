@@ -135,8 +135,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         // Bind to ScannerService service
         Intent intent = new Intent(this, ScannerService.class);
         //intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, false);
-        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, false);
-        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
+        //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, true);
+        //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"BtSppSdk"});
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
         // Ascending compatibility
@@ -358,6 +358,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         displayToggleLedButton();
         displayEnableScanButton();
         displayDisableScanButton();
+        displayBellButton();
     }
 
 
@@ -538,6 +539,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
                 @Override
                 public void onClick(View view) {
                     ScannerCompatActivity.this.scannerService.resume();
+                }
+            });
+        }
+    }
+
+    private void displayBellButton() {
+        if (findViewById(R.id.scanner_bell) != null) {
+            findViewById(R.id.scanner_bell).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ScannerCompatActivity.this.scannerService.beep();
                 }
             });
         }

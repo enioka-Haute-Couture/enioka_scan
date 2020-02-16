@@ -20,9 +20,16 @@ public class BtScannerConnectionRegistry extends BroadcastReceiver implements Cl
 
     private Set<String> connectedDevices = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
     private Context ctx;
+    private boolean registered = false;
 
     public void register(Context ctx) {
         this.ctx = ctx;
+        connectedDevices.clear();
+
+        if (registered) {
+            return;
+        }
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);

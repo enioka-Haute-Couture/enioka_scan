@@ -132,17 +132,26 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         // Set content immediately - that way our callbacks can draw on the layout.
         setViewContent();
 
+        // Ascending compatibility
+        if (zbarViewId != null) {
+            cameraViewId = zbarViewId;
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        serviceBound = false;
+        scannerService = null;
+
         // Bind to ScannerService service
         Intent intent = new Intent(this, ScannerService.class);
         //intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, false);
         //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, true);
         //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"BtSppSdk"});
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
-
-        // Ascending compatibility
-        if (zbarViewId != null) {
-            cameraViewId = zbarViewId;
-        }
     }
 
     /**

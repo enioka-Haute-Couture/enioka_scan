@@ -37,6 +37,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     protected final static String LOG_TAG = "ScannerService";
 
     private Handler uiHandler;
+    private boolean firstBind = true;
 
     /**
      * Scanner instances. They should never leak outside of this service.
@@ -71,7 +72,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     /**
      * The options (which can be adapted from intent extra data) with which we look for scanners on this device.
      */
-    private ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions().getAllAvailableScanners();
+    private final ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions().getAllAvailableScanners();
 
     private interface EndOfInitCallback {
         void run();
@@ -114,6 +115,10 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
                 scannerSearchOptions.excludedProviderKeys.addAll(Arrays.asList(excludedProviderKeys));
             }
         }
+        if (firstBind) {
+            this.initLaserScannerSearch();
+        }
+        firstBind = false;
         return new LocalBinder();
     }
 
@@ -127,7 +132,6 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         Log.i(LOG_TAG, "Starting scanner service");
         super.onCreate();
         uiHandler = new Handler(getApplicationContext().getMainLooper());
-        this.initLaserScannerSearch();
     }
 
     @Override

@@ -94,16 +94,21 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     public IBinder onBind(Intent intent) {
         Bundle extras = intent.getExtras();
         if (extras != null) {
-            scannerSearchOptions.useBlueTooth = extras.getBoolean("useBlueTooth", scannerSearchOptions.useBlueTooth);
-            scannerSearchOptions.allowLaterConnections = extras.getBoolean("allowLaterConnections", scannerSearchOptions.allowLaterConnections);
-            scannerSearchOptions.allowPairingFlow = extras.getBoolean("allowPairingFlow", scannerSearchOptions.allowPairingFlow);
+            scannerSearchOptions.useBlueTooth = extras.getBoolean(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, scannerSearchOptions.useBlueTooth);
+            scannerSearchOptions.allowLaterConnections = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, scannerSearchOptions.allowLaterConnections);
+            scannerSearchOptions.allowPairingFlow = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, scannerSearchOptions.allowPairingFlow);
+            scannerSearchOptions.allowInitialSearch = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, scannerSearchOptions.allowInitialSearch);
 
-            String allowedProviderKeys = extras.getString("allowedProviderKeys");
-            if (allowedProviderKeys != null && !allowedProviderKeys.isEmpty()) {
+            String[] allowedProviderKeys = extras.getStringArray(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY);
+            if (allowedProviderKeys != null && allowedProviderKeys.length > 0) {
                 scannerSearchOptions.allowedProviderKeys = new HashSet<>();
-                for (String s : allowedProviderKeys.split(",")) {
-                    scannerSearchOptions.allowedProviderKeys.add(s);
-                }
+                scannerSearchOptions.allowedProviderKeys.addAll(Arrays.asList(allowedProviderKeys));
+            }
+
+            String[] excludedProviderKeys = extras.getStringArray(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY);
+            if (excludedProviderKeys != null && excludedProviderKeys.length > 0) {
+                scannerSearchOptions.excludedProviderKeys = new HashSet<>();
+                scannerSearchOptions.excludedProviderKeys.addAll(Arrays.asList(excludedProviderKeys));
             }
         }
         return new LocalBinder();

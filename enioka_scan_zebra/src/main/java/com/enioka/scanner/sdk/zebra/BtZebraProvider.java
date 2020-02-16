@@ -59,7 +59,6 @@ public class BtZebraProvider extends Service implements ScannerProvider, IDcsSdk
 
         sdkHandler = new SDKHandler(ctx);
         sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_BT_NORMAL);
-        sdkHandler.dcssdkSetOperationalMode(DCSSDKDefs.DCSSDK_MODE.DCSSDK_OPMODE_SNAPI);
 
         // Subscribe to SDK events
         sdkHandler.dcssdkSetDelegate(this);
@@ -74,54 +73,58 @@ public class BtZebraProvider extends Service implements ScannerProvider, IDcsSdk
         // subscribe to events set in notification mask
         sdkHandler.dcssdkSubsribeForEvents(notificationsMask); // | 20 | 21
 
-        // Connect to available scanners
-        List<DCSScannerInfo> mScannerInfoList = new ArrayList<>();
-        Log.i(LOG_TAG, "dcssdkGetAvailableScannersList :" + sdkHandler.dcssdkGetAvailableScannersList(mScannerInfoList) + " " + mScannerInfoList.size());
 
-        final Semaphore waitingFor = new Semaphore(0);
         final AtomicInteger created = new AtomicInteger(0);
+        if (options.allowInitialSearch) {
+            // Connect to available scanners
+            List<DCSScannerInfo> mScannerInfoList = new ArrayList<>();
+            Log.i(LOG_TAG, "dcssdkGetAvailableScannersList :" + sdkHandler.dcssdkGetAvailableScannersList(mScannerInfoList) + " " + mScannerInfoList.size());
 
-        for (final DCSScannerInfo scannerInfo : mScannerInfoList) {
-            Log.i(LOG_TAG, "Trying to connect to BT device :");
-            Log.i(LOG_TAG, " ID :" + scannerInfo.getScannerID());
-            Log.i(LOG_TAG, " Name :" + scannerInfo.getScannerName());
+            final Semaphore waitingFor = new Semaphore(0);
 
-            // The stupid dcssdkGetAvailableScannersList API actually lists all paired BT devices. Try and connect to check device is a Zebra device.
-            new BtZebraConnectScannerAsync(new BtZebraConnectScannerAsync.ConnectionCallback() {
-                @Override
-                public void onSuccess() {
-                    BtZebraScanner scanner = new BtZebraScanner(sdkHandler, scannerInfo.getScannerID());
-                    createdScanners.put(scannerInfo.getScannerID(), scanner);
-                    cb.onScannerCreated(getKey(), getKey() + scannerInfo.getScannerID(), scanner);
-                    created.incrementAndGet();
-                    waitingFor.release();
-                }
+            for (final DCSScannerInfo scannerInfo : mScannerInfoList) {
+                Log.i(LOG_TAG, "Trying to connect to BT device :");
+                Log.i(LOG_TAG, " ID :" + scannerInfo.getScannerID());
+                Log.i(LOG_TAG, " Name :" + scannerInfo.getScannerName());
 
-                @Override
-                public void onFailure() {
-                    waitingFor.release();
-                }
-            }, sdkHandler, scannerInfo.getScannerID()).execute();
-        }
+                // The stupid dcssdkGetAvailableScannersList API actually lists all paired BT devices. Try and connect to check device is a Zebra device.
+                new BtZebraConnectScannerAsync(new BtZebraConnectScannerAsync.ConnectionCallback() {
+                    @Override
+                    public void onSuccess() {
+                        BtZebraScanner scanner = new BtZebraScanner(sdkHandler, scannerInfo.getScannerID());
+                        createdScanners.put(scannerInfo.getScannerID(), scanner);
+                        cb.onScannerCreated(getKey(), getKey() + scannerInfo.getScannerID(), scanner);
+                        created.incrementAndGet();
+                        waitingFor.release();
+                    }
 
-        try {
-            waitingFor.acquire(mScannerInfoList.size());
-        } catch (InterruptedException e) {
-            // Who cares
-        }
+                    @Override
+                    public void onFailure() {
+                        waitingFor.release();
+                    }
+                }, sdkHandler, scannerInfo.getScannerID()).execute();
+            }
 
-        if (created.get() > 0) {
-            cb.onAllScannersCreated(getKey());
-        } else {
-            Log.i(LOG_TAG, "No Zebra BT devices connected to this device");
-            if (!options.allowLaterConnections) {
-                cb.onProviderUnavailable(PROVIDER_NAME); // Costly search. We do not want it to do it on each scanner search.
-                sdkHandler.dcssdkClose();
+            try {
+                waitingFor.acquire(mScannerInfoList.size());
+            } catch (InterruptedException e) {
+                // Who cares
             }
         }
 
-        if (!options.allowLaterConnections) {
+        if (created.get() > 0 || options.allowLaterConnections) {
+            cb.onAllScannersCreated(getKey());
+        } else {
+            Log.i(LOG_TAG, "No Zebra BT devices connected to this device and master device connection si disabled - disabling Zebra BT SDK");
+            cb.onProviderUnavailable(PROVIDER_NAME); // Costly search. We do not want it to do it on each scanner search.
+            sdkHandler.dcssdkClose();
+        }
+
+        // Master scanner connection
+        if (options.allowLaterConnections) {
             sdkHandler.dcssdkEnableAvailableScannersDetection(true);
+        } else {
+            sdkHandler.dcssdkEnableAvailableScannersDetection(false);
         }
     }
 
@@ -153,12 +156,14 @@ public class BtZebraProvider extends Service implements ScannerProvider, IDcsSdk
     public void dcssdkEventCommunicationSessionEstablished(DCSScannerInfo activeScanner) {
         Log.i(LOG_TAG, "dcssdkEventCommunicationSessionEstablished");
         int scannerID = activeScanner.getScannerID();
-        if (createdScanners.containsKey(scannerID) && createdScanners.get(scannerID) != null) {
-            createdScanners.get(scannerID).reconnected();
+        BtZebraScanner existingScanner = createdScanners.get(scannerID);
+
+        if (existingScanner != null) {
+            existingScanner.reconnected();
         } else {
-            BtZebraScanner scanner = new BtZebraScanner(sdkHandler, activeScanner.getScannerID());
-            createdScanners.put(activeScanner.getScannerID(), scanner);
-            this.providerCallback.onScannerCreated(getKey(), getKey() + scannerID, scanner);
+            BtZebraScanner newScanner = new BtZebraScanner(sdkHandler, scannerID);
+            createdScanners.put(scannerID, newScanner);
+            this.providerCallback.onScannerCreated(getKey(), getKey() + scannerID, newScanner);
         }
     }
 

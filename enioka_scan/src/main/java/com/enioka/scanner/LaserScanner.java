@@ -202,6 +202,9 @@ public final class LaserScanner {
         if (psh.getMeta().isBluetooth() && !options.useBlueTooth) {
             return false;
         }
+        if (options.excludedProviderKeys != null && options.excludedProviderKeys.contains(psh.getMeta().getProviderKey())) {
+            return false;
+        }
         if (options.allowedProviderKeys != null && !options.allowedProviderKeys.isEmpty() && !options.allowedProviderKeys.contains(psh.getMeta().getProviderKey())) {
             return false;
         }

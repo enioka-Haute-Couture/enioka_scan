@@ -10,6 +10,46 @@ import com.enioka.scanner.api.Color;
 public interface ScannerServiceApi {
 
     ////////////////////////////////////////////////////////////////////////////
+    // INTENT EXTRAS
+    ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * If false, the service will only connect to wired, non-BT scanners. Default is true.
+     */
+    String EXTRA_BT_ALLOW_BT_BOOLEAN = "useBlueTooth";
+
+    /**
+     * If true, some providers may find scanners after initial search is done. For example, a master BT device may connect later.
+     * Default is true. May be ignored by some providers.
+     */
+    String EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN = "allowLaterConnections";
+
+    /**
+     * If false, the initial search is skipped. Useful when it would be useless for the library to search for scanners, for example for master BT devices: no need to test already paired BT devices, for master BT scanners are often non-discoverable.
+     * Default is true. May be ignored by some providers.
+     */
+    String EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN = "allowInitialSearch";
+
+    /**
+     * If true, the library is allowed to start pairing/configuration activities during initial search.
+     * Default is false. Some providers require this (ProGlove for example).
+     */
+    String EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN = "allowPairingFlow";
+
+    /**
+     * An array of provider keys (BluebirdProvider, ProgloveProvider...) allowed. All others are excluded.
+     * Default is empty, meaning all providers allowed.
+     */
+    String EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY = "allowedProviderKeys";
+
+    /**
+     * An array of provider keys (BluebirdProvider, ProgloveProvider...) which cannot be used. All others (or those inside EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY) are allowed.
+     * Default is empty, meaning non exclusions.
+     */
+    String EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY = "excludedProviderKeys";
+
+
+    ////////////////////////////////////////////////////////////////////////////
     // HOOKS
     ////////////////////////////////////////////////////////////////////////////
 

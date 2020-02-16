@@ -27,6 +27,11 @@ public class ScannerSearchOptions {
     public boolean allowLaterConnections = true;
 
     /**
+     * If true, some providers may retrieve scanners during initial search.
+     */
+    public boolean allowInitialSearch = true;
+
+    /**
      * If true, the providers which need a pairing done by their own SDKs (like a BLE on the fly pairing) will be allowed to do so.
      */
     public boolean allowPairingFlow = false;
@@ -35,6 +40,11 @@ public class ScannerSearchOptions {
      * Restrict search to this list of providers. Ignored if null or empty.
      */
     public Set<String> allowedProviderKeys = null;
+
+    /**
+     * The providers inside this list will never be used. Ignored if null or empty.
+     */
+    public Set<String> excludedProviderKeys = null;
 
     public static ScannerSearchOptions defaultOptions() {
         return new ScannerSearchOptions();

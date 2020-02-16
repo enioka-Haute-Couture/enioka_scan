@@ -1,6 +1,6 @@
 package com.enioka.scanner.sdk.zebra;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -8,7 +8,7 @@ import android.util.Xml;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerForeground;
+import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.zebra.scannercontrol.DCSSDKDefs;
@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Scanner provider for external BT Zebra (real Zebra, not Symbol) devices.
+ * Scanner provider for external BT Zebra (Symbol, Motorola...) devices.
  */
-class BtZebraScanner implements ScannerForeground {
+class BtZebraScanner implements ScannerBackground {
     private static final String LOG_TAG = "BtZebraProvider";
 
     private static final int BEEP_HIGH_SHORT_1 = 0;
@@ -49,27 +49,28 @@ class BtZebraScanner implements ScannerForeground {
     }
 
     @Override
-    public void initialize(Activity ctx, final ScannerInitCallback cb0, final ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
-        this.dataCb = cb1;
-        this.statusCb = cb2;
+    public void initialize(Context applicationContext, final ScannerInitCallback initCallback, ScannerDataCallback dataCallback, ScannerStatusCallback statusCallback, Mode mode) {
+        this.dataCb = dataCallback;
+        this.statusCb = statusCallback;
 
         sdkHandler.dcssdkEnableAutomaticSessionReestablishment(true, scannerId);
 
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
-        BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_ENABLE, inXML);
 
         // Try to enable the scanner
         new BtZebraAsyncTask(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_ENABLE, new BtZebraAsyncTask.BtZebraAsyncTaskCallback() {
             @Override
             public void onSuccess(String resultString) {
-                cb0.onConnectionSuccessful(BtZebraScanner.this);
+                initCallback.onConnectionSuccessful(BtZebraScanner.this);
+                Log.d(LOG_TAG, "Finished init of scanner Zebra BT of ID " + scannerId);
             }
 
             @Override
             public void onFailure() {
-                cb0.onConnectionFailure(BtZebraScanner.this);
+                initCallback.onConnectionFailure(BtZebraScanner.this);
+                Log.e(LOG_TAG, "FAILED init of scanner Zebra BT of ID " + scannerId);
             }
-        });
+        }).execute(inXML);
     }
 
     @Override
@@ -213,8 +214,6 @@ class BtZebraScanner implements ScannerForeground {
     public void resume() {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_ENABLE, inXML);
-
-        pullTrigger();
     }
 
 

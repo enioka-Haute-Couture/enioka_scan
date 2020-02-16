@@ -53,7 +53,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     /**
      * Don't start camera mode, even if no lasers are available
      */
-    protected boolean laserModeOnly = false;
+    protected boolean laserModeOnly = true;
 
     /**
      * If set to false, ScannerCompatActivity will behave like an standard AppCompatActivity
@@ -134,8 +134,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
 
         // Bind to ScannerService service
         Intent intent = new Intent(this, ScannerService.class);
-        //intent.putExtra("useBlueTooth", false);
-        //intent.putExtra("allowedProviderKeys", "Koamtac");
+        //intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, false);
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, false);
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
         // Ascending compatibility

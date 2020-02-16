@@ -21,10 +21,10 @@ class BtZebraAsyncTask extends AsyncTask<String, Integer, BtZebraAsyncTask.BtZeb
         String resultText;
     }
 
-    private DCSSDKDefs.DCSSDK_COMMAND_OPCODE opcode;
-    private BtZebraAsyncTaskCallback callingThreadCb;
-    private int scannerId;
-    private SDKHandler sdkHandler;
+    private final DCSSDKDefs.DCSSDK_COMMAND_OPCODE opcode;
+    private final BtZebraAsyncTaskCallback callingThreadCb;
+    private final int scannerId;
+    private final SDKHandler sdkHandler;
 
     private BtZebraAsyncTaskResult result = new BtZebraAsyncTaskResult();
 

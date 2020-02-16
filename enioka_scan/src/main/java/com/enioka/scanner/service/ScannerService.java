@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -34,6 +35,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ScannerService extends Service implements ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerServiceApi {
 
     protected final static String LOG_TAG = "ScannerService";
+
+    private Handler uiHandler;
 
     /**
      * Scanner instances. They should never leak outside of this service.
@@ -123,6 +126,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     public void onCreate() {
         Log.i(LOG_TAG, "Starting scanner service");
         super.onCreate();
+        uiHandler = new Handler(getApplicationContext().getMainLooper());
         this.initLaserScannerSearch();
     }
 
@@ -229,11 +233,16 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     ////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void onStatusChanged(String newStatus) {
+    public void onStatusChanged(final String newStatus) {
         Log.d(LOG_TAG, "Status change: " + newStatus);
-        for (BackgroundScannerClient client : this.clients) {
-            client.onStatusChanged(newStatus);
-        }
+        uiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (BackgroundScannerClient client : ScannerService.this.clients) {
+                    client.onStatusChanged(newStatus);
+                }
+            }
+        });
     }
 
     @Override

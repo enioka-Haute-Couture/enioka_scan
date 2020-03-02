@@ -1,5 +1,6 @@
 package com.enioka.scanner;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
@@ -141,7 +142,17 @@ public final class LaserScanner {
             declaredProviderServices.put(name.getClassName(), meta);
 
             Log.d(LOG_TAG, "Trying to bind to service " + name.getClassName() + (meta.isBluetooth() ? " - BT    " : " - not BT") + " - " + meta.getPriority());
-            ctx.bindService(boundServiceIntent, connection, Context.BIND_AUTO_CREATE);
+            try {
+                ctx.bindService(boundServiceIntent, connection, Context.BIND_AUTO_CREATE);
+            } catch (Exception e) {
+                declaredProviderServices.remove(name.getClassName());
+                try {
+                    waitingForConnection.acquire(1);
+                } catch (InterruptedException ex) {
+                    // Who cares.
+                }
+                Log.w(LOG_TAG, "Could not bind to service - usual cause is missing SDK from classpath");
+            }
         }
     }
 
@@ -224,6 +235,13 @@ public final class LaserScanner {
             handlerProxy.noScannerAvailable();
             handlerProxy.endOfScannerSearch();
             return;
+        }
+
+        // BT disabled?
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (btAdapter == null || !btAdapter.isEnabled()) {
+            Log.w(LOG_TAG, "BT is disabled by the user. All providers using BT will not be enabled. Enabling BT is not the library's responsibility.");
+            options.useBlueTooth = false;
         }
 
         // Count providers which should actually be used.

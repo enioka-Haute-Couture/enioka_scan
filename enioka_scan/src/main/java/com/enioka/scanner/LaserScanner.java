@@ -65,7 +65,7 @@ public final class LaserScanner {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Provider search: provider services which should answer. Initialized at service count, provider search ends when we can aquire that many permits.
+     * Provider search: provider services which should answer. Initialized at service count, provider search ends when we can acquire that many permits.
      */
     private static Semaphore waitingForConnection = new Semaphore(0);
 
@@ -368,9 +368,11 @@ public final class LaserScanner {
             }
 
             private void checkEnd(String providerKey) {
-                // Free BT mutex - another BT provider may run.
+                // Free BT mutex - another BT provider may run. (copy set: concurrent usage otherwise)
                 for (ProviderServiceMeta psm : declaredProviderServices.values()) {
-                    if (psm.getProviderKey().equals(providerKey) && psm.isBluetooth()) {
+                    // key null happens when the provider was not initialized (it is not selected or is excluded by the user)
+                    // We could iterate providerServices instead but this would force us to lock it to avoid concurrent modifications.
+                    if (psm.getProviderKey() != null && psm.getProviderKey().equals(providerKey) && psm.isBluetooth()) {
                         btResolutionMutex.release();
                     }
                 }

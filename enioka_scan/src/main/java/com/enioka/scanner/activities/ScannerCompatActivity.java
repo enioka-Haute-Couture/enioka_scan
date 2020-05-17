@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -49,6 +50,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     protected final static String LOG_TAG = "ScannerActivity";
     protected final static int PERMISSION_REQUEST_ID_CAMERA = 1790;
     protected final static int PERMISSION_REQUEST_ID_BT_EMDK = 1791;
+    protected final static int PERMISSION_REQUEST_ID_POSITION = 1792;
 
     /**
      * Don't start camera mode, even if no lasers are available
@@ -64,6 +66,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
      * Helper to go directly to camera (used on reload, such as after permission change).
      */
     protected boolean goToCamera = false;
+
+    /**
+     * Use bluetooth to look for scanners (if available).
+     */
+    protected boolean useBluetooth = true;
 
     /**
      * The layout to use when using a laser or external keyboard.
@@ -145,10 +152,35 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         serviceBound = false;
         scannerService = null;
 
+        if (canUseBluetooth()) {
+            bindAndStartService();
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH,
+                            Manifest.permission.BLUETOOTH_ADMIN,
+                            android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.P ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSION_REQUEST_ID_POSITION);
+        }
+    }
+
+    private boolean canUseBluetooth() {
+        return useBluetooth &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED &&
+                (
+                        (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.P && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) ||
+                                (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.P && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+                );
+    }
+
+    private void bindAndStartService() {
+        if (serviceBound) {
+            return;
+        }
+
         // Bind to ScannerService service
         Intent intent = new Intent(this, ScannerService.class);
-        //intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, false);
-        //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, true);
+        intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, useBluetooth);
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, useBluetooth);
         //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"BtSppSdk"});
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
@@ -328,6 +360,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
             case PERMISSION_REQUEST_ID_BT_EMDK: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //initLaserScannerSearch();
+                } else {
+                    Toast.makeText(this, R.string.scanner_status_disabled, Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+            case PERMISSION_REQUEST_ID_POSITION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (canUseBluetooth()) {
+                        bindAndStartService();
+                    }
                 } else {
                     Toast.makeText(this, R.string.scanner_status_disabled, Toast.LENGTH_SHORT).show();
                 }

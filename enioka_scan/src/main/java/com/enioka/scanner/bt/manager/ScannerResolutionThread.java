@@ -16,7 +16,7 @@ import java.util.concurrent.Semaphore;
 class ScannerResolutionThread implements Runnable, BtSppScannerProvider.ManagementCallback {
     private static final String LOG_TAG = "BtSppSdk";
 
-    private BtSppScanner device;
+    private ScannerInternal device;
     private List<BtSppScannerProvider> scannerProviders;
     private ScannerResolutionCallback callback;
     private final Semaphore providerLock = new Semaphore(0);
@@ -40,10 +40,10 @@ class ScannerResolutionThread implements Runnable, BtSppScannerProvider.Manageme
          *
          * @param device the scanner which failed to find a home provider. Very sad.
          */
-        void notCompatible(BtSppScanner device);
+        void notCompatible(ScannerInternal device);
     }
 
-    ScannerResolutionThread(BtSppScanner device, List<BtSppScannerProvider> scannerProviders, ScannerResolutionCallback callback) {
+    ScannerResolutionThread(ScannerInternal device, List<BtSppScannerProvider> scannerProviders, ScannerResolutionCallback callback) {
         this.device = device;
         this.scannerProviders = scannerProviders;
         this.callback = callback;

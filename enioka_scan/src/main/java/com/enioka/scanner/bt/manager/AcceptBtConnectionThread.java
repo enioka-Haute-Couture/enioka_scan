@@ -14,14 +14,14 @@ class AcceptBtConnectionThread extends Thread {
     private static final String LOG_TAG = "BtSppSdk";
 
     private final BluetoothServerSocket serverSocket;
-    private final BluetoothAdapter bluetoothAdapter;
     private final ConnectToBtDeviceThread.OnConnectedCallback onConnectedCallback;
+    private final BtSppScannerProvider parentProvider;
 
     private boolean done = false;
 
-    AcceptBtConnectionThread(BluetoothAdapter bluetoothAdapter, ConnectToBtDeviceThread.OnConnectedCallback callback) {
-        this.bluetoothAdapter = bluetoothAdapter;
+    AcceptBtConnectionThread(BluetoothAdapter bluetoothAdapter, ConnectToBtDeviceThread.OnConnectedCallback callback, BtSppScannerProvider parentProvider) {
         this.onConnectedCallback = callback;
+        this.parentProvider = parentProvider;
 
         BluetoothServerSocket serverSocket = null;
         try {
@@ -49,7 +49,7 @@ class AcceptBtConnectionThread extends Thread {
 
             if (clientSocket != null) {
                 if (this.onConnectedCallback != null) {
-                    this.onConnectedCallback.connected(clientSocket);
+                    this.onConnectedCallback.connected(new BtSppScanner(parentProvider, clientSocket));
                     Log.i(LOG_TAG, "Live socket opened for incoming SPP BT device.");
                 }
 

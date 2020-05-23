@@ -76,14 +76,11 @@ public class BleManager {
                 if (btDevice == null) {
                     return;
                 }
-
                 if (foundDevices.contains(btDevice.getAddress())) {
                     return;
                 }
                 foundDevices.add(btDevice.getAddress());
-                Log.i(LOG_TAG, "Device was returned. Start of BLE analysis: is it a BLE device? " + btDevice.getName() + " - " + btDevice.getAddress());
-
-                //result.getScanRecord().
+                Log.i(LOG_TAG, "A new BT device was returned. Start of analysis: is it a usable BLE device? " + btDevice.getName() + " - " + btDevice.getAddress());
 
                 btDevice.connectGatt(ctx, true, new BluetoothGattCallback() {
                     @Override
@@ -170,8 +167,6 @@ public class BleManager {
                 leScanner.stopScan(callback);
             }
         }, 10000);
-
-
     }
 
     private static void signalEvent(BleStateMachineDevice.BleEvent event) {

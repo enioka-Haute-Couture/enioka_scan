@@ -6,10 +6,29 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
 
+import com.enioka.scanner.bt.api.BtSppScannerProvider;
+import com.enioka.scanner.bt.api.Command;
+import com.enioka.scanner.bt.api.DataSubscriptionCallback;
+import com.enioka.scanner.bt.api.Helpers;
+import com.enioka.scanner.bt.api.ParsingResult;
+import com.enioka.scanner.bt.api.Scanner;
+import com.enioka.scanner.bt.api.ScannerDataParser;
+import com.enioka.scanner.bt.manager.DataSubscription;
+import com.enioka.scanner.sdk.honeywelloss.HoneywellOssSppScannerProvider;
+import com.enioka.scanner.sdk.honeywelloss.parsers.HoneywellOssParser;
+import com.enioka.scanner.sdk.honeywelloss.commands.GetFirmware;
+
+import java.io.Closeable;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
-public class BleTerminalIODevice implements BleStateMachineDevice {
+public class BleTerminalIODevice implements BleStateMachineDevice, Scanner, Closeable {
     private static final String LOG_TAG = "BtSppSdk";
 
     // Device
@@ -18,11 +37,23 @@ public class BleTerminalIODevice implements BleStateMachineDevice {
     private String deviceAddress;
     private BluetoothDevice btDevice;
 
+    private final BleTerminalIOStreamWriter writer;
+
     // Credits
     private Semaphore clientCredits = new Semaphore(0);
     private Semaphore serverCredits = new Semaphore(0);
     private static final byte MIN_SERVER_CREDITS = 20;
     private static final byte SERVER_CREDITS_ALLOCATION = 40;
+
+    @Override
+    public void close() {
+        this.disconnect();
+
+        if (this.timeoutHunter != null) {
+            this.timeoutHunter.cancel();
+            this.timeoutHunter = null;
+        }
+    }
 
     // State
     private enum TioState {
@@ -31,16 +62,54 @@ public class BleTerminalIODevice implements BleStateMachineDevice {
 
     private TioState currentState = TioState.INITIAL;
 
+
+    // Relations with providers
+    /**
+     * All the callbacks which are registered to run on received data (post-parsing). Key is data class name.
+     */
+    private final Map<String, DataSubscription> dataSubscriptions = new HashMap<>();
+
+    /**
+     * The (provider-supplied) parser used to cut the data given by the scanner into objects.
+     */
+    private ScannerDataParser inputHandler;
+
+    private com.enioka.scanner.api.Scanner providerScanner;
+
+
+    private Timer timeoutHunter;
+
     BleTerminalIODevice(BluetoothGatt gatt) {
         this.gatt = gatt;
         this.btDevice = gatt.getDevice();
         this.deviceName = this.btDevice.getName();
         this.deviceAddress = this.btDevice.getAddress();
+        this.writer = new BleTerminalIOStreamWriter(this, gatt);
+
+        this.setUpTimeoutTimer();
+
+        // TODO: TEMP CODE
+        this.inputHandler = new HoneywellOssParser();
+        HoneywellOssSppScannerProvider scannerProvider = new HoneywellOssSppScannerProvider();
+        scannerProvider.canManageDevice(this, new BtSppScannerProvider.ManagementCallback() {
+            @Override
+            public void canManage(com.enioka.scanner.api.Scanner libraryScanner) {
+                BleTerminalIODevice.this.providerScanner = libraryScanner;
+                //((ScannerBackground)libraryScanner).initialize();
+                runCommand(new GetFirmware(), null);
+            }
+
+            @Override
+            public void cannotManage() {
+
+            }
+        });
     }
 
     static boolean isCompatibleWith(BluetoothGatt gatt) {
         return gatt.getService(GattAttribute.TERMINAL_IO_SERVICE.id) != null;
     }
+
 
     @Override
     public void onEvent(BleEvent event) {
@@ -104,7 +173,64 @@ public class BleTerminalIODevice implements BleStateMachineDevice {
     }
 
     private void handleData(BleEvent event) {
-        Log.i(LOG_TAG, "Received data " + new String(event.data, StandardCharsets.UTF_8));
+        Log.i(LOG_TAG, "Received data " + new String(event.data, StandardCharsets.UTF_8) + " - " + Helpers.byteArrayToHex(event.data, event.data.length));
+
+        // Sanity checks
+        if (!serverCredits.tryAcquire()) {
+            Log.w(LOG_TAG, "Weirdly the scanner has answered without having enough credits. May sbe a lib or a scanner bug");
+            return;
+        }
+
+        if (event.data == null || event.data.length == 0) {
+            Log.w(LOG_TAG, "Weirdly the scanner has sent a data event... without any data");
+            return;
+        }
+
+        // Parse data
+        ParsingResult res = this.inputHandler.parse(event.data, 0, event.data.length);
+        if (!res.expectingMoreData && res.data != null) {
+            Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString());
+
+            // Subscriptions to fulfill on that data type?
+            synchronized (dataSubscriptions) {
+                if (this.dataSubscriptions.containsKey(res.data.getClass().getCanonicalName())) {
+                    DataSubscription subscription = this.dataSubscriptions.get(res.data.getClass().getCanonicalName());
+                    if (subscription == null) {
+                        throw new IllegalStateException("stored subscription cannot be null");
+                    }
+                    DataSubscriptionCallback callback = subscription.getCallback();
+                    callback.onSuccess(res.data);
+
+                    if (!subscription.isPermanent()) {
+                        this.dataSubscriptions.remove(res.data.getClass().getCanonicalName());
+                    }
+                }
+            }
+
+            if (res.acknowledger != null) {
+                this.writer.endOfCommand();
+                this.writer.write(res.acknowledger.getCommand(), false);
+            }
+
+            this.writer.endOfCommand();
+        } else if (!res.expectingMoreData && !res.rejected) {
+            Log.d(LOG_TAG, "Message was interpreted as: message without additional data");
+            if (res.acknowledger != null) {
+                this.writer.write(res.acknowledger.getCommand(), false);
+            }
+            this.writer.endOfCommand();
+        } else if (!res.expectingMoreData) {
+            Log.d(LOG_TAG, "Message was rejected " + res.result);
+            if (res.acknowledger != null) {
+                this.writer.write(res.acknowledger.getCommand(), false);
+            }
+            this.writer.endOfCommand();
+        } else {
+            Log.d(LOG_TAG, "Data was not interpreted yet as we are expecting more data");
+            if (res.acknowledger != null) {
+                this.writer.write(res.acknowledger.getCommand(), false);
+            }
+        }
     }
 
     private void handleCredit(BleEvent event) {
@@ -112,20 +238,103 @@ public class BleTerminalIODevice implements BleStateMachineDevice {
         clientCredits.release(event.data[0]);
     }
 
-    private boolean sendCreditsToServerIfNeeded(BluetoothGatt gatt) {
+    private void sendCreditsToServerIfNeeded(BluetoothGatt gatt) {
         if (serverCredits.availablePermits() >= MIN_SERVER_CREDITS) {
-            return false;
+            return;
         }
 
         BluetoothGattService service = gatt.getService(GattAttribute.TERMINAL_IO_SERVICE.id);
         BluetoothGattCharacteristic characteristic = service.getCharacteristic(GattAttribute.TERMINAL_IO_UART_CREDITS_RX.id);
         if (characteristic != null) {
-            Log.i(LOG_TAG, "Sending credits to remote device");
+            Log.i(LOG_TAG, "Sending " + SERVER_CREDITS_ALLOCATION + " credits to remote device " + this.deviceName);
+            characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
             characteristic.setValue(new byte[]{SERVER_CREDITS_ALLOCATION});
             gatt.writeCharacteristic(characteristic);
             serverCredits.release(SERVER_CREDITS_ALLOCATION);
-            return true;
         }
-        return false;
+    }
+
+    boolean waitForClientCredits(int creditCount) {
+        try {
+            this.clientCredits.acquire(creditCount);
+            return true;
+        } catch (InterruptedException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Start a timer which checks if data subscribers are timed-out and deals with the consequences.
+     */
+    private void setUpTimeoutTimer() {
+        this.timeoutHunter = new Timer();
+        this.timeoutHunter.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                synchronized (dataSubscriptions) {
+                    List<String> toRemove = new ArrayList<>(0);
+                    for (Map.Entry<String, DataSubscription> entry : dataSubscriptions.entrySet()) {
+                        DataSubscription subscription = entry.getValue();
+                        String expectedDataClass = entry.getKey();
+
+                        if (subscription.isTimedOut()) {
+                            Log.d(LOG_TAG, "A data subscription has timed out");
+                            toRemove.add(expectedDataClass);
+                            subscription.getCallback().onTimeout();
+                            writer.endOfCommand();
+                        }
+                    }
+
+                    for (String key : toRemove) {
+                        dataSubscriptions.remove(key);
+                    }
+                }
+            }
+        }, 0, 100);
+    }
+
+    public <T> void runCommand(Command<T> command, DataSubscriptionCallback<T> subscription) {
+        byte[] cmd = command.getCommand();
+
+        if (subscription != null) {
+            synchronized (dataSubscriptions) {
+                String expectedDataClass = command.getReturnType().getCanonicalName();
+                this.dataSubscriptions.put(expectedDataClass, new DataSubscription(subscription, command.getTimeOut(), false));
+            }
+        } else {
+            // Nothing is expected in return, so no need to wait before running the next command.
+            this.writer.endOfCommand();
+        }
+
+        Log.d(LOG_TAG, "Queuing for dispatch command " + command.getClass().getSimpleName());
+        this.writer.write(cmd, true);
+    }
+
+    @Override
+    public String getName() {
+        return this.deviceName;
+    }
+
+    @Override
+    public void disconnect() {
+        if (gatt != null) {
+            this.gatt.disconnect();
+            this.gatt = null;
+        }
+    }
+
+    @Override
+    public <T> void registerSubscription(DataSubscriptionCallback<T> subscription, Class<? extends T> targetType) {
+        if (subscription != null) {
+            synchronized (dataSubscriptions) {
+                String expectedDataClass = targetType.getCanonicalName();
+                this.dataSubscriptions.put(expectedDataClass, new DataSubscription(subscription, 0, true));
+            }
+        }
+    }
+
+    @Override
+    public void registerStatusCallback(SppScannerStatusCallback statusCallback) {
+
     }
 }

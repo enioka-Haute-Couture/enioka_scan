@@ -1,4 +1,4 @@
-package com.enioka.scanner.ble;
+package com.enioka.scanner.bt.manager;
 
 import java.util.UUID;
 

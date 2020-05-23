@@ -1,9 +1,10 @@
-package com.enioka.scanner.ble;
+package com.enioka.scanner.bt.manager;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
+import android.content.Context;
 import android.util.Log;
 
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
@@ -11,12 +12,7 @@ import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Helpers;
 import com.enioka.scanner.bt.api.ParsingResult;
-import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.bt.manager.DataSubscription;
-import com.enioka.scanner.sdk.honeywelloss.HoneywellOssSppScannerProvider;
-import com.enioka.scanner.sdk.honeywelloss.parsers.HoneywellOssParser;
-import com.enioka.scanner.sdk.honeywelloss.commands.GetFirmware;
 
 import java.io.Closeable;
 import java.nio.charset.StandardCharsets;
@@ -28,16 +24,18 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
-public class BleTerminalIODevice implements BleStateMachineDevice, Scanner, Closeable {
+class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Closeable {
     private static final String LOG_TAG = "BtSppSdk";
 
+    private Context ctx;
+    private BleStateMachineGattCallback gattCallback;
+
     // Device
+    private BluetoothDevice btDevice;
     private BluetoothGatt gatt;
     private String deviceName;
-    private String deviceAddress;
-    private BluetoothDevice btDevice;
 
-    private final BleTerminalIOStreamWriter writer;
+    private BleTerminalIOStreamWriter writer;
 
     // Credits
     private Semaphore clientCredits = new Semaphore(0);
@@ -65,6 +63,10 @@ public class BleTerminalIODevice implements BleStateMachineDevice, Scanner, Clos
 
     // Relations with providers
     /**
+     * The scanner driver.
+     */
+    private BtSppScannerProvider scannerProvider;
+    /**
      * All the callbacks which are registered to run on received data (post-parsing). Key is data class name.
      */
     private final Map<String, DataSubscription> dataSubscriptions = new HashMap<>();
@@ -74,36 +76,70 @@ public class BleTerminalIODevice implements BleStateMachineDevice, Scanner, Clos
      */
     private ScannerDataParser inputHandler;
 
-    private com.enioka.scanner.api.Scanner providerScanner;
-
-
+    // Misc.
     private Timer timeoutHunter;
 
-    BleTerminalIODevice(BluetoothGatt gatt) {
-        this.gatt = gatt;
-        this.btDevice = gatt.getDevice();
-        this.deviceName = this.btDevice.getName();
-        this.deviceAddress = this.btDevice.getAddress();
-        this.writer = new BleTerminalIOStreamWriter(this, gatt);
+    /**
+     * Create a new TIO device from the given BT device. This does not attempt to connect to anything - this is done in the connect method.
+     *
+     * @param ctx      a valid context (application, service, activity...)
+     * @param btDevice the BT device to encapsulate.
+     */
+    BleTerminalIODevice(Context ctx, BluetoothDevice btDevice) {
+        this.ctx = ctx;
+        this.btDevice = btDevice;
+        this.deviceName = btDevice.getName();
+    }
 
-        this.setUpTimeoutTimer();
+    public void connect(final ConnectToBtDeviceThread.OnConnectedCallback callback) {
+        if (btDevice.getType() != BluetoothDevice.DEVICE_TYPE_LE && btDevice.getType() != BluetoothDevice.DEVICE_TYPE_DUAL) {
+            Log.i(LOG_TAG, "Trying to connect to GATT with a non-BLE device " + this.deviceName);
+            callback.failed();
+            return;
+        }
 
-        // TODO: TEMP CODE
-        this.inputHandler = new HoneywellOssParser();
-        HoneywellOssSppScannerProvider scannerProvider = new HoneywellOssSppScannerProvider();
-        scannerProvider.canManageDevice(this, new BtSppScannerProvider.ManagementCallback() {
+        Log.i(LOG_TAG, "Starting connection to device " + this.deviceName);
+
+        gattCallback = new BleStateMachineGattCallback(this, new BleStateMachineGattCallback.OnConnectedCallback() {
             @Override
-            public void canManage(com.enioka.scanner.api.Scanner libraryScanner) {
-                BleTerminalIODevice.this.providerScanner = libraryScanner;
-                //((ScannerBackground)libraryScanner).initialize();
-                runCommand(new GetFirmware(), null);
+            public void onConnected(BluetoothGatt gatt) {
+                Log.i(LOG_TAG, "Device " + BleTerminalIODevice.this.deviceName + " reports it is connected to its GATT server");
+
+                if (gatt.getService(GattAttribute.TERMINAL_IO_SERVICE.id) == null) {
+                    if (callback != null) {
+                        callback.failed();
+                    }
+
+                    Log.i(LOG_TAG, "Trying to connect to TIO on a BLE device which does not have the TIO service " + BleTerminalIODevice.this.deviceName);
+                    return;
+                }
+
+                // init the wrapper.
+                BleTerminalIODevice.this.writer = new BleTerminalIOStreamWriter(BleTerminalIODevice.this, gatt);
+                BleTerminalIODevice.this.gatt = gatt;
+
+                BleTerminalIODevice.this.setUpTimeoutTimer();
+
+                // warn caller - we are connected OK to the GATT server.
+                if (callback != null) {
+                    callback.connected(BleTerminalIODevice.this);
+                }
             }
 
             @Override
-            public void cannotManage() {
-
+            public void onConnectionFailure() {
+                if (callback != null) {
+                    callback.failed();
+                }
             }
         });
+        btDevice.connectGatt(ctx, true, gattCallback);
+    }
+
+    @Override
+    public void setProvider(BtSppScannerProvider provider) {
+        this.scannerProvider = provider;
+        this.inputHandler = this.scannerProvider.getInputHandler();
     }
 
     static boolean isCompatibleWith(BluetoothGatt gatt) {
@@ -126,6 +162,8 @@ public class BleTerminalIODevice implements BleStateMachineDevice, Scanner, Clos
         // Advance state according to event.
         if (event.nature.equals(BleEventNature.RESET)) {
             currentState = TioState.INITIAL;
+            clientCredits.drainPermits();
+            serverCredits.drainPermits();
         }
         switch (currentState) {
             case INITIAL:
@@ -152,10 +190,10 @@ public class BleTerminalIODevice implements BleStateMachineDevice, Scanner, Clos
         // Trigger specific actions on each state in order to progress inside the TIO lifecycle.
         switch (currentState) {
             case INITIAL:
-                BleManager.subscribeToCharacteristic(gatt, service, GattAttribute.TERMINAL_IO_UART_CREDITS_TX, BleSubscriptionType.INDICATION);
+                BleHelpers.subscribeToCharacteristic(gatt, service, GattAttribute.TERMINAL_IO_UART_CREDITS_TX, BleSubscriptionType.INDICATION);
                 return;
             case SUBSCRIBED_TO_CREDIT:
-                BleManager.subscribeToCharacteristic(gatt, service, GattAttribute.TERMINAL_IO_UART_DATA_TX, BleSubscriptionType.NOTIFICATION);
+                BleHelpers.subscribeToCharacteristic(gatt, service, GattAttribute.TERMINAL_IO_UART_DATA_TX, BleSubscriptionType.NOTIFICATION);
                 return;
             case SUBSCRIBED_TO_DATA:
                 sendCreditsToServerIfNeeded(gatt);
@@ -267,6 +305,10 @@ public class BleTerminalIODevice implements BleStateMachineDevice, Scanner, Clos
      * Start a timer which checks if data subscribers are timed-out and deals with the consequences.
      */
     private void setUpTimeoutTimer() {
+        if (this.timeoutHunter != null) {
+            return;
+        }
+
         this.timeoutHunter = new Timer();
         this.timeoutHunter.schedule(new TimerTask() {
             @Override
@@ -320,6 +362,7 @@ public class BleTerminalIODevice implements BleStateMachineDevice, Scanner, Clos
         if (gatt != null) {
             this.gatt.disconnect();
             this.gatt = null;
+            this.gattCallback = null;
         }
     }
 

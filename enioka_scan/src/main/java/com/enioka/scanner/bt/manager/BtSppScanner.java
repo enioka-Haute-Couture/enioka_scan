@@ -7,12 +7,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.bt.api.ParsingResult;
-import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
-import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Command;
+import com.enioka.scanner.bt.api.DataSubscriptionCallback;
+import com.enioka.scanner.bt.api.ParsingResult;
+import com.enioka.scanner.bt.api.ScannerDataParser;
 import com.enioka.scanner.sdk.zebraoss.SsiParser;
 
 import java.io.Closeable;
@@ -27,10 +26,12 @@ import java.util.TimerTask;
 /**
  * Internal class used as the main interaction entry point for bluetooth devices.
  */
-class BtSppScanner implements Closeable, Scanner {
+class BtSppScanner implements Closeable, ScannerInternal {
     private static final String LOG_TAG = "BtSppSdk";
 
     private final com.enioka.scanner.bt.manager.BtSppScannerProvider parentProvider;
+    private BtSppScannerProvider scannerDriver;
+
     private final BluetoothDevice rawDevice;
     private ConnectToBtDeviceThread connectionThread;
     private Timer timeoutHunter;
@@ -63,7 +64,7 @@ class BtSppScanner implements Closeable, Scanner {
      *
      * @param device a device definition
      */
-    BtSppScanner(BluetoothDevice device, com.enioka.scanner.bt.manager.BtSppScannerProvider parentProvider) {
+    BtSppScanner(com.enioka.scanner.bt.manager.BtSppScannerProvider parentProvider, BluetoothDevice device) {
         this.rawDevice = device;
         this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
@@ -77,7 +78,7 @@ class BtSppScanner implements Closeable, Scanner {
      *
      * @param socket a socket to a bluetooth device.
      */
-    BtSppScanner(BluetoothSocket socket, com.enioka.scanner.bt.manager.BtSppScannerProvider parentProvider) {
+    BtSppScanner(com.enioka.scanner.bt.manager.BtSppScannerProvider parentProvider, BluetoothSocket socket) {
         this.rawDevice = socket.getRemoteDevice();
         this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
@@ -120,13 +121,14 @@ class BtSppScanner implements Closeable, Scanner {
         }, 0, 100);
     }
 
-    void setProvider(BtSppScannerProvider provider) {
-        this.inputHandler = provider.getInputHandler();
+    public void setProvider(BtSppScannerProvider provider) {
+        this.scannerDriver = provider;
+        this.inputHandler = scannerDriver.getInputHandler();
     }
 
-    void connect(final ConnectToBtDeviceThread.OnConnectedCallback callback) {
+    public void connect(final ConnectToBtDeviceThread.OnConnectedCallback callback) {
         Log.i(LOG_TAG, "Starting connection to device " + BtSppScanner.this.name);
-        connectionThread = new ConnectToBtDeviceThread(rawDevice, new ConnectToBtDeviceThread.OnConnectedCallback() {
+        connectionThread = new ConnectToBtDeviceThread(rawDevice, new ConnectToBtDeviceThread.OnStreamConnectedCallback() {
             @Override
             public void connected(BluetoothSocket bluetoothSocket) {
                 BtSppScanner.this.connectionThread = null;
@@ -135,7 +137,7 @@ class BtSppScanner implements Closeable, Scanner {
                 connectStreams();
 
                 if (callback != null) {
-                    callback.connected(bluetoothSocket);
+                    callback.connected(BtSppScanner.this);
                 }
             }
 
@@ -254,7 +256,7 @@ class BtSppScanner implements Closeable, Scanner {
             // Ignore.
         }
 
-        connectionThread = new ConnectToBtDeviceThread(rawDevice, new ConnectToBtDeviceThread.OnConnectedCallback() {
+        connectionThread = new ConnectToBtDeviceThread(rawDevice, new ConnectToBtDeviceThread.OnStreamConnectedCallback() {
             @Override
             public void connected(BluetoothSocket bluetoothSocket) {
                 BtSppScanner.this.connectionThread = null;

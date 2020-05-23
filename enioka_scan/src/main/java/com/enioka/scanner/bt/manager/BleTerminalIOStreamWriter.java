@@ -1,9 +1,11 @@
-package com.enioka.scanner.ble;
+package com.enioka.scanner.bt.manager;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.util.Log;
+
+import com.enioka.scanner.bt.api.Helpers;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -68,7 +70,7 @@ public class BleTerminalIOStreamWriter implements Closeable {
 
         @Override
         public void run() {
-            Log.d(LOG_TAG, "Trying to write data on characteristic " + tioDataRxCharacteristic.getUuid() + " - " + buffer);
+            Log.d(LOG_TAG, "Trying to write data on characteristic " + tioDataRxCharacteristic.getUuid() + " - " + Helpers.byteArrayToHex(buffer, buffer.length));
             if (waitForCommandLock) {
                 BleTerminalIOStreamWriter.this.startOfCommand();
             }
@@ -88,7 +90,7 @@ public class BleTerminalIOStreamWriter implements Closeable {
                     System.arraycopy(this.buffer, i, loopData, 0, Math.min(this.buffer.length, (i + 1) * 20));
                 }
 
-                Log.d(LOG_TAG, "Locks OK, writing data on characteristic " + tioDataRxCharacteristic.getUuid() + " - " + buffer);
+                Log.d(LOG_TAG, "Locks OK, writing data on characteristic " + tioDataRxCharacteristic.getUuid() + " - " + Helpers.byteArrayToHex(buffer, buffer.length));
                 BleTerminalIOStreamWriter.this.tioDataRxCharacteristic.setValue(loopData);
                 gatt.writeCharacteristic(BleTerminalIOStreamWriter.this.tioDataRxCharacteristic);
             }

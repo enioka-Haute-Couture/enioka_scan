@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 /**
- * A thread which attempts (once) to connect to a given BT SPP slave device.
+ * A thread which attempts (once) to connect to a given Classic BT SPP slave device.
  */
 class ConnectToBtDeviceThread extends Thread {
     private static final String LOG_TAG = "BtSppSdk";
@@ -18,15 +18,21 @@ class ConnectToBtDeviceThread extends Thread {
 
     private BluetoothSocket clientSocket;
     private final BluetoothDevice bluetoothDevice;
-    private final OnConnectedCallback onConnectedCallback;
+    private final OnStreamConnectedCallback onConnectedCallback;
 
     interface OnConnectedCallback {
+        void connected(ScannerInternal scanner);
+
+        void failed();
+    }
+
+    interface OnStreamConnectedCallback {
         void connected(BluetoothSocket bluetoothSocket);
 
         void failed();
     }
 
-    ConnectToBtDeviceThread(BluetoothDevice bluetoothDevice, OnConnectedCallback callback) {
+    ConnectToBtDeviceThread(BluetoothDevice bluetoothDevice, OnStreamConnectedCallback callback) {
         this.onConnectedCallback = callback;
         this.bluetoothDevice = bluetoothDevice;
     }

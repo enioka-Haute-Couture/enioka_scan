@@ -82,6 +82,10 @@ public class BleManager {
                 foundDevices.add(btDevice.getAddress());
                 Log.i(LOG_TAG, "A new BT device was returned. Start of analysis: is it a usable BLE device? " + btDevice.getName() + " - " + btDevice.getAddress());
 
+                if (!btDevice.getAddress().equals("C0:EE:40:41:83:AF")) {
+                    return;
+                }
+
                 btDevice.connectGatt(ctx, true, new BluetoothGattCallback() {
                     @Override
                     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -91,7 +95,7 @@ public class BleManager {
                                     Log.i(LOG_TAG, "BLE scanner disconnected successfully " + btDevice.getName() + " - " + btDevice.getAddress());
                                     break;
                                 case BluetoothGatt.STATE_CONNECTED:
-                                    Log.i(LOG_TAG, "BLE scanner connected successfully." + btDevice.getName() + " - " + btDevice.getAddress());
+                                    Log.i(LOG_TAG, "BLE scanner connected successfully. " + btDevice.getName() + " - " + btDevice.getAddress());
                                     if (gatt.getServices().isEmpty()) {
                                         Log.i(LOG_TAG, "Starting service discovery. " + btDevice.getName() + " - " + btDevice.getAddress());
                                         gatt.discoverServices();
@@ -106,7 +110,7 @@ public class BleManager {
                                     break;
                             }
                         } else {
-                            Log.e(LOG_TAG, "Error when communicating with GATT server. Status is " + status + ". New state is " + newState + " - " + gatt.getDevice().getName() + ".");
+                            Log.e(LOG_TAG, "Error when communicating with GATT server. Status is " + status + ". New state is " + newState + ". Device: " + gatt.getDevice().getName() + " - " + btDevice.getAddress());
                         }
                     }
 
@@ -116,7 +120,7 @@ public class BleManager {
                             Log.e(LOG_TAG, "Error when discovering services. Status is " + status + ". Device " + btDevice.getName() + " - " + btDevice.getAddress());
                             return;
                         }
-                        Log.i(LOG_TAG, "Services discovered for device");
+                        Log.i(LOG_TAG, "Services discovered for device " + gatt.getDevice().getName() + " - " + gatt.getDevice().getAddress());
                         logServices(gatt);
                         selectAndCreateScanner(gatt);
                     }
@@ -124,7 +128,7 @@ public class BleManager {
                     @Override
                     public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                         if (status == BluetoothGatt.GATT_SUCCESS) {
-                            Log.i(LOG_TAG, "\t\tRead characteristic " + characteristic.getUuid() + " known name " + GattAttribute.getAttributeName(characteristic.getUuid()) + " cached value " + new String(characteristic.getValue(), StandardCharsets.UTF_8));
+                            Log.i(LOG_TAG, "\t\tRead characteristic " + characteristic.getUuid() + " known name " + GattAttribute.getAttributeName(characteristic.getUuid()) + " cached value " + (characteristic.getValue() != null ? new String(characteristic.getValue(), StandardCharsets.UTF_8) : "null"));
                         }
                         signalEvent(new BleStateMachineDevice.BleEvent(characteristic, BleStateMachineDevice.BleEventNature.CHARACTERISTIC_READ_SUCCESS));
                     }
@@ -140,7 +144,7 @@ public class BleManager {
 
                     @Override
                     public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-                        Log.i(LOG_TAG, "\t\tChanged characteristic " + characteristic.getUuid() + " (" + GattAttribute.getAttributeName(characteristic.getUuid()) + ") cached value " + new String(characteristic.getValue(), StandardCharsets.UTF_8));
+                        Log.i(LOG_TAG, "\t\tChanged characteristic " + characteristic.getUuid() + " (" + GattAttribute.getAttributeName(characteristic.getUuid()) + ") cached value " + (characteristic.getValue() != null ? new String(characteristic.getValue(), StandardCharsets.UTF_8) : "null"));
                         signalEvent(new BleStateMachineDevice.BleEvent(characteristic, BleStateMachineDevice.BleEventNature.CHARACTERISTIC_CHANGED_SUCCESS));
                     }
 
@@ -164,6 +168,7 @@ public class BleManager {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                Log.i(LOG_TAG, "End of BLE search");
                 leScanner.stopScan(callback);
             }
         }, 10000);
@@ -217,9 +222,10 @@ public class BleManager {
             Log.i(LOG_TAG, "\tDevice has service id " + service.getUuid() + " (" + GattAttribute.getAttributeName(service.getUuid()) + ")");
 
             for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
-                Log.i(LOG_TAG, "\t\tCharacteristic " + characteristic.getUuid() + " (" + GattAttribute.getAttributeName(characteristic.getUuid()) + "). Cached value: " + new String(characteristic.getValue(), StandardCharsets.UTF_8));
+                Log.i(LOG_TAG, "\t\tCharacteristic " + characteristic.getUuid() + " (" + GattAttribute.getAttributeName(characteristic.getUuid()) + "). Cached value: " + (characteristic.getValue() != null ? new String(characteristic.getValue(), StandardCharsets.UTF_8) : "null"));
             }
         }
+        Log.d(LOG_TAG, "End of services for device " + gatt.getDevice().getName());
     }
 
     /**

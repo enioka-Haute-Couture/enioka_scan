@@ -12,14 +12,14 @@ import java.nio.charset.Charset;
 /**
  * A thread dedicated to listening data incoming from a socket.
  */
-class SocketStreamReader extends Thread implements Closeable {
+class ClassicBtSocketStreamReader extends Thread implements Closeable {
     private static final String LOG_TAG = "BtSppSdk";
 
-    private final BtSppScanner device;
+    private final ClassicBtSppScanner device;
     private final InputStream inputStream;
     private boolean closed = false;
 
-    SocketStreamReader(InputStream inputStream, BtSppScanner device) {
+    ClassicBtSocketStreamReader(InputStream inputStream, ClassicBtSppScanner device) {
         this.inputStream = inputStream;
         this.device = device;
     }

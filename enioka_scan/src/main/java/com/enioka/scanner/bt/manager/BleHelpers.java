@@ -73,7 +73,7 @@ public class BleHelpers {
                 Log.i(LOG_TAG, "A new BT device was returned. Start of analysis: is it a usable BLE device? " + btDevice.getName() + " - " + btDevice.getAddress());
 
                 BleTerminalIODevice device = new BleTerminalIODevice(ctx, btDevice);
-                device.connect(new ConnectToBtDeviceThread.OnConnectedCallback() {
+                device.connect(new ClassicBtConnectToDeviceThread.OnConnectedCallback() {
                     @Override
                     public void connected(ScannerInternal scanner) {
 

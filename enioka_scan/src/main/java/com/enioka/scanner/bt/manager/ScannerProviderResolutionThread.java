@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
- * Responsible for transforming {@link BtSppScanner} into {@link Scanner}. As this is a long and costly operation
+ * Responsible for transforming {@link ScannerInternal} into {@link Scanner}. As this is a long and costly operation
  * (as providers may need to wait for device answer timeout to their "are you a type XXX device" questions)
  * there is one thread per BT device.
  */
-class ScannerResolutionThread implements Runnable, BtSppScannerProvider.ManagementCallback {
+class ScannerProviderResolutionThread implements Runnable, BtSppScannerProvider.ManagementCallback {
     private static final String LOG_TAG = "BtSppSdk";
 
     private ScannerInternal device;
@@ -43,7 +43,7 @@ class ScannerResolutionThread implements Runnable, BtSppScannerProvider.Manageme
         void notCompatible(ScannerInternal device);
     }
 
-    ScannerResolutionThread(ScannerInternal device, List<BtSppScannerProvider> scannerProviders, ScannerResolutionCallback callback) {
+    ScannerProviderResolutionThread(ScannerInternal device, List<BtSppScannerProvider> scannerProviders, ScannerResolutionCallback callback) {
         this.device = device;
         this.scannerProviders = scannerProviders;
         this.callback = callback;

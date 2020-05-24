@@ -10,22 +10,22 @@ import java.io.IOException;
 /**
  * A SPP service listener thread on a bluetooth adapter. Used by master BT devices to connect to the phone. Closes after the first connection (OK or not). No timeout.
  */
-class AcceptBtConnectionThread extends Thread {
+class ClassicBtAcceptConnectionThread extends Thread {
     private static final String LOG_TAG = "BtSppSdk";
 
     private final BluetoothServerSocket serverSocket;
-    private final ConnectToBtDeviceThread.OnConnectedCallback onConnectedCallback;
-    private final BtSppScannerProvider parentProvider;
+    private final ClassicBtConnectToDeviceThread.OnConnectedCallback onConnectedCallback;
+    private final SerialBtScannerProvider parentProvider;
 
     private boolean done = false;
 
-    AcceptBtConnectionThread(BluetoothAdapter bluetoothAdapter, ConnectToBtDeviceThread.OnConnectedCallback callback, BtSppScannerProvider parentProvider) {
+    ClassicBtAcceptConnectionThread(BluetoothAdapter bluetoothAdapter, ClassicBtConnectToDeviceThread.OnConnectedCallback callback, SerialBtScannerProvider parentProvider) {
         this.onConnectedCallback = callback;
         this.parentProvider = parentProvider;
 
         BluetoothServerSocket serverSocket = null;
         try {
-            serverSocket = bluetoothAdapter.listenUsingRfcommWithServiceRecord("SPP", ConnectToBtDeviceThread.SERVER_BT_SERVICE_UUID);
+            serverSocket = bluetoothAdapter.listenUsingRfcommWithServiceRecord("SPP", ClassicBtConnectToDeviceThread.SERVER_BT_SERVICE_UUID);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Socket's create() method failed", e);
         }
@@ -49,7 +49,7 @@ class AcceptBtConnectionThread extends Thread {
 
             if (clientSocket != null) {
                 if (this.onConnectedCallback != null) {
-                    this.onConnectedCallback.connected(new BtSppScanner(parentProvider, clientSocket));
+                    this.onConnectedCallback.connected(new ClassicBtSppScanner(parentProvider, clientSocket));
                     Log.i(LOG_TAG, "Live socket opened for incoming SPP BT device.");
                 }
 

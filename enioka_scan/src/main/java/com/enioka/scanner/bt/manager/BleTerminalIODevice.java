@@ -91,7 +91,7 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
         this.deviceName = btDevice.getName();
     }
 
-    public void connect(final ConnectToBtDeviceThread.OnConnectedCallback callback) {
+    public void connect(final ClassicBtConnectToDeviceThread.OnConnectedCallback callback) {
         if (btDevice.getType() != BluetoothDevice.DEVICE_TYPE_LE && btDevice.getType() != BluetoothDevice.DEVICE_TYPE_DUAL) {
             Log.i(LOG_TAG, "Trying to connect to GATT with a non-BLE device " + this.deviceName);
             callback.failed();

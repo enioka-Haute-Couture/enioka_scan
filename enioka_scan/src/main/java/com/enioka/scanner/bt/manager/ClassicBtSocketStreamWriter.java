@@ -13,23 +13,23 @@ import java.util.concurrent.TimeUnit;
 /**
  * As some write operations can be blocking, we use a dedicated thread. There is a single write thread running at a given time.
  */
-class SocketStreamWriter implements Closeable {
+class ClassicBtSocketStreamWriter implements Closeable {
     private static final String LOG_TAG = "BtSppSdk";
 
-    private final BtSppScanner device;
+    private final ClassicBtSppScanner device;
     private final OutputStream outputStream;
     private final ExecutorService pool;
 
     private Semaphore commandAllowed = new Semaphore(1);
 
-    SocketStreamWriter(OutputStream outputStream, BtSppScanner device) {
+    ClassicBtSocketStreamWriter(OutputStream outputStream, ClassicBtSppScanner device) {
         this.outputStream = outputStream;
         this.device = device;
         this.pool = Executors.newFixedThreadPool(1);
     }
 
     synchronized void write(byte[] buffer, int offset, int length, boolean ackType) {
-        pool.submit(new SocketStreamWriterTask(this.outputStream, buffer, offset, length, this, ackType));
+        pool.submit(new ClassicBtSocketStreamWriterTask(this.outputStream, buffer, offset, length, this, ackType));
     }
 
     void write(byte[] buffer, int offset, int length) {

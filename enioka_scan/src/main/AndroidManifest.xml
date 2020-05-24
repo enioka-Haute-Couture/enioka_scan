@@ -99,7 +99,7 @@
         </service>
 
         <service
-            android:name=".bt.manager.BtSppScannerProvider"
+            android:name=".bt.manager.SerialBtScannerProvider"
             android:description="@string/service_description"
             android:exported="false">
 

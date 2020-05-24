@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 /**
  * Actual socket writing. Used in executor.
  */
-class SocketStreamWriterTask implements Runnable {
+class ClassicBtSocketStreamWriterTask implements Runnable {
     private static final String LOG_TAG = "BtSppSdk";
 
     private final OutputStream outputStream;
@@ -19,9 +19,9 @@ class SocketStreamWriterTask implements Runnable {
     private final int offset;
     private final int length;
     private final boolean ackType;
-    private final SocketStreamWriter parent;
+    private final ClassicBtSocketStreamWriter parent;
 
-    SocketStreamWriterTask(OutputStream outputStream, byte[] buffer, int offset, int length, SocketStreamWriter writer, boolean ackType) {
+    ClassicBtSocketStreamWriterTask(OutputStream outputStream, byte[] buffer, int offset, int length, ClassicBtSocketStreamWriter writer, boolean ackType) {
         this.outputStream = outputStream;
         this.buffer = buffer;
         this.length = length;

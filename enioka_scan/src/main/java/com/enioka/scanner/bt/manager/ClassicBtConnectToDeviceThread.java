@@ -10,7 +10,7 @@ import java.util.UUID;
 /**
  * A thread which attempts (once) to connect to a given Classic BT SPP slave device.
  */
-class ConnectToBtDeviceThread extends Thread {
+class ClassicBtConnectToDeviceThread extends Thread {
     private static final String LOG_TAG = "BtSppSdk";
 
     // This is the SPP service UUID. From http://sviluppomobile.blogspot.com/2012/11/bluetooth-services-uuids.html
@@ -32,7 +32,7 @@ class ConnectToBtDeviceThread extends Thread {
         void failed();
     }
 
-    ConnectToBtDeviceThread(BluetoothDevice bluetoothDevice, OnStreamConnectedCallback callback) {
+    ClassicBtConnectToDeviceThread(BluetoothDevice bluetoothDevice, OnStreamConnectedCallback callback) {
         this.onConnectedCallback = callback;
         this.bluetoothDevice = bluetoothDevice;
     }

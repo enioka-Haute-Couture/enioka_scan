@@ -11,15 +11,12 @@ import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.honeywelloss.commands.ActivateTrigger;
 import com.enioka.scanner.sdk.honeywelloss.commands.Beep;
-import com.enioka.scanner.sdk.honeywelloss.commands.Cleanup;
 import com.enioka.scanner.sdk.honeywelloss.commands.DeactivateTrigger;
 import com.enioka.scanner.sdk.honeywelloss.commands.DisableAimer;
 import com.enioka.scanner.sdk.honeywelloss.commands.DisableIllumination;
 import com.enioka.scanner.sdk.honeywelloss.commands.DisplayScreenColor;
 import com.enioka.scanner.sdk.honeywelloss.commands.EnableAimer;
 import com.enioka.scanner.sdk.honeywelloss.commands.EnableIllumination;
-import com.enioka.scanner.sdk.honeywelloss.commands.GetFirmware;
-import com.enioka.scanner.sdk.honeywelloss.data.FirmwareVersion;
 
 import java.util.ArrayList;
 import java.util.List;

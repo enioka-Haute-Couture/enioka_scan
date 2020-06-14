@@ -16,6 +16,6 @@ public class DeactivateTrigger implements Command<Void> {
 
     @Override
     public int getTimeOut() {
-        return 0;
+        return 1000;
     }
 }

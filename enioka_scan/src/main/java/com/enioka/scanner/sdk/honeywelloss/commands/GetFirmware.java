@@ -17,6 +17,6 @@ public class GetFirmware implements Command<FirmwareVersion> {
 
     @Override
     public int getTimeOut() {
-        return 1000;
+        return 500;
     }
 }

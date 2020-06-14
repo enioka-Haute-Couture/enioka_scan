@@ -7,8 +7,11 @@ import android.support.annotation.Nullable;
 
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.bt.api.BtSppScannerProviderServiceBinder;
+import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.bt.api.ScannerDataParser;
+import com.enioka.scanner.sdk.honeywelloss.commands.GetFirmware;
+import com.enioka.scanner.sdk.honeywelloss.data.FirmwareVersion;
 import com.enioka.scanner.sdk.honeywelloss.parsers.HoneywellOssParser;
 
 public class HoneywellOssSppScannerProvider extends Service implements BtSppScannerProvider {
@@ -24,23 +27,22 @@ public class HoneywellOssSppScannerProvider extends Service implements BtSppScan
 
     @Override
     public void canManageDevice(final Scanner device, final ManagementCallback callback) {
-        callback.canManage(new HoneywellOssScanner(device));
-        /*device.runCommand(new CapabilitiesRequest(), new DataSubscriptionCallback<CapabilitiesReply>() {
+        device.runCommand(new GetFirmware(), new DataSubscriptionCallback<FirmwareVersion>() {
             @Override
-            public void onSuccess(CapabilitiesReply data) {
+            public void onSuccess(FirmwareVersion data) {
                 callback.canManage(new HoneywellOssScanner(device));
-            }
-
-            @Override
-            public void onTimeout() {
-                callback.cannotManage();
             }
 
             @Override
             public void onFailure() {
                 callback.cannotManage();
             }
-        });*/
+
+            @Override
+            public void onTimeout() {
+                callback.cannotManage();
+            }
+        });
     }
 
     @Override

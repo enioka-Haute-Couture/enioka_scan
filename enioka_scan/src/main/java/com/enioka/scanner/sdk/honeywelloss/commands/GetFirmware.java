@@ -7,7 +7,7 @@ public class GetFirmware implements Command<FirmwareVersion> {
     @Override
     public byte[] getCommand() {
         // SYN M CR "REV" "INF" "^" "!"
-        return new byte[] {22, 77, 13, 82, 69, 86, 73, 78, 70, 94, 33};
+        return new byte[]{22, 77, 13, 82, 69, 86, 73, 78, 70, 94, 33};
     }
 
     @Override
@@ -17,6 +17,6 @@ public class GetFirmware implements Command<FirmwareVersion> {
 
     @Override
     public int getTimeOut() {
-        return 0;
+        return 1000;
     }
 }

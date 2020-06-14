@@ -38,12 +38,15 @@ public class MenuParser implements ScannerDataParser {
                     res.expectingMoreData = false;
                 case 59: // SEMI COLUMN ; - end of answer, list
                 case 44: // COMMA , - end of answer, list
-                    res.data = new FirmwareVersion();
-                    Log.d(LOG_TAG, current);
+                    // TODO: a directory of commands, as for the zebra provider.
+                    if (current.contains("REVINF")) {
+                        res.data = new FirmwareVersion();
+                    }
+                    Log.d(LOG_TAG, "Data received from scanner, ACK: " + current);
                     current = "";
                     break;
                 default:
-                    current += buffer[i];
+                    current += Character.toString((char)buffer[i]);
                     break;
             }
         }

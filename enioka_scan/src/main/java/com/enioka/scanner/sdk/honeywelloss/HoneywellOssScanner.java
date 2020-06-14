@@ -9,12 +9,17 @@ import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.sdk.honeywelloss.commands.ActivateTrigger;
+import com.enioka.scanner.sdk.honeywelloss.commands.Beep;
+import com.enioka.scanner.sdk.honeywelloss.commands.Cleanup;
+import com.enioka.scanner.sdk.honeywelloss.commands.DeactivateTrigger;
+import com.enioka.scanner.sdk.honeywelloss.commands.DisableAimer;
+import com.enioka.scanner.sdk.honeywelloss.commands.DisableIllumination;
+import com.enioka.scanner.sdk.honeywelloss.commands.DisplayScreenColor;
+import com.enioka.scanner.sdk.honeywelloss.commands.EnableAimer;
+import com.enioka.scanner.sdk.honeywelloss.commands.EnableIllumination;
 import com.enioka.scanner.sdk.honeywelloss.commands.GetFirmware;
-import com.enioka.scanner.sdk.zebraoss.commands.Beep;
-import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
-import com.enioka.scanner.sdk.zebraoss.commands.LedOn;
-import com.enioka.scanner.sdk.zebraoss.commands.ScanDisable;
-import com.enioka.scanner.sdk.zebraoss.commands.ScanEnable;
+import com.enioka.scanner.sdk.honeywelloss.data.FirmwareVersion;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,12 +49,18 @@ class HoneywellOssScanner implements ScannerBackground {
 
     @Override
     public void pause() {
-        this.btScanner.runCommand(new ScanDisable(), null);
+        this.btScanner.runCommand(new DeactivateTrigger(), null);
+        this.btScanner.runCommand(new DisableAimer(), null);
+        this.btScanner.runCommand(new DisableIllumination(), null);
+        this.btScanner.runCommand(new DisplayScreenColor(Color.RED), null);
     }
 
     @Override
     public void resume() {
-        this.btScanner.runCommand(new ScanEnable(), null);
+        this.btScanner.runCommand(new ActivateTrigger(), null);
+        this.btScanner.runCommand(new EnableAimer(), null);
+        this.btScanner.runCommand(new EnableIllumination(), null);
+        this.btScanner.runCommand(new DisplayScreenColor(null), null);
     }
 
 
@@ -59,17 +70,17 @@ class HoneywellOssScanner implements ScannerBackground {
 
     @Override
     public void beepScanSuccessful() {
-        this.btScanner.runCommand(new Beep((byte) 0x01), null);
+        this.btScanner.runCommand(new Beep(), null);
     }
 
     @Override
     public void beepScanFailure() {
-        this.btScanner.runCommand(new Beep((byte) 0x12), null);
+        this.btScanner.runCommand(new Beep(), null);
     }
 
     @Override
     public void beepPairingCompleted() {
-        this.btScanner.runCommand(new Beep((byte) 0x14), null);
+        this.btScanner.runCommand(new Beep(), null);
     }
 
 
@@ -109,12 +120,20 @@ class HoneywellOssScanner implements ScannerBackground {
 
     @Override
     public void ledColorOn(Color color) {
-        this.btScanner.runCommand(new LedOn(color), null);
+        this.btScanner.runCommand(new DisplayScreenColor(color), null);
+
+        // This is needed otherwise the color is reused for every default action afterwards!
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                btScanner.runCommand(new DisplayScreenColor(null), null);
+            }
+        }, 5000);
     }
 
     @Override
     public void ledColorOff(Color color) {
-        this.btScanner.runCommand(new LedOff(), null);
+        this.btScanner.runCommand(new DisplayScreenColor(null), null);
     }
 
 
@@ -128,7 +147,7 @@ class HoneywellOssScanner implements ScannerBackground {
     }
 
     @Override
-    public void initialize(final Context applicationContext, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
         this.dataCallback = dataCallback;
 
         final Handler uiHandler = new Handler(applicationContext.getMainLooper());
@@ -177,12 +196,7 @@ class HoneywellOssScanner implements ScannerBackground {
             }
         }, Barcode.class);
 
-        //this.btScanner.runCommand(new InitCommand(), null);
-        //this.btScanner.runCommand(new ScanEnable(), null);
-        //this.btScanner.runCommand(new StartSession(), null);
-        //this.btScanner.runCommand(new RequestParam(), null);
-
-        this.btScanner.runCommand(new GetFirmware(), null);
+        //this.btScanner.runCommand(new Cleanup(), null);
 
         // We are already connected if the scanner could be created...
         initCallback.onConnectionSuccessful(this);

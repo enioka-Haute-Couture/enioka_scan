@@ -1,13 +1,13 @@
 package com.enioka.scanner.sdk.honeywelloss.commands;
 
 import com.enioka.scanner.bt.api.Command;
-import com.enioka.scanner.sdk.honeywelloss.data.FirmwareVersion;
 
-public class Cleanup implements Command<Void> {
+public class DisableAimer implements Command<Void> {
     @Override
     public byte[] getCommand() {
-        // "!"
-        return new byte[]{33};
+        // SCNAIM0 / 2
+        // SYN M CR ... 0 !
+        return new byte[]{22, 77, 13, 83, 67, 78, 65, 73, 77, 48, 33};
     }
 
     @Override

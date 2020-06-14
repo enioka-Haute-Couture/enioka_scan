@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
-public class BleHelpers {
+class BleHelpers {
     private static final String LOG_TAG = "BtSppSdk";
 
     // Common connection status codes. https://android.googlesource.com/platform/external/bluetooth/bluedroid/+/refs/heads/master/stack/include/gatt_api.h
@@ -158,9 +158,6 @@ public class BleHelpers {
             return false;
         }
         final BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
-        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
-            return false;
-        }
-        return true;
+        return bluetoothAdapter != null && bluetoothAdapter.isEnabled();
     }
 }

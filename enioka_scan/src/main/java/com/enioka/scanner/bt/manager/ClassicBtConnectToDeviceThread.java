@@ -52,7 +52,7 @@ class ClassicBtConnectToDeviceThread extends Thread {
             clientSocket.connect();
         } catch (IOException connectException) {
             // Unable to connect; close the socket and return.
-            Log.e(LOG_TAG, "Could not connect to device. " + connectException.getMessage());
+            Log.e(LOG_TAG, "Could not connect to device. " + bluetoothDevice.getName() + " - " + connectException.getMessage());
             try {
                 clientSocket.close();
             } catch (IOException closeException) {

@@ -78,6 +78,7 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
 
     // Misc.
     private Timer timeoutHunter;
+    ClassicBtConnectToDeviceThread.OnConnectedCallback callback;
 
     /**
      * Create a new TIO device from the given BT device. This does not attempt to connect to anything - this is done in the connect method.
@@ -92,6 +93,8 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
     }
 
     public void connect(final ClassicBtConnectToDeviceThread.OnConnectedCallback callback) {
+        this.callback = callback;
+
         if (btDevice.getType() != BluetoothDevice.DEVICE_TYPE_LE && btDevice.getType() != BluetoothDevice.DEVICE_TYPE_DUAL) {
             Log.i(LOG_TAG, "Trying to connect to GATT with a non-BLE device " + this.deviceName);
             callback.failed();
@@ -120,10 +123,10 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
 
                 BleTerminalIODevice.this.setUpTimeoutTimer();
 
-                // warn caller - we are connected OK to the GATT server.
-                if (callback != null) {
-                    callback.connected(BleTerminalIODevice.this);
-                }
+                // Start the state machine.
+                BleTerminalIODevice.this.onEvent(BleStateMachineDevice.BleEvent.RESET_EVENT);
+
+                // the callback will be called by onEvent consequences.
             }
 
             @Override
@@ -180,6 +183,7 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
                 if (event.nature == BleEventNature.CHARACTERISTIC_WRITE_SUCCESS && event.targetAttribute == GattAttribute.TERMINAL_IO_UART_CREDITS_RX) {
                     currentState = TioState.READY;
                 }
+
                 break;
             case READY:
                 // Nothing to do.
@@ -274,6 +278,12 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
     private void handleCredit(BleEvent event) {
         Log.i(LOG_TAG, "Received client credits " + event.data[0]);
         clientCredits.release(event.data[0]);
+
+        // warn the SPP SDK - we are connected OK to the GATT server and ready to accept commands.
+        if (callback != null) {
+            callback.connected(this);
+            callback = null; // do not do this twice.
+        }
     }
 
     private void sendCreditsToServerIfNeeded(BluetoothGatt gatt) {

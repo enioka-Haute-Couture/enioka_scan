@@ -153,6 +153,9 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
     @Override
     public void onEvent(BleEvent event) {
         // State 0 is: has just been retrieved from BT stack.
+        if (gatt == null) {
+            return;
+        }
 
         // State 0
         BluetoothGattService service = gatt.getService(GattAttribute.TERMINAL_IO_SERVICE.id);

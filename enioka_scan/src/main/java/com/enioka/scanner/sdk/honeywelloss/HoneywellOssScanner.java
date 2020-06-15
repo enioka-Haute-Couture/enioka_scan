@@ -16,6 +16,7 @@ import com.enioka.scanner.sdk.honeywelloss.commands.DisableAimer;
 import com.enioka.scanner.sdk.honeywelloss.commands.DisableIllumination;
 import com.enioka.scanner.sdk.honeywelloss.commands.DisplayScreenColor;
 import com.enioka.scanner.sdk.honeywelloss.commands.EnableAimer;
+import com.enioka.scanner.sdk.honeywelloss.commands.EnableBarcodeMetadata;
 import com.enioka.scanner.sdk.honeywelloss.commands.EnableIllumination;
 
 import java.util.ArrayList;
@@ -179,7 +180,6 @@ class HoneywellOssScanner implements ScannerBackground {
                         HoneywellOssScanner.this.dataCallback.onData(HoneywellOssScanner.this, res);
                     }
                 });
-
             }
 
             @Override
@@ -194,6 +194,9 @@ class HoneywellOssScanner implements ScannerBackground {
         }, Barcode.class);
 
         //this.btScanner.runCommand(new Cleanup(), null);
+
+        resume();
+        this.btScanner.runCommand(new EnableBarcodeMetadata(), null);
 
         // We are already connected if the scanner could be created...
         initCallback.onConnectionSuccessful(this);

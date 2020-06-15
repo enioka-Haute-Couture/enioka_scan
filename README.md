@@ -158,7 +158,10 @@ It is then possible to use the `ScannerServiceApi` object to access the differen
 
 Note that foreground scanners are not available using this method.
 
-Please remember to unbind the service when it is not needed anymore, as for any other service. This will often be in "onDestroy" hooks. Also, as this is a bound service, it is destroyed whenever it has no bound clients left. Many applications actually bind the service on startup to be sure it is never destroyed and therefore is very quick to bind from anywhere, but this depends on the use-case and is not compulsory at all.
+Please remember to unbind the service when it is not needed anymore, as for any other service. This will often be in "onDestroy" hooks. Also, as this is a bound service, it is destroyed whenever it has no bound clients left. Many applications actually bind the service on startup onto the application context to be sure it is never destroyed and therefore is very quick to bind from anywhere, but this depends on the use-case and is not compulsory at all.
+
+Finally, there are a few Intent extra properties which can be set to control the behaviour of the service.
+These can be found as static strings inside the `ScannerServiceApi` interface.
 
 
 ## With an activity object

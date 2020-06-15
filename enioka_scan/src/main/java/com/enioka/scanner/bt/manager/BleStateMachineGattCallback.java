@@ -59,6 +59,9 @@ class BleStateMachineGattCallback extends BluetoothGattCallback {
                         }
                     }
                     break;
+                default:
+                    Log.i(LOG_TAG, "Weird new connection state: " + newState);
+                    break;
             }
         } else {
             Log.e(LOG_TAG, "Error when communicating with GATT server. Status is " + status + ". New state is " + newState + ". Device: " + gatt.getDevice().getName() + " - " + gatt.getDevice().getAddress());

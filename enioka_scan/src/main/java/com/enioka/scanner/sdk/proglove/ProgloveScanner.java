@@ -13,6 +13,8 @@ import com.enioka.scanner.helpers.intent.IntentScanner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Scanner provider for ProGlove MARK II BT gloves.<br>
@@ -22,6 +24,7 @@ public class ProgloveScanner extends IntentScanner<String> {
     private static final String LOG_TAG = "ProgloveScanner";
     private int connectionAttempts = 0;
     private ScannerSearchOptions options;
+    private Timer beepTimer;
 
     ProgloveScanner(ScannerSearchOptions options) {
         this.options = options;
@@ -160,10 +163,23 @@ public class ProgloveScanner extends IntentScanner<String> {
     @Override
     public void pause() {
         broadcastIntent("com.proglove.api.BLOCK_TRIGGER");
+        if (beepTimer == null) {
+            beepTimer = new Timer();
+            beepTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    broadcastIntent("com.proglove.api.PLAY_FEEDBACK", "com.proglove.api.extra.FEEDBACK_SEQUENCE_ID", 4);
+                }
+            }, 0, 2000);
+        }
     }
 
     @Override
     public void resume() {
+        if (beepTimer != null) {
+            beepTimer.cancel();
+            beepTimer = null;
+        }
         broadcastIntent("com.proglove.api.UNBLOCK_TRIGGER");
     }
 

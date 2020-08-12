@@ -201,6 +201,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected void broadcastIntent(Intent intent) {
+        Log.d("BtSppSdk", "Broadcasting new Intent with action " + intent.getAction());
         ctx.sendBroadcast(intent);
     }
 

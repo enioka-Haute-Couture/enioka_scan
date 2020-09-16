@@ -15,6 +15,7 @@ import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOn;
 import com.enioka.scanner.sdk.zebraoss.commands.ScanDisable;
 import com.enioka.scanner.sdk.zebraoss.commands.ScanEnable;
+import com.enioka.scanner.sdk.zebraoss.commands.SetPickListMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -181,6 +182,7 @@ class ZebraOssScanner implements ScannerBackground {
         //this.btScanner.runCommand(new ScanEnable(), null);
         //this.btScanner.runCommand(new StartSession(), null);
         //this.btScanner.runCommand(new RequestParam(), null);
+        this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
 
         // We are already connected if the scanner could be created...
         initCallback.onConnectionSuccessful(this);

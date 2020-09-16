@@ -1,12 +1,15 @@
 package com.enioka.scanner.helpers.intent;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
@@ -30,6 +33,8 @@ public abstract class IntentScannerProvider extends Service implements ScannerPr
     protected List<String> specificDevices = new ArrayList<>(0);
 
     protected String appPackageToTest = null;
+
+    protected String serviceToTest = null;
 
     protected void configureProvider() {
     }
@@ -83,6 +88,21 @@ public abstract class IntentScannerProvider extends Service implements ScannerPr
                     compatible = false;
                 }
             } catch (PackageManager.NameNotFoundException e) {
+                compatible = false;
+            }
+        }
+
+        if (serviceToTest != null) {
+            Intent i = new Intent();
+            i.setComponent(new ComponentName(serviceToTest.split("/")[0], serviceToTest.split("/")[1]));
+            try {
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                    ctx.startForegroundService(i);
+                } else {
+                    ctx.startService(i);
+                }
+            } catch (Exception e) {
+                Log.i("LaserScanner", "could not start service " + serviceToTest, e);
                 compatible = false;
             }
         }

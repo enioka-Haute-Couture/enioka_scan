@@ -23,6 +23,7 @@ import java.util.TimerTask;
 public class ProgloveScanner extends IntentScanner<String> {
     private static final String LOG_TAG = "ProgloveScanner";
     private int connectionAttempts = 0;
+    private boolean connected = false;
     private ScannerSearchOptions options;
     private Timer beepTimer;
 
@@ -116,6 +117,7 @@ public class ProgloveScanner extends IntentScanner<String> {
         switch (status) {
             case "RECONNECTING":
                 this.statusCb.onScannerReconnecting(this);
+                connected = false;
                 break;
             case "ERROR":
             case "CONNECTING":
@@ -124,12 +126,29 @@ public class ProgloveScanner extends IntentScanner<String> {
             case "CONNECTED":
                 this.statusCb.onStatusChanged(status);
                 broadcastIntent("com.proglove.api.GET_CONFIG");
+                connected = true;
                 break;
             case "SEARCHING":
+                // Just ignore this transient state. Just get status once in a while in order to know when scanner is connected.
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                broadcastIntent("com.proglove.api.GET_SCANNER_STATE");
+                break;
             case "DISCONNECTED":
                 if (options.allowPairingFlow && ++connectionAttempts <= 2) {
+                    try {
+                        Thread.sleep(1000); // Absolutely horrible, but PG service has a slow start.
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     broadcastIntent("com.proglove.api.CONNECT");
+                } else {
+                    Log.w(LOG_TAG, "Given up on connecting to PG scanner - too many tries");
                 }
+                connected = false;
                 break;
             default:
                 this.statusCb.onStatusChanged("Unknown status " + status);
@@ -162,6 +181,9 @@ public class ProgloveScanner extends IntentScanner<String> {
 
     @Override
     public void pause() {
+        if (!connected) {
+            return;
+        }
         broadcastIntent("com.proglove.api.BLOCK_TRIGGER");
         if (beepTimer == null) {
             beepTimer = new Timer();

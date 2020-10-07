@@ -1,5 +1,6 @@
 package com.enioka.scanner.sdk.proglove;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -45,6 +46,7 @@ public class ProgloveScanner extends IntentScanner<String> {
 
     @Override
     protected void configureAfterInit(Context ctx) {
+        broadcastIntent("de.proglove.core.sdk.SdkService");
         broadcastIntent("com.proglove.api.GET_SCANNER_STATE");
     }
 
@@ -138,13 +140,17 @@ public class ProgloveScanner extends IntentScanner<String> {
                 broadcastIntent("com.proglove.api.GET_SCANNER_STATE");
                 break;
             case "DISCONNECTED":
-                if (options.allowPairingFlow && ++connectionAttempts <= 2) {
+                if (options.allowPairingFlow && ++connectionAttempts <= 10) {
                     try {
                         Thread.sleep(1000); // Absolutely horrible, but PG service has a slow start.
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    broadcastIntent("com.proglove.api.CONNECT");
+                    //broadcastIntent("com.proglove.api.CONNECT");
+                    ComponentName cn = new ComponentName("de.proglove.connect", "de.proglove.coreui.activities.PairingActivity");
+                    Intent i = new Intent();
+                    i.setComponent(cn);
+                    startActivity(i);
                 } else {
                     Log.w(LOG_TAG, "Given up on connecting to PG scanner - too many tries");
                 }

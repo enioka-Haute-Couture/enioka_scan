@@ -265,4 +265,8 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         intent.setAction(action);
         return intent;
     }
+
+    protected void startActivity(Intent intent) {
+        ctx.startActivity(intent);
+    }
 }

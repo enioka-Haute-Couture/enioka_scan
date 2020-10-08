@@ -141,15 +141,10 @@ public class ProgloveScanner extends IntentScanner<String> {
                 break;
             case "DISCONNECTED":
                 if (options.allowPairingFlow && ++connectionAttempts <= 10) {
-                    try {
-                        Thread.sleep(1000); // Absolutely horrible, but PG service has a slow start.
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    //broadcastIntent("com.proglove.api.CONNECT");
                     ComponentName cn = new ComponentName("de.proglove.connect", "de.proglove.coreui.activities.PairingActivity");
                     Intent i = new Intent();
                     i.setComponent(cn);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
                 } else {
                     Log.w(LOG_TAG, "Given up on connecting to PG scanner - too many tries");

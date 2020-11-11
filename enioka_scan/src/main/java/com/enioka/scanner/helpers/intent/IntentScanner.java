@@ -210,6 +210,11 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         broadcastIntent(intent);
     }
 
+    protected void broadcastIntent(String action, String parameter1Key, boolean parameter1Value) {
+        Intent intent = newIntent(action, parameter1Key, parameter1Value);
+        broadcastIntent(intent);
+    }
+
     protected void broadcastIntent(String action, String parameter1Key, String parameter1Value) {
         Intent intent = newIntent(action, parameter1Key, parameter1Value);
         broadcastIntent(intent);
@@ -236,6 +241,13 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         for (Map.Entry<String, String> entry : extras.entrySet()) {
             intent.putExtra(entry.getKey(), entry.getValue());
         }
+        return intent;
+    }
+
+    protected Intent newIntent(String action, String parameter1Key, boolean parameter1Value) {
+        Intent intent = new Intent();
+        intent.setAction(action);
+        intent.putExtra(parameter1Key, parameter1Value);
         return intent;
     }
 

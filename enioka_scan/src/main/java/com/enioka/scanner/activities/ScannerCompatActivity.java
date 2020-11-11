@@ -143,14 +143,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         if (zbarViewId != null) {
             cameraViewId = zbarViewId;
         }
+
+        // init fields
+        serviceBound = false;
+        scannerService = null;
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        serviceBound = false;
-        scannerService = null;
+        Log.d(LOG_TAG, "Scanner activity is starting");
 
         if (canUseBluetooth()) {
             bindAndStartService();
@@ -190,11 +192,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     /**
      * Defines callbacks for service binding
      */
-    private ServiceConnection connection = new ServiceConnection() {
+    private final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             // We've bound to ScannerService, cast the IBinder and get the ScannerServiceApi instance
+            Log.d(LOG_TAG, "Service is connected to activity");
             ScannerService.LocalBinder binder = (ScannerService.LocalBinder) service;
             scannerService = binder.getService();
             serviceBound = true;
@@ -203,6 +206,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
+            Log.d(LOG_TAG, "Service is disconnected from activity");
             serviceBound = false;
             scannerService = null;
         }
@@ -240,6 +244,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         if (serviceBound) {
             scannerService.resume(); // does nothing if not init.
             scannerService.takeForegroundControl(this, this);
+        } else {
+            bindAndStartService();
         }
     }
 
@@ -253,6 +259,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
             cameraScanner.disconnect();
         }
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i(LOG_TAG, "Scanner activity is being stopped");
     }
 
     @Override
@@ -574,7 +586,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         }
     }
 
-    private void displayEnableScanButton() {
+    private void displayDisableScanButton() {
         if (findViewById(R.id.scanner_trigger_off) != null) {
             findViewById(R.id.scanner_trigger_off).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -585,7 +597,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         }
     }
 
-    private void displayDisableScanButton() {
+    private void displayEnableScanButton() {
         if (findViewById(R.id.scanner_trigger_on) != null) {
             findViewById(R.id.scanner_trigger_on).setOnClickListener(new View.OnClickListener() {
                 @Override

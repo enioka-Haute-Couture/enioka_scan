@@ -16,7 +16,7 @@ public class ProgloveProvider extends IntentScannerProvider {
     @Override
     protected void configureProvider() {
         appPackageToTest = "de.proglove.connect";
-        serviceToTest = "de.proglove.connect/de.proglove.core.services.ProGloveService";
+        //serviceToTest = "de.proglove.connect/de.proglove.core.services.ProGloveService";
     }
 
     @Override

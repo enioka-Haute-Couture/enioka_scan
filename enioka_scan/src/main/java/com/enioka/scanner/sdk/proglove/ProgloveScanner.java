@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.enioka.scanner.api.Color;
@@ -23,6 +24,9 @@ import java.util.TimerTask;
  */
 public class ProgloveScanner extends IntentScanner<String> {
     private static final String LOG_TAG = "ProgloveScanner";
+    private static final int MAX_CONNECTION_ATTEMPTS = 10;
+
+    private boolean firstServiceResponseReceived = false;
     private int connectionAttempts = 0;
     private boolean connected = false;
     private ScannerSearchOptions options;
@@ -46,8 +50,18 @@ public class ProgloveScanner extends IntentScanner<String> {
 
     @Override
     protected void configureAfterInit(Context ctx) {
-        broadcastIntent("de.proglove.core.sdk.SdkService");
         broadcastIntent("com.proglove.api.GET_SCANNER_STATE");
+
+        // Service may not be started. Fire an event after some time to check we have received an answer from it, and force start it if needed.
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!ProgloveScanner.this.firstServiceResponseReceived) {
+                    displayPgPairingActivity();
+                    broadcastIntent("com.proglove.api.GET_SCANNER_STATE");
+                }
+            }
+        }, 2000);
     }
 
 
@@ -114,12 +128,23 @@ public class ProgloveScanner extends IntentScanner<String> {
     }
 
     private void handleStatusIntent(Intent intent) {
+        firstServiceResponseReceived = true;
         String status = intent.getStringExtra("com.proglove.api.extra.SCANNER_STATE");
         Log.d(LOG_TAG, "Received status update from scanner " + status);
         switch (status) {
             case "RECONNECTING":
                 this.statusCb.onScannerReconnecting(this);
                 connected = false;
+                this.connectionAttempts++;
+
+                if (connectionAttempts > MAX_CONNECTION_ATTEMPTS) {
+                    this.connectionAttempts = 0;
+                    broadcastIntent("com.proglove.api.DISCONNECT");
+                }
+
+                // Request a new status - scanner may have reconnected.
+                requestScannerState(500);
+
                 break;
             case "ERROR":
             case "CONNECTING":
@@ -127,33 +152,45 @@ public class ProgloveScanner extends IntentScanner<String> {
                 break;
             case "CONNECTED":
                 this.statusCb.onStatusChanged(status);
-                broadcastIntent("com.proglove.api.GET_CONFIG");
-                connected = true;
+                this.connected = true;
+                this.connectionAttempts = 0;
                 break;
             case "SEARCHING":
                 // Just ignore this transient state. Just get status once in a while in order to know when scanner is connected.
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                broadcastIntent("com.proglove.api.GET_SCANNER_STATE");
+                requestScannerState(500);
                 break;
             case "DISCONNECTED":
-                if (options.allowPairingFlow && ++connectionAttempts <= 10) {
-                    ComponentName cn = new ComponentName("de.proglove.connect", "de.proglove.coreui.activities.PairingActivity");
-                    Intent i = new Intent();
-                    i.setComponent(cn);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
+                connected = false;
+
+                if (options.allowPairingFlow && ++connectionAttempts <= MAX_CONNECTION_ATTEMPTS) {
+                    // Simply start the PG activity - service may not be up, this will force its start.
+                    displayPgPairingActivity();
                 } else {
                     Log.w(LOG_TAG, "Given up on connecting to PG scanner - too many tries");
                 }
-                connected = false;
                 break;
             default:
                 this.statusCb.onStatusChanged("Unknown status " + status);
         }
+    }
+
+    private void requestScannerState(int msDelay) {
+        if (msDelay > 0) {
+            try {
+                Thread.sleep(msDelay);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        broadcastIntent("com.proglove.api.GET_SCANNER_STATE");
+    }
+
+    private void displayPgPairingActivity() {
+        ComponentName cn = new ComponentName("de.proglove.connect", "de.proglove.coreui.activities.PairingActivity");
+        Intent i = new Intent();
+        i.setComponent(cn);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
     }
 
 
@@ -185,7 +222,7 @@ public class ProgloveScanner extends IntentScanner<String> {
         if (!connected) {
             return;
         }
-        broadcastIntent("com.proglove.api.BLOCK_TRIGGER");
+        broadcastIntent("com.proglove.api.BLOCK_TRIGGER", "com.proglove.api.extra.REPLACE_QUEUE", true);
         if (beepTimer == null) {
             beepTimer = new Timer();
             beepTimer.scheduleAtFixedRate(new TimerTask() {
@@ -193,7 +230,7 @@ public class ProgloveScanner extends IntentScanner<String> {
                 public void run() {
                     broadcastIntent("com.proglove.api.PLAY_FEEDBACK", "com.proglove.api.extra.FEEDBACK_SEQUENCE_ID", 4);
                 }
-            }, 0, 2000);
+            }, 0, 3000);
         }
     }
 
@@ -203,7 +240,7 @@ public class ProgloveScanner extends IntentScanner<String> {
             beepTimer.cancel();
             beepTimer = null;
         }
-        broadcastIntent("com.proglove.api.UNBLOCK_TRIGGER");
+        broadcastIntent("com.proglove.api.UNBLOCK_TRIGGER", "com.proglove.api.extra.REPLACE_QUEUE", true);
     }
 
 

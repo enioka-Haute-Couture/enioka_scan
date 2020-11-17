@@ -71,6 +71,7 @@ public class ProgloveScanner extends IntentScanner<String> {
 
     @Override
     public void disconnect() {
+        stopSchedule();
         broadcastIntent("com.proglove.api.DISCONNECT");
         super.disconnect();
     }
@@ -236,6 +237,10 @@ public class ProgloveScanner extends IntentScanner<String> {
 
     @Override
     public void resume() {
+        stopSchedule();
+    }
+
+    private void stopSchedule() {
         if (beepTimer != null) {
             beepTimer.cancel();
             beepTimer = null;

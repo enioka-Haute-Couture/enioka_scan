@@ -19,6 +19,13 @@ import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.bt.api.BtSppScannerProviderServiceBinder;
+import com.enioka.scanner.bt.manager.bleserial.BleTerminalIODevice;
+import com.enioka.scanner.bt.manager.classicbtspp.ClassicBtAcceptConnectionThread;
+import com.enioka.scanner.bt.manager.classicbtspp.ClassicBtSppScanner;
+import com.enioka.scanner.bt.manager.common.OnConnectedCallback;
+import com.enioka.scanner.bt.manager.common.ScannerInternal;
+import com.enioka.scanner.bt.manager.common.SerialBtScannerPassiveConnectionManager;
+import com.enioka.scanner.bt.manager.data.BtConstHelpers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +36,7 @@ import java.util.concurrent.Semaphore;
  * Responsible for finding bluetooth devices and starting their initialization, converting them to {@link com.enioka.scanner.api.Scanner}.<br><br>
  * This is the entry point of the BT SPP/TIO SDK for the rest of the library.
  */
-public class SerialBtScannerProvider extends Service implements ScannerProvider {
+public class SerialBtScannerProvider extends Service implements ScannerProvider, SerialBtScannerPassiveConnectionManager {
     private static final String LOG_TAG = "BtSppSdk";
 
     private static List<com.enioka.scanner.bt.api.BtSppScannerProvider> scannerProviders = new ArrayList<>();
@@ -77,14 +84,14 @@ public class SerialBtScannerProvider extends Service implements ScannerProvider 
     /**
      * Allow new master BT SPP devices to connect to the Android device.
      */
-    void resetListener(BluetoothAdapter bluetoothAdapter) {
+    public void resetListener(BluetoothAdapter bluetoothAdapter) {
         if (server == null || server.isDone()) {
             server = new ClassicBtAcceptConnectionThread(bluetoothAdapter, new ConnectionCallback(this), this);
             server.start();
         }
     }
 
-    void stopMasterListener() {
+    public void stopMasterListener() {
         if (server != null && !server.isDone()) {
             server.cancel();
         }
@@ -178,7 +185,7 @@ public class SerialBtScannerProvider extends Service implements ScannerProvider 
                         continue;
                     }
                     for (ParcelUuid uuid : bt.getUuids()) {
-                        if (uuid.getUuid().equals(ClassicBtConnectToDeviceThread.SERVER_BT_SERVICE_UUID)) {
+                        if (uuid.getUuid().equals(BtConstHelpers.SERVER_BT_SERVICE_UUID)) {
                             found = true;
                             break;
                         }
@@ -234,7 +241,7 @@ public class SerialBtScannerProvider extends Service implements ScannerProvider 
     /**
      * What to do when a connection is successful (i.e. socket opened or GATT server connected): try to resolve the BT SPP provider associated to the device.
      */
-    private class ConnectionCallback implements ClassicBtConnectToDeviceThread.OnConnectedCallback {
+    private class ConnectionCallback implements OnConnectedCallback {
         private ScannerInternal btDevice;
         private final SerialBtScannerProvider parentProvider;
 

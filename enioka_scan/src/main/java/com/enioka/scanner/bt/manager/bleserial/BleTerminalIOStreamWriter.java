@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.bleserial;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGattService;
 import android.util.Log;
 
 import com.enioka.scanner.bt.api.Helpers;
+import com.enioka.scanner.bt.manager.data.GattAttribute;
 
 import java.io.Closeable;
 import java.io.IOException;

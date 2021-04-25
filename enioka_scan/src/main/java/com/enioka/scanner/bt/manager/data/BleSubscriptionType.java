@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.data;
 
 public enum BleSubscriptionType {
     NOTIFICATION,

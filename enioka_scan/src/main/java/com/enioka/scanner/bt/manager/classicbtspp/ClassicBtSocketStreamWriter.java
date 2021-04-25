@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.classicbtspp;
 
 import java.io.Closeable;
 import java.io.IOException;

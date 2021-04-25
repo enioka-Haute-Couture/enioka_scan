@@ -1,11 +1,12 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.classicbtspp;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.enioka.scanner.bt.manager.data.BtConstHelpers;
+
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * A thread which attempts (once) to connect to a given Classic BT SPP slave device.
@@ -13,24 +14,9 @@ import java.util.UUID;
 class ClassicBtConnectToDeviceThread extends Thread {
     private static final String LOG_TAG = "BtSppSdk";
 
-    // This is the SPP service UUID. From http://sviluppomobile.blogspot.com/2012/11/bluetooth-services-uuids.html
-    static final UUID SERVER_BT_SERVICE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
     private BluetoothSocket clientSocket;
     private final BluetoothDevice bluetoothDevice;
     private final OnStreamConnectedCallback onConnectedCallback;
-
-    interface OnConnectedCallback {
-        void connected(ScannerInternal scanner);
-
-        void failed();
-    }
-
-    interface OnStreamConnectedCallback {
-        void connected(BluetoothSocket bluetoothSocket);
-
-        void failed();
-    }
 
     ClassicBtConnectToDeviceThread(BluetoothDevice bluetoothDevice, OnStreamConnectedCallback callback) {
         this.onConnectedCallback = callback;
@@ -39,7 +25,7 @@ class ClassicBtConnectToDeviceThread extends Thread {
 
     public void run() {
         try {
-            this.clientSocket = bluetoothDevice.createRfcommSocketToServiceRecord(SERVER_BT_SERVICE_UUID);
+            this.clientSocket = bluetoothDevice.createRfcommSocketToServiceRecord(BtConstHelpers.SERVER_BT_SERVICE_UUID);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Socket's create() method failed", e);
             this.onConnectedCallback.failed();

@@ -1,10 +1,12 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.bleserial;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.util.Log;
+
+import com.enioka.scanner.bt.manager.data.GattAttribute;
 
 import java.nio.charset.StandardCharsets;
 

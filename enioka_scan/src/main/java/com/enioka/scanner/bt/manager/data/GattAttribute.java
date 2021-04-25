@@ -1,8 +1,7 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.data;
 
 import java.util.UUID;
 
-@SuppressWarnings("unused")
 public enum GattAttribute {
     /////////////////////////////////////////////
     // Standardized attributes
@@ -36,7 +35,18 @@ public enum GattAttribute {
     TERMINAL_IO_UART_DATA_RX("00000001-0000-1000-8000-008025000000", GattAttributeType.CHARACTERISTIC),
     TERMINAL_IO_UART_DATA_TX("00000002-0000-1000-8000-008025000000", GattAttributeType.CHARACTERISTIC),
     TERMINAL_IO_UART_CREDITS_RX("00000003-0000-1000-8000-008025000000", GattAttributeType.CHARACTERISTIC),
-    TERMINAL_IO_UART_CREDITS_TX("00000004-0000-1000-8000-008025000000", GattAttributeType.CHARACTERISTIC);
+    TERMINAL_IO_UART_CREDITS_TX("00000004-0000-1000-8000-008025000000", GattAttributeType.CHARACTERISTIC),
+
+    /////////////////////////////////////////////
+    // Zebra non-standard serial emulation
+
+    ZEBRA_SSI_SERVICE("a2f0037b-4e26-4981-8a2d-eda9e1689868", GattAttributeType.SERVICE),
+    ZEBRA_SSI_DATA_RX("4b0e1f59-c0f4-4eee-91ad-da9a1532ea00", GattAttributeType.CHARACTERISTIC),
+    ZEBRA_SSI_DATA_TX("91a765f5-ec8f-4882-a9eb-cc0e5b0915af", GattAttributeType.CHARACTERISTIC),
+    ZEBRA_SSI_CONTROL_RX("256a0615-c232-4eec-8187-9afb38226a5a", GattAttributeType.CHARACTERISTIC),
+    ZEBRA_SSI_CONTROL_TX("21f9e2b9-e59c-4e49-84e9-8cf2be479d0b", GattAttributeType.CHARACTERISTIC),
+    ZEBRA_SSI_CREDITS_RX("f3ae6f04-8407-44b6-85a3-59c6feb21924", GattAttributeType.CHARACTERISTIC),
+    ZEBRA_SSI_CREDITS_TX("89ae8d0b-8905-45a7-a4b2-d61b94cb20de", GattAttributeType.CHARACTERISTIC);
 
 
     public GattAttributeType type;

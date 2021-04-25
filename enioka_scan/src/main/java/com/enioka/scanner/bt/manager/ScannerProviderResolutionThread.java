@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
+import com.enioka.scanner.bt.manager.common.ScannerInternal;
 
 import java.util.List;
 import java.util.concurrent.Semaphore;

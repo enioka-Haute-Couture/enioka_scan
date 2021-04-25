@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.bleserial;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -13,6 +13,11 @@ import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Helpers;
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
+import com.enioka.scanner.bt.manager.common.DataSubscription;
+import com.enioka.scanner.bt.manager.common.OnConnectedCallback;
+import com.enioka.scanner.bt.manager.common.ScannerInternal;
+import com.enioka.scanner.bt.manager.data.BleSubscriptionType;
+import com.enioka.scanner.bt.manager.data.GattAttribute;
 
 import java.io.Closeable;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +29,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
-class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Closeable {
+/**
+ * TerminalIO is an attempt to encapsulate good old serial protocols inside BLE attributes, with two attributes for data and two for control (control being token-based).
+ * This class contains all the boilerplate code to "decapsulate" the serial protocol.
+ */
+public class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Closeable {
     private static final String LOG_TAG = "BtSppSdk";
 
     private Context ctx;
@@ -78,7 +87,7 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
 
     // Misc.
     private Timer timeoutHunter;
-    ClassicBtConnectToDeviceThread.OnConnectedCallback callback;
+    OnConnectedCallback callback;
 
     /**
      * Create a new TIO device from the given BT device. This does not attempt to connect to anything - this is done in the connect method.
@@ -86,13 +95,13 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
      * @param ctx      a valid context (application, service, activity...)
      * @param btDevice the BT device to encapsulate.
      */
-    BleTerminalIODevice(Context ctx, BluetoothDevice btDevice) {
+    public BleTerminalIODevice(Context ctx, BluetoothDevice btDevice) {
         this.ctx = ctx;
         this.btDevice = btDevice;
         this.deviceName = btDevice.getName();
     }
 
-    public void connect(final ClassicBtConnectToDeviceThread.OnConnectedCallback callback) {
+    public void connect(final OnConnectedCallback callback) {
         this.callback = callback;
 
         if (btDevice.getType() != BluetoothDevice.DEVICE_TYPE_LE && btDevice.getType() != BluetoothDevice.DEVICE_TYPE_DUAL) {
@@ -222,7 +231,7 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
 
         // Sanity checks
         if (!serverCredits.tryAcquire()) {
-            Log.w(LOG_TAG, "Weirdly the scanner has answered without having enough credits. May sbe a lib or a scanner bug");
+            Log.w(LOG_TAG, "Weirdly the scanner has answered without having enough credits. May be a lib or a scanner bug");
             return;
         }
 

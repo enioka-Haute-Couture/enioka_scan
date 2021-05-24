@@ -11,7 +11,9 @@ public interface BtSppScannerProvider {
      * @param device a connected device, ready to run commands.
      * @return true if compatible.
      */
-    void canManageDevice(Scanner device, ManagementCallback callback);
+    void canManageClassicDevice(Scanner device, ManagementCallback callback);
+
+    void canManageBleDevice(Scanner device, ManagementCallback callback);
 
     /**
      * The {@link ScannerDataParser} which should be used to parse results.

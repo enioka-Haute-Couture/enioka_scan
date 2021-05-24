@@ -30,7 +30,7 @@ public class PostechSppScannerProvider extends Service implements BtSppScannerPr
     }
 
     @Override
-    public void canManageDevice(final Scanner device, final ManagementCallback callback) {
+    public void canManageClassicDevice(final Scanner device, final ManagementCallback callback) {
         //discoverCodes(device);
         //device.runCommand(new CloseRead(), null);
         device.runCommand(new GetDeviceName(), new DataSubscriptionCallback<DeviceName>() {
@@ -50,6 +50,11 @@ public class PostechSppScannerProvider extends Service implements BtSppScannerPr
             }
         });
         //device.runCommand(new OpenRead(), null);
+    }
+
+    @Override
+    public void canManageBleDevice(Scanner device, ManagementCallback callback) {
+        callback.cannotManage();
     }
 
     @Override

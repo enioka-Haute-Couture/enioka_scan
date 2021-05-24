@@ -27,9 +27,14 @@ public class HoneywellOssSppScannerProvider extends Service implements BtSppScan
     }
 
     @Override
-    public void canManageDevice(final Scanner device, final ManagementCallback callback) {
+    public void canManageClassicDevice(final Scanner device, final ManagementCallback callback) {
         device.runCommand(new Cleanup(), null);
         testFirmwareCommand(device, callback);
+    }
+
+    @Override
+    public void canManageBleDevice(Scanner device, ManagementCallback callback) {
+        callback.cannotManage();
     }
 
     private void testFirmwareCommand(final Scanner device, final ManagementCallback callback) {

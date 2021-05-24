@@ -17,6 +17,7 @@ import com.enioka.scanner.bt.manager.common.DataSubscription;
 import com.enioka.scanner.bt.manager.common.OnConnectedCallback;
 import com.enioka.scanner.bt.manager.common.ScannerInternal;
 import com.enioka.scanner.bt.manager.common.SerialBtScannerPassiveConnectionManager;
+import com.enioka.scanner.bt.manager.data.BtConnectionType;
 import com.enioka.scanner.sdk.zebraoss.SsiParser;
 
 import java.io.Closeable;
@@ -29,7 +30,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Internal class used as the main interaction entry point for bluetooth devices.
+ * Internal class used as the main interaction entry point for bluetooth devices. It handles all connection/reconnection boilerplate and delegates level 7 stuff to a {@link ScannerDataParser}.
  */
 public class ClassicBtSppScanner implements Closeable, ScannerInternal {
     private static final String LOG_TAG = "BtSppSdk";
@@ -305,6 +306,11 @@ public class ClassicBtSppScanner implements Closeable, ScannerInternal {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public BtConnectionType getConnectionType() {
+        return BtConnectionType.CLASSIC_SLAVE;
     }
 
     @Override

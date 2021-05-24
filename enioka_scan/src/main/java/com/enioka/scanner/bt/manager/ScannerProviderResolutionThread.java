@@ -17,9 +17,9 @@ import java.util.concurrent.Semaphore;
 class ScannerProviderResolutionThread implements Runnable, BtSppScannerProvider.ManagementCallback {
     private static final String LOG_TAG = "BtSppSdk";
 
-    private ScannerInternal device;
-    private List<BtSppScannerProvider> scannerProviders;
-    private ScannerResolutionCallback callback;
+    private final ScannerInternal device;
+    private final List<BtSppScannerProvider> scannerProviders;
+    private final ScannerResolutionCallback callback;
     private final Semaphore providerLock = new Semaphore(0);
     private com.enioka.scanner.api.Scanner foundLibraryScanner;
 
@@ -44,6 +44,13 @@ class ScannerProviderResolutionThread implements Runnable, BtSppScannerProvider.
         void notCompatible(ScannerInternal device);
     }
 
+    /**
+     * Create a new resolver for a given BT device (Classic or BLE).
+     *
+     * @param device           a connected device, ready to run commands.
+     * @param scannerProviders the list of BT scanner providers against which to check the compatibility of device.
+     * @param callback         what to do when resolution is done or failed
+     */
     ScannerProviderResolutionThread(ScannerInternal device, List<BtSppScannerProvider> scannerProviders, ScannerResolutionCallback callback) {
         this.device = device;
         this.scannerProviders = scannerProviders;
@@ -55,7 +62,14 @@ class ScannerProviderResolutionThread implements Runnable, BtSppScannerProvider.
         for (BtSppScannerProvider provider : scannerProviders) {
             Log.d(LOG_TAG, "Testing compatibility of scanner " + device.getName() + " with provider " + provider.getClass().getSimpleName());
             device.setProvider(provider); // Analyse returned data with the current provider.
-            provider.canManageDevice(device, this);
+
+            switch (device.getConnectionType()) {
+                case BLE:
+                    provider.canManageBleDevice(device, this);
+                case CLASSIC_SLAVE:
+                default:
+                    provider.canManageClassicDevice(device, this);
+            }
 
             // We now wait. Because only one provider is allowed to do its analysis at a time - there is only one socket available to the scanner!
             try {

@@ -17,6 +17,7 @@ import com.enioka.scanner.bt.manager.common.DataSubscription;
 import com.enioka.scanner.bt.manager.common.OnConnectedCallback;
 import com.enioka.scanner.bt.manager.common.ScannerInternal;
 import com.enioka.scanner.bt.manager.data.BleSubscriptionType;
+import com.enioka.scanner.bt.manager.data.BtConnectionType;
 import com.enioka.scanner.bt.manager.data.GattAttribute;
 
 import java.io.Closeable;
@@ -99,20 +100,8 @@ public class BleTerminalIODevice implements BleStateMachineDevice, ScannerIntern
         this.ctx = ctx;
         this.btDevice = btDevice;
         this.deviceName = btDevice.getName();
-    }
 
-    public void connect(final OnConnectedCallback callback) {
-        this.callback = callback;
-
-        if (btDevice.getType() != BluetoothDevice.DEVICE_TYPE_LE && btDevice.getType() != BluetoothDevice.DEVICE_TYPE_DUAL) {
-            Log.i(LOG_TAG, "Trying to connect to GATT with a non-BLE device " + this.deviceName);
-            callback.failed();
-            return;
-        }
-
-        Log.i(LOG_TAG, "Starting connection to device " + this.deviceName);
-
-        gattCallback = new BleStateMachineGattCallback(this, new BleStateMachineGattCallback.OnConnectedCallback() {
+        this.gattCallback = new BleStateMachineGattCallback(this, new BleStateMachineGattCallback.OnConnectedCallback() {
             @Override
             public void onConnected(BluetoothGatt gatt) {
                 Log.i(LOG_TAG, "Device " + BleTerminalIODevice.this.deviceName + " reports it is connected to its GATT server");
@@ -145,8 +134,8 @@ public class BleTerminalIODevice implements BleStateMachineDevice, ScannerIntern
                 }
             }
         });
-        btDevice.connectGatt(ctx, true, gattCallback);
     }
+
 
     @Override
     public void setProvider(BtSppScannerProvider provider) {
@@ -374,19 +363,6 @@ public class BleTerminalIODevice implements BleStateMachineDevice, ScannerIntern
         this.writer.write(cmd, true);
     }
 
-    @Override
-    public String getName() {
-        return this.deviceName;
-    }
-
-    @Override
-    public void disconnect() {
-        if (gatt != null) {
-            this.gatt.disconnect();
-            this.gatt = null;
-            this.gattCallback = null;
-        }
-    }
 
     @Override
     public <T> void registerSubscription(DataSubscriptionCallback<T> subscription, Class<? extends T> targetType) {

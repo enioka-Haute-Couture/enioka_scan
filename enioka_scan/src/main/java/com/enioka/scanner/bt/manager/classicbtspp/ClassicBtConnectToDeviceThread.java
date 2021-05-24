@@ -9,7 +9,7 @@ import com.enioka.scanner.bt.manager.data.BtConstHelpers;
 import java.io.IOException;
 
 /**
- * A thread which attempts (once) to connect to a given Classic BT SPP slave device.
+ * A thread which attempts (once) to connect to a given Classic BT SPP slave device. This is only a BT connection, without any applicative (level 7) stuff. This is the socket opening - streams are opened later by another component!
  */
 class ClassicBtConnectToDeviceThread extends Thread {
     private static final String LOG_TAG = "BtSppSdk";

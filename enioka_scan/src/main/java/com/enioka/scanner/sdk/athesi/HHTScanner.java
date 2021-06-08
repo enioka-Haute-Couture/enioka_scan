@@ -12,8 +12,10 @@ import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -124,6 +126,19 @@ public class HHTScanner extends IntentScanner<String> {
 
         // Apply changes.
         broadcastIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETERS, confChanges.toArray(new String[0]));
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // INVENTORY
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public String getStatus(String key) {
+        return null;
+    }
+
+    public Map<String, String> getStatus() {
+        return new HashMap<>();
     }
 
 

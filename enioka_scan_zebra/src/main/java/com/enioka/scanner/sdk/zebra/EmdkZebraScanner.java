@@ -495,6 +495,19 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
     public void ledColorOff(Color color) {
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // INVENTORY
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public String getStatus(String key) {
+        return null;
+    }
+
+    public Map<String, String> getStatus() {
+        return new HashMap<>();
+    }
+
     @Override
     public String getProviderKey() {
         return EmdkZebraProvider.PROVIDER_NAME;

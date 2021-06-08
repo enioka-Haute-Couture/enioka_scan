@@ -12,7 +12,9 @@ import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Scanner provider for BlueBird integrated devices.<br>
@@ -106,6 +108,19 @@ public class BluebirdScanner extends IntentScanner<Integer> {
         if (dataCb != null) {
             dataCb.onData(this, barcodes);
         }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // INVENTORY
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public String getStatus(String key) {
+        return null;
+    }
+
+    public Map<String, String> getStatus() {
+        return new HashMap<>();
     }
 
     @Override

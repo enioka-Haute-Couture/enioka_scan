@@ -2,6 +2,7 @@ package com.enioka.scanner.sdk.zebraoss;
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
 
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
@@ -13,16 +14,21 @@ import com.enioka.scanner.sdk.zebraoss.commands.Beep;
 import com.enioka.scanner.sdk.zebraoss.commands.InitCommand;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOn;
+import com.enioka.scanner.sdk.zebraoss.commands.RequestParam;
 import com.enioka.scanner.sdk.zebraoss.commands.ScanDisable;
 import com.enioka.scanner.sdk.zebraoss.commands.ScanEnable;
 import com.enioka.scanner.sdk.zebraoss.commands.SetPickListMode;
+import com.enioka.scanner.sdk.zebraoss.data.ParamSend;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class ZebraOssScanner implements ScannerBackground {
     private ScannerDataCallback dataCallback = null;
     private final com.enioka.scanner.bt.api.Scanner btScanner;
+    private final Map<String, String> statusCache = new HashMap<>();
 
     ZebraOssScanner(com.enioka.scanner.bt.api.Scanner btScanner) {
         this.btScanner = btScanner;
@@ -120,6 +126,19 @@ class ZebraOssScanner implements ScannerBackground {
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    // INVENTORY
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public String getStatus(String key) {
+        return statusCache.get(key);
+    }
+
+    public Map<String, String> getStatus() {
+        return new HashMap<>(statusCache);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // Init and data cb
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -134,6 +153,7 @@ class ZebraOssScanner implements ScannerBackground {
 
         final Handler uiHandler = new Handler(applicationContext.getMainLooper());
 
+        // Hook connection / disconnection events
         this.btScanner.registerStatusCallback(new Scanner.SppScannerStatusCallback() {
             @Override
             public void onScannerConnected() {
@@ -153,6 +173,7 @@ class ZebraOssScanner implements ScannerBackground {
             }
         });
 
+        // Subscribe to read barcodes.
         this.btScanner.registerSubscription(new DataSubscriptionCallback<Barcode>() {
             @Override
             public void onSuccess(final Barcode data) {
@@ -178,11 +199,31 @@ class ZebraOssScanner implements ScannerBackground {
             }
         }, Barcode.class);
 
-        //this.btScanner.runCommand(new InitCommand(), null);
+        // Request scanner configuration
+        this.btScanner.runCommand(new RequestParam(), new DataSubscriptionCallback<com.enioka.scanner.sdk.zebraoss.data.ParamSend>() {
+            @Override
+            public void onSuccess(com.enioka.scanner.sdk.zebraoss.data.ParamSend data) {
+                for (ParamSend.Param prm : data.parameters) {
+                    ZebraOssScanner.this.statusCache.put(prm.number + "", prm.getStringValue());
+                }
+            }
+
+            @Override
+            public void onFailure() {
+                Log.e("TEST", "oooops");
+            }
+
+            @Override
+            public void onTimeout() {
+                Log.e("TEST", "oooops timeout");
+            }
+        });
+
+        this.btScanner.runCommand(new InitCommand(), null);
+
+        //this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
         //this.btScanner.runCommand(new ScanEnable(), null);
         //this.btScanner.runCommand(new StartSession(), null);
-        //this.btScanner.runCommand(new RequestParam(), null);
-        this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
 
         // We are already connected if the scanner could be created...
         initCallback.onConnectionSuccessful(this);

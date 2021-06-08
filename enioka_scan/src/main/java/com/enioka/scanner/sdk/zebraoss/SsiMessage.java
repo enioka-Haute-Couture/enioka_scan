@@ -6,6 +6,7 @@ import com.enioka.scanner.sdk.zebraoss.parsers.CapabilitiesParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.ErrorParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.EventParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.GenericParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.ParamSendParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.PayloadParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.ReplyRevisionParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.ScannerInitParser;
@@ -39,7 +40,7 @@ public enum SsiMessage {
     PAGE_MOTOR_ACTIVATION(0xCA, SsiSource.HOST),
     PARAM_DEFAULTS(0xC8, SsiSource.HOST),
     PARAM_REQUEST(0xC7, SsiSource.HOST),
-    PARAM_SEND(0xC6, SsiSource.BOTH), // No ACK ever
+    PARAM_SEND(0xC6, SsiSource.BOTH, true, new ParamSendParser()),
     REPLY_REVISION(0xA4, SsiSource.DECODER, false, new ReplyRevisionParser()),
     REQUEST_REVISION(0xA3, SsiSource.HOST),
     SCAN_DISABLE(0xEA, SsiSource.HOST),

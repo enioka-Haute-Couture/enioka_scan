@@ -20,7 +20,9 @@ import com.enioka.scanner.sdk.honeywelloss.commands.EnableBarcodeMetadata;
 import com.enioka.scanner.sdk.honeywelloss.commands.EnableIllumination;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class HoneywellOssScanner implements ScannerBackground {
     private ScannerDataCallback dataCallback = null;
@@ -132,6 +134,19 @@ class HoneywellOssScanner implements ScannerBackground {
     @Override
     public void ledColorOff(Color color) {
         this.btScanner.runCommand(new DisplayScreenColor(null), null);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // INVENTORY
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public String getStatus(String key) {
+        return null;
+    }
+
+    public Map<String, String> getStatus() {
+        return new HashMap<>();
     }
 
 

@@ -58,13 +58,13 @@ public class SsiPacket {
      * @param bufferLength read buffer until from + bufferLength
      * @return true if another buffer is expected (buffer incomplete or multi part message).
      */
-    boolean addData(byte[] buffer, int offset, int bufferLength) {
+    SsiMultiPacketMessage.PacketParsingResult addData(byte[] buffer, int offset, int bufferLength) {
         if (bufferLength == 0) {
-            return true;
+            return new SsiMultiPacketMessage.PacketParsingResult(true, offset);
         }
 
         // First byte is packet length.
-        int bufferIndex = (byte) offset;
+        int bufferIndex = offset;
         if (readBytes == 0 && bufferLength > 0) {
             packetLengthWithoutCheckSum = (0xFF & buffer[bufferIndex]);
             readBytes++;
@@ -72,7 +72,7 @@ public class SsiPacket {
 
             if (packetLengthWithoutCheckSum < 4) {
                 Log.e(LOG_TAG, "Received a message with an impossible length - ignored");
-                return false; // Packet is weird. Stop reading it at once.
+                return new SsiMultiPacketMessage.PacketParsingResult(false, offset); // Packet is weird. Stop reading it at once.
             }
 
             data = new byte[packetLengthWithoutCheckSum - 4];
@@ -122,14 +122,14 @@ public class SsiPacket {
         if (readBytes != packetLengthWithoutCheckSum + 2) {
             Log.d(LOG_TAG, "Still missing bytes to complete SSI packet: " + (packetLengthWithoutCheckSum + 2 - readBytes));
         }
-        return readBytes != packetLengthWithoutCheckSum + 2;
+        return new SsiMultiPacketMessage.PacketParsingResult(readBytes != packetLengthWithoutCheckSum + 2, bufferIndex - 1);
     }
 
     SsiSource getSource() {
         return (this.source == 0 ? SsiSource.DECODER : SsiSource.HOST);
     }
 
-    byte[] getData() {
+    public byte[] getData() {
         return this.data;
     }
 

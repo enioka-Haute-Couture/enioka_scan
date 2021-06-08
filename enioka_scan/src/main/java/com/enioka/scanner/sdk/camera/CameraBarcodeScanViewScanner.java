@@ -10,7 +10,9 @@ import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -124,8 +126,21 @@ public class CameraBarcodeScanViewScanner implements ScannerForeground, CameraBa
     public void ledColorOff(Color color) {
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // INVENTORY
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public String getStatus(String key) {
+        return null;
+    }
+
+    public Map<String, String> getStatus() {
+        return new HashMap<>();
+    }
+
     @Override
     public String getProviderKey() {
         return "CAMERA_SCANNER";
     }
+
 }

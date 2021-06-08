@@ -42,6 +42,7 @@ public class ParsingResult<T> {
     public MessageRejectionReason result;
     public T data;
     public Command acknowledger = null;
+    public int read = 0;
 
     MessageRejectionReason getResult() {
         return this.result;

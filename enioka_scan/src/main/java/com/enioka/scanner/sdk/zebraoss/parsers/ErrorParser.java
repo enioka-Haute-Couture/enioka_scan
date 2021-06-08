@@ -3,6 +3,7 @@ package com.enioka.scanner.sdk.zebraoss.parsers;
 import android.util.Log;
 
 import com.enioka.scanner.bt.api.MessageRejectionReason;
+import com.enioka.scanner.sdk.zebraoss.SsiMultiPacketMessage;
 
 /**
  * Responsible for handling NAK data
@@ -11,7 +12,8 @@ public class ErrorParser implements PayloadParser<MessageRejectionReason> {
     private static final String LOG_TAG = "ErrorParser";
 
     @Override
-    public MessageRejectionReason parseData(byte[] buffer) {
+    public MessageRejectionReason parseData(SsiMultiPacketMessage message) {
+        byte[] buffer = message.getData();
         if (buffer.length < 1) {
             return null;
         }

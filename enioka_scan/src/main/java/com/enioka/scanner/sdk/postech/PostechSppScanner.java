@@ -16,7 +16,9 @@ import com.enioka.scanner.sdk.generalscan.commands.OpenRead;
 import com.enioka.scanner.sdk.generalscan.commands.SetBeepLevel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class PostechSppScanner implements ScannerBackground {
     private ScannerDataCallback dataCallback = null;
@@ -183,5 +185,18 @@ class PostechSppScanner implements ScannerBackground {
     @Override
     public void ledColorOff(Color color) {
         // No programmable LED on device.
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // INVENTORY
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public String getStatus(String key) {
+        return null;
+    }
+
+    public Map<String, String> getStatus() {
+        return new HashMap<>();
     }
 }

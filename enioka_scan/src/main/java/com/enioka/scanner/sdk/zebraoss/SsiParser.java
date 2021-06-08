@@ -22,8 +22,10 @@ public class SsiParser implements ScannerDataParser {
     public ParsingResult parse(byte[] buffer, int offset, int dataLength) {
         ParsingResult res = new ParsingResult();
 
-        boolean needMoreData = message.addData(buffer, offset, dataLength);
-        if (!needMoreData) {
+        SsiMultiPacketMessage.PacketParsingResult messageParsingResult = message.addData(buffer, offset, dataLength);
+        res.read = messageParsingResult.read;
+
+        if (!messageParsingResult.incompleteParsing) {
             // Done with extracting data from messages. Now do the op-code specific parsing.
             if (message.isDataUsable()) {
                 res.expectingMoreData = false;
@@ -51,7 +53,7 @@ public class SsiParser implements ScannerDataParser {
                 byte[] data = this.message.getData();
 
                 // Note that data can be null - for example with an ACK. But we still want a parsing to occur in order to have a specific payload in the result.
-                res.data = parser.parseData(data);
+                res.data = parser.parseData(this.message);
 
                 // Start anew.
                 this.message = new SsiMultiPacketMessage();
@@ -61,13 +63,13 @@ public class SsiParser implements ScannerDataParser {
             } else {
                 // Not expecting more data but not usable means: wrong checksum!
                 res = new ParsingResult(MessageRejectionReason.CHECKSUM_FAILURE); //TODO: sigh.
+                res.read = messageParsingResult.read;
                 res.acknowledger = new Nack(MessageRejectionReason.CHECKSUM_FAILURE);
                 this.message = new SsiMultiPacketMessage();
                 return res;
             }
         } else {
             // If here, message is still incomplete.
-            res = new ParsingResult();
             res.acknowledger = new Ack();
             return res;
         }

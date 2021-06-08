@@ -14,6 +14,8 @@ import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GenericHidScanner implements ScannerForeground {
     private final static String LOG_TAG = "GenericHidScanner";
@@ -137,6 +139,19 @@ public class GenericHidScanner implements ScannerForeground {
     public boolean supportsIllumination() {
         // We consider that most scanner HID beep by themselves and illuminate by themselves.
         return false;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // INVENTORY
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public String getStatus(String key) {
+        return null;
+    }
+
+    public Map<String, String> getStatus() {
+        return new HashMap<>();
     }
 
     @Override

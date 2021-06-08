@@ -335,6 +335,16 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
     }
 
     void handleInputBuffer(byte[] buffer, int offset, int length) {
+        int read = offset;
+        while (read < length) {
+            read = handleInputBufferLoop(buffer, read, length) + 1;
+            if (read < length) {
+                Log.d(LOG_TAG, "The buffer contains multiple tokens - a loop will happen starting at position " + read + " until " + length);
+            }
+        }
+    }
+
+    private int handleInputBufferLoop(byte[] buffer, int offset, int length) {
         ParsingResult res = this.inputHandler.parse(buffer, offset, length);
         if (!res.expectingMoreData && res.data != null) {
             Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString());
@@ -376,5 +386,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                 this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
             }
         }
+
+        return res.read;
     }
 }

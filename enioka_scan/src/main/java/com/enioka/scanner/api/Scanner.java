@@ -3,6 +3,7 @@ package com.enioka.scanner.api;
 import com.enioka.scanner.data.Barcode;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The interface to implement by a laser scanner provider.
@@ -22,6 +23,10 @@ public interface Scanner {
          */
         BATCH
     }
+
+    public static final String SCANNER_STATUS_SCANNER_SN = "SCANNER_STATUS_SCANNER_SN";
+    public static final String SCANNER_STATUS_BATTERY_SN = "SCANNER_STATUS_BATTERY_SN";
+    public static final String SCANNER_STATUS_FIRMWARE = "SCANNER_STATUS_FIRMWARE";
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -168,4 +173,22 @@ public interface Scanner {
      * For logging and sorting purpose, this is the key of the SDK behing this scanner (same as {@link ScannerProvider#getKey()}.
      */
     String getProviderKey();
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // INVENTORY
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Get an inventory/status value. For example battery serial number, device MAC, etc. Keys are usually constants exported by drivers. A list can be obtained with {@link #getStatus()}.
+     *
+     * @param key requested key
+     * @return corresponding value or null if key is not supported by this scanner.
+     */
+    String getStatus(String key);
+
+    /**
+     * @return all inventory/status data known by the scanner. May be empty but not null.
+     */
+    Map<String, String> getStatus();
 }

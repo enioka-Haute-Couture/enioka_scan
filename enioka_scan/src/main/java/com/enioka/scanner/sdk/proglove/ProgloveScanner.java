@@ -14,7 +14,9 @@ import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -210,6 +212,19 @@ public class ProgloveScanner extends IntentScanner<String> {
                 break;
         }
         broadcastIntent("com.proglove.api.PLAY_FEEDBACK", "com.proglove.api.extra.FEEDBACK_SEQUENCE_ID", c);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // INVENTORY
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public String getStatus(String key) {
+        return null;
+    }
+
+    public Map<String, String> getStatus() {
+        return new HashMap<>();
     }
 
 

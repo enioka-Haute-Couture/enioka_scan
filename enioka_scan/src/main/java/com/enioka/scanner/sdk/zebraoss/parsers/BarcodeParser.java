@@ -1,6 +1,7 @@
 package com.enioka.scanner.sdk.zebraoss.parsers;
 
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.sdk.zebraoss.SsiMultiPacketMessage;
 import com.enioka.scanner.sdk.zebraoss.ZebraOssDataTranslator;
 
 import java.nio.charset.Charset;
@@ -10,7 +11,8 @@ import java.nio.charset.Charset;
  */
 public class BarcodeParser implements PayloadParser<Barcode> {
     @Override
-    public Barcode parseData(byte[] buffer) {
+    public Barcode parseData(SsiMultiPacketMessage message) {
+        byte[] buffer = message.getData();
         if (buffer.length < 2) {
             return null;
         }

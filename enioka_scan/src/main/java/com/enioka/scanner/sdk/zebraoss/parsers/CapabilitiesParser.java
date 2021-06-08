@@ -1,5 +1,6 @@
 package com.enioka.scanner.sdk.zebraoss.parsers;
 
+import com.enioka.scanner.sdk.zebraoss.SsiMultiPacketMessage;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 
 import java.util.HashSet;
@@ -10,7 +11,8 @@ import java.util.Set;
  */
 public class CapabilitiesParser implements PayloadParser<CapabilitiesReply> {
     @Override
-    public CapabilitiesReply parseData(byte[] buffer) {
+    public CapabilitiesReply parseData(SsiMultiPacketMessage message) {
+        byte[] buffer = message.getData();
         if (buffer.length < 4) {
             return null;
         }

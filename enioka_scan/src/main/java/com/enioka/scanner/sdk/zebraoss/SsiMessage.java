@@ -9,6 +9,7 @@ import com.enioka.scanner.sdk.zebraoss.parsers.GenericParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.ParamSendParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.PayloadParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.ReplyRevisionParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.RsmResponseParser;
 import com.enioka.scanner.sdk.zebraoss.parsers.ScannerInitParser;
 
 public enum SsiMessage {
@@ -47,7 +48,7 @@ public enum SsiMessage {
     SCAN_ENABLE(0xE9, SsiSource.HOST),
     SCANNER_INIT(0x91, SsiSource.DECODER, new ScannerInitParser()),
     SLEEP(0xEB, SsiSource.HOST),
-    SSI_MGMT_COMMAND(0x80, SsiSource.BOTH),
+    SSI_MGMT_COMMAND(0x80, SsiSource.BOTH, true, new RsmResponseParser()),
     START_SESSION(0xE4, SsiSource.HOST),
     STOP_SESSION(0xE5, SsiSource.HOST),
     VIDEO_DATA(0xB4, SsiSource.DECODER, true),

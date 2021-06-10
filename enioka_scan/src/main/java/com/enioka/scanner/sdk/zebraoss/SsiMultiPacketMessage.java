@@ -46,7 +46,7 @@ public class SsiMultiPacketMessage {
 
         PacketParsingResult bufferPacketAdditionResult = currentPacket.addData(buffer, offset, length);
         if (!bufferPacketAdditionResult.incompleteParsing) {
-            Log.d(LOG_TAG, "Read a full SSI packet (as many bytes as announced) " + currentPacket.data.length);
+            Log.d(LOG_TAG, "Read a full SSI packet. As many bytes as announced " + currentPacket.data.length + ". Op code is " + currentPacket.opCode);
 
             if (!this.currentPacket.isChecksumValid()) {
                 Log.e(LOG_TAG, "Received a message with an invalid checksum - ignored");

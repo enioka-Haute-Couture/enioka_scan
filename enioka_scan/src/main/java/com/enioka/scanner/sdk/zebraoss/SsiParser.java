@@ -70,7 +70,7 @@ public class SsiParser implements ScannerDataParser {
             }
         } else {
             // If here, message is still incomplete.
-            res.acknowledger = new Ack();
+            res.acknowledger = null; //new Ack();
             return res;
         }
     }

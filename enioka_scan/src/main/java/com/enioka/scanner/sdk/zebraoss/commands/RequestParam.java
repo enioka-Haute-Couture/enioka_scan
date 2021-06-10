@@ -15,6 +15,26 @@ public class RequestParam extends SsiPacket implements Command<com.enioka.scanne
         super((byte) (-57), new byte[]{(byte) (-2)});
     } // 0xC7 => -57, -2 is 0xFE when signed... sigh.
 
+    public RequestParam(int prmCode) {
+        super((byte) (-57), prmCodeToByteArray(prmCode));
+    }
+
+    private static byte[] prmCodeToByteArray(int prmCode) {
+        byte[] prmBytes;
+        if (prmCode >= 1024) {
+            prmBytes = new byte[]{(byte) (0xF8 & 0xFF), (byte) (prmCode >>> 8), (byte) prmCode};
+        } else if (prmCode >= 768) {
+            prmBytes = new byte[]{(byte) (0xF2 & 0xFF), (byte) (prmCode - 768)};
+        } else if (prmCode >= 512) {
+            prmBytes = new byte[]{(byte) (0xF1 & 0xFF), (byte) (prmCode - 512)};
+        } else if (prmCode >= 256) {
+            prmBytes = new byte[]{(byte) (0xF0 & 0xFF), (byte) (prmCode - 256)};
+        } else {
+            prmBytes = new byte[]{(byte) prmCode};
+        }
+        return prmBytes;
+    }
+
     @Override
     public Class<? extends com.enioka.scanner.sdk.zebraoss.data.ParamSend> getReturnType() {
         return ParamSend.class;
@@ -22,6 +42,6 @@ public class RequestParam extends SsiPacket implements Command<com.enioka.scanne
 
     @Override
     public int getTimeOut() {
-        return 2000;
+        return 5000;
     }
 }

@@ -25,8 +25,13 @@ public interface Scanner {
     }
 
     public static final String SCANNER_STATUS_SCANNER_SN = "SCANNER_STATUS_SCANNER_SN";
+    public static final String SCANNER_STATUS_SCANNER_MODEL = "SCANNER_STATUS_SCANNER_MODEL";
     public static final String SCANNER_STATUS_BATTERY_SN = "SCANNER_STATUS_BATTERY_SN";
+    public static final String SCANNER_STATUS_BATTERY_MODEL = "SCANNER_STATUS_BATTERY_MODEL";
+    public static final String SCANNER_STATUS_BATTERY_WEAR = "SCANNER_STATUS_BATTERY_WEAR";
+    public static final String SCANNER_STATUS_BATTERY_CHARGE = "SCANNER_STATUS_BATTERY_CHARGE";
     public static final String SCANNER_STATUS_FIRMWARE = "SCANNER_STATUS_FIRMWARE";
+    public static final String SCANNER_STATUS_BT_MAC = "SCANNER_STATUS_BT_MAC";
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 public class ReplyRevision {
-    private String softwareRevision, boardType, engineCode;
+    public String softwareRevision, boardType, engineCode;
 
     public ReplyRevision(byte[] buffer) {
         String temp = new String(buffer, Charset.forName("ASCII"));

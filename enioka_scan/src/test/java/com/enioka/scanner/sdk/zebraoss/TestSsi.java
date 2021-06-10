@@ -2,6 +2,8 @@ package com.enioka.scanner.sdk.zebraoss;
 
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.sdk.zebraoss.data.ParamSend;
+import com.enioka.scanner.sdk.zebraoss.data.RsmAttribute;
+import com.enioka.scanner.sdk.zebraoss.data.RsmAttributeReply;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -11,13 +13,6 @@ import java.nio.charset.Charset;
 
 public class TestSsi {
     private SsiParser parser = new SsiParser();
-
-    @Test
-    public void samplePacketTest() {
-
-        ParsingResult res = parseHexString("0c8000800008200000f000f0fcec");
-        System.out.println(res.data.toString());
-    }
 
     @Test
     public void paramResultTest() {
@@ -44,6 +39,33 @@ public class TestSsi {
         Assert.assertEquals("0x00", res2.parameters.get(0).getStringValue());
         Assert.assertEquals(156, res2.parameters.get(1).number);
         Assert.assertEquals("0x07", res2.parameters.get(1).getStringValue());
+    }
+
+    @Test
+    public void rsmTest() {
+        // Simple array attribute from doc
+        ParsingResult res = parseHexString("21 80 00 00 00 1D 02 00 27 4D 41 01 42 00 0E 00 00 00 00 01 03 02 03 03 03 04 03 05 03 06 03 FF FF FC 15");
+        System.out.println(res.data.toString());
+
+        Assert.assertTrue(res.data instanceof RsmAttributeReply);
+        RsmAttributeReply res2 = (RsmAttributeReply) res.data;
+        Assert.assertEquals(1, res2.attributes.size());
+        Assert.assertEquals(10061, res2.attributes.get(0).id);
+
+        // Multiple string attributes
+        res = parseHexString("3e 80 00 80 00 3a 02 00 02 15 53 01 00 13 00 00 52 53 35 31 42 30 2d 54 42 53 4e 57 52 20 20 20 20 20 00 02 16 53 01 00 11 00 00 53 32 30 31 34 30 35 32 33 30 32 30 31 34 34 20 00 ff ff f4 34");
+        System.out.println(res.data.toString());
+
+        Assert.assertTrue(res.data instanceof RsmAttributeReply);
+        res2 = (RsmAttributeReply) res.data;
+        Assert.assertEquals(2, res2.attributes.size());
+        Assert.assertEquals(533, res2.attributes.get(0).id);
+        Assert.assertEquals("RS51B0-TBSNWR", res2.attributes.get(0).data);
+        Assert.assertEquals("S20140523020144", res2.attributes.get(1).data);
+
+        //
+        res = parseHexString("0f 80 00 80    000b 02 00 0192 42 07 00ffff fc0a");
+        System.out.println(res.data.toString());
     }
 
     private ParsingResult parseString(String asciiString) {

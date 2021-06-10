@@ -349,22 +349,25 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         if (!res.expectingMoreData && res.data != null) {
             Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString());
 
+            // ACK first - the event handlers may write to stream and create out of order ACKs.
+            if (res.acknowledger != null) {
+                this.outputStreamWriter.endOfCommand();
+                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+            }
+
             // Subscriptions to fulfill on that data type?
             synchronized (dataSubscriptions) {
                 if (this.dataSubscriptions.containsKey(res.data.getClass().getCanonicalName())) {
                     DataSubscription subscription = this.dataSubscriptions.get(res.data.getClass().getCanonicalName());
-                    DataSubscriptionCallback callback = subscription.getCallback();
-                    callback.onSuccess(res.data);
 
+                    // Remove callback before calling it - that way callbacks can re-subscribe at once.
                     if (!subscription.isPermanent()) {
                         this.dataSubscriptions.remove(res.data.getClass().getCanonicalName());
                     }
-                }
-            }
 
-            if (res.acknowledger != null) {
-                this.outputStreamWriter.endOfCommand();
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                    DataSubscriptionCallback callback = subscription.getCallback();
+                    callback.onSuccess(res.data);
+                }
             }
 
             this.outputStreamWriter.endOfCommand();

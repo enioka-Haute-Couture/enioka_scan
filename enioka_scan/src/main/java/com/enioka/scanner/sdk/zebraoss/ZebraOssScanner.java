@@ -11,14 +11,18 @@ import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.zebraoss.commands.Beep;
-import com.enioka.scanner.sdk.zebraoss.commands.InitCommand;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOn;
+import com.enioka.scanner.sdk.zebraoss.commands.ManagementCommandGetAttribute;
+import com.enioka.scanner.sdk.zebraoss.commands.ManagementCommandGetBufferSize;
 import com.enioka.scanner.sdk.zebraoss.commands.RequestParam;
+import com.enioka.scanner.sdk.zebraoss.commands.RequestRevision;
 import com.enioka.scanner.sdk.zebraoss.commands.ScanDisable;
 import com.enioka.scanner.sdk.zebraoss.commands.ScanEnable;
-import com.enioka.scanner.sdk.zebraoss.commands.SetPickListMode;
 import com.enioka.scanner.sdk.zebraoss.data.ParamSend;
+import com.enioka.scanner.sdk.zebraoss.data.ReplyRevision;
+import com.enioka.scanner.sdk.zebraoss.data.RsmAttribute;
+import com.enioka.scanner.sdk.zebraoss.data.RsmAttributeReply;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 class ZebraOssScanner implements ScannerBackground {
+    private static final String LOG_TAG = "SsiParser";
+
     private ScannerDataCallback dataCallback = null;
     private final com.enioka.scanner.bt.api.Scanner btScanner;
     private final Map<String, String> statusCache = new HashMap<>();
@@ -185,7 +191,6 @@ class ZebraOssScanner implements ScannerBackground {
                         ZebraOssScanner.this.dataCallback.onData(ZebraOssScanner.this, res);
                     }
                 });
-
             }
 
             @Override
@@ -202,30 +207,123 @@ class ZebraOssScanner implements ScannerBackground {
         // Request scanner configuration
         this.btScanner.runCommand(new RequestParam(), new DataSubscriptionCallback<com.enioka.scanner.sdk.zebraoss.data.ParamSend>() {
             @Override
-            public void onSuccess(com.enioka.scanner.sdk.zebraoss.data.ParamSend data) {
-                for (ParamSend.Param prm : data.parameters) {
-                    ZebraOssScanner.this.statusCache.put(prm.number + "", prm.getStringValue());
-                }
-            }
-
-            @Override
             public void onFailure() {
-                Log.e("TEST", "oooops");
+                Log.e(LOG_TAG, "failed to get scanner parameters");
             }
 
             @Override
             public void onTimeout() {
-                Log.e("TEST", "oooops timeout");
+                Log.e(LOG_TAG, "timeout while fetching scanner parameters");
+            }
+
+            @Override
+            public void onSuccess(com.enioka.scanner.sdk.zebraoss.data.ParamSend data) {
+                for (ParamSend.Param prm : data.parameters) {
+                    ZebraOssScanner.this.statusCache.put("ZEBRA_SSI_PRM_" + prm.number, prm.getStringValue());
+                }
+
+                ZebraOssScanner.this.btScanner.runCommand(new ManagementCommandGetBufferSize(), new DataSubscriptionCallback<RsmAttributeReply>() {
+                    @Override
+                    public void onFailure() {
+                        Log.e(LOG_TAG, "could not retrieve RSM buffer data - timeout");
+                    }
+
+                    @Override
+                    public void onTimeout() {
+                        Log.e(LOG_TAG, "could not retrieve RSM buffer data - timeout");
+                    }
+
+                    @Override
+                    public void onSuccess(RsmAttributeReply data) {
+                        Log.i(LOG_TAG, "Zebra scanner has an RSM buffer of " + data);
+
+                        // Model number, S/N, MAC address, battery%, battery health, battery model
+                        ZebraOssScanner.this.btScanner.runCommand(new ManagementCommandGetAttribute(533, 534, 541, 30012, 30013, 30017), new DataSubscriptionCallback<RsmAttributeReply>() {
+                            @Override
+                            public void onFailure() {
+                                Log.e(LOG_TAG, "could not retrieve RSM data");
+                            }
+
+                            @Override
+                            public void onTimeout() {
+                                Log.e(LOG_TAG, "could not retrieve RSM data - timeout");
+                            }
+
+                            @Override
+                            public void onSuccess(RsmAttributeReply data) {
+                                Log.i(LOG_TAG, "Scanner S/N & other RSM data found. " + data.toString());
+
+                                for (RsmAttribute attribute : data.attributes) {
+                                    statusCache.put("ZEBRA_RSM_ATTR_" + attribute.id, attribute.data);
+                                }
+
+                                // Finally some revision data.
+                                ZebraOssScanner.this.btScanner.runCommand(new RequestRevision(), new DataSubscriptionCallback<ReplyRevision>() {
+                                    @Override
+                                    public void onSuccess(ReplyRevision data) {
+                                        ZebraOssScanner.this.statusCache.put(com.enioka.scanner.api.Scanner.SCANNER_STATUS_FIRMWARE, data.softwareRevision);
+
+                                        normalizeAttributes();
+                                    }
+
+                                    @Override
+                                    public void onFailure() {
+                                        Log.e(LOG_TAG, "could not retrieve revision data");
+                                    }
+
+                                    @Override
+                                    public void onTimeout() {
+                                        Log.e(LOG_TAG, "timeout when retrieving revision data");
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
             }
         });
 
-        this.btScanner.runCommand(new InitCommand(), null);
 
+        //this.btScanner.runCommand(new InitCommand(), null);
         //this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
         //this.btScanner.runCommand(new ScanEnable(), null);
         //this.btScanner.runCommand(new StartSession(), null);
 
         // We are already connected if the scanner could be created...
         initCallback.onConnectionSuccessful(this);
+    }
+
+    private void normalizeAttributes() {
+        String var = this.statusCache.get("ZEBRA_RSM_ATTR_533");
+        if (var != null) {
+            this.statusCache.put(com.enioka.scanner.api.Scanner.SCANNER_STATUS_SCANNER_SN, var);
+        }
+        var = this.statusCache.get("ZEBRA_RSM_ATTR_533");
+        if (var != null) {
+            this.statusCache.put(com.enioka.scanner.api.Scanner.SCANNER_STATUS_SCANNER_MODEL, var);
+        }
+
+        var = this.statusCache.get("ZEBRA_RSM_ATTR_30017");
+        if (var != null) {
+            this.statusCache.put(com.enioka.scanner.api.Scanner.SCANNER_STATUS_BATTERY_MODEL, var);
+        }
+        var = this.statusCache.get("ZEBRA_RSM_ATTR_30013");
+        if (var != null) {
+            this.statusCache.put(com.enioka.scanner.api.Scanner.SCANNER_STATUS_BATTERY_WEAR, var);
+        }
+        var = this.statusCache.get("ZEBRA_RSM_ATTR_30012");
+        if (var != null) {
+            this.statusCache.put(com.enioka.scanner.api.Scanner.SCANNER_STATUS_BATTERY_CHARGE, var);
+        }
+
+        var = this.statusCache.get("ZEBRA_RSM_ATTR_541");
+        if (var != null) {
+            this.statusCache.put(com.enioka.scanner.api.Scanner.SCANNER_STATUS_BT_MAC, var);
+        }
+
+        Log.i(LOG_TAG, "Scanner status cache contains: ");
+        for (Map.Entry<String, String> e : this.statusCache.entrySet()) {
+            Log.i(LOG_TAG, String.format("\t%-30s - %s", e.getKey(), e.getValue()));
+        }
     }
 }

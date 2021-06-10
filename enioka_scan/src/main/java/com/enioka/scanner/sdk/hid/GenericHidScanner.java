@@ -154,6 +154,10 @@ public class GenericHidScanner implements ScannerForeground {
         return new HashMap<>();
     }
 
+    public String getStatus(String key, boolean allowCache) {
+        return null;
+    }
+
     @Override
     public String getProviderKey() {
         return GenericHidProvider.LOG_TAG;

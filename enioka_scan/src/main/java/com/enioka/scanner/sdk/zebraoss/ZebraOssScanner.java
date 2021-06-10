@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 class ZebraOssScanner implements ScannerBackground {
     private static final String LOG_TAG = "SsiParser";
@@ -139,6 +140,34 @@ class ZebraOssScanner implements ScannerBackground {
         return statusCache.get(key);
     }
 
+    public String getStatus(String key, boolean allowCache) {
+        if (!allowCache) {
+            final Semaphore s = new Semaphore(0);
+            startStatusCacheRefresh(new DataSubscriptionCallback<String>() {
+                @Override
+                public void onSuccess(String data) {
+                    s.release();
+                }
+
+                @Override
+                public void onFailure() {
+                    // Ignored
+                }
+
+                @Override
+                public void onTimeout() {
+                    // Ignored
+                }
+            });
+            try {
+                s.acquire();
+            } catch (InterruptedException e) {
+                return null;
+            }
+        }
+        return getStatus(key);
+    }
+
     public Map<String, String> getStatus() {
         return new HashMap<>(statusCache);
     }
@@ -205,6 +234,18 @@ class ZebraOssScanner implements ScannerBackground {
         }, Barcode.class);
 
         // Request scanner configuration
+        startStatusCacheRefresh(null);
+
+        //this.btScanner.runCommand(new InitCommand(), null);
+        //this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
+        //this.btScanner.runCommand(new ScanEnable(), null);
+        //this.btScanner.runCommand(new StartSession(), null);
+
+        // We are already connected if the scanner could be created...
+        initCallback.onConnectionSuccessful(this);
+    }
+
+    private void startStatusCacheRefresh(final DataSubscriptionCallback<String> finalCallback) {
         this.btScanner.runCommand(new RequestParam(), new DataSubscriptionCallback<com.enioka.scanner.sdk.zebraoss.data.ParamSend>() {
             @Override
             public void onFailure() {
@@ -264,6 +305,10 @@ class ZebraOssScanner implements ScannerBackground {
                                         ZebraOssScanner.this.statusCache.put(com.enioka.scanner.api.Scanner.SCANNER_STATUS_FIRMWARE, data.softwareRevision);
 
                                         normalizeAttributes();
+
+                                        if (finalCallback != null) {
+                                            finalCallback.onSuccess(null);
+                                        }
                                     }
 
                                     @Override
@@ -282,15 +327,6 @@ class ZebraOssScanner implements ScannerBackground {
                 });
             }
         });
-
-
-        //this.btScanner.runCommand(new InitCommand(), null);
-        //this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
-        //this.btScanner.runCommand(new ScanEnable(), null);
-        //this.btScanner.runCommand(new StartSession(), null);
-
-        // We are already connected if the scanner could be created...
-        initCallback.onConnectionSuccessful(this);
     }
 
     private void normalizeAttributes() {

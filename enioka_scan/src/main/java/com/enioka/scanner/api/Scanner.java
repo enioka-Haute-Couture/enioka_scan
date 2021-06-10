@@ -185,12 +185,21 @@ public interface Scanner {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Get an inventory/status value. For example battery serial number, device MAC, etc. Keys are usually constants exported by drivers. A list can be obtained with {@link #getStatus()}.
+     * Get an inventory/status value. For example battery serial number, device MAC, etc. Keys are usually constants exported by drivers. A list can be obtained with {@link #getStatus()}. Data returned may come from a local cache.
      *
      * @param key requested key
      * @return corresponding value or null if key is not supported by this scanner.
      */
     String getStatus(String key);
+
+    /**
+     * Get an inventory/status value. For example battery serial number, device MAC, etc. Keys are usually constants exported by drivers. A list can be obtained with {@link #getStatus()}.
+     *
+     * @param key        requested key
+     * @param allowCache if false the driver is not allowed to use a cache and MUST fetch fresh data from the device.
+     * @return corresponding value or null if key is not supported by this scanner.
+     */
+    String getStatus(String key, boolean allowCache);
 
     /**
      * @return all inventory/status data known by the scanner. May be empty but not null.

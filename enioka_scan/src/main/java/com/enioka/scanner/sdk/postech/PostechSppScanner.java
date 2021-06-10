@@ -196,6 +196,10 @@ class PostechSppScanner implements ScannerBackground {
         return null;
     }
 
+    public String getStatus(String key, boolean allowCache) {
+        return null;
+    }
+
     public Map<String, String> getStatus() {
         return new HashMap<>();
     }

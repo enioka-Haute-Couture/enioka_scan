@@ -22,8 +22,10 @@ import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -383,5 +385,28 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         for (Scanner s : this.scanners) {
             s.ledColorOff(color);
         }
+    }
+
+    // On ajoute quand même ces apis pour le ScannerServiceAPI pour plus de control sur le contenu et on expose tous les autres scanners pour donner une liberter pour les clients de la librairie
+
+    @Override
+    public Map<String, String> getFirstScannerStatus() {
+        if (!this.scanners.isEmpty()) {
+            return this.scanners.get(0).getStatus();
+        }
+        return new HashMap<>();
+    }
+
+    @Override
+    public String getFirstScannerStatus(String key) {
+        if (!this.scanners.isEmpty()) {
+            return this.scanners.get(0).getStatus(key);
+        }
+        return null;
+    }
+
+    @Override
+    public List<Scanner> getConnectedScanners() {
+        return scanners;
     }
 }

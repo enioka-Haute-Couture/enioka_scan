@@ -3,6 +3,11 @@ package com.enioka.scanner.service;
 import android.app.Activity;
 
 import com.enioka.scanner.api.Color;
+import com.enioka.scanner.api.Scanner;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The public API of the {@link ScannerService}. Obtained by binding to the service.
@@ -128,4 +133,10 @@ public interface ScannerServiceApi {
     void ledColorOn(Color color);
 
     void ledColorOff(Color color);
+
+    Map<String, String> getFirstScannerStatus();
+
+    String getFirstScannerStatus(String key);
+
+    List<Scanner> getConnectedScanners();
 }

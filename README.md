@@ -173,7 +173,7 @@ This method can also be used inside an Activity, when the use of an external bas
 # Developer quick start
 
 In order to start developing and testing the library:
-* Have Android Studio installed with your project open and ready
+* Have Android Studio installed and open the project with it
 * Connect a compatible android device via USB, it should then show up in Android Studio's device manager
 * Run the app with the android device selected
 

@@ -2,8 +2,12 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 28
+    lintOptions {
+        disable 'ExpiredTargetSdkVersion'
+    }
     defaultConfig {
         minSdkVersion 19
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

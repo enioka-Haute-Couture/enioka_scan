@@ -169,3 +169,14 @@ These can be found as static strings inside the `ScannerServiceApi` interface.
 This often happens when dealing with UI frameworks which have their own lifecycle handling such as Cordova. The programmer does not directly write activities deriving from Activity, but has access to the underlying Activity object used by the framework. In this case, it is just a matter of binding to the service like above, and then call `ScannerServiceApi.takeForegroundControl(Activity, ForegroundScannerClient)` (this internally calls `registerClient` too). This will register the activity as having foreground control, and full foreground scanner access will be available.
 
 This method can also be used inside an Activity, when the use of an external base class for an Activity is not possible (for example when there already is a base class, or when using `AppCompatActivity` is not desired). This is exactly what `ScannerCompatActivity` does - it simply binds to the service.
+
+# Developer quick start
+
+In order to start developing and testing the library:
+* Have Android Studio installed with your project open and ready
+* Connect a compatible android device via USB, it should then show up in Android Studio's device manager
+* Run the app with the android device selected
+
+In case the android device is not detected by Android Studio:
+* Make sure the device is in developer mode and has USB Debugging enabled
+* Make sure the USB cable supports data transfer (some cables only support charging)

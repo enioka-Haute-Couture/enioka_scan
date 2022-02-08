@@ -15,19 +15,14 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      - name: Build the release package
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: enioka_scan:assembleRelease
-        env:
-          SIGN_KEYID: ${{ secrets.SIGN_KEYID }}
-          SIGN_KEY: ${{ secrets.SIGN_KEY }}
-          SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
       - name: Publish the library
         uses: gradle/gradle-build-action@v2
         with:
           arguments: enioka_scan:publish
         env:
           RUN_ID: ${{ github.run_id }}
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
+          OSSRH_LOGIN: ${{ secrets.OSSRH_LOGIN }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          SIGN_KEYID: ${{ secrets.SIGN_KEYID }}
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}

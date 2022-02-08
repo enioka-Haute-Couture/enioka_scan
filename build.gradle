@@ -1,22 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-buildscript {
-    repositories {
-        jcenter()
-        google()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.1'
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-plugins {
-    id 'maven-publish'
-}
-
 def excludedSubprojects = []
 ["Honeywell", "Koamtac", "Zebra", "M3"].each { sdkName ->
     def propertyName = "with" + sdkName
@@ -33,38 +16,23 @@ def excludedSubprojects = []
 }
 
 gradle.taskGraph.whenReady {
-  gradle.taskGraph.allTasks.each {
-    if(it.project.name in excludedSubprojects) {
-      it.onlyIf { false }
+    gradle.taskGraph.allTasks.each {
+        if(it.project.name in excludedSubprojects) {
+            it.onlyIf { false }
+        }
     }
-  }
 }
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            pom {
-                name = 'Enioka Scan'
-                description = 'A library that makes the integration of all barcode scanners easy in any Android application, avoiding vendor lock-in and lowering the cost of advanced scanner integration.'
-                url = 'https://github.com/enioka/enioka_scan'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-            }
-        }
-    }
+buildscript {
     repositories {
-        maven {
-            name = "OSSRH"
-            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
-            }
-        }
+        jcenter()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.1.1'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
     }
 }
 

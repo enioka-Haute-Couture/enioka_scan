@@ -12,7 +12,7 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      - name: Set up Gradle
-        uses: gradle/gradle-build-action@v2
       - name: Build and test with Gradle
-        uses: ./gradlew build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build

@@ -12,7 +12,7 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      - name: Build and test with Gradle
+      - name: Build and test
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build

@@ -15,17 +15,19 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
-      - name: Set up Gradle
+      - name: Build the release package
         uses: gradle/gradle-build-action@v2
-      - name: Build the library
-        uses: ./gradlew assembleRelease
+        with:
+          arguments: enioka_scan:assembleRelease
         env:
-          SIGN_STOREFILE: ${{ secrets.SIGN_STOREFILE }}
-          SIGN_STOREPASSWORD: ${{ secrets.SIGN_STOREPASSWORD }}
-          SIGN_KEYALIAS: ${{ secrets.SIGN_KEYALIAS }}
-          SIGN_KEYPASSWORD: ${{ secrets.SIGN_KEYPASSWORD }}
+          SIGN_KEYID: ${{ secrets.SIGN_KEYID }}
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
       - name: Publish the library
-        uses: ./gradlew publish
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: enioka_scan:publish
         env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          RUN_ID: ${{ github.run_id }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}

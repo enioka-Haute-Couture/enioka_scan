@@ -17,7 +17,14 @@ jobs:
           distribution: 'adopt'
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
-      - name: Build and test with Gradle
+      - name: Build the library
+        uses: ./gradlew assembleRelease
+        env:
+          SIGN_STOREFILE: ${{ secrets.SIGN_STOREFILE }}
+          SIGN_STOREPASSWORD: ${{ secrets.SIGN_STOREPASSWORD }}
+          SIGN_KEYALIAS: ${{ secrets.SIGN_KEYALIAS }}
+          SIGN_KEYPASSWORD: ${{ secrets.SIGN_KEYPASSWORD }}
+      - name: Publish the library
         uses: ./gradlew publish
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}

@@ -1,4 +1,4 @@
-name: Testsuite
+name: Test
 
 on: [ push ]
 
@@ -6,7 +6,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Set up environment
         uses: actions/setup-java@v2
         with:

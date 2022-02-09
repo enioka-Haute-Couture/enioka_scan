@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  create:
+    tags: '*'
+    branches: master
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Get tag version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+      - name: Set up environment
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Build and test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: enioka_scan:build
+      - name: Publish the library to MavenCentral
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: enioka_scan:publish
+        env:
+          OSSRH_LOGIN: ${{ secrets.OSSRH_LOGIN }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          SIGN_KEYID: ${{ secrets.SIGN_KEYID }}
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
+          LIB_VERSION: ${{ steps.get_version.outputs.VERSION }}
+      - name: Create a release on Github
+        uses: softprops/action-gh-release@v1
+        with:
+          files: enioka_scan/build/outputs/aar/enioka_scan-release.aar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

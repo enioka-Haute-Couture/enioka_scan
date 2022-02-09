@@ -38,7 +38,7 @@ afterEvaluate {
             release(MavenPublication) {
                 groupId 'com.enioka'
                 artifactId 'scanner'
-                version '1.1.0-' + System.getenv("RUN_ID")
+                version System.getenv("LIB_VERSION")
 
                 from components.release
                 artifact androidSourcesJar

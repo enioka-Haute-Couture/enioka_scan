@@ -1,9 +1,19 @@
 package com.enioka.scanner.sdk.mock;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.support.test.InstrumentationRegistry;
+
+import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerConnectionHandler;
+import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.data.Barcode;
-import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.service.ScannerService;
+import com.enioka.scanner.service.ScannerServiceApi;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,25 +23,34 @@ import java.util.List;
 
 public class MockTest {
 
-    @Test
-    public void testStatusCallbacks(){
-        final TestScannerConnectionHandler handler = setupMock();
+    private static final Context ctx = InstrumentationRegistry.getContext();
 
-        handler.statusCallback.expectStatus = "Paused";
-        handler.mock.pause();
-        handler.statusCallback.expectStatus = "Resumed";
-        handler.mock.resume();
-        handler.statusCallback.expectDisconnected = true;
-        handler.mock.disconnect();
+    @Test
+    public void testMockRetrievableByLaserScanner(){
+        final ScannerSearchOptions options = ScannerSearchOptions.defaultOptions();
+        final TestInitCallback initCallback = new TestInitCallback();
+        final TestStatusCallback statusCallback = new TestStatusCallback();
+        final TestDataCallback dataCallback = new TestDataCallback();
+        final TestScannerConnectionHandler handler = new TestScannerConnectionHandler(initCallback, statusCallback, dataCallback);
+        LaserScanner.getLaserScanner(ctx, handler, options);
     }
 
-    @Test
-    public void testOnDataCallback(){
-        final TestScannerConnectionHandler handler = setupMock();
+    @Test(timeout = 3000)
+    public void testMockRetrievableByScannerService(){
+        final Intent serviceIntent = new Intent(ctx, ScannerService.class);
+        final TestServiceConnection serviceConnection = new TestServiceConnection();
+        ctx.startService(serviceIntent);
+        ctx.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        final Barcode barcode = new Barcode("1234ABCD", BarcodeType.CODE39);
-        handler.dataCallback.expectedData.add(barcode);
-        handler.mock.scan(barcode);
+        for (;serviceConnection.binder == null;){}
+
+        final ScannerServiceApi scannerService = serviceConnection.binder.getService();
+
+        for (;scannerService.getConnectedScanners().size() == 0;) {}
+
+        final List<Scanner> scanners = scannerService.getConnectedScanners();
+        Assert.assertEquals(1, scanners.size());
+        Assert.assertTrue(scanners.get(0) instanceof MockScanner);
     }
 
     private static class TestStatusCallback implements Scanner.ScannerStatusCallback {
@@ -98,7 +117,7 @@ public class MockTest {
         public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
             if (s instanceof MockScanner) {
                 mock = ((MockScanner) s);
-                mock.initialize(null, initCallback, dataCallback, statusCallback, null);
+                mock.initialize(ctx, initCallback, dataCallback, statusCallback, null);
             }
         }
 
@@ -111,13 +130,17 @@ public class MockTest {
         }
     }
 
-    private TestScannerConnectionHandler setupMock() {
-        final TestInitCallback initCallback = new TestInitCallback();
-        final TestStatusCallback statusCallback = new TestStatusCallback();
-        final TestDataCallback dataCallback = new TestDataCallback();
-        final TestScannerConnectionHandler handler = new TestScannerConnectionHandler(initCallback, statusCallback, dataCallback);
+    private static class TestServiceConnection implements ServiceConnection {
+        public ScannerService.LocalBinder binder;
 
-        handler.scannerCreated("MockProvider", "Mock", new MockScanner());
-        return handler;
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            binder = (ScannerService.LocalBinder) iBinder;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Assert.fail("Service disconnected");
+        }
     }
 }

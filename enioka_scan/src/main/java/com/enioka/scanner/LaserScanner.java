@@ -134,6 +134,13 @@ public final class LaserScanner {
         Log.i(LOG_TAG, "There are " + ris.size() + " scanner provider service(s) available");
 
         for (ResolveInfo ri : ris) {
+            // Bruteforce fix for issue #39 where an non-exported service is still picked up by an app with a different UID.
+            // There is no explanation as to why this behavior is even possible, I suspect the intent-filter property somehow overrides the exposed property, so another fix would be app-specific intent names.
+            if (ri.serviceInfo.applicationInfo.uid != ctx.getApplicationInfo().uid) {
+                Log.d(LOG_TAG, "Skipping candidate service " + ri.serviceInfo.name + " : does not match application UID (Service=" + ri.serviceInfo.applicationInfo.uid + " | Application=" + ctx.getApplicationInfo().uid + ")");
+                continue;
+            }
+
             ComponentName name = new ComponentName(ri.serviceInfo.packageName, ri.serviceInfo.name);
             Intent boundServiceIntent = new Intent();
             boundServiceIntent.setClassName(ctx, name.getClassName());

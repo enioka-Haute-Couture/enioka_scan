@@ -36,7 +36,7 @@ afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                groupId 'com.enioka'
+                groupId 'com.enioka.scanner'
                 artifactId 'scanner'
                 version System.getenv("LIB_VERSION")
 

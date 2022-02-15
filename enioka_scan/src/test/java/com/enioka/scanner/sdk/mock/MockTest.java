@@ -34,6 +34,11 @@ public class MockTest {
         handler.mock.scan(barcode);
     }
 
+    // TOOLS
+    // Callbacks are declared separately to avoid having to re-declare them in every test.
+    // Tests need to access their attributes to setup test values, which is not possible when
+    // using the regular Scanner.ScannerXCallback interfaces and lambda declaration.
+
     private static class TestStatusCallback implements Scanner.ScannerStatusCallback {
         public boolean expectReconnecting = false;
         public boolean expectDisconnected = false;

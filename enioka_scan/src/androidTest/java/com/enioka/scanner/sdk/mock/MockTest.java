@@ -21,7 +21,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MockTest {
+public class  MockTest {
 
     private static final Context ctx = InstrumentationRegistry.getContext();
 
@@ -73,6 +73,11 @@ public class MockTest {
             Assert.assertTrue("Unexpected call to onScannerDisconnected", expectDisconnected);
         }
     }
+
+    // TOOLS
+    // Handlers are declared separately to avoid having to re-declare them in every test.
+    // Tests need to access their attributes to setup test values, which is not possible when
+    // using the regular Scanner.ScannerXCallback interfaces and lambda declaration.
 
     private static class TestDataCallback implements Scanner.ScannerDataCallback {
         public List<Barcode> expectedData = new ArrayList<>();

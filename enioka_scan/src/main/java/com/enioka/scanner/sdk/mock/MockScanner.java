@@ -20,6 +20,7 @@ public class MockScanner implements ScannerBackground {
     static final String LOG_TAG = "MockScanner";
 
     private boolean paused = false;
+    private boolean disconnected = false;
     private boolean illuminated = false;
     private ScannerDataCallback dataCallback;
     private ScannerStatusCallback statusCallback;
@@ -33,11 +34,12 @@ public class MockScanner implements ScannerBackground {
     /**
      * Send a barcode to the scanner to trigger onData callbacks.
      * @param barcode The barcode.
+     * @throws RuntimeException When the scan method is called when the scanner is either paused or disconnected.
      */
     public void scan(final Barcode barcode) {
-        if (paused) {
-            Log.d(LOG_TAG, "Received barcode while");
-            return;
+        if (paused || disconnected) {
+            Log.d(LOG_TAG, "Received barcode while " + (paused ? "paused" : "disconnected"));
+            throw new RuntimeException("Received barcode while the scanner was " + (paused ? "paused" : "disconnected"));
         }
         Log.d(LOG_TAG, "Received barcode of type " + barcode.getBarcodeType() + ": " + barcode.getBarcode());
         final List<Barcode> barcodeList = new ArrayList<>();
@@ -66,6 +68,7 @@ public class MockScanner implements ScannerBackground {
     @Override
     public void disconnect() {
         Log.d(LOG_TAG, "Scanner disconnected");
+        disconnected = true;
         statusCallback.onScannerDisconnected(this);
     }
 

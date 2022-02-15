@@ -34,9 +34,9 @@ jobs:
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
           LIB_VERSION: ${{ steps.get_version.outputs.VERSION }}
-      - name: Create a release on Github
-        uses: softprops/action-gh-release@v1
-        with:
-          files: enioka_scan/build/outputs/aar/enioka_scan-release.aar
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #- name: Create a release on Github
+      #  uses: softprops/action-gh-release@v1
+      #  with:
+      #    files: enioka_scan/build/outputs/aar/enioka_scan-release.aar
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -34,9 +34,23 @@ jobs:
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
           LIB_VERSION: ${{ steps.get_version.outputs.VERSION }}
-      #- name: Create a release on Github
-      #  uses: softprops/action-gh-release@v1
-      #  with:
-      #    files: enioka_scan/build/outputs/aar/enioka_scan-release.aar
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create a GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          files: enioka_scan/build/outputs/aar/enioka_scan-release.aar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload AAR as GitHub release asset
+        uses: actions/upload-release-assets@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: enioka_scan/build/outputs/aar/enioka_scan-release.aar
+          asset_name: enioka_scan-release.aar
+          asset_content_type: application/android-archive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

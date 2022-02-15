@@ -11,32 +11,60 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Tests that the mock correctly reacts to inputs by calling the appropriate callbacks
+ */
 public class MockTest {
-
-    @Test
-    public void testStatusCallbacks(){
-        final TestScannerConnectionHandler handler = setupMock();
-
-        handler.statusCallback.expectStatus = "Paused";
-        handler.mock.pause();
-        handler.statusCallback.expectStatus = "Resumed";
-        handler.mock.resume();
-        handler.statusCallback.expectDisconnected = true;
-        handler.mock.disconnect();
-    }
 
     @Test
     public void testOnDataCallback(){
         final TestScannerConnectionHandler handler = setupMock();
-
         final Barcode barcode = new Barcode("1234ABCD", BarcodeType.CODE39);
+
         handler.dataCallback.expectedData.add(barcode);
         handler.mock.scan(barcode);
     }
 
+    @Test
+    public void testStatusChanges(){
+        final TestScannerConnectionHandler handler = setupMock();
+        final Barcode barcode = new Barcode("1234ABCD", BarcodeType.CODE39);
+
+        handler.statusCallback.expectStatus = "Paused";
+        handler.mock.pause();
+
+        try {
+            handler.mock.scan(barcode);
+            Assert.fail();
+        } catch (RuntimeException e) {
+            Assert.assertEquals("Received barcode while the scanner was paused", e.getMessage());
+        }
+
+        handler.statusCallback.expectStatus = "Resumed";
+        handler.mock.resume();
+
+        try {
+            handler.dataCallback.expectedData.add(barcode);
+            handler.mock.scan(barcode);
+        } catch (RuntimeException e) {
+            Assert.fail();
+        }
+
+        handler.statusCallback.expectDisconnected = true;
+        handler.mock.disconnect();
+
+        try {
+            handler.dataCallback.expectedData = new ArrayList<>();
+            handler.statusCallback.expectStatus = "";
+            handler.mock.scan(barcode);
+            Assert.fail();
+        } catch (RuntimeException e) {
+            Assert.assertEquals("Received barcode while the scanner was disconnected", e.getMessage());
+        }
+    }
+
     // TOOLS
-    // Callbacks are declared separately to avoid having to re-declare them in every test.
-    // Tests need to access their attributes to setup test values, which is not possible when
+    // Tests need to access callback attributes to setup test values, which is not possible when
     // using the regular Scanner.ScannerXCallback interfaces and lambda declaration.
 
     private static class TestStatusCallback implements Scanner.ScannerStatusCallback {
@@ -96,10 +124,6 @@ public class MockTest {
         }
 
         @Override
-        public void scannerConnectionProgress(String providerKey, String scannerKey, String message) {
-        }
-
-        @Override
         public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
             if (s instanceof MockScanner) {
                 mock = ((MockScanner) s);
@@ -108,12 +132,11 @@ public class MockTest {
         }
 
         @Override
-        public void noScannerAvailable() {
-        }
-
+        public void scannerConnectionProgress(String providerKey, String scannerKey, String message) {}
         @Override
-        public void endOfScannerSearch() {
-        }
+        public void noScannerAvailable() {}
+        @Override
+        public void endOfScannerSearch() {}
     }
 
     private TestScannerConnectionHandler setupMock() {

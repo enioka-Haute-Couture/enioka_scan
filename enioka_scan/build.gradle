@@ -28,10 +28,6 @@ task androidSourcesJar(type: Jar) {
     from android.sourceSets.main.kotlin.srcDirs
 }
 
-artifacts {
-    archives androidSourcesJar
-}
-
 afterEvaluate {
     publishing {
         publications {
@@ -41,8 +37,6 @@ afterEvaluate {
                 version System.getenv("LIB_VERSION")
 
                 from components.release
-                artifact bundleReleaseAar
-                artifact androidSourcesJar
 
                 pom {
                     name = 'Enioka Scan'

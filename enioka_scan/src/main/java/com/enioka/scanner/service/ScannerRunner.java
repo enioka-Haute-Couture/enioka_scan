@@ -1,13 +1,10 @@
 package com.enioka.scanner.service;
 
 import android.app.Activity;
-import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.LaserScanner;
@@ -30,14 +27,18 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * A runnable class handling all the different scanner life cycles. Should be instantiated and started in a thread by the clients requiring it.
+ * This class replaces {@link ScannerService}.
  * A bound service handling all the different scanner life cycles. Should usually be bound to the app itself.<br><br>
- * Note that the public API of this service is described in {@link ScannerServiceApi}, which the type obtained by binding to this service.
+ * Note that the public API of this service is described in {@link ScannerServiceApi}, which the type this class this class is used as.
  * The other methods of this class should not be accessed by clients.
  */
-@Deprecated
-public class ScannerService extends Service implements ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerServiceApi {
+public class ScannerRunner implements Runnable, ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerServiceApi {
 
     protected final static String LOG_TAG = "ScannerService";
+
+    private final Context context;
+    private final Intent intent;
 
     private Handler uiHandler;
     private boolean firstBind = true;
@@ -77,28 +78,35 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
      */
     private final ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions().getAllAvailableScanners();
 
+    public static ScannerServiceApi getScannerRunner(Context context, Intent intent) {
+        return new ScannerRunner(context, intent);
+    }
+
+    private ScannerRunner(Context context, Intent intent) {
+        this.context = context;
+        this.intent = intent;
+        uiHandler = new Handler(context.getApplicationContext().getMainLooper());
+    }
+
+    @Override
+    public void run() {
+        configure(intent);
+    }
+
     private interface EndOfInitCallback {
         void run();
     }
 
 
     ////////////////////////////////////////////////////////////////////////////
-    // SERVICE BIND
+    // SETUP
     ////////////////////////////////////////////////////////////////////////////
 
     /**
-     * We only allow app-local bind.
+     * Configuration of the ScannerService. Only called once.
+     * @param intent The intent (legacy compatibility) containing the search options. // TODO replace with ScannerSearchOption parameter.
      */
-    public class LocalBinder extends Binder {
-        public ScannerServiceApi getService() {
-            // Return this instance of ScannerService so clients can call public methods
-            return ScannerService.this;
-        }
-    }
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
+    public void configure(Intent intent) {
         Bundle extras = intent.getExtras();
         if (extras != null) {
             scannerSearchOptions.useBlueTooth = extras.getBoolean(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, scannerSearchOptions.useBlueTooth);
@@ -122,28 +130,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
             this.initLaserScannerSearch();
         }
         firstBind = false;
-        return new LocalBinder();
     }
-
-
-    ////////////////////////////////////////////////////////////////////////////
-    // SERVICE LIFECYCLE
-    ////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void onCreate() {
-        Log.i(LOG_TAG, "Starting scanner service");
-        super.onCreate();
-        uiHandler = new Handler(getApplicationContext().getMainLooper());
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.i(LOG_TAG, "Destroying scanner service");
-        this.disconnect();
-        super.onDestroy();
-    }
-
 
     ////////////////////////////////////////////////////////////////////////////
     // SCANNER PROVIDER CONNECTION HANDLERS
@@ -155,7 +142,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     }
 
     protected synchronized void initLaserScannerSearch() {
-        LaserScanner.getLaserScanner(this.getApplicationContext(), this, scannerSearchOptions);
+        LaserScanner.getLaserScanner(context, this, scannerSearchOptions);
     }
 
     @Override
@@ -169,7 +156,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
         if (s instanceof ScannerBackground) {
             initializingScannersCount.incrementAndGet();
-            ((ScannerBackground) s).initialize(this.getApplicationContext(), this, this, this, Scanner.Mode.BATCH);
+            ((ScannerBackground) s).initialize(context, this, this, this, Scanner.Mode.BATCH);
         } else {
             Log.i(LOG_TAG, "This is a foreground scanner");
             // If foreground, only init it when we have an active activity.
@@ -181,14 +168,14 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void noScannerAvailable() {
-        onStatusChanged(getResources().getString(R.string.scanner_service_no_compatible_sdk));
+        onStatusChanged(context.getResources().getString(R.string.scanner_service_no_compatible_sdk));
         checkInitializationEnd();
     }
 
     @Override
     public void endOfScannerSearch() {
         Log.i(LOG_TAG, scanners.size() + " scanners from the different SDKs have reported for duty. Waiting for the initialization of the " + (scanners.size() - foregroundScanners.size()) + " background scanners.");
-        onStatusChanged(getResources().getString(R.string.scanner_service_sdk_search_end));
+        onStatusChanged(context.getResources().getString(R.string.scanner_service_sdk_search_end));
         checkInitializationEnd();
     }
 
@@ -201,7 +188,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     public void onConnectionSuccessful(Scanner s) {
         Log.i(LOG_TAG, "A scanner has successfully initialized from provider " + s.getProviderKey());
         this.scanners.add(s);
-        onStatusChanged(getResources().getString(R.string.scanner_status_initialized));
+        onStatusChanged(context.getResources().getString(R.string.scanner_status_initialized));
         initializingScannersCount.decrementAndGet();
         checkInitializationEnd();
     }
@@ -209,7 +196,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Override
     public void onConnectionFailure(Scanner s) {
         Log.i(LOG_TAG, "A scanner has failed to initialize from provider " + s.getProviderKey());
-        onStatusChanged(getResources().getString(R.string.scanner_status_initialization_failure));
+        onStatusChanged(context.getResources().getString(R.string.scanner_status_initialization_failure));
         initializingScannersCount.decrementAndGet();
         checkInitializationEnd();
     }
@@ -245,7 +232,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         uiHandler.post(new Runnable() {
             @Override
             public void run() {
-                for (BackgroundScannerClient client : ScannerService.this.clients) {
+                for (BackgroundScannerClient client : ScannerRunner.this.clients) {
                     client.onStatusChanged(newStatus);
                 }
             }
@@ -300,23 +287,23 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
                     }
                 });
                 for (ScannerForeground sf : foregroundScanners) {
-                    ScannerService.this.initializingScannersCount.addAndGet(1);
-                    sf.initialize(activity, ScannerService.this, ScannerService.this, ScannerService.this, Scanner.Mode.SINGLE_SCAN);
+                    ScannerRunner.this.initializingScannersCount.addAndGet(1);
+                    sf.initialize(activity, ScannerRunner.this, ScannerRunner.this, ScannerRunner.this, Scanner.Mode.SINGLE_SCAN);
                 }
             } else {
                 this.endOfInitCallbacks.add(new EndOfInitCallback() {
                     @Override
                     public void run() {
                         Log.i(LOG_TAG, "Initializing all foreground scanners");
-                        ScannerService.this.endOfInitCallbacks.add(new EndOfInitCallback() {
+                        ScannerRunner.this.endOfInitCallbacks.add(new EndOfInitCallback() {
                             @Override
                             public void run() {
                                 client.onForegroundScannerInitEnded(foregroundScanners.size(), scanners.size() - foregroundScanners.size());
                             }
                         });
                         for (ScannerForeground sf : foregroundScanners) {
-                            ScannerService.this.initializingScannersCount.addAndGet(1);
-                            sf.initialize(activity, ScannerService.this, ScannerService.this, ScannerService.this, Scanner.Mode.SINGLE_SCAN);
+                            ScannerRunner.this.initializingScannersCount.addAndGet(1);
+                            sf.initialize(activity, ScannerRunner.this, ScannerRunner.this, ScannerRunner.this, Scanner.Mode.SINGLE_SCAN);
                         }
                     }
                 });

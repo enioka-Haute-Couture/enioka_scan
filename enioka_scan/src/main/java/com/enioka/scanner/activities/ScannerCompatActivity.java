@@ -35,9 +35,12 @@ import com.enioka.scanner.sdk.camera.CameraBarcodeScanViewScanner;
 import com.enioka.scanner.service.ForegroundScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
+import com.enioka.scanner.service.ScannerRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * A helper activity which implements all scan functions: laser, camera, HID.<br><br>Basic usage is trivial : just inherit this class, and that's all.<br>
@@ -118,6 +121,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     /**
      * Actual access to the scanners.
      */
+    private ExecutorService executor;
     private ScannerServiceApi scannerService;
     private boolean serviceBound = false;
 
@@ -180,13 +184,18 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         }
 
         // Bind to ScannerService service
-        Intent intent = new Intent(this, ScannerService.class);
+        Intent intent = new Intent(this, ScannerRunner.class); // was ScannerService.class, deprecated
         intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, useBluetooth);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, useBluetooth);
         //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"BtSppSdk"});
         //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, true);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        //bindService(intent, connection, Context.BIND_AUTO_CREATE); // deprecated
+        scannerService = ScannerRunner.getScannerRunner(this.getApplicationContext(), intent);
+        scannerService.takeForegroundControl(ScannerCompatActivity.this, ScannerCompatActivity.this);
+        serviceBound = true;
+        executor = Executors.newSingleThreadExecutor();
+        executor.execute((Runnable) scannerService);
     }
 
     /**
@@ -271,8 +280,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     protected void onDestroy() {
         Log.i(LOG_TAG, "Scanner activity is being destroyed");
         super.onDestroy();
-        unbindService(connection);
+        //unbindService(connection); // deprecated
+        executor.shutdownNow();
+        scannerService.disconnect();
         serviceBound = false;
+        scannerService = null; // new
     }
 
     private void setViewContent() {

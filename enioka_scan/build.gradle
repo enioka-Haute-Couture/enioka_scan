@@ -41,6 +41,7 @@ afterEvaluate {
                 version System.getenv("LIB_VERSION")
 
                 from components.release
+                artifact bundleReleaseAar
                 artifact androidSourcesJar
 
                 pom {

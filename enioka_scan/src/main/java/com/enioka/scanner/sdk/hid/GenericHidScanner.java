@@ -25,14 +25,14 @@ public class GenericHidScanner implements ScannerForeground {
     private ScannerDataCallback dataCb;
 
     @Override
-    public void initialize(Activity ctx, ScannerInitCallback cb0, final ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
-        this.dataCb = cb1;
+    public void initialize(Activity ctx, ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, ScannerStatusCallback statusCallback, Mode mode) {
+        this.dataCb = dataCallback;
 
         // Register an OnKeyListener onto the Activity root view, if any.
         View rootParentView = ctx.findViewById(android.R.id.content);
 
         if (rootParentView == null) {
-            cb0.onConnectionFailure(this);
+            initCallback.onConnectionFailure(this);
             Log.w(LOG_TAG, "Tried to listen to a HID but no view is available - only views allow to listen to key presses");
         }
 
@@ -69,7 +69,7 @@ public class GenericHidScanner implements ScannerForeground {
         });
 
         Log.i(LOG_TAG, "HID scanner initialized");
-        cb0.onConnectionSuccessful(this);
+        initCallback.onConnectionSuccessful(this);
     }
 
     @Override

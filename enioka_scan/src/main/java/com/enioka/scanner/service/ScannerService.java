@@ -5,7 +5,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -19,6 +18,10 @@ import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.helpers.ScannerConnectionHandlerProxy;
+import com.enioka.scanner.helpers.ScannerDataCallbackProxy;
+import com.enioka.scanner.helpers.ScannerInitCallbackProxy;
+import com.enioka.scanner.helpers.ScannerStatusCallbackProxy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,7 +41,6 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     protected final static String LOG_TAG = "ScannerService";
 
-    private Handler uiHandler;
     private boolean firstBind = true;
 
     /**
@@ -133,7 +135,6 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     public void onCreate() {
         Log.i(LOG_TAG, "Starting scanner service");
         super.onCreate();
-        uiHandler = new Handler(getApplicationContext().getMainLooper());
     }
 
     @Override
@@ -154,7 +155,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     }
 
     protected synchronized void initLaserScannerSearch() {
-        LaserScanner.getLaserScanner(this.getApplicationContext(), this, scannerSearchOptions);
+        LaserScanner.getLaserScanner(this.getApplicationContext(), new ScannerConnectionHandlerProxy(this), scannerSearchOptions);
     }
 
     @Override
@@ -168,7 +169,11 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
         if (s instanceof ScannerBackground) {
             initializingScannersCount.incrementAndGet();
-            ((ScannerBackground) s).initialize(this.getApplicationContext(), this, this, this, Scanner.Mode.BATCH);
+            ((ScannerBackground) s).initialize(this.getApplicationContext(),
+                    new ScannerInitCallbackProxy(ScannerService.this),
+                    new ScannerDataCallbackProxy(ScannerService.this),
+                    new ScannerStatusCallbackProxy(ScannerService.this),
+                    Scanner.Mode.BATCH);
         } else {
             Log.i(LOG_TAG, "This is a foreground scanner");
             // If foreground, only init it when we have an active activity.
@@ -241,14 +246,9 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Override
     public void onStatusChanged(final String newStatus) {
         Log.d(LOG_TAG, "Status change: " + newStatus);
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                for (BackgroundScannerClient client : ScannerService.this.clients) {
-                    client.onStatusChanged(newStatus);
-                }
-            }
-        });
+        for (BackgroundScannerClient client : ScannerService.this.clients) {
+            client.onStatusChanged(newStatus);
+        }
     }
 
     @Override
@@ -300,7 +300,11 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
                 });
                 for (ScannerForeground sf : foregroundScanners) {
                     ScannerService.this.initializingScannersCount.addAndGet(1);
-                    sf.initialize(activity, ScannerService.this, ScannerService.this, ScannerService.this, Scanner.Mode.SINGLE_SCAN);
+                    sf.initialize(activity,
+                            new ScannerInitCallbackProxy(ScannerService.this),
+                            new ScannerDataCallbackProxy(ScannerService.this),
+                            new ScannerStatusCallbackProxy(ScannerService.this),
+                            Scanner.Mode.SINGLE_SCAN);
                 }
             } else {
                 this.endOfInitCallbacks.add(new EndOfInitCallback() {
@@ -315,7 +319,11 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
                         });
                         for (ScannerForeground sf : foregroundScanners) {
                             ScannerService.this.initializingScannersCount.addAndGet(1);
-                            sf.initialize(activity, ScannerService.this, ScannerService.this, ScannerService.this, Scanner.Mode.SINGLE_SCAN);
+                            sf.initialize(activity,
+                                    new ScannerInitCallbackProxy(ScannerService.this),
+                                    new ScannerDataCallbackProxy(ScannerService.this),
+                                    new ScannerStatusCallbackProxy(ScannerService.this),
+                                    Scanner.Mode.SINGLE_SCAN);
                         }
                     }
                 });

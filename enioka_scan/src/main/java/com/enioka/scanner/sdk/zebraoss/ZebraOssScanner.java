@@ -1,7 +1,6 @@
 package com.enioka.scanner.sdk.zebraoss;
 
 import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
 
 import com.enioka.scanner.R;
@@ -186,8 +185,6 @@ class ZebraOssScanner implements ScannerBackground {
     public void initialize(final Context applicationContext, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
         this.dataCallback = dataCallback;
 
-        final Handler uiHandler = new Handler(applicationContext.getMainLooper());
-
         // Hook connection / disconnection events
         this.btScanner.registerStatusCallback(new Scanner.SppScannerStatusCallback() {
             @Override
@@ -214,12 +211,7 @@ class ZebraOssScanner implements ScannerBackground {
             public void onSuccess(final Barcode data) {
                 final List<Barcode> res = new ArrayList<>(1);
                 res.add(data);
-                uiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        ZebraOssScanner.this.dataCallback.onData(ZebraOssScanner.this, res);
-                    }
-                });
+                ZebraOssScanner.this.dataCallback.onData(ZebraOssScanner.this, res);
             }
 
             @Override

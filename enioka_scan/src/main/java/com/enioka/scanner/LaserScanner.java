@@ -19,7 +19,6 @@ import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
 import com.enioka.scanner.helpers.ProviderServiceHolder;
 import com.enioka.scanner.helpers.ProviderServiceMeta;
-import com.enioka.scanner.helpers.ScannerConnectionHandlerProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -223,7 +222,8 @@ public final class LaserScanner {
     }
 
     private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandler handler, final ScannerSearchOptions options) {
-        final ScannerConnectionHandler handlerProxy = new ScannerConnectionHandlerProxy(handler);
+        // Handler is now directly passed as a proxy
+        //final ScannerConnectionHandler handlerProxy = new ScannerConnectionHandlerProxy(handler);
 
         if (options.useBlueTooth) {
             btRegistry.register(ctx);
@@ -232,8 +232,8 @@ public final class LaserScanner {
         // Trivial
         if (providerServices.isEmpty()) {
             Log.i(LOG_TAG, "There are no laser scanners available at all");
-            handlerProxy.noScannerAvailable();
-            handlerProxy.endOfScannerSearch();
+            handler.noScannerAvailable();
+            handler.endOfScannerSearch();
             return;
         }
 
@@ -253,7 +253,7 @@ public final class LaserScanner {
         }
 
         providersHavingAnswered.drainPermits();
-        final ScannerProvider.ProviderCallback providerCallback = getProviderCallback(handlerProxy, options);
+        final ScannerProvider.ProviderCallback providerCallback = getProviderCallback(handler, options);
 
         // Interrogate all providers, grouped by priority. (higher priority comes first).
         Log.i(LOG_TAG, "There are " + providersExpectedToAnswerCount + " providers which are going to be invoked for fresh laser scanners");

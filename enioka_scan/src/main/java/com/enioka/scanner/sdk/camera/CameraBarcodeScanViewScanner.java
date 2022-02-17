@@ -38,9 +38,9 @@ public class CameraBarcodeScanViewScanner implements ScannerForeground, CameraBa
     }
 
     @Override
-    public void initialize(Activity ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
+    public void initialize(Activity ctx, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, ScannerStatusCallback statusCallback, Mode mode) {
         // Do nothing. The camera view implementation is special, as it is built directly and not through the LaserScanner.
-        cb0.onConnectionSuccessful(this);
+        initCallback.onConnectionSuccessful(this);
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
+import com.enioka.scanner.helpers.ScannerSppStatusCallbackProxy;
 import com.enioka.scanner.sdk.zebraoss.SsiParser;
 
 import java.io.Closeable;
@@ -50,7 +51,6 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
     private ScannerDataParser inputHandler;
 
     private SppScannerStatusCallback statusCallback;
-    private Handler uiHandler = new Handler(Looper.getMainLooper());
 
     /**
      * All the callbacks which are registered to run on received data (post-parsing). Key is data class name.
@@ -219,24 +219,14 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             Log.w(LOG_TAG, "Reconnection will not be attempted as it was a master device - the device itself should reconnect.");
             this.parentProvider.resetListener(BluetoothAdapter.getDefaultAdapter());
             if (this.statusCallback != null) {
-                uiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        ClassicBtSppScanner.this.statusCallback.onScannerDisconnected();
-                    }
-                });
+                this.statusCallback.onScannerDisconnected();
             }
             return;
         }
 
         Log.w(LOG_TAG, "This is a slave device, attempting reconnection");
         if (this.statusCallback != null) {
-            uiHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    ClassicBtSppScanner.this.statusCallback.onScannerReconnecting();
-                }
-            });
+            this.statusCallback.onScannerReconnecting();
         }
 
         // We choose to disable master connection if socket is still open - that way devices which are both master and slave will not reconnect the "wrong" way.
@@ -266,12 +256,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                 connectStreams();
 
                 if (ClassicBtSppScanner.this.statusCallback != null) {
-                    uiHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ClassicBtSppScanner.this.statusCallback.onScannerConnected();
-                        }
-                    });
+                    ClassicBtSppScanner.this.statusCallback.onScannerConnected();
                 }
             }
 
@@ -284,12 +269,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                 } else {
                     Log.w(LOG_TAG, "Giving up on dead scanner " + ClassicBtSppScanner.this.name);
                     if (ClassicBtSppScanner.this.statusCallback != null) {
-                        uiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                ClassicBtSppScanner.this.statusCallback.onScannerDisconnected();
-                            }
-                        });
+                        ClassicBtSppScanner.this.statusCallback.onScannerDisconnected();
                     }
                 }
             }
@@ -331,7 +311,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
 
     @Override
     public void registerStatusCallback(SppScannerStatusCallback statusCallback) {
-        this.statusCallback = statusCallback;
+        this.statusCallback = new ScannerSppStatusCallbackProxy(statusCallback);
     }
 
     void handleInputBuffer(byte[] buffer, int offset, int length) {
@@ -339,7 +319,8 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         while (read < length) {
             read = handleInputBufferLoop(buffer, read, length) + 1;
             if (read < length) {
-                Log.d(LOG_TAG, "The buffer contains multiple tokens - a loop will happen starting at position " + read + " until " + length);
+                // Commented out, generates too much output during debug
+                //Log.d(LOG_TAG, "The buffer contains multiple tokens - a loop will happen starting at position " + read + " until " + length);
             }
         }
     }
@@ -384,7 +365,8 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             }
             this.outputStreamWriter.endOfCommand();
         } else {
-            Log.d(LOG_TAG, "Data was not interpreted yet as we are expecting more data");
+            // Commented out, generates too much output during debug
+            //Log.d(LOG_TAG, "Data was not interpreted yet as we are expecting more data");
             if (res.acknowledger != null) {
                 this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
             }

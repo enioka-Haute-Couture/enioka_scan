@@ -1,7 +1,6 @@
 package com.enioka.scanner.sdk.postech;
 
 import android.content.Context;
-import android.os.Handler;
 
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
@@ -42,8 +41,6 @@ class PostechSppScanner implements ScannerBackground {
     public void initialize(final Context applicationContext, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
         this.dataCallback = dataCallback;
 
-        final Handler uiHandler = new Handler(applicationContext.getMainLooper());
-
         this.btScanner.registerStatusCallback(new Scanner.SppScannerStatusCallback() {
             @Override
             public void onScannerConnected() {
@@ -68,12 +65,7 @@ class PostechSppScanner implements ScannerBackground {
             public void onSuccess(final Barcode data) {
                 final List<Barcode> res = new ArrayList<>(1);
                 res.add(data);
-                uiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        PostechSppScanner.this.dataCallback.onData(PostechSppScanner.this, res);
-                    }
-                });
+                PostechSppScanner.this.dataCallback.onData(PostechSppScanner.this, res);
 
             }
 

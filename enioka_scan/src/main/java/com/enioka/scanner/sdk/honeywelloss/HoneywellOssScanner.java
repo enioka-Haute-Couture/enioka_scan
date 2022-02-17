@@ -167,8 +167,6 @@ class HoneywellOssScanner implements ScannerBackground {
     public void initialize(final Context applicationContext, final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
         this.dataCallback = dataCallback;
 
-        final Handler uiHandler = new Handler(applicationContext.getMainLooper());
-
         this.btScanner.registerStatusCallback(new Scanner.SppScannerStatusCallback() {
             @Override
             public void onScannerConnected() {
@@ -193,12 +191,7 @@ class HoneywellOssScanner implements ScannerBackground {
             public void onSuccess(final Barcode data) {
                 final List<Barcode> res = new ArrayList<>(1);
                 res.add(data);
-                uiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        HoneywellOssScanner.this.dataCallback.onData(HoneywellOssScanner.this, res);
-                    }
-                });
+                HoneywellOssScanner.this.dataCallback.onData(HoneywellOssScanner.this, res);
             }
 
             @Override

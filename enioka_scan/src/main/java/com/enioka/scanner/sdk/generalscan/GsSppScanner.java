@@ -8,6 +8,9 @@ import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.helpers.ScannerDataCallbackProxy;
+import com.enioka.scanner.helpers.ScannerInitCallbackProxy;
+import com.enioka.scanner.helpers.ScannerStatusCallbackProxy;
 import com.enioka.scanner.sdk.generalscan.commands.Bell;
 import com.enioka.scanner.sdk.generalscan.commands.CloseRead;
 import com.enioka.scanner.sdk.generalscan.commands.EnableBarcodeSuffix;
@@ -38,7 +41,7 @@ class GsSppScanner implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void initialize(final Context applicationContext, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, ScannerInitCallbackProxy initCallback, ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, Mode mode) {
         this.dataCallback = dataCallback;
 
         this.btScanner.registerStatusCallback(new Scanner.SppScannerStatusCallback() {
@@ -89,7 +92,7 @@ class GsSppScanner implements ScannerBackground {
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCallback = cb;
     }
 

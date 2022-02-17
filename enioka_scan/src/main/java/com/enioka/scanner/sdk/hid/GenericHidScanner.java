@@ -7,10 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.enioka.scanner.api.Color;
-import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.helpers.ScannerDataCallbackProxy;
+import com.enioka.scanner.helpers.ScannerInitCallbackProxy;
+import com.enioka.scanner.helpers.ScannerStatusCallbackProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,10 +24,10 @@ public class GenericHidScanner implements ScannerForeground {
 
     private String keyboardInput = "";
     private boolean paused = false;
-    private ScannerDataCallback dataCb;
+    private ScannerDataCallbackProxy dataCb;
 
     @Override
-    public void initialize(Activity ctx, ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(Activity ctx, ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, ScannerStatusCallbackProxy statusCallback, Mode mode) {
         this.dataCb = dataCallback;
 
         // Register an OnKeyListener onto the Activity root view, if any.
@@ -73,7 +75,7 @@ public class GenericHidScanner implements ScannerForeground {
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCb = cb;
     }
 

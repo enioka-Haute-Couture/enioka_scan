@@ -1,6 +1,7 @@
 package com.enioka.scanner.api;
 
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.helpers.ScannerDataCallbackProxy;
 
 import java.util.List;
 import java.util.Map;
@@ -93,7 +94,7 @@ public interface Scanner {
      *
      * @param cb a callback to call when data is read.
      */
-    void setDataCallBack(ScannerDataCallback cb);
+    void setDataCallBack(ScannerDataCallbackProxy cb);
 
     /**
      * Disconnect scanner from the App (the app does not need the scanner anymore)

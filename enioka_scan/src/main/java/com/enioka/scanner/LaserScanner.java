@@ -12,13 +12,13 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
 import com.enioka.scanner.helpers.ProviderServiceHolder;
 import com.enioka.scanner.helpers.ProviderServiceMeta;
+import com.enioka.scanner.helpers.ScannerConnectionHandlerProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -191,7 +191,7 @@ public final class LaserScanner {
      * @param handler the callback.
      * @param options parameters for scanner search.
      */
-    public static void getLaserScanner(final Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+    public static void getLaserScanner(final Context ctx, final ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
         if (providerServices.isEmpty()) {
             getProviders(ctx, new OnProvidersDiscovered() {
                 @Override
@@ -221,10 +221,7 @@ public final class LaserScanner {
         return true;
     }
 
-    private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandler handler, final ScannerSearchOptions options) {
-        // Handler is now directly passed as a proxy
-        //final ScannerConnectionHandler handlerProxy = new ScannerConnectionHandlerProxy(handler);
-
+    private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
         if (options.useBlueTooth) {
             btRegistry.register(ctx);
         }
@@ -300,7 +297,7 @@ public final class LaserScanner {
         }
     }
 
-    private static ScannerProvider.ProviderCallback getProviderCallback(final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+    private static ScannerProvider.ProviderCallback getProviderCallback(final ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
         return new ScannerProvider.ProviderCallback() {
             @Override
             public void onScannerCreated(String providerKey, String scannerKey, Scanner s) {

@@ -9,6 +9,9 @@ import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.helpers.ScannerDataCallbackProxy;
+import com.enioka.scanner.helpers.ScannerInitCallbackProxy;
+import com.enioka.scanner.helpers.ScannerStatusCallbackProxy;
 import com.enioka.scanner.sdk.zebraoss.commands.Beep;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOn;
@@ -32,7 +35,7 @@ import java.util.concurrent.Semaphore;
 class ZebraOssScanner implements ScannerBackground {
     private static final String LOG_TAG = "SsiParser";
 
-    private ScannerDataCallback dataCallback = null;
+    private ScannerDataCallbackProxy dataCallback = null;
     private final com.enioka.scanner.bt.api.Scanner btScanner;
     private final Map<String, String> statusCache = new HashMap<>();
 
@@ -46,7 +49,7 @@ class ZebraOssScanner implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCallback = cb;
     }
 
@@ -182,7 +185,7 @@ class ZebraOssScanner implements ScannerBackground {
     }
 
     @Override
-    public void initialize(final Context applicationContext, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, ScannerInitCallbackProxy initCallback, ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, Mode mode) {
         this.dataCallback = dataCallback;
 
         // Hook connection / disconnection events

@@ -22,7 +22,7 @@
                 <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
             </intent-filter>
         </service>
-<!--
+
         <service
             android:name=".sdk.zebraoss.ZebraOssSppScannerProvider"
             android:description="@string/service_description"
@@ -42,7 +42,7 @@
                 <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
             </intent-filter>
         </service>
--->
+
         <!-- DISABLED: never tested, so rather incomplete and likely buggy.
         <service
             android:name=".sdk.postech.PostechSppScannerProvider"
@@ -55,7 +55,7 @@
         </service> -->
 
         <!-- Other scanner providers -->
-<!--
+
         <service
             android:name=".sdk.hid.GenericHidProvider"
             android:description="@string/service_description"
@@ -98,7 +98,7 @@
                 <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
             </intent-filter>
         </service>
--->
+
         <service
             android:name=".bt.manager.SerialBtScannerProvider"
             android:description="@string/service_description"

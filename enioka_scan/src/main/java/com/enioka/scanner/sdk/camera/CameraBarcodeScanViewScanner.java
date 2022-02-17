@@ -8,6 +8,9 @@ import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.helpers.ScannerDataCallbackProxy;
+import com.enioka.scanner.helpers.ScannerInitCallbackProxy;
+import com.enioka.scanner.helpers.ScannerStatusCallbackProxy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,13 +41,13 @@ public class CameraBarcodeScanViewScanner implements ScannerForeground, CameraBa
     }
 
     @Override
-    public void initialize(Activity ctx, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(Activity ctx, ScannerInitCallbackProxy initCallback, ScannerDataCallbackProxy dataCallback, ScannerStatusCallbackProxy statusCallback, Mode mode) {
         // Do nothing. The camera view implementation is special, as it is built directly and not through the LaserScanner.
         initCallback.onConnectionSuccessful(this);
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         //
     }
 

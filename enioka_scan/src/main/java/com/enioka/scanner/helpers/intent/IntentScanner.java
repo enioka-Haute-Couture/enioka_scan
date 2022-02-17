@@ -12,11 +12,13 @@ import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.helpers.ScannerDataCallbackProxy;
+import com.enioka.scanner.helpers.ScannerInitCallbackProxy;
+import com.enioka.scanner.helpers.ScannerStatusCallbackProxy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -50,13 +52,13 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     // LIFE CYCLE
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    protected Scanner.ScannerDataCallback dataCb = null;
-    protected Scanner.ScannerStatusCallback statusCb = null;
+    protected ScannerDataCallbackProxy dataCb = null;
+    protected ScannerStatusCallbackProxy statusCb = null;
     protected Scanner.Mode mode;
 
 
     @Override
-    public void initialize(Context ctx, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(Context ctx, ScannerInitCallbackProxy initCallback, ScannerDataCallbackProxy dataCallback, ScannerStatusCallbackProxy statusCallback, Mode mode) {
         this.dataCb = dataCallback;
         this.statusCb = statusCallback;
         this.mode = mode;
@@ -104,7 +106,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCb = cb;
     }
 

@@ -9,6 +9,9 @@ import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.helpers.ScannerDataCallbackProxy;
+import com.enioka.scanner.helpers.ScannerInitCallbackProxy;
+import com.enioka.scanner.helpers.ScannerStatusCallbackProxy;
 import com.enioka.scanner.sdk.honeywelloss.commands.ActivateTrigger;
 import com.enioka.scanner.sdk.honeywelloss.commands.Beep;
 import com.enioka.scanner.sdk.honeywelloss.commands.DeactivateTrigger;
@@ -25,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 class HoneywellOssScanner implements ScannerBackground {
-    private ScannerDataCallback dataCallback = null;
+    private ScannerDataCallbackProxy dataCallback = null;
     private final Scanner btScanner;
 
     HoneywellOssScanner(Scanner btScanner) {
@@ -38,7 +41,7 @@ class HoneywellOssScanner implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCallback = cb;
     }
 
@@ -164,7 +167,7 @@ class HoneywellOssScanner implements ScannerBackground {
     }
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, Mode mode) {
         this.dataCallback = dataCallback;
 
         this.btScanner.registerStatusCallback(new Scanner.SppScannerStatusCallback() {

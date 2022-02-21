@@ -1,13 +1,17 @@
 package com.enioka.scanner.api;
 
+import android.support.annotation.Nullable;
+
 /**
+ * FIXME 21/02/2022 - Class kept as placeholder until it's decided whether individual callbacks are to be defined in it or by the user.
+ *                    Remove it if callbacks are not needed, remove Scanner.ScannerStatusCallback otherwise.
  * The interface to implement to describe a scanner's internal status and associated callbacks.
  * Replaces {@link Scanner.ScannerStatusCallback}.
  */
 public interface ScannerStatus {
     /**
      * Enum describing the scanner's lifecycle and current status.
-     * Some elements may not make sense depending on which scanner SDK is used.
+     * Some elements may not be used depending on which scanner SDK is used.
      */
     enum Status {
         /** The scanner is waiting for a connection. */
@@ -33,16 +37,18 @@ public interface ScannerStatus {
         /** The scanner is no longer available after a critical error occurred, usually during connection or initialization. */
         FAILURE,
         /** The scanner disconnected and can no longer be used. */
-        DISCONNECTED
+        DISCONNECTED,
+        /** The scanner is in an unknown status. */
+        UNKNOWN
     }
 
     /**
-     * Updates the status and its details before calling the appropriate callback.
-     * @param scanner The updated scanner.
+     * Called whenever the scanner has changed status.
+     * @param scanner The updated scanner. May be null if the scanner has not yet been created.
      * @param newStatus The new status.
      * @param statusDetails The associated status details.
      */
-    void onStatusChanged(final Scanner scanner, final Status newStatus, final String statusDetails);/* {
+    default void onStatusChanged(@Nullable final Scanner scanner, final Status newStatus, final String statusDetails) {
         switch (newStatus) {
             case WAITING:
                 onWaiting(scanner);
@@ -80,66 +86,73 @@ public interface ScannerStatus {
             case DISCONNECTED:
                 onDisconnected(scanner);
                 break;
+            default:
+                onUnknown(scanner);
         }
-    }*/
+    }
 
     /**
      * Callback used when the scanner is waiting for a connection.
      */
-    //void onWaiting(final Scanner scanner);
+    void onWaiting(final Scanner scanner);
 
     /**
      * Callback used when the scanner is connecting.
      */
-    //void onConnecting(final Scanner scanner);
+    void onConnecting(final Scanner scanner);
 
     /**
      * Callback used when the scanner is reconnecting.
      */
-    //void onReconnecting(final Scanner scanner);
+    void onReconnecting(final Scanner scanner);
 
     /**
      * Callback used when the scanner is connected.
      */
-    //void onConnected(final Scanner scanner);
+    void onConnected(final Scanner scanner);
 
     /**
      * Callback used when the scanner is initializing.
      */
-    //void onInitializing(final Scanner scanner);
+    void onInitializing(final Scanner scanner);
 
     /**
      * Callback used when the scanner is initialized.
      */
-    //void onInitialized(final Scanner scanner);
+    void onInitialized(final Scanner scanner);
 
     /**
      * Callback used when the scanner becomes ready to scan.
      */
-    //void onReady(final Scanner scanner);
+    void onReady(final Scanner scanner);
 
     /**
      * Callback used when the scanner is scanning.
      */
-    //void onScanning(final Scanner scanner);
+    void onScanning(final Scanner scanner);
 
     /**
      * Callback used when the scanner goes idle.
      */
-    //void onIdle(final Scanner scanner);
+    void onIdle(final Scanner scanner);
 
     /**
      * Callback used when the scanner gets disabled.
      */
-    //void onDisabled(final Scanner scanner);
+    void onDisabled(final Scanner scanner);
 
     /**
      * Callback used when a critical failure happens.
      */
-    //void onFailure(final Scanner scanner);
+    void onFailure(final Scanner scanner);
 
     /**
      * Callback used when the scanner has disconnected.
      */
-    //void onDisconnected(final Scanner scanner);
+    void onDisconnected(final Scanner scanner);
+
+    /**
+     * Callback used when the scanner enters an unknown status.
+     */
+    void onUnknown(final Scanner scanner);
 }

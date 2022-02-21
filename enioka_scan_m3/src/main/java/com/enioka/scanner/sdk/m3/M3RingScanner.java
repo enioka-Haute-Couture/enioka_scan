@@ -116,13 +116,13 @@ class M3RingScanner implements ScannerBackground {
 
     @Override
     public void pause() {
-        statusCallback.onStatusChanged(context.getString(com.enioka.scanner.R.string.scanner_status_disabled));
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.DISABLED, context.getString(com.enioka.scanner.R.string.scanner_status_disabled));
         this.scanner.setReadable(false);
     }
 
     @Override
     public void resume() {
-        statusCallback.onStatusChanged(context.getString(com.enioka.scanner.R.string.scanner_status_waiting));
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY, context.getString(com.enioka.scanner.R.string.scanner_status_ready));
         this.scanner.setReadable(true);
     }
 

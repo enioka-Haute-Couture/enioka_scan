@@ -94,7 +94,7 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
         }
 
         if (this.statusCb != null) {
-            this.statusCb.onStatusChanged("Scanner is ready");
+            this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.READY, "Scanner is ready");
         }
         Log.i(LOG_TAG, "Scanner initialized");
 

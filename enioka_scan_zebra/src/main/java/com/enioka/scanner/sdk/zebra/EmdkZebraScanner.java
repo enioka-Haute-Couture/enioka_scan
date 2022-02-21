@@ -105,7 +105,7 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
 
         // Toast to indicate that the user can now start scanning
         if (statusCb != null) {
-            statusCb.onStatusChanged("Press Hard Scan Button to start scanning...");
+            statusCb.onStatusChanged(this, ScannerStatusCallback.Status.READY, "Press Hard Scan Button to start scanning...");
         }
     }
 
@@ -256,7 +256,7 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
 
                 // Scanner is waiting for trigger press
                 case WAITING:
-                    statusStr = r.getString(R.string.scanner_status_waiting);
+                    statusStr = r.getString(R.string.scanner_status_ready);
                     break;
 
                 // Scanner is not enabled
@@ -275,7 +275,7 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
         @Override
         protected void onPostExecute(String result) {
             if (statusCb != null) {
-                statusCb.onStatusChanged(result);
+                statusCb.onStatusChanged(selfScanner, ScannerStatusCallback.Status.UNKNOWN, result);
             }
         }
 

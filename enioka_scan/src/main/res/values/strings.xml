@@ -5,7 +5,7 @@
     <!-- Scanner status -->
     <string name="scanner_status_idle">Scanner is idle</string>
     <string name="scanner_status_scanning">Scanner is scanning</string>
-    <string name="scanner_status_waiting">Scanner ready to scan on trigger press</string>
+    <string name="scanner_status_ready">Scanner ready to scan on trigger press</string>
     <string name="scanner_status_disabled">Scanner is disabled</string>
     <string name="scanner_status_initialized">Scanner is correctly initialized</string>
     <string name="scanner_status_initializing">Scanner is initializing</string>

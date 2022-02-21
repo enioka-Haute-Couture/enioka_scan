@@ -3,7 +3,7 @@
     <string name="scanner_status_disabled">Scanner désactivé</string>
     <string name="scanner_status_idle">Scanner au repos</string>
     <string name="scanner_status_scanning">Scanner actif</string>
-    <string name="scanner_status_waiting">Scanner en attente</string>
+    <string name="scanner_status_ready">Scanner en attente</string>
     <string name="scanner_camera_no_camera">Aucune caméra disponible. Veuillez brancher votre lecteur laser. L\'application va s\'arrêter.</string>
     <string name="scanner_camera_open_error">Veuillez vérifier qu\'aucune autre application n\'utilise la caméra (comme ScanWedge, DataWedge...). Vérifiez aussi que la caméra fnction dans l\'application idoine.</string>
     <string name="scanner_camera_open_error_title">Impossible de se connecter à la caméra</string>

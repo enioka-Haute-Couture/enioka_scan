@@ -136,7 +136,7 @@ public class ProgloveScanner extends IntentScanner<String> {
         Log.d(LOG_TAG, "Received status update from scanner " + status);
         switch (status) {
             case "RECONNECTING":
-                this.statusCb.onScannerReconnecting(this);
+                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.RECONNECTING, status);
                 connected = false;
                 this.connectionAttempts++;
 
@@ -151,10 +151,10 @@ public class ProgloveScanner extends IntentScanner<String> {
                 break;
             case "ERROR":
             case "CONNECTING":
-                this.statusCb.onStatusChanged(status);
+                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.CONNECTING, status);
                 break;
             case "CONNECTED":
-                this.statusCb.onStatusChanged(status);
+                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.CONNECTED, status);
                 this.connected = true;
                 this.connectionAttempts = 0;
                 break;
@@ -173,7 +173,7 @@ public class ProgloveScanner extends IntentScanner<String> {
                 }
                 break;
             default:
-                this.statusCb.onStatusChanged("Unknown status " + status);
+                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.UNKNOWN, "Unknown status " + status);
         }
     }
 

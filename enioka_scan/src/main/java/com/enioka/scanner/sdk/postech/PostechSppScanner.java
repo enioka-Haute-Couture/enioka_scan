@@ -47,19 +47,17 @@ class PostechSppScanner implements ScannerBackground {
         this.btScanner.registerStatusCallback(new Scanner.SppScannerStatusCallback() {
             @Override
             public void onScannerConnected() {
-                statusCallback.onStatusChanged(applicationContext.getString(R.string.scanner_status_connected));
+                statusCallback.onStatusChanged(PostechSppScanner.this, ScannerStatusCallback.Status.CONNECTED, applicationContext.getString(R.string.scanner_status_connected));
             }
 
             @Override
             public void onScannerReconnecting() {
-                statusCallback.onStatusChanged(applicationContext.getString(R.string.scanner_status_reconnecting));
-                statusCallback.onScannerReconnecting(PostechSppScanner.this);
+                statusCallback.onStatusChanged(PostechSppScanner.this, ScannerStatusCallback.Status.RECONNECTING, applicationContext.getString(R.string.scanner_status_reconnecting));
             }
 
             @Override
             public void onScannerDisconnected() {
-                statusCallback.onStatusChanged(applicationContext.getString(R.string.scanner_status_lost));
-                statusCallback.onScannerDisconnected(PostechSppScanner.this);
+                statusCallback.onStatusChanged(PostechSppScanner.this, ScannerStatusCallback.Status.DISCONNECTED, applicationContext.getString(R.string.scanner_status_lost));
             }
         });
 

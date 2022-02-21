@@ -16,7 +16,6 @@ import com.enioka.scanner.data.BarcodeType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -77,7 +76,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         }
 
         if (this.statusCb != null) {
-            this.statusCb.onStatusChanged(ctx.getString(R.string.scanner_status_waiting));
+            this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.READY, ctx.getString(R.string.scanner_status_ready));
         }
     }
 

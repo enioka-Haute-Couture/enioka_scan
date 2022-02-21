@@ -92,14 +92,13 @@ class BtZebraScanner implements ScannerBackground {
 
     void reconnected() {
         if (statusCb != null) {
-            statusCb.onScannerReconnecting(this);
-            statusCb.onStatusChanged("reconnected");
+            statusCb.onStatusChanged(this, ScannerStatusCallback.Status.CONNECTED, "reconnected");
         }
     }
 
     void disconnected() {
         if (statusCb != null) {
-            statusCb.onScannerReconnecting(this);
+            statusCb.onStatusChanged(this, ScannerStatusCallback.Status.DISCONNECTED, "disconnected");
         }
     }
 

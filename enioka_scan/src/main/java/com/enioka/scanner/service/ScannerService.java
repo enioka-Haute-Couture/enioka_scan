@@ -18,6 +18,7 @@ import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.api.ScannerStatus;
 import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
@@ -34,12 +35,22 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Note that the public API of this service is described in {@link ScannerServiceApi}, which the type obtained by binding to this service.
  * The other methods of this class should not be accessed by clients.
  */
-public class ScannerService extends Service implements ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerServiceApi {
+public class ScannerService extends Service implements ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerStatus, ScannerServiceApi {
 
     protected final static String LOG_TAG = "ScannerService";
 
     private Handler uiHandler;
     private boolean firstBind = true;
+
+    /**
+     * Scanner status
+     */
+    private ScannerStatus.Status scannerStatus = Status.DISCONNECTED;
+
+    /**
+     * Scanner status detailed information
+     */
+    private String scannerStatusDetails = "";
 
     /**
      * Scanner instances. They should never leak outside of this service.
@@ -408,5 +419,104 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Override
     public List<Scanner> getConnectedScanners() {
         return scanners;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // SCANNER STATUS API
+    ////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public Status getStatus() {
+        return scannerStatus;
+    }
+
+    @Override
+    public String getStatusDetails() {
+        return scannerStatusDetails;
+    }
+
+    @Override
+    public void onWaiting() {
+        scannerStatus = Status.WAITING;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_listen);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onConnecting() {
+        scannerStatus = Status.CONNECTING;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_connecting);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onReconnecting() {
+        scannerStatus = Status.RECONNECTING;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_reconnecting);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onConnected() {
+        scannerStatus = Status.CONNECTED;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_connected);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onInitializing() {
+        scannerStatus = Status.INITIALIZING;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_initializing);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onInitialized() {
+        scannerStatus = Status.INITIALIZED;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_initialized);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onReady() {
+        scannerStatus = Status.READY;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_waiting);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onScanning() {
+        scannerStatus = Status.SCANNING;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_scanning);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onIdle() {
+        scannerStatus = Status.IDLE;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_idle);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onDisabled() {
+        scannerStatus = Status.DISABLED;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_disabled);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onFailure() {
+        scannerStatus = Status.FAILURE;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_initialization_failure); // Not the most appropriate message but close enough
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    }
+
+    @Override
+    public void onDisconnected() {
+        scannerStatus = Status.DISCONNECTED;
+        scannerStatusDetails = getResources().getString(R.string.scanner_status_lost);
+        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
     }
 }

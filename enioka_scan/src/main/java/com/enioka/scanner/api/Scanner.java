@@ -59,6 +59,7 @@ public interface Scanner {
         void onData(Scanner s, List<Barcode> data);
     }
 
+    @Deprecated
     interface ScannerStatusCallback {
         /**
          * Called whenever the scanner has changed status.

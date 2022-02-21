@@ -7,6 +7,7 @@ package com.enioka.scanner.api;
 public interface ScannerStatus {
     /**
      * Enum describing the scanner's lifecycle and current status.
+     * Some elements may not make sense depending on which scanner SDK is used.
      */
     enum Status {
         /** The scanner is waiting for a connection. */
@@ -36,74 +37,109 @@ public interface ScannerStatus {
     }
 
     /**
-     * Gets the current status of a scanner.
-     * @return The scanner's status.
+     * Updates the status and its details before calling the appropriate callback.
+     * @param scanner The updated scanner.
+     * @param newStatus The new status.
+     * @param statusDetails The associated status details.
      */
-    Status getStatus();
-
-    /**
-     * Gets a more detailed overview of a scanner's status (may contain sdk-specific messages).
-     * @return The scanner's status details.
-     */
-    String getStatusDetails();
+    void onStatusChanged(final Scanner scanner, final Status newStatus, final String statusDetails);/* {
+        switch (newStatus) {
+            case WAITING:
+                onWaiting(scanner);
+                break;
+            case CONNECTING:
+                onConnecting(scanner);
+                break;
+            case RECONNECTING:
+                onReconnecting(scanner);
+                break;
+            case CONNECTED:
+                onConnected(scanner);
+                break;
+            case INITIALIZING:
+                onInitializing(scanner);
+                break;
+            case INITIALIZED:
+                onInitialized(scanner);
+                break;
+            case READY:
+                onReady(scanner);
+                break;
+            case SCANNING:
+                onScanning(scanner);
+                break;
+            case IDLE:
+                onIdle(scanner);
+                break;
+            case DISABLED:
+                onDisabled(scanner);
+                break;
+            case FAILURE:
+                onFailure(scanner);
+                break;
+            case DISCONNECTED:
+                onDisconnected(scanner);
+                break;
+        }
+    }*/
 
     /**
      * Callback used when the scanner is waiting for a connection.
      */
-    void onWaiting();
+    //void onWaiting(final Scanner scanner);
 
     /**
      * Callback used when the scanner is connecting.
      */
-    void onConnecting();
+    //void onConnecting(final Scanner scanner);
 
     /**
      * Callback used when the scanner is reconnecting.
      */
-    void onReconnecting();
+    //void onReconnecting(final Scanner scanner);
 
     /**
      * Callback used when the scanner is connected.
      */
-    void onConnected();
+    //void onConnected(final Scanner scanner);
 
     /**
      * Callback used when the scanner is initializing.
      */
-    void onInitializing();
+    //void onInitializing(final Scanner scanner);
 
     /**
      * Callback used when the scanner is initialized.
      */
-    void onInitialized();
+    //void onInitialized(final Scanner scanner);
 
     /**
      * Callback used when the scanner becomes ready to scan.
      */
-    void onReady();
+    //void onReady(final Scanner scanner);
 
     /**
      * Callback used when the scanner is scanning.
      */
-    void onScanning();
+    //void onScanning(final Scanner scanner);
 
     /**
      * Callback used when the scanner goes idle.
      */
-    void onIdle();
+    //void onIdle(final Scanner scanner);
 
     /**
      * Callback used when the scanner gets disabled.
      */
-    void onDisabled();
+    //void onDisabled(final Scanner scanner);
 
     /**
      * Callback used when a critical failure happens.
      */
-    void onFailure();
+    //void onFailure(final Scanner scanner);
 
     /**
      * Callback used when the scanner has disconnected.
      */
-    void onDisconnected();
+    //void onDisconnected(final Scanner scanner);
 }

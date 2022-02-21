@@ -43,16 +43,6 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     private boolean firstBind = true;
 
     /**
-     * Scanner status
-     */
-    private ScannerStatus.Status scannerStatus = Status.DISCONNECTED;
-
-    /**
-     * Scanner status detailed information
-     */
-    private String scannerStatusDetails = "";
-
-    /**
      * Scanner instances. They should never leak outside of this service.
      */
     protected final List<Scanner> scanners = new ArrayList<>(10);
@@ -252,12 +242,9 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Override
     public void onStatusChanged(final String newStatus) {
         Log.d(LOG_TAG, "Status change: " + newStatus);
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                for (BackgroundScannerClient client : ScannerService.this.clients) {
-                    client.onStatusChanged(newStatus);
-                }
+        uiHandler.post(() -> {
+            for (BackgroundScannerClient client : ScannerService.this.clients) {
+                client.onStatusChanged(newStatus);
             }
         });
     }
@@ -426,97 +413,70 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     // SCANNER STATUS API
     ////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * This is temporary as currently there is no specific behavior for these callbacks.
+     * ScannerClient interfaces will need to be adapted to reflect these changes.
+     * @param scanner The updated scanner.
+     * @param newStatus The new status.
+     * @param statusDetails The associated status details.
+     */
     @Override
-    public Status getStatus() {
-        return scannerStatus;
+    public void onStatusChanged(final Scanner scanner, final Status newStatus, final String statusDetails) {
+        Log.d(LOG_TAG, "Status changed: " + newStatus.toString() + " --- " + statusDetails);
+        uiHandler.post(() -> {
+            for (BackgroundScannerClient client : ScannerService.this.clients) {
+                client.onStatusChanged(statusDetails);
+            }
+        });
+    }
+
+    /*
+    @Override
+    public void onWaiting(Scanner scanner) {
     }
 
     @Override
-    public String getStatusDetails() {
-        return scannerStatusDetails;
+    public void onConnecting(Scanner scanner) {
     }
 
     @Override
-    public void onWaiting() {
-        scannerStatus = Status.WAITING;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_listen);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    public void onReconnecting(Scanner scanner) {
     }
 
     @Override
-    public void onConnecting() {
-        scannerStatus = Status.CONNECTING;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_connecting);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    public void onConnected(Scanner scanner) {
     }
 
     @Override
-    public void onReconnecting() {
-        scannerStatus = Status.RECONNECTING;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_reconnecting);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    public void onInitializing(Scanner scanner) {
     }
 
     @Override
-    public void onConnected() {
-        scannerStatus = Status.CONNECTED;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_connected);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    public void onInitialized(Scanner scanner) {
     }
 
     @Override
-    public void onInitializing() {
-        scannerStatus = Status.INITIALIZING;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_initializing);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    public void onReady(Scanner scanner) {
     }
 
     @Override
-    public void onInitialized() {
-        scannerStatus = Status.INITIALIZED;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_initialized);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    public void onScanning(Scanner scanner) {
     }
 
     @Override
-    public void onReady() {
-        scannerStatus = Status.READY;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_waiting);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    public void onIdle(Scanner scanner) {
     }
 
     @Override
-    public void onScanning() {
-        scannerStatus = Status.SCANNING;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_scanning);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    public void onDisabled(Scanner scanner) {
     }
 
     @Override
-    public void onIdle() {
-        scannerStatus = Status.IDLE;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_idle);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    public void onFailure(Scanner scanner) {
     }
 
     @Override
-    public void onDisabled() {
-        scannerStatus = Status.DISABLED;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_disabled);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
+    public void onDisconnected(Scanner scanner) {
     }
-
-    @Override
-    public void onFailure() {
-        scannerStatus = Status.FAILURE;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_initialization_failure); // Not the most appropriate message but close enough
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
-    }
-
-    @Override
-    public void onDisconnected() {
-        scannerStatus = Status.DISCONNECTED;
-        scannerStatusDetails = getResources().getString(R.string.scanner_status_lost);
-        Log.d(LOG_TAG, "Scanner changed status to " + scannerStatus.toString());
-    }
+    */
 }

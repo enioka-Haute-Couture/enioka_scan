@@ -11,6 +11,8 @@ import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.service.BackgroundScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 
@@ -19,6 +21,7 @@ import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 /**
  * Tests that the mock is compatible with the library's instantiation methods: LaserScanner and ScannerService.
@@ -27,7 +30,7 @@ public class MockTest {
 
     private static final Context ctx = InstrumentationRegistry.getContext();
 
-    @Test(timeout = 200) // Have to wait for provider search.
+    @Test
     public void testMockRetrievableByLaserScanner(){
         final ScannerSearchOptions options = ScannerSearchOptions.defaultOptions();
         options.useBlueTooth = false;
@@ -37,20 +40,50 @@ public class MockTest {
         final TestScannerConnectionHandler handler = new TestScannerConnectionHandler();
         LaserScanner.getLaserScanner(ctx, handler, options);
 
-        for (;handler.mock == null;){}
+        try {
+            handler.semaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertNotNull("Mock scanner was not found", handler.mock);
     }
 
-    @Test(timeout = 200) // Have to wait for service binding and provider search.
+    @Test
     public void testMockRetrievableByScannerService(){
         final TestServiceConnection serviceConnection = new TestServiceConnection();
         final Intent serviceIntent = new Intent(ctx, ScannerService.class);
-        serviceIntent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, "MockProvider");
+        serviceIntent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"MockProvider"});
 
         ctx.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        for (;serviceConnection.binder == null;){}
+
+        try {
+            serviceConnection.semaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertNotNull("ScannerService was not found", serviceConnection.binder);
 
         final ScannerServiceApi scannerService = serviceConnection.binder.getService();
-        for (;scannerService.getConnectedScanners().size() == 0;) {}
+        scannerService.registerClient(new BackgroundScannerClient() {
+            @Override
+            public void onStatusChanged(String newStatus) {
+                if (newStatus.equals(ctx.getResources().getString(com.enioka.scanner.R.string.scanner_service_sdk_search_end)))
+                    serviceConnection.semaphore.release();
+            }
+
+            @Override
+            public void onBackgroundScannerInitEnded(int count) {}
+            @Override
+            public void onData(List<Barcode> data) {}
+        });
+
+        try {
+            serviceConnection.semaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         final List<Scanner> scanners = scannerService.getConnectedScanners();
         Assert.assertEquals(1, scanners.size());
@@ -78,6 +111,7 @@ public class MockTest {
         };
         public Scanner.ScannerDataCallback dataCallback = (s, data) -> {};
         public MockScanner mock = null;
+        public Semaphore semaphore = new Semaphore(0); // Permit is released only when scanner search is over.
 
         @Override
         public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
@@ -92,6 +126,7 @@ public class MockTest {
         @Override
         public void endOfScannerSearch() {
             Assert.assertNotNull("Mock was not found", mock);
+            semaphore.release();
         }
 
         @Override
@@ -102,10 +137,12 @@ public class MockTest {
 
     private static class TestServiceConnection implements ServiceConnection {
         public ScannerService.LocalBinder binder;
+        public Semaphore semaphore = new Semaphore(0); // Permit is released only once service binding is over, or when scanner search is over.
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             binder = (ScannerService.LocalBinder) iBinder;
+            semaphore.release();
         }
 
         @Override

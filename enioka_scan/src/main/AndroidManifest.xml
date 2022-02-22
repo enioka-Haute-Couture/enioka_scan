@@ -99,16 +99,6 @@
         </service>
 
         <service
-            android:name=".sdk.mock.MockProvider"
-            android:description="@string/service_description"
-            android:exported="false">
-
-            <intent-filter>
-                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
-            </intent-filter>
-        </service>
-
-        <service
             android:name=".bt.manager.SerialBtScannerProvider"
             android:description="@string/service_description"
             android:exported="false">

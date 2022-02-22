@@ -1,0 +1,19 @@
+name: Test
+
+on: [ push ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up environment
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+      - name: Build and test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build

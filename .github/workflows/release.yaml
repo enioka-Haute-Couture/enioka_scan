@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  create:
+    tags: '*'
+    branches: master
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Get tag version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+      - name: Set up environment
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'zulu'
+      - name: Build and test
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: enioka_scan:build
+      - name: Publish the library to MavenCentral
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: enioka_scan:publish
+        env:
+          OSSRH_LOGIN: ${{ secrets.OSSRH_LOGIN }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          SIGN_KEYID: ${{ secrets.SIGN_KEYID }}
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
+          LIB_VERSION: ${{ steps.get_version.outputs.VERSION }}
+      - name: Create a GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          files: enioka_scan/build/outputs/aar/enioka_scan-release.aar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload AAR as GitHub release asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: enioka_scan/build/outputs/aar/enioka_scan-release.aar
+          asset_name: enioka_scan-${{ steps.get_version.outputs.VERSION }}.aar
+          asset_content_type: application/android-archive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

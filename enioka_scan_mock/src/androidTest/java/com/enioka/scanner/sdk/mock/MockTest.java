@@ -17,6 +17,7 @@ import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -28,7 +29,28 @@ import java.util.concurrent.Semaphore;
  */
 public class MockTest {
 
+    // Mock application context
     private static final Context ctx = InstrumentationRegistry.getContext();
+
+    // Semaphore gaining permits only when the binding process of ScannerService ends.
+    private static final Semaphore serviceBindingSemaphore = new Semaphore(0);
+
+    // Semaphore gaining permits only when the process of searching a Scanner ends.
+    private static final Semaphore scannerDiscoverySemaphore = new Semaphore(0);
+
+    @Before
+    public void drainSemaphorePermits() {
+        serviceBindingSemaphore.drainPermits();
+        scannerDiscoverySemaphore.drainPermits();
+    }
+
+    public static void waitOnSemaphore(final Semaphore semaphore) {
+        try {
+            semaphore.acquire();
+        } catch (final InterruptedException exception) {
+            exception.printStackTrace();
+        }
+    }
 
     @Test
     public void testMockRetrievableByLaserScanner(){
@@ -40,11 +62,8 @@ public class MockTest {
         final TestScannerConnectionHandler handler = new TestScannerConnectionHandler();
         LaserScanner.getLaserScanner(ctx, handler, options);
 
-        try {
-            handler.semaphore.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Wait for LaserScanner to finish Scanner discovery
+        waitOnSemaphore(scannerDiscoverySemaphore);
 
         Assert.assertNotNull("Mock scanner was not found", handler.mock);
     }
@@ -57,11 +76,8 @@ public class MockTest {
 
         ctx.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        try {
-            serviceConnection.semaphore.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Wait for binding with ScannerService
+        waitOnSemaphore(serviceBindingSemaphore);
 
         Assert.assertNotNull("ScannerService was not found", serviceConnection.binder);
 
@@ -69,8 +85,10 @@ public class MockTest {
         scannerService.registerClient(new BackgroundScannerClient() {
             @Override
             public void onStatusChanged(String newStatus) {
-                if (newStatus.equals(ctx.getResources().getString(com.enioka.scanner.R.string.scanner_service_sdk_search_end)))
-                    serviceConnection.semaphore.release();
+                if (newStatus.equals(ctx.getResources().getString(com.enioka.scanner.R.string.scanner_service_sdk_search_end))) {
+                    // Scanner discovery ended
+                    scannerDiscoverySemaphore.release();
+                }
             }
 
             @Override
@@ -79,11 +97,8 @@ public class MockTest {
             public void onData(List<Barcode> data) {}
         });
 
-        try {
-            serviceConnection.semaphore.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Wait for ScannerService to finish Scanner discovery
+        waitOnSemaphore(scannerDiscoverySemaphore);
 
         final List<Scanner> scanners = scannerService.getConnectedScanners();
         Assert.assertEquals(1, scanners.size());
@@ -111,7 +126,6 @@ public class MockTest {
         };
         public Scanner.ScannerDataCallback dataCallback = (s, data) -> {};
         public MockScanner mock = null;
-        public Semaphore semaphore = new Semaphore(0); // Permit is released only when scanner search is over.
 
         @Override
         public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
@@ -126,7 +140,8 @@ public class MockTest {
         @Override
         public void endOfScannerSearch() {
             Assert.assertNotNull("Mock was not found", mock);
-            semaphore.release();
+            // Scanner discovery ended
+            scannerDiscoverySemaphore.release();
         }
 
         @Override
@@ -137,12 +152,12 @@ public class MockTest {
 
     private static class TestServiceConnection implements ServiceConnection {
         public ScannerService.LocalBinder binder;
-        public Semaphore semaphore = new Semaphore(0); // Permit is released only once service binding is over, or when scanner search is over.
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             binder = (ScannerService.LocalBinder) iBinder;
-            semaphore.release();
+            // Service binding ended
+            serviceBindingSemaphore.release();
         }
 
         @Override

@@ -180,3 +180,9 @@ In order to start developing and testing the library:
 In case the android device is not detected by Android Studio:
 * Make sure the device is in developer mode and has USB Debugging enabled
 * Make sure the USB cable supports data transfer (some cables only support charging)
+
+# Release process
+
+To publish the library to Maven Central and GitHub releases, a tag must be created and attached to the appropriate commit.
+The tag will trigger a workflow that will automatically create a github release containing the AAR file, and publish the library to Maven Central.
+If the release is created manually, the workflow will not run and the library will not be published correctly. Only the tag needs to be manually created.

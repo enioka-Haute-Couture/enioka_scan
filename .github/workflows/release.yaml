@@ -39,7 +39,7 @@ jobs:
         uses: actions/create-release@v1
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ steps.get_version.outputs.VERSION }}
+          release_name: ${{ steps.get_version.outputs.VERSION }}
           draft: false
           prerelease: false
           files: enioka_scan/build/outputs/aar/enioka_scan-release.aar

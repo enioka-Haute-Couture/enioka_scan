@@ -12,13 +12,13 @@ import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 
-public class GenericHidProvider extends Service implements ScannerProvider {
+public class GenericHidProvider /*extends Service*/ implements ScannerProvider {
     static final String LOG_TAG = "GenericHidProvider";
 
     private final IBinder binder = new ScannerProviderBinder(this);
 
     @Nullable
-    @Override
+    //@Override
     public IBinder onBind(Intent intent) {
         return binder;
     }

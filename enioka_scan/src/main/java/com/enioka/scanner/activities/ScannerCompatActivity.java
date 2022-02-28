@@ -1,16 +1,12 @@
 package com.enioka.scanner.activities;
 
 import android.Manifest;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -33,7 +29,6 @@ import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.helpers.Common;
 import com.enioka.scanner.sdk.camera.CameraBarcodeScanViewScanner;
 import com.enioka.scanner.service.ForegroundScannerClient;
-import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 import com.enioka.scanner.service.ScannerRunner;
 
@@ -197,29 +192,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         executor = Executors.newSingleThreadExecutor();
         executor.execute((Runnable) scannerService);
     }
-
-    /**
-     * Defines callbacks for service binding
-     */
-    private final ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to ScannerService, cast the IBinder and get the ScannerServiceApi instance
-            Log.d(LOG_TAG, "Service is connected to activity");
-            ScannerService.LocalBinder binder = (ScannerService.LocalBinder) service;
-            scannerService = binder.getService();
-            serviceBound = true;
-            scannerService.takeForegroundControl(ScannerCompatActivity.this, ScannerCompatActivity.this);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            Log.d(LOG_TAG, "Service is disconnected from activity");
-            serviceBound = false;
-            scannerService = null;
-        }
-    };
 
     @Override
     protected void onResume() {

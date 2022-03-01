@@ -34,7 +34,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Note that the public API of this service is described in {@link ScannerServiceApi}, which the type obtained by binding to this service.
  * The other methods of this class should not be accessed by clients.
  */
-@Deprecated
 public class ScannerService extends Service implements ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerServiceApi {
 
     protected final static String LOG_TAG = "ScannerService";

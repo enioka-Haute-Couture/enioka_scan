@@ -170,6 +170,11 @@ This often happens when dealing with UI frameworks which have their own lifecycl
 
 This method can also be used inside an Activity, when the use of an external base class for an Activity is not possible (for example when there already is a base class, or when using `AppCompatActivity` is not desired). This is exactly what `ScannerCompatActivity` does - it simply binds to the service.
 
+# Using another SDK
+
+In order for a new scanner SDK to be recognized by the library, the provider class needs to be declared as a service in `AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER` for regular scanners, or `com.enioka.scan.PROVIDE_SPP_SCANNER` for Bluetooth scanners.
+The associated Java class does not need to extend Android's Service class (the `tools:ignore="Instantiatable"` attribute may be added to the service in the manifest), but it must provide a default constructor as it will be instantiated using `Class.getName()`, and it needs to implement the ScannerProvider interface.
+
 # Developer quick start
 
 In order to start developing and testing the library:

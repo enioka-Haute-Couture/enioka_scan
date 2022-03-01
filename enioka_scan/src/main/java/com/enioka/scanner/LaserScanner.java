@@ -90,7 +90,7 @@ public final class LaserScanner {
                 Log.d(LOG_TAG, "Provider " + provider.getKey() + " was successfully instantiated");
             } catch (Exception e) {
                 declaredProviderServices.remove(meta.getName());
-                Log.w(LOG_TAG, "Could not instantiate provider - usual cause is missing SDK from classpath");
+                Log.w(LOG_TAG, "Could not instantiate provider - usual cause is missing SDK from classpath", e);
             }
         }
 

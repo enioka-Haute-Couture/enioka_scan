@@ -1,12 +1,16 @@
 package com.enioka.scanner.activities;
 
 import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -29,13 +33,11 @@ import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.helpers.Common;
 import com.enioka.scanner.sdk.camera.CameraBarcodeScanViewScanner;
 import com.enioka.scanner.service.ForegroundScannerClient;
+import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
-import com.enioka.scanner.service.ScannerRunner;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * A helper activity which implements all scan functions: laser, camera, HID.<br><br>Basic usage is trivial : just inherit this class, and that's all.<br>
@@ -116,7 +118,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     /**
      * Actual access to the scanners.
      */
-    private ExecutorService executor;
     private ScannerServiceApi scannerService;
     private boolean serviceBound = false;
 
@@ -179,19 +180,37 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         }
 
         // Bind to ScannerService service
-        Intent intent = new Intent(this, ScannerRunner.class); // was ScannerService.class, deprecated
+        Intent intent = new Intent(this, ScannerService.class);
         intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, useBluetooth);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, useBluetooth);
         //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"BtSppSdk"});
         //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, true);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
-        //bindService(intent, connection, Context.BIND_AUTO_CREATE); // deprecated
-        scannerService = ScannerRunner.getScannerRunner(this.getApplicationContext(), intent);
-        scannerService.takeForegroundControl(ScannerCompatActivity.this, ScannerCompatActivity.this);
-        serviceBound = true;
-        executor = Executors.newSingleThreadExecutor();
-        executor.execute((Runnable) scannerService);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
+
+    /**
+     * Defines callbacks for service binding
+     */
+    private final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to ScannerService, cast the IBinder and get the ScannerServiceApi instance
+            Log.d(LOG_TAG, "Service is connected to activity");
+            ScannerService.LocalBinder binder = (ScannerService.LocalBinder) service;
+            scannerService = binder.getService();
+            serviceBound = true;
+            scannerService.takeForegroundControl(ScannerCompatActivity.this, ScannerCompatActivity.this);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Log.d(LOG_TAG, "Service is disconnected from activity");
+            serviceBound = false;
+            scannerService = null;
+        }
+    };
 
     @Override
     protected void onResume() {
@@ -252,11 +271,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     protected void onDestroy() {
         Log.i(LOG_TAG, "Scanner activity is being destroyed");
         super.onDestroy();
-        //unbindService(connection); // deprecated
-        executor.shutdownNow();
-        scannerService.disconnect();
+        unbindService(connection);
         serviceBound = false;
-        scannerService = null; // new
     }
 
     private void setViewContent() {

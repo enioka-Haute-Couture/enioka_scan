@@ -86,6 +86,7 @@ public final class LaserScanner {
             Log.d(LOG_TAG, "Trying to instantiate provider " + meta.getName() + (meta.isBluetooth() ? " - BT    " : " - not BT") + " - " + meta.getPriority());
             try {
                 final ScannerProvider provider = (ScannerProvider) Class.forName(meta.getName()).newInstance();
+                meta.setProviderKey(provider.getKey());
                 providerServices.add(new ProviderServiceHolder(provider, meta));
                 Log.d(LOG_TAG, "Provider " + provider.getKey() + " was successfully instantiated");
             } catch (Exception e) {
@@ -148,12 +149,15 @@ public final class LaserScanner {
      */
     private static boolean shouldProviderBeUsed(ProviderServiceHolder psh, ScannerSearchOptions options) {
         if (psh.getMeta().isBluetooth() && !options.useBlueTooth) {
+            Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because bluetooth option is disabled");
             return false;
         }
         if (options.excludedProviderKeys != null && options.excludedProviderKeys.contains(psh.getMeta().getProviderKey())) {
+            Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because blacklisted by option (excludes " + options.excludedProviderKeys + ")");
             return false;
         }
         if (options.allowedProviderKeys != null && !options.allowedProviderKeys.isEmpty() && !options.allowedProviderKeys.contains(psh.getMeta().getProviderKey())) {
+            Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because not whitelisted by option (only allows " + options.allowedProviderKeys + ")");
             return false;
         }
         return true;
@@ -187,6 +191,7 @@ public final class LaserScanner {
         for (ProviderServiceHolder psh : new ArrayList<>(providerServices)) {
             if (shouldProviderBeUsed(psh, options)) {
                 providersExpectedToAnswerCount++;
+                Log.d(LOG_TAG, "Provider " + psh.getProvider() + "accepted");
             }
         }
 

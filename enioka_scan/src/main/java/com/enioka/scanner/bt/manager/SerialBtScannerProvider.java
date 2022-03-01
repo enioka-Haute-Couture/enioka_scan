@@ -1,24 +1,18 @@
 package com.enioka.scanner.bt.manager;
 
-import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.IBinder;
 import android.os.ParcelUuid;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
-import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
-import com.enioka.scanner.bt.api.BtSppScannerProviderServiceBinder;
+import com.enioka.scanner.bt.api.BtSppScannerProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,29 +23,15 @@ import java.util.concurrent.Semaphore;
  * Responsible for finding bluetooth devices and starting their initialization, converting them to {@link com.enioka.scanner.api.Scanner}.<br><br>
  * This is the entry point of the BT SPP/TIO SDK for the rest of the library.
  */
-public class SerialBtScannerProvider extends Service implements ScannerProvider {
+public class SerialBtScannerProvider implements ScannerProvider {
     private static final String LOG_TAG = "BtSppSdk";
 
-    private static List<com.enioka.scanner.bt.api.BtSppScannerProvider> scannerProviders = new ArrayList<>();
-    private static List<ServiceConnection> connections = new ArrayList<>();
+    private static final List<com.enioka.scanner.bt.api.BtSppScannerProvider> scannerProviders = new ArrayList<>();
 
     private ClassicBtAcceptConnectionThread server;
     private ProviderCallback providerCallback;
-    private Semaphore waitForScanners = new Semaphore(0);
+    private final Semaphore waitForScanners = new Semaphore(0);
     private int passiveScannersCount = 0;
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Bound service stuff
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private final IBinder binder = new ScannerProviderBinder(this);
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
-    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,28 +76,6 @@ public class SerialBtScannerProvider extends Service implements ScannerProvider 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Callbacks for bound service connections (useful since SPP providers are services).
-     */
-    private static ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            BtSppScannerProviderServiceBinder binder = (BtSppScannerProviderServiceBinder) service;
-            com.enioka.scanner.bt.api.BtSppScannerProvider provider = binder.getService();
-            Log.i(LOG_TAG, "Provider " + provider.getClass().getSimpleName() + " was registered");
-            scannerProviders.add(provider);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            for (ServiceConnection sc : connections) {
-                //if (connection.get)
-                // TODO: remove from collection, close everything related to this provider.
-            }
-        }
-    };
-
-    /**
      * Retrieve SPP BT providers through service intent.
      *
      * @param ctx a context used to retrieve a PackageManager
@@ -133,11 +91,18 @@ public class SerialBtScannerProvider extends Service implements ScannerProvider 
         List<ResolveInfo> ris = pkManager.queryIntentServices(i, PackageManager.GET_META_DATA);
 
         for (ResolveInfo ri : ris) {
-            ComponentName name = new ComponentName(ri.serviceInfo.packageName, ri.serviceInfo.name);
-            Intent boundServiceIntent = new Intent();
-            boundServiceIntent.setClassName(ctx, name.getClassName());
+            // This just avoids processing the same service twice, which could mean duplicate instances now that services are no longer used.
+            if (ri.serviceInfo.applicationInfo.uid != ctx.getApplicationInfo().uid) {
+                Log.d(LOG_TAG, "Skipping duplicate provider " + ri.serviceInfo.name + " : does not match application UID (Service=" + ri.serviceInfo.applicationInfo.uid + " | Application=" + ctx.getApplicationInfo().uid + ")");
+                continue;
+            }
 
-            ctx.bindService(boundServiceIntent, connection, Context.BIND_AUTO_CREATE);
+            try {
+                final BtSppScannerProvider provider = (BtSppScannerProvider) Class.forName(ri.serviceInfo.name).newInstance();
+                scannerProviders.add(provider);
+            } catch (Exception e) {
+                // Could not instantiate
+            }
         }
     }
 

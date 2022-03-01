@@ -1,18 +1,10 @@
 package com.enioka.scanner.sdk.athesi;
 
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
 
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerProvider;
-import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.intent.IntentScannerProvider;
-
-import java.util.ArrayList;
 
 /**
  * Provider for the HHT Wrapper Layer

@@ -1,27 +1,14 @@
 package com.enioka.scanner.sdk.hid;
 
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.ScannerProvider;
-import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 
-public class GenericHidProvider extends Service implements ScannerProvider {
+public class GenericHidProvider implements ScannerProvider {
     static final String LOG_TAG = "GenericHidProvider";
-
-    private final IBinder binder = new ScannerProviderBinder(this);
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
-    }
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {

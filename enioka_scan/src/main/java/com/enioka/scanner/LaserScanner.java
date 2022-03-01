@@ -2,19 +2,15 @@ package com.enioka.scanner;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.IBinder;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
-import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
 import com.enioka.scanner.helpers.ProviderServiceHolder;
@@ -46,7 +42,7 @@ public final class LaserScanner {
      */
     private static final Set<ProviderServiceHolder> providerServices = new HashSet<>();
 
-    private static BtScannerConnectionRegistry btRegistry = new BtScannerConnectionRegistry();
+    private static final BtScannerConnectionRegistry btRegistry = new BtScannerConnectionRegistry();
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,95 +61,42 @@ public final class LaserScanner {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Provider search: provider services which should answer. Initialized at service count, provider search ends when we can acquire that many permits.
-     */
-    private static Semaphore waitingForConnection = new Semaphore(0);
-
-    /**
-     * Provider search: Helper internal callback.
-     */
-    private static OnProvidersDiscovered cb;
-
-
-    /**
-     * Callbacks for bound service connections (used for scanner provider discovery).
-     */
-    private static ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            // We've bound to ScannerProvider, cast the IBinder and get ScannerProvider instance
-            ScannerProviderBinder binder = (ScannerProviderBinder) service;
-            ScannerProvider provider = binder.getService();
-
-            ProviderServiceMeta meta = declaredProviderServices.get(className.getClassName());
-            if (meta == null) {
-                Log.e(LOG_TAG, "A provider service was connected... but was not expected! This is a bug");
-                return;
-            }
-            meta.setProviderKey(provider.getKey());
-
-            String additionalComments = "";
-            if (meta.isBluetooth()) {
-                additionalComments += " It is a BT provider.";
-            }
-
-            Log.i(LOG_TAG, "ScannerProvider service " + provider.getClass().getSimpleName() + " was registered." + additionalComments);
-            providerServices.add(new ProviderServiceHolder(provider, meta));
-
-            try {
-                waitingForConnection.acquire(1);
-                if (waitingForConnection.availablePermits() == 0) {
-                    // All scanner providers have reported for duty, launch scanner search.
-                    // TODO: we should not wait for all providers to be available to start looking for scanners.
-                    cb.discoveryDone();
-                }
-            } catch (InterruptedException e) {
-                Log.e(LOG_TAG, "Could not wait for provider service initialization. Ignoring.", e);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            Log.i(LOG_TAG, "scanner provider was disconnected");
-        }
-    };
-
-    /**
-     * Retrieve scanner providers through service intent.
+     * Discovers scanner providers through service intent and retrieves them through reflection.
      *
      * @param ctx a context used to retrieve a PackageManager
      */
     private static void getProviders(Context ctx, OnProvidersDiscovered cb) {
-        Log.i(LOG_TAG, "Starting service discovery");
-        LaserScanner.cb = cb;
+        Log.i(LOG_TAG, "Starting provider discovery");
         PackageManager pkManager = ctx.getPackageManager();
         Intent i = new Intent("com.enioka.scan.PROVIDE_SCANNER");
         List<ResolveInfo> ris = pkManager.queryIntentServices(i, PackageManager.GET_META_DATA);
 
-        waitingForConnection.release(ris.size());
-        Log.i(LOG_TAG, "There are " + ris.size() + " scanner provider service(s) available");
+        Log.i(LOG_TAG, "There are " + ris.size() + " scanner provider(s) available before filtering duplicates");
 
         for (ResolveInfo ri : ris) {
-            ComponentName name = new ComponentName(ri.serviceInfo.packageName, ri.serviceInfo.name);
-            Intent boundServiceIntent = new Intent();
-            boundServiceIntent.setClassName(ctx, name.getClassName());
+            // This just avoids processing the same service twice, which could mean duplicate instances now that services are no longer used.
+            if (ri.serviceInfo.applicationInfo.uid != ctx.getApplicationInfo().uid) {
+                Log.d(LOG_TAG, "Skipping duplicate provider " + ri.serviceInfo.name + " : does not match application UID (Service=" + ri.serviceInfo.applicationInfo.uid + " | Application=" + ctx.getApplicationInfo().uid + ")");
+                continue;
+            }
 
             ProviderServiceMeta meta = new ProviderServiceMeta(ri.serviceInfo);
-            declaredProviderServices.put(name.getClassName(), meta);
+            declaredProviderServices.put(meta.getName(), meta);
 
-            Log.d(LOG_TAG, "Trying to bind to service " + name.getClassName() + (meta.isBluetooth() ? " - BT    " : " - not BT") + " - " + meta.getPriority());
+            Log.d(LOG_TAG, "Trying to instantiate provider " + meta.getName() + (meta.isBluetooth() ? " - BT    " : " - not BT") + " - " + meta.getPriority());
             try {
-                ctx.bindService(boundServiceIntent, connection, Context.BIND_AUTO_CREATE);
+                final ScannerProvider provider = (ScannerProvider) Class.forName(meta.getName()).newInstance();
+                meta.setProviderKey(provider.getKey());
+                providerServices.add(new ProviderServiceHolder(provider, meta));
+                Log.d(LOG_TAG, "Provider " + provider.getKey() + " was successfully instantiated");
             } catch (Exception e) {
-                declaredProviderServices.remove(name.getClassName());
-                try {
-                    waitingForConnection.acquire(1);
-                } catch (InterruptedException ex) {
-                    // Who cares.
-                }
-                Log.w(LOG_TAG, "Could not bind to service - usual cause is missing SDK from classpath");
+                declaredProviderServices.remove(meta.getName());
+                Log.w(LOG_TAG, "Could not instantiate provider - usual cause is missing SDK from classpath", e);
             }
         }
+
+        Log.i(LOG_TAG, "Provider discovery done");
+        cb.discoveryDone();
     }
 
     private interface OnProvidersDiscovered {
@@ -168,7 +111,7 @@ public final class LaserScanner {
     /**
      * Scanner search: only one BT provider may look for scanners at the same time, as the underlying SDKs often make the assumption they are alone in the world.
      */
-    private static Semaphore btResolutionMutex = new Semaphore(1);
+    private static final Semaphore btResolutionMutex = new Semaphore(1);
 
     /**
      * Scanner search: how many providers are expected to make a contribution, even if empty, to the search.
@@ -178,7 +121,7 @@ public final class LaserScanner {
     /**
      * Scanner search: how many scanner providers have already made their contribution (event if empty) to the search. Search stops when it equals {@link #providersExpectedToAnswerCount}.
      */
-    private static Semaphore providersHavingAnswered = new Semaphore(0);
+    private static final Semaphore providersHavingAnswered = new Semaphore(0);
 
     /**
      * Scanner search: used to determine the first scanner returned.
@@ -194,12 +137,7 @@ public final class LaserScanner {
      */
     public static void getLaserScanner(final Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
         if (providerServices.isEmpty()) {
-            getProviders(ctx, new OnProvidersDiscovered() {
-                @Override
-                public void discoveryDone() {
-                    startLaserSearchInProviders(ctx, handler, options);
-                }
-            });
+            getProviders(ctx, () -> startLaserSearchInProviders(ctx, handler, options));
         } else {
             // We are here if this was called a second time. In this case just launch scanner search from existing providers.
             startLaserSearchInProviders(ctx, handler, options);
@@ -211,18 +149,22 @@ public final class LaserScanner {
      */
     private static boolean shouldProviderBeUsed(ProviderServiceHolder psh, ScannerSearchOptions options) {
         if (psh.getMeta().isBluetooth() && !options.useBlueTooth) {
+            Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because bluetooth option is disabled");
             return false;
         }
         if (options.excludedProviderKeys != null && options.excludedProviderKeys.contains(psh.getMeta().getProviderKey())) {
+            Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because blacklisted by option (excludes " + options.excludedProviderKeys + ")");
             return false;
         }
         if (options.allowedProviderKeys != null && !options.allowedProviderKeys.isEmpty() && !options.allowedProviderKeys.contains(psh.getMeta().getProviderKey())) {
+            Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because not whitelisted by option (only allows " + options.allowedProviderKeys + ")");
             return false;
         }
         return true;
     }
 
     private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+        Log.i(LOG_TAG, "Starting scanner search");
         final ScannerConnectionHandler handlerProxy = new ScannerConnectionHandlerProxy(handler);
 
         if (options.useBlueTooth) {
@@ -249,6 +191,7 @@ public final class LaserScanner {
         for (ProviderServiceHolder psh : new ArrayList<>(providerServices)) {
             if (shouldProviderBeUsed(psh, options)) {
                 providersExpectedToAnswerCount++;
+                Log.d(LOG_TAG, "Provider " + psh.getProvider() + "accepted");
             }
         }
 

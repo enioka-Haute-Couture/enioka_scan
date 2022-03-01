@@ -181,6 +181,11 @@ In case the android device is not detected by Android Studio:
 * Make sure the device is in developer mode and has USB Debugging enabled
 * Make sure the USB cable supports data transfer (some cables only support charging)
 
+# Adding another SDK
+
+In order for a new scanner SDK to be recognized by the library, the provider class needs to be declared as a service in `AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER`.
+The associated Java class does not need to extend Android's Service class (the `tools:ignore="Instantiatable"` attribute may be added to the service in the manifest), but it must provide a default constructor as it will be instantiated using `Class.getName()`, and it needs to implement the ScannerProvider interface. See `/enioka_scan_mock` for an example of addon SDK.
+
 # Release process
 
 To publish the library to Maven Central and GitHub releases, a tag must be created and attached to the appropriate commit.

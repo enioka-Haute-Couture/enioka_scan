@@ -14,7 +14,8 @@
         <service
             android:name=".KoamtacScannerProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <meta-data
                 android:name="bluetooth"

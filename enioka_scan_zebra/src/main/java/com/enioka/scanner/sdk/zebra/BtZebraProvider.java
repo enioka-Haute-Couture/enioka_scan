@@ -32,7 +32,7 @@ public class BtZebraProvider implements ScannerProvider, IDcsSdkApiDelegate {
     public void getScanner(Context ctx, final ProviderCallback cb, ScannerSearchOptions options) {
         Log.i(LOG_TAG, "Starting scanner search");
         try {
-            this.getClassLoader().loadClass("com.zebra.scannercontrol.SDKHandler");
+            this.getClass().getClassLoader().loadClass("com.zebra.scannercontrol.SDKHandler");
         } catch (ClassNotFoundException e) {
             cb.onProviderUnavailable(PROVIDER_NAME);
         }

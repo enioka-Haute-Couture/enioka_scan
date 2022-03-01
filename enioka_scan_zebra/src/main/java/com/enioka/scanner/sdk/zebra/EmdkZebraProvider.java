@@ -1,31 +1,18 @@
 package com.enioka.scanner.sdk.zebra;
 
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
-import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 
 /**
  * EMDK SDK provider. For Symbol (formerly Motorola subsidiary, now Zebra subsidiary) devices. Known to work with TC51 and WT6000.
  */
-public class EmdkZebraProvider extends Service implements ScannerProvider {
+public class EmdkZebraProvider implements ScannerProvider {
     private final static String LOG_TAG = "EmdkProvider";
     static final String PROVIDER_NAME = "Zebra EMDK";
-
-    private final IBinder binder = new ScannerProviderBinder(this);
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
-    }
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {

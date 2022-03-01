@@ -5,7 +5,6 @@ import android.content.Context;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.intent.IntentScannerProvider;
-import com.enioka.scanner.sdk.athesi.HHTScanner;
 
 /**
  * Provider for Bluebird integrated scanners through an intent service.

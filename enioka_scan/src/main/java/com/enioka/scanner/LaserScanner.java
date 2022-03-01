@@ -2,7 +2,6 @@ package com.enioka.scanner;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -43,7 +42,7 @@ public final class LaserScanner {
      */
     private static final Set<ProviderServiceHolder> providerServices = new HashSet<>();
 
-    private static BtScannerConnectionRegistry btRegistry = new BtScannerConnectionRegistry();
+    private static final BtScannerConnectionRegistry btRegistry = new BtScannerConnectionRegistry();
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,39 +61,35 @@ public final class LaserScanner {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Retrieve scanner providers through service intent.
+     * Discovers scanner providers through service intent and retrieves them through reflection.
      *
      * @param ctx a context used to retrieve a PackageManager
      */
     private static void getProviders(Context ctx, OnProvidersDiscovered cb) {
-        Log.i(LOG_TAG, "Starting service discovery");
+        Log.i(LOG_TAG, "Starting provider discovery");
         PackageManager pkManager = ctx.getPackageManager();
         Intent i = new Intent("com.enioka.scan.PROVIDE_SCANNER");
         List<ResolveInfo> ris = pkManager.queryIntentServices(i, PackageManager.GET_META_DATA);
 
-        Log.i(LOG_TAG, "There are " + ris.size() + " scanner provider service(s) available");
+        Log.i(LOG_TAG, "There are " + ris.size() + " scanner provider(s) available before filtering duplicates");
 
         for (ResolveInfo ri : ris) {
-            // This just avoids processing the same service twice but does not stop the lib from binding to a service from another app using the same lib.
+            // This just avoids processing the same service twice, which could mean duplicate instances now that services are no longer used.
             if (ri.serviceInfo.applicationInfo.uid != ctx.getApplicationInfo().uid) {
-                Log.d(LOG_TAG, "Skipping candidate service " + ri.serviceInfo.name + " : does not match application UID (Service=" + ri.serviceInfo.applicationInfo.uid + " | Application=" + ctx.getApplicationInfo().uid + ")");
+                Log.d(LOG_TAG, "Skipping duplicate provider " + ri.serviceInfo.name + " : does not match application UID (Service=" + ri.serviceInfo.applicationInfo.uid + " | Application=" + ctx.getApplicationInfo().uid + ")");
                 continue;
             }
 
-            ComponentName name = new ComponentName(ri.serviceInfo.packageName, ri.serviceInfo.name);
-            Intent boundServiceIntent = new Intent();
-            boundServiceIntent.setClassName(ctx, name.getClassName());
-
             ProviderServiceMeta meta = new ProviderServiceMeta(ri.serviceInfo);
-            declaredProviderServices.put(name.getClassName(), meta);
+            declaredProviderServices.put(meta.getName(), meta);
 
-            Log.d(LOG_TAG, "Trying to instantiate provider " + name.getClassName() + (meta.isBluetooth() ? " - BT    " : " - not BT") + " - " + meta.getPriority());
+            Log.d(LOG_TAG, "Trying to instantiate provider " + meta.getName() + (meta.isBluetooth() ? " - BT    " : " - not BT") + " - " + meta.getPriority());
             try {
                 final ScannerProvider provider = (ScannerProvider) Class.forName(meta.getName()).newInstance();
                 providerServices.add(new ProviderServiceHolder(provider, meta));
                 Log.d(LOG_TAG, "Provider " + provider.getKey() + " was successfully instantiated");
             } catch (Exception e) {
-                declaredProviderServices.remove(name.getClassName());
+                declaredProviderServices.remove(meta.getName());
                 Log.w(LOG_TAG, "Could not instantiate provider - usual cause is missing SDK from classpath");
             }
         }
@@ -115,7 +110,7 @@ public final class LaserScanner {
     /**
      * Scanner search: only one BT provider may look for scanners at the same time, as the underlying SDKs often make the assumption they are alone in the world.
      */
-    private static Semaphore btResolutionMutex = new Semaphore(1);
+    private static final Semaphore btResolutionMutex = new Semaphore(1);
 
     /**
      * Scanner search: how many providers are expected to make a contribution, even if empty, to the search.
@@ -125,7 +120,7 @@ public final class LaserScanner {
     /**
      * Scanner search: how many scanner providers have already made their contribution (event if empty) to the search. Search stops when it equals {@link #providersExpectedToAnswerCount}.
      */
-    private static Semaphore providersHavingAnswered = new Semaphore(0);
+    private static final Semaphore providersHavingAnswered = new Semaphore(0);
 
     /**
      * Scanner search: used to determine the first scanner returned.

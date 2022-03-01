@@ -1,20 +1,10 @@
 package com.enioka.scanner.sdk.zebra;
 
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Looper;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
-import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
-import com.enioka.scanner.data.Barcode;
-import com.enioka.scanner.data.BarcodeType;
 import com.zebra.scannercontrol.DCSSDKDefs;
 import com.zebra.scannercontrol.DCSScannerInfo;
 import com.zebra.scannercontrol.FirmwareUpdateEvent;
@@ -30,21 +20,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Provider for the BT Zebra SDK.
  */
-public class BtZebraProvider extends Service implements ScannerProvider, IDcsSdkApiDelegate {
+public class BtZebraProvider implements ScannerProvider, IDcsSdkApiDelegate {
     private static final String LOG_TAG = "BtZebraProvider";
     static final String PROVIDER_NAME = "BtZebraProvider";
-
-    private final IBinder binder = new ScannerProviderBinder(this);
 
     private ConcurrentHashMap<Integer, BtZebraScanner> createdScanners = new ConcurrentHashMap<>();
     private ProviderCallback providerCallback;
     private SDKHandler sdkHandler;
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
-    }
 
     @Override
     public void getScanner(Context ctx, final ProviderCallback cb, ScannerSearchOptions options) {

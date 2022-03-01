@@ -183,7 +183,7 @@ In case the android device is not detected by Android Studio:
 
 # Adding another SDK
 
-In order for a new scanner SDK to be recognized by the library, the provider class needs to be declared as a service in `AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER` for regular scanners, or `com.enioka.scan.PROVIDE_SPP_SCANNER` for Bluetooth scanners.
+In order for a new scanner SDK to be recognized by the library, the provider class needs to be declared as a service in `AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER`.
 The associated Java class does not need to extend Android's Service class (the `tools:ignore="Instantiatable"` attribute may be added to the service in the manifest), but it must provide a default constructor as it will be instantiated using `Class.getName()`, and it needs to implement the ScannerProvider interface. See `/enioka_scan_mock` for an example of addon SDK.
 
 # Release process

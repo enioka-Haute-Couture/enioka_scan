@@ -34,8 +34,10 @@ dependencies {
     if (rootProject.ext.withKoamtac)
         implementation project(':enioka_scan_koamtac');
 
-    if (rootProject.ext.withZebra)
+    if (rootProject.ext.withZebra) {
         implementation project(':enioka_scan_zebra');
+        implementation fileTree(dir: '../enioka_scan_zebra/libs', include: ['*.aar'])
+    }
 
     if (rootProject.ext.withM3)
         implementation project(':enioka_scan_m3');

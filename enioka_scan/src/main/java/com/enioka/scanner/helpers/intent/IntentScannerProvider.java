@@ -1,19 +1,15 @@
 package com.enioka.scanner.helpers.intent;
 
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
-import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 
 import java.util.ArrayList;
@@ -24,9 +20,7 @@ import java.util.List;
  * (be it a system service or a service provided by another app).<br>
  * This class factors all the boilerplate code to discover such services.
  */
-public abstract class IntentScannerProvider extends Service implements ScannerProvider {
-
-    private final IBinder binder = new ScannerProviderBinder(this);
+public abstract class IntentScannerProvider implements ScannerProvider {
 
     protected String intentToTest = null;
 
@@ -37,12 +31,6 @@ public abstract class IntentScannerProvider extends Service implements ScannerPr
     protected String serviceToTest = null;
 
     protected void configureProvider() {
-    }
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
     }
 
     @Override

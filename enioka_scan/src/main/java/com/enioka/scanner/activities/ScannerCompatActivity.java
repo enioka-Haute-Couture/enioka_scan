@@ -183,9 +183,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         Intent intent = new Intent(this, ScannerService.class);
         intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, useBluetooth);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, useBluetooth);
-        //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"BtSppSdk"});
+        //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
+        //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
         //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, true);
-        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 

@@ -19,6 +19,65 @@ android {
     }
 }
 
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+    from android.sourceSets.main.kotlin.srcDirs
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId 'com.enioka.scanner'
+                artifactId 'scanner'
+                version System.getenv("LIB_VERSION")
+
+                from components.release
+
+                pom {
+                    name = 'Enioka Scan'
+                    description = 'A library that makes the integration of all barcode scanners easy in any Android application, avoiding vendor lock-in and lowering the cost of advanced scanner integration.'
+                    url = 'https://github.com/enioka/enioka_scan'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:github.com/enioka/enioka_scan.git'
+                        developerConnection = 'scm:git:ssh://github.com/enioka/enioka_scan.git'
+                        url = 'https://github.com/enioka/enioka_scan/tree/master'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = "OSSRH"
+                url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username = System.getenv("OSSRH_LOGIN")
+                    password = System.getenv("OSSRH_PASSWORD")
+                }
+            }
+        }
+    }
+}
+
+signing {
+    useInMemoryPgpKeys(
+            System.getenv("SIGN_KEYID"),
+            System.getenv("SIGN_KEY"),
+            System.getenv("SIGN_PASSWORD")
+    )
+    sign publishing.publications
+}
+
 allprojects {
     repositories {
         google()

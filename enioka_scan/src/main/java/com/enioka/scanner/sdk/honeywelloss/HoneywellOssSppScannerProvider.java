@@ -1,12 +1,6 @@
 package com.enioka.scanner.sdk.honeywelloss;
 
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
-
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
-import com.enioka.scanner.bt.api.BtSppScannerProviderServiceBinder;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.bt.api.ScannerDataParser;
@@ -15,16 +9,9 @@ import com.enioka.scanner.sdk.honeywelloss.commands.GetFirmware;
 import com.enioka.scanner.sdk.honeywelloss.data.FirmwareVersion;
 import com.enioka.scanner.sdk.honeywelloss.parsers.HoneywellOssParser;
 
-public class HoneywellOssSppScannerProvider extends Service implements BtSppScannerProvider {
-    private final IBinder binder = new BtSppScannerProviderServiceBinder(this);
+public class HoneywellOssSppScannerProvider implements BtSppScannerProvider {
 
     private final ScannerDataParser inputHandler = new HoneywellOssParser();
-
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
-    }
 
     @Override
     public void canManageDevice(final Scanner device, final ManagementCallback callback) {

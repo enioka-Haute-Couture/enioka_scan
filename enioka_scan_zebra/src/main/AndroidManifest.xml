@@ -10,7 +10,8 @@
         <service
             android:name=".BtZebraProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <meta-data
                 android:name="bluetooth"
@@ -27,7 +28,8 @@
         <service
             android:name=".EmdkZebraProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SCANNER" />

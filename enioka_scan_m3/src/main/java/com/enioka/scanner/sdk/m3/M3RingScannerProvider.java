@@ -1,29 +1,19 @@
 package com.enioka.scanner.sdk.m3;
 
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.enioka.scanner.api.ScannerProvider;
-import com.enioka.scanner.api.ScannerProviderBinder;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.m3.ringscannersdk.RingScannerService;
 
 
-public class M3RingScannerProvider extends Service implements ScannerProvider {
+public class M3RingScannerProvider implements ScannerProvider {
     private static final String LOG_TAG = "M3RingScannerProvider";
     static String PROVIDER_KEY = "M3RingScannerProvider";
-
-    private final IBinder binder = new ScannerProviderBinder(this);
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
-    }
 
     @Override
     public void getScanner(Context ctx, final ProviderCallback cb, ScannerSearchOptions options) {

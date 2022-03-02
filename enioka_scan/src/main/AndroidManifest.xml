@@ -16,7 +16,8 @@
         <service
             android:name=".sdk.generalscan.GsSppScannerProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
@@ -26,7 +27,8 @@
         <service
             android:name=".sdk.zebraoss.ZebraOssSppScannerProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
@@ -36,7 +38,8 @@
         <service
             android:name=".sdk.honeywelloss.HoneywellOssSppScannerProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
@@ -47,7 +50,8 @@
         <service
             android:name=".sdk.postech.PostechSppScannerProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
@@ -58,7 +62,8 @@
         <service
             android:name=".sdk.hid.GenericHidProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
@@ -68,7 +73,8 @@
         <service
             android:name=".sdk.athesi.HHTProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
@@ -78,7 +84,8 @@
         <service
             android:name=".sdk.bluebird.BluebirdProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
@@ -88,7 +95,8 @@
         <service
             android:name=".sdk.proglove.ProgloveProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <meta-data
                 android:name="bluetooth"
@@ -101,7 +109,8 @@
         <service
             android:name=".bt.manager.SerialBtScannerProvider"
             android:description="@string/service_description"
-            android:exported="false">
+            android:exported="false"
+            tools:ignore="Instantiatable">
 
             <meta-data
                 android:name="bluetooth"

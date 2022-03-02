@@ -1,1 +1,1 @@
-include ':enioka_scan', ':enioka_scan_honeywell', ':enioka_scan_koamtac', ':enioka_scan_zebra', ':enioka_scan_m3', ':demoscannerapp'
+include ':enioka_scan', 'enioka_scan_mock', ':enioka_scan_honeywell', ':enioka_scan_koamtac', ':enioka_scan_zebra', ':enioka_scan_m3', ':demoscannerapp'

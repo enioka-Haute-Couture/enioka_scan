@@ -398,11 +398,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     // Scanner lifecycle callbacks
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @SuppressLint("SetTextI18n") // Text is already localized, only special characters remain.
     @Override
     public void onStatusChanged(final Scanner scanner, final ScannerStatusCallback.Status newStatus) {
         if (findViewById(R.id.scanner_text_scanner_status) != null) {
             TextView tv = findViewById(R.id.scanner_text_scanner_status);
-            tv.setText((scanner == null ? "" : (scanner.getProviderKey() + ": ")) + newStatus + "\n" + tv.getText());
+            tv.setText((scanner == null ? "" : (scanner.getProviderKey() + ": ")) + newStatus + " --- " + newStatus.getLocalizedMessage(this) + "\n" + tv.getText());
         }
     }
 

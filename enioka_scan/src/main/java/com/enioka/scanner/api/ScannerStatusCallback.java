@@ -1,7 +1,10 @@
 package com.enioka.scanner.api;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import com.enioka.scanner.R;
 
 /**
  * Callback to deal with scanner status changes.
@@ -14,43 +17,54 @@ public interface ScannerStatusCallback {
      */
     enum Status {
         /** The scanner is waiting for a connection. */
-        WAITING,//(Resources.getAppResources().getString(R.string.scanner_status_WAITING)),
+        WAITING(R.string.scanner_status_WAITING),
         /** The scanner is in the process of connecting. */
-        CONNECTING,//(Resources.getAppResources().getString(R.string.scanner_status_CONNECTING)),
+        CONNECTING(R.string.scanner_status_CONNECTING),
         /** The scanner disconnected but is trying to reconnect. */
-        RECONNECTING,//(Resources.getAppResources().getString(R.string.scanner_status_RECONNECTING)),
+        RECONNECTING(R.string.scanner_status_RECONNECTING),
         /** The scanner has finished connecting. */
-        CONNECTED,//(Resources.getAppResources().getString(R.string.scanner_status_CONNECTED)),
+        CONNECTED(R.string.scanner_status_CONNECTED),
         /** The scanner is in the process of initializing. */
-        INITIALIZING,//(Resources.getAppResources().getString(R.string.scanner_status_INITIALIZING)),
+        INITIALIZING(R.string.scanner_status_INITIALIZING),
         /** The scanner has finished initializing. */
-        INITIALIZED,//(Resources.getAppResources().getString(R.string.scanner_status_INITIALIZED)),
+        INITIALIZED(R.string.scanner_status_INITIALIZED),
         /** The scanner is ready to scan and waiting to be used. */
-        READY,//(Resources.getAppResources().getString(R.string.scanner_status_READY)),
+        READY(R.string.scanner_status_READY),
         /** The scanner is in the process of scanning. */
-        SCANNING,//(Resources.getAppResources().getString(R.string.scanner_status_SCANNING)),
+        SCANNING(R.string.scanner_status_SCANNING),
         /** The scanner is connected, initialized and enabled but not ready to scan. */
-        PAUSED,//(Resources.getAppResources().getString(R.string.scanner_status_PAUSED)),
+        PAUSED(R.string.scanner_status_PAUSED),
         /** The scanner is connected and initialized but has been disabled and cannot be used. */
-        DISABLED,//(Resources.getAppResources().getString(R.string.scanner_status_DISABLED)),
+        DISABLED(R.string.scanner_status_DISABLED),
         /** The scanner is no longer available after a critical error occurred, usually during connection or initialization. */
-        FAILURE,//(Resources.getAppResources().getString(R.string.scanner_status_FAILURE)),
+        FAILURE(R.string.scanner_status_FAILURE),
         /** The scanner disconnected and can no longer be used. */
-        DISCONNECTED,//(Resources.getAppResources().getString(R.string.scanner_status_DISCONNECTED)),
+        DISCONNECTED(R.string.scanner_status_DISCONNECTED),
         /** The scanner is in an unknown status. */
-        UNKNOWN,//(Resources.getAppResources().getString(R.string.scanner_status_UNKNOWN)),
+        UNKNOWN(R.string.scanner_status_UNKNOWN),
         /** ScannerService's SDK search is over. */
-        SERVICE_SDK_SEARCH_OVER,//(Resources.getAppResources().getString(R.string.scanner_status_SERVICE_SDK_SEARCH_OVER)), // FIXME - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
+        SERVICE_SDK_SEARCH_OVER(R.string.scanner_status_SERVICE_SDK_SEARCH_OVER), // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
         /** ScannerService's SDK search found no scanner. **/
-        SERVICE_SDK_SEARCH_NOTHINGFOUND;//(Resources.getAppResources().getString(R.string.scanner_status_SERVICE_SDK_SEARCH_NOTHINGFOUND)); // FIXME - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
+        SERVICE_SDK_SEARCH_NOCOMPATIBLE(R.string.scanner_status_SERVICE_SDK_SEARCH_NOCOMPATIBLE); // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
 
-        /*
-        final private String message;
+        final private int resId;
 
-        Status(@NonNull final String message) {
-            this.message = message;
+        Status(final int resId) {
+            this.resId = resId;
         }
-        */
+
+        /**
+         * Retrieves a localized message explaining the status.
+         * @param context The application context, required to retrieve the message.
+         * @return The localized message.
+         */
+        public String getLocalizedMessage(Context context) {
+            try {
+                return context.getString(resId);
+            } catch (final Exception exception) {
+                return "No details available";
+            }
+        }
 
         @Override
         @NonNull

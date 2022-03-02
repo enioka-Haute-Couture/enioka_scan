@@ -180,7 +180,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void noScannerAvailable() {
-        onStatusChanged(null, Status.SERVICE_SDK_SEARCH_NOTHINGFOUND); // FIXME - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
+        onStatusChanged(null, Status.SERVICE_SDK_SEARCH_NOCOMPATIBLE); // FIXME - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
         checkInitializationEnd();
     }
 

@@ -17,7 +17,7 @@
     <string name="scanner_status_DISCONNECTED">Scanner disconnected and can no longer be used</string>
     <string name="scanner_status_UNKNOWN">Scanner is in an unknown status</string>
     <!-- Scanner Service status -->
-    <string name="scanner_status_SERVICE_SDK_SEARCH_NOTHINGFOUND">There are no compatible hardware barcode scanners on this device</string>
+    <string name="scanner_status_SERVICE_SDK_SEARCH_NOCOMPATIBLE">There are no compatible hardware barcode scanners on this device</string>
     <string name="scanner_status_SERVICE_SDK_SEARCH_OVER">All hardware scanner providers have reported for duty</string>
 
     <!-- Scanner status (Others) -->

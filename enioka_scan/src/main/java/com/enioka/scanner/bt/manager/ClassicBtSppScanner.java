@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
@@ -49,7 +51,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
 
     private ScannerDataParser inputHandler;
 
-    private SppScannerStatusCallback statusCallback;
+    private ScannerStatusCallback statusCallback;
     private Handler uiHandler = new Handler(Looper.getMainLooper());
 
     /**
@@ -222,7 +224,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                 uiHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        ClassicBtSppScanner.this.statusCallback.onScannerDisconnected();
+                        ClassicBtSppScanner.this.statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.FAILURE);
                     }
                 });
             }
@@ -234,7 +236,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             uiHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    ClassicBtSppScanner.this.statusCallback.onScannerReconnecting();
+                    ClassicBtSppScanner.this.statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.RECONNECTING);
                 }
             });
         }
@@ -269,7 +271,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                     uiHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            ClassicBtSppScanner.this.statusCallback.onScannerConnected();
+                            ClassicBtSppScanner.this.statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.CONNECTED);
                         }
                     });
                 }
@@ -287,7 +289,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                         uiHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                ClassicBtSppScanner.this.statusCallback.onScannerDisconnected();
+                                ClassicBtSppScanner.this.statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.FAILURE);
                             }
                         });
                     }
@@ -330,7 +332,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
     }
 
     @Override
-    public void registerStatusCallback(SppScannerStatusCallback statusCallback) {
+    public void registerStatusCallback(ScannerStatusCallback statusCallback) {
         this.statusCallback = statusCallback;
     }
 

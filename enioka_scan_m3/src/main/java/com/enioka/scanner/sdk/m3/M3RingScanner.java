@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.m3.ringscanner.ScannerIDCallback;
@@ -17,6 +18,7 @@ import com.m3.ringscannersdk.RingScannerService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 class M3RingScanner implements ScannerBackground {
     private static final String LOG_TAG = "M3RingScanner";
@@ -116,13 +118,13 @@ class M3RingScanner implements ScannerBackground {
 
     @Override
     public void pause() {
-        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.DISABLED, context.getString(com.enioka.scanner.R.string.scanner_status_disabled));
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.DISABLED);
         this.scanner.setReadable(false);
     }
 
     @Override
     public void resume() {
-        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY, context.getString(com.enioka.scanner.R.string.scanner_status_ready));
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
         this.scanner.setReadable(true);
     }
 
@@ -195,5 +197,20 @@ class M3RingScanner implements ScannerBackground {
     @Override
     public String getProviderKey() {
         return M3RingScannerProvider.PROVIDER_KEY;
+    }
+
+    @Override
+    public String getStatus(String key) {
+        return null;
+    }
+
+    @Override
+    public String getStatus(String key, boolean allowCache) {
+        return null;
+    }
+
+    @Override
+    public Map<String, String> getStatus() {
+        return null;
     }
 }

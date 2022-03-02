@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
@@ -136,7 +137,7 @@ public class ProgloveScanner extends IntentScanner<String> {
         Log.d(LOG_TAG, "Received status update from scanner " + status);
         switch (status) {
             case "RECONNECTING":
-                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.RECONNECTING, status);
+                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.RECONNECTING);
                 connected = false;
                 this.connectionAttempts++;
 
@@ -151,10 +152,10 @@ public class ProgloveScanner extends IntentScanner<String> {
                 break;
             case "ERROR":
             case "CONNECTING":
-                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.CONNECTING, status);
+                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.CONNECTING);
                 break;
             case "CONNECTED":
-                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.CONNECTED, status);
+                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.CONNECTED);
                 this.connected = true;
                 this.connectionAttempts = 0;
                 break;
@@ -173,7 +174,7 @@ public class ProgloveScanner extends IntentScanner<String> {
                 }
                 break;
             default:
-                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.UNKNOWN, "Unknown status " + status);
+                this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.UNKNOWN);
         }
     }
 

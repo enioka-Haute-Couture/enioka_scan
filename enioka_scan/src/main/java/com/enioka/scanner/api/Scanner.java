@@ -1,7 +1,5 @@
 package com.enioka.scanner.api;
 
-import android.support.annotation.Nullable;
-
 import com.enioka.scanner.data.Barcode;
 
 import java.util.List;
@@ -59,52 +57,6 @@ public interface Scanner {
          * @param data the data read by the reader.
          */
         void onData(Scanner s, List<Barcode> data);
-    }
-
-    /**
-     * Callback to deal with scanner status changes.
-     */
-    interface ScannerStatusCallback {
-        /**
-         * Enum describing the scanner's lifecycle and current status.
-         * Some elements may not be used depending on which scanner SDK is used.
-         */
-        enum Status {
-            /** The scanner is waiting for a connection. */
-            WAITING,
-            /** The scanner is in the process of connecting. */
-            CONNECTING,
-            /** The scanner disconnected but is trying to reconnect. */
-            RECONNECTING,
-            /** The scanner has finished connecting. */
-            CONNECTED,
-            /** The scanner is in the process of initializing. */
-            INITIALIZING,
-            /** The scanner has finished initializing. */
-            INITIALIZED,
-            /** The scanner is ready to scan and waiting to be used. */
-            READY,
-            /** The scanner is in the process of scanning. */
-            SCANNING,
-            /** The scanner is connected, initialized and enabled but not ready to scan. */
-            IDLE,
-            /** The scanner is connected and initialized but has been disabled and cannot be used. */
-            DISABLED,
-            /** The scanner is no longer available after a critical error occurred, usually during connection or initialization. */
-            FAILURE,
-            /** The scanner disconnected and can no longer be used. */
-            DISCONNECTED,
-            /** The scanner is in an unknown status. */
-            UNKNOWN
-        }
-
-        /**
-         * Called whenever the scanner has changed status.
-         * @param scanner The updated scanner. May be null if the scanner has not yet been created.
-         * @param newStatus The new status.
-         * @param statusDetails The associated status details.
-         */
-        void onStatusChanged(@Nullable final Scanner scanner, final Status newStatus, final String statusDetails);
     }
 
 

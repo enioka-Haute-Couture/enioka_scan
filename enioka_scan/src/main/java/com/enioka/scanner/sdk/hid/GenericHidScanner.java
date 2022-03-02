@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.enioka.scanner.api.Color;
-import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerForeground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 

@@ -8,6 +8,7 @@ import android.util.Log;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.honeywell.aidc.AidcManager;
@@ -94,7 +95,7 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
         }
 
         if (this.statusCb != null) {
-            this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.READY, "Scanner is ready");
+            this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.READY);
         }
         Log.i(LOG_TAG, "Scanner initialized");
 

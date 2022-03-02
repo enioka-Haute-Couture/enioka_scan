@@ -3,11 +3,10 @@ package com.enioka.scanner.sdk.generalscan;
 import android.content.Context;
 import android.os.Handler;
 
-import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
-import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.generalscan.commands.Bell;
 import com.enioka.scanner.sdk.generalscan.commands.CloseRead;
@@ -44,22 +43,7 @@ class GsSppScanner implements ScannerBackground {
 
         final Handler uiHandler = new Handler(applicationContext.getMainLooper());
 
-        this.btScanner.registerStatusCallback(new Scanner.SppScannerStatusCallback() {
-            @Override
-            public void onScannerConnected() {
-                statusCallback.onStatusChanged(GsSppScanner.this, ScannerStatusCallback.Status.CONNECTED, applicationContext.getString(R.string.scanner_status_connected));
-            }
-
-            @Override
-            public void onScannerReconnecting() {
-                statusCallback.onStatusChanged(GsSppScanner.this, ScannerStatusCallback.Status.RECONNECTING, applicationContext.getString(R.string.scanner_status_reconnecting));
-            }
-
-            @Override
-            public void onScannerDisconnected() {
-                statusCallback.onStatusChanged(GsSppScanner.this, ScannerStatusCallback.Status.DISCONNECTED, applicationContext.getString(R.string.scanner_status_lost));
-            }
-        });
+        this.btScanner.registerStatusCallback(statusCallback);
 
         this.btScanner.registerSubscription(new DataSubscriptionCallback<Barcode>() {
             @Override

@@ -3,9 +3,9 @@ package com.enioka.scanner.sdk.postech;
 import android.content.Context;
 import android.os.Handler;
 
-import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
@@ -44,22 +44,7 @@ class PostechSppScanner implements ScannerBackground {
 
         final Handler uiHandler = new Handler(applicationContext.getMainLooper());
 
-        this.btScanner.registerStatusCallback(new Scanner.SppScannerStatusCallback() {
-            @Override
-            public void onScannerConnected() {
-                statusCallback.onStatusChanged(PostechSppScanner.this, ScannerStatusCallback.Status.CONNECTED, applicationContext.getString(R.string.scanner_status_connected));
-            }
-
-            @Override
-            public void onScannerReconnecting() {
-                statusCallback.onStatusChanged(PostechSppScanner.this, ScannerStatusCallback.Status.RECONNECTING, applicationContext.getString(R.string.scanner_status_reconnecting));
-            }
-
-            @Override
-            public void onScannerDisconnected() {
-                statusCallback.onStatusChanged(PostechSppScanner.this, ScannerStatusCallback.Status.DISCONNECTED, applicationContext.getString(R.string.scanner_status_lost));
-            }
-        });
+        this.btScanner.registerStatusCallback(statusCallback);
 
         this.btScanner.registerSubscription(new DataSubscriptionCallback<Barcode>() {
             @Override

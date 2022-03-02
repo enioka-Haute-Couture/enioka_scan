@@ -10,6 +10,7 @@ import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
@@ -36,7 +37,7 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
     private Scanner selfScanner = this;
     private boolean waitingForResult = false;
     private Scanner.ScannerDataCallback dataCb = null;
-    private Scanner.ScannerStatusCallback statusCb = null;
+    private ScannerStatusCallback statusCb = null;
     private Scanner.ScannerInitCallback initCb = null;
     private Scanner.Mode mode;
 
@@ -105,7 +106,7 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
 
         // Toast to indicate that the user can now start scanning
         if (statusCb != null) {
-            statusCb.onStatusChanged(this, ScannerStatusCallback.Status.READY, "Press Hard Scan Button to start scanning...");
+            statusCb.onStatusChanged(this, ScannerStatusCallback.Status.READY);
         }
     }
 
@@ -236,7 +237,7 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
             switch (state) {
                 // Scanner is IDLE
                 case IDLE:
-                    statusStr = r.getString(R.string.scanner_status_idle);
+                    statusStr = r.getString(R.string.scanner_status_PAUSED);
 
                     if (waitingForResult) {
                         // Happens when the user has pressed the button, then did not scan anything. Rearm.
@@ -251,17 +252,17 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
 
                 // Scanner is SCANNING
                 case SCANNING:
-                    statusStr = r.getString(R.string.scanner_status_scanning);
+                    statusStr = r.getString(R.string.scanner_status_SCANNING);
                     break;
 
                 // Scanner is waiting for trigger press
                 case WAITING:
-                    statusStr = r.getString(R.string.scanner_status_ready);
+                    statusStr = r.getString(R.string.scanner_status_READY);
                     break;
 
                 // Scanner is not enabled
                 case DISABLED:
-                    statusStr = r.getString(R.string.scanner_status_disabled);
+                    statusStr = r.getString(R.string.scanner_status_DISABLED);
                     break;
 
                 default:
@@ -275,7 +276,16 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
         @Override
         protected void onPostExecute(String result) {
             if (statusCb != null) {
-                statusCb.onStatusChanged(selfScanner, ScannerStatusCallback.Status.UNKNOWN, result);
+                if (result.equals(r.getString(R.string.scanner_status_PAUSED)))
+                    statusCb.onStatusChanged(selfScanner, ScannerStatusCallback.Status.PAUSED);
+                else if (result.equals(r.getString(R.string.scanner_status_SCANNING)))
+                    statusCb.onStatusChanged(selfScanner, ScannerStatusCallback.Status.SCANNING);
+                else if (result.equals(r.getString(R.string.scanner_status_READY)))
+                    statusCb.onStatusChanged(selfScanner, ScannerStatusCallback.Status.READY);
+                else if (result.equals(r.getString(R.string.scanner_status_DISABLED)))
+                    statusCb.onStatusChanged(selfScanner, ScannerStatusCallback.Status.DISABLED);
+                else
+                    statusCb.onStatusChanged(selfScanner, ScannerStatusCallback.Status.UNKNOWN);
             }
         }
 

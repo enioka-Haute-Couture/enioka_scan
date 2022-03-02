@@ -1,6 +1,7 @@
 package com.enioka.scanner.activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.camera.CameraReader;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
@@ -41,7 +43,7 @@ import java.util.List;
 
 /**
  * A helper activity which implements all scan functions: laser, camera, HID.<br><br>Basic usage is trivial : just inherit this class, and that's all.<br>
- * You may want to override {@link #onData(List)} to get barcode data, and {@link #onStatusChanged(String)} to display status messages from the scanners.<br>
+ * You may want to override {@link #onData(List)} to get barcode data, and {@link #onStatusChanged(Scanner, ScannerStatusCallback.Status)} to display status messages from the scanners.<br>
  * It is also useful to change  inside onCreate {@link #layoutIdLaser} and {@link #layoutIdCamera} to a layout ID (from R.id...) corresponding to your application.
  * By default, a basic test layout is provided.<br>
  * Also, {@link #cameraViewId} points to the camera view inside your camera layout.
@@ -374,7 +376,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //initLaserScannerSearch();
                 } else {
-                    Toast.makeText(this, R.string.scanner_status_disabled, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.scanner_status_DISABLED, Toast.LENGTH_SHORT).show();
                 }
                 break;
             }
@@ -384,7 +386,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
                         bindAndStartService();
                     }
                 } else {
-                    Toast.makeText(this, R.string.scanner_status_disabled, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.scanner_status_DISABLED, Toast.LENGTH_SHORT).show();
                 }
                 break;
             }
@@ -397,10 +399,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void onStatusChanged(String newStatus) {
+    public void onStatusChanged(final Scanner scanner, final ScannerStatusCallback.Status newStatus) {
         if (findViewById(R.id.scanner_text_scanner_status) != null) {
             TextView tv = findViewById(R.id.scanner_text_scanner_status);
-            tv.setText(newStatus + "\n" + tv.getText());
+            tv.setText((scanner == null ? "" : (scanner.getProviderKey() + ": ")) + newStatus + "\n" + tv.getText());
         }
     }
 

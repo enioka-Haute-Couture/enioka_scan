@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerForeground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;

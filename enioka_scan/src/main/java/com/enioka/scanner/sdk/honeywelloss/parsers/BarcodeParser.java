@@ -109,12 +109,14 @@ class BarcodeParser implements ScannerDataParser {
             res.expectingMoreData = false;
             res.rejected = false;
             res.acknowledger = null;
+            res.read += length;
             return res;
         }
 
         // If here we have read all the bytes and still need more.
         //return length;
         res.expectingMoreData = true;
+        res.read += length;
         return res;
     }
 

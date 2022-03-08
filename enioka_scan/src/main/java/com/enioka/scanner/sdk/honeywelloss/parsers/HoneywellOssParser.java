@@ -20,7 +20,7 @@ public class HoneywellOssParser implements ScannerDataParser {
 
     @Override
     public ParsingResult parse(byte[] buffer, int offset, int dataLength) {
-        MessagePrinter.prettyPrint(buffer, offset, dataLength); //FIXME - don't include in release, wasted processing
+        MessagePrinter.prettyPrint(buffer, offset, dataLength);
         if (mode == ParsingMode.NONE && dataLength > 0 && buffer[offset] == 0x16) {
             mode = ParsingMode.DATA;
         } else if (mode == ParsingMode.NONE) {

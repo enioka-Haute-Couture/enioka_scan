@@ -32,7 +32,7 @@ class BarcodeParser implements ScannerDataParser {
         //   0x?? 0x?? 0x?? 0x??                    = Data length (each byte = ASCII character of digit, read in natural order, e.g. 0x30 0x30 0x31 0x33 => 0013)
         //   0x??                                   = Honeywell ID for symbology
         //   0x?? 0x??                              = AIM ID for symbology (each byte = ASCII character, first is symbology family, second is modifier to identify the exact symbology)
-        //   0x1D (GS)                              = End of payload description / payload starts next
+        //   0x1D (GS)                              = End of payload description / data starts next
         //   Data! In natural order. ASCII.
         //   0x0D (CR)                              = End of data (included in the data length, expecting more data until found).
 

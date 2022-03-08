@@ -1,7 +1,5 @@
 package com.enioka.scanner.sdk.honeywelloss.helpers;
 
-import android.support.annotation.Nullable;
-
 import com.enioka.scanner.data.BarcodeType;
 
 import java.util.Collections;

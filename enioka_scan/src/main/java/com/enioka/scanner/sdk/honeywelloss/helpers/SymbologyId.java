@@ -1,5 +1,9 @@
 package com.enioka.scanner.sdk.honeywelloss.helpers;
 
+import android.support.annotation.Nullable;
+
+import com.enioka.scanner.data.BarcodeType;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +61,7 @@ public final class SymbologyId {
     /**
      * Map associating an AIM ID (in ASCII hexadecimal value) to its corresponding symbology.
      * The modifier is ignored, so the symbology may not be complete (e.g. "UPC/EAN" -> could be EAN-8 or EAN-13).
+     * Because of this, it is recommended to prefer using the honeywellIdMap instead.
      */
     public static final Map<Integer, String> AIMIdMap = Collections.unmodifiableMap(new HashMap<Integer, String>() {{
         put(0x41, "Code39"); //A
@@ -82,4 +87,29 @@ public final class SymbologyId {
         put(0x65, "GS1"); //e
         put(0x7A, "Aztec"); //z
     }});
+
+    /**
+     * Converts a string returned by one of the ID maps above into one of the available BarcodeTypes.
+     * Defaults to the UNKNOWN type if no corresponding type exists.
+     * FIXME: Fill-in missing types to BarcodeType and make maps return a type directly.
+     * @param symbologyString The string returned by one of the ID maps.
+     * @return The corresponding BarcodeType.
+     */
+    public static BarcodeType toBarcodeType(final String symbologyString) {
+        if (symbologyString == null)
+            throw new IllegalArgumentException("No symbology to convert");
+        if (symbologyString.equals("Code128"))
+            return BarcodeType.CODE128;
+        if (symbologyString.equals("Code39"))
+            return BarcodeType.CODE39;
+        if (symbologyString.equals("D2of5"))
+            return BarcodeType.DIS25;
+        if (symbologyString.equals("I2of5"))
+            return BarcodeType.INT25;
+        if (symbologyString.equals("EAN-13") || symbologyString.equals("UPC/EAN"))
+            return BarcodeType.EAN13;
+        if (symbologyString.equals("QRCode"))
+            return BarcodeType.QRCODE;
+        return BarcodeType.UNKNOWN;
+    }
 }

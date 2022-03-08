@@ -19,8 +19,6 @@ public class MessagePrinter {
         boolean inDataSize = false;
 
         for (int i = offset; i < dataLength; i++) {
-            if (i == offset && inData)
-                printedStr.append("Response --- ");
             if (inPayloadSize) { // Message header decoding (payload length)
                 byte[] bytes = { buffer[i], buffer[i+1], buffer[i+2], buffer[i+3] };
                 int payloadSize = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();

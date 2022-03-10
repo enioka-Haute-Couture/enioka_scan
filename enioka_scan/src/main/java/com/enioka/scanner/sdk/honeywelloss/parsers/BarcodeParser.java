@@ -1,14 +1,11 @@
 package com.enioka.scanner.sdk.honeywelloss.parsers;
 
-import android.util.Log;
-
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 /**
  * Parser for one the two main data structures: data, inside a MSGGET message.

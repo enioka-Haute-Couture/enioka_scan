@@ -5,11 +5,14 @@ avoiding vendor lock-in and lowering the cost of advanced scanner integration.
 
 It is compatible with:
 * Zebra EMDK devices (which comprise most of their integrated systems like the TC25, TC75, WT6000...)
+* Zebra Bluetooth scanners
 * Honeywell AIDC integrated devices (including CN* devices)
 * Athesi SPA43
+* GeneralScan Bluetooth rings
 * All hardware scanners acting as keyboards (HID), like most BlueTooth cheap handled scanners.
+* And a few others, check full compatibility table below.
 
-When there are no compatible hardware devices available, the library provides a camera reader based on ZBar or ZXing.
+When there are no compatible hardware devices available, the library provides a camera reader based on ZBar (default) or ZXing.
 
 Through a common abstraction, it provides access to the following methods (provided the hardware supports them):
 * pause/resume scanning
@@ -31,7 +34,7 @@ The different plugins do not all have the same capabilities. The following table
 * "All 1D" symbologies means code 128, 39, I25, D25, EAN13. (some devices also provide QR code and other 2D symbologies)
 * "Plugin AAR needed" means an additional aar must be used for this device. This is likely because it contains non-OSS code and cannot be distributed freely.
 * "SDK needed" means the library will need the manufacturer SDK to work. This SDK likely could not be included for licence reasons, and must be provided by valid SDK license holder.
-* "Provider name" is an name internal o the library which can be used to enable or disable a provider.
+* "Provider name" is a name internal to the library which can be used to enable or disable a provider (by default all providers present are used which can slow initialisation).
 
 Manufacturer | Device family          | Plugin AAR needed | SDK needed | Provider name                               | Connection | Notes                          | Basic scanning | Symbologies recognized      | Symbologies detection | Symbology configuration | Illumination control | Disable trigger | LED control | Beep control
 ------------ | ---------------------- | ----------------- | ---------- | ------------------------------------------- | ---------- | ------------------------------ | -------------- | --------------------------- | --------------------- | ----------------------- | -------------------- | --------------- | ----------- | ------------
@@ -47,23 +50,16 @@ Koamtac      | BT KDC (180...)        | Yes               | No         | Koamtac
 M3           | RingScanners           | Yes               | No         | M3RingScannerProvider                       | BT SPP     | M3 app needed                  | Yes            | All 1D                      | No                    | No                      | No                   | Yes             | No          | No
 Camera       | Devices with camera    | No                | No         |                                             | Integrated | Capabilities depend on device  | Yes            | All 1D                      | Yes                   | On startup              | Yes (flash light)    | Yes             | N/A         | Yes
 
-There also are traces of Postech BT ring scanner compatibility - their communication protocol is like the GeneralScan one, but the authors of the library lacked a test device to finish it, so it disabled.
+There also are traces of Postech BT ring scanner compatibility - their communication protocol is like the GeneralScan one, but the authors of the library lacked a test device to finish it, so it was disabled.
 Also, the HID provider is named GenericHidProvider.
 
 # Adding the library to an Android application
 
-TODO: upload to Maven Central and rewrite this.
+For all devices which are not marked as "plugin AAR needed" in the above table, a single dependency is needed. It is available either here on Github or (better) or Maven Central: just use coordinates `com.enioka.scanner:scanner:x.y.z:aar` (do remember to specify `mavenCentral()` inside the Gradle build file `repositories` section), and update the version to latets version).
 
-At the root of your app: (all files *are inside the source tree or created by the project*)
+That's all if you do not need an AAR plugin. If you also need a plugin AAR (provided by us) and a proprietary SDK (provided by the scanner manufacturer, at the root of your app: (all files *are inside the source tree or created by the project*)
 * copy barcode_scanner_library_*.aar (the Zebra Bluetooth SDK) to aar_zebra
-* copy eniokascan.aar to aar_enioka
 * copy DataCollection.jar (Honeywell SDK) to barcodelibs
-
-Inside aar_enioka, create a build.gradle file:
-```
-configurations.maybeCreate("default")
-artifacts.add("default", file('eniokascan.aar'))
-```
 
 Inside aar_zebra:
 ```
@@ -71,13 +67,12 @@ configurations.maybeCreate("default")
 artifacts.add("default", file('barcode_scanner_library_v2.0.8.0.aar'))
 ```
 
-Inside settings.gradle, add "aar_enioka" and 'aar_zebra" to the list of includes.
+Inside settings.gradle, add 'aar_zebra" to the list of includes.
 
 Inside the application build.gradle, add:
 
 ```
 dependencies {
-    compile project(':aar_enioka')
     compile project(':aar_zebra')
 
     compile 'me.dm7.barcodescanner:zbar:1.8.3'
@@ -170,7 +165,7 @@ This often happens when dealing with UI frameworks which have their own lifecycl
 
 This method can also be used inside an Activity, when the use of an external base class for an Activity is not possible (for example when there already is a base class, or when using `AppCompatActivity` is not desired). This is exactly what `ScannerCompatActivity` does - it simply binds to the service.
 
-# Developer quick start
+# Developer quick start (modifying this library)
 
 In order to start developing and testing the library:
 * Have Android Studio installed and open the project with it
@@ -181,7 +176,7 @@ In case the android device is not detected by Android Studio:
 * Make sure the device is in developer mode and has USB Debugging enabled
 * Make sure the USB cable supports data transfer (some cables only support charging)
 
-# Adding another SDK
+# Adding another SDK to the library
 
 In order for a new scanner SDK to be recognized by the library, the provider class needs to be declared as a service in `AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER`.
 The associated Java class does not need to extend Android's Service class (the `tools:ignore="Instantiatable"` attribute may be added to the service in the manifest), but it must provide a default constructor as it will be instantiated using `Class.getName()`, and it needs to implement the ScannerProvider interface. See `/enioka_scan_mock` for an example of addon SDK.

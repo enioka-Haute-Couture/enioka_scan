@@ -376,6 +376,14 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     }
 
     @Override
+    public String getFirstScannerStatus(String key, boolean allowCache) {
+        if (!this.scanners.isEmpty()) {
+            return this.scanners.get(0).getStatus(key, allowCache);
+        }
+        return null;
+    }
+
+    @Override
     public List<Scanner> getConnectedScanners() {
         return scanners;
     }

@@ -53,6 +53,13 @@ afterEvaluate {
                         developerConnection = 'scm:git:ssh://github.com/enioka/enioka_scan.git'
                         url = 'https://github.com/enioka/enioka_scan/tree/master'
                     }
+                    developers {
+                        developer {
+                            id = 'mag'
+                            name = 'Marc-Antoine Gouillart'
+                            email = 'mag@enioka.com'
+                        }
+                    }
                 }
             }
         }

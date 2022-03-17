@@ -138,5 +138,7 @@ public interface ScannerServiceApi {
 
     String getFirstScannerStatus(String key);
 
+    String getFirstScannerStatus(String key, boolean allowCache);
+
     List<Scanner> getConnectedScanners();
 }

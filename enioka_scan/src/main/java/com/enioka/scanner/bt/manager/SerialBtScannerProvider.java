@@ -99,6 +99,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
 
             try {
                 final BtSppScannerProvider provider = (BtSppScannerProvider) Class.forName(ri.serviceInfo.name).newInstance();
+                Log.i(LOG_TAG, "\tSPP SDK compatible provider found: " + ri.serviceInfo.name);
                 scannerProviders.add(provider);
             } catch (Exception e) {
                 // Could not instantiate

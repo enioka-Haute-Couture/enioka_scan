@@ -348,6 +348,16 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
 
     private int handleInputBufferLoop(byte[] buffer, int offset, int length) {
         ParsingResult res = this.inputHandler.parse(buffer, offset, length);
+
+        if (length > 0 && res.read == 0) {
+            Log.w(LOG_TAG, "The buffer is abandoned as the parser did not read any byte on the latest loop");
+            this.outputStreamWriter.endOfCommand();
+            if (res.acknowledger != null) {
+                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+            }
+            return length;
+        }
+
         if (!res.expectingMoreData && res.data != null) {
             Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString());
 

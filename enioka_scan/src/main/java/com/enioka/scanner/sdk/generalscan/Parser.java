@@ -31,16 +31,21 @@ public class Parser implements ScannerDataParser {
 
         // Special parser for this data?
         Object res = null;
+        int read = 0;
         if (currentData.startsWith("[")) {
             res = new DeviceId(currentData);
+            read = dataLength;
         }
         // TODO: {GSxxxx} parsing.
 
         if (res == null) {
             res = new Barcode(currentData, BarcodeType.UNKNOWN);
+            read = dataLength;
         }
 
         currentData = null;
-        return new ParsingResult(res);
+        ParsingResult result = new ParsingResult(res);
+        result.read = read;
+        return result;
     }
 }

@@ -20,6 +20,7 @@ public class GsSppScannerProvider implements BtSppScannerProvider {
         device.runCommand(new GetDeviceId(), new DataSubscriptionCallback<DeviceId>() {
             @Override
             public void onSuccess(DeviceId data) {
+                device.runCommand(new OpenRead(), null);
                 callback.canManage(new GsSppScanner(device));
             }
 
@@ -33,7 +34,6 @@ public class GsSppScannerProvider implements BtSppScannerProvider {
                 callback.cannotManage();
             }
         });
-        device.runCommand(new OpenRead(), null);
     }
 
     @Override

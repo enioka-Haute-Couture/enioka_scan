@@ -11,6 +11,7 @@ import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.zebraoss.commands.Beep;
+import com.enioka.scanner.sdk.zebraoss.commands.InitCommand;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOn;
 import com.enioka.scanner.sdk.zebraoss.commands.ManagementCommandGetAttribute;
@@ -19,6 +20,8 @@ import com.enioka.scanner.sdk.zebraoss.commands.RequestParam;
 import com.enioka.scanner.sdk.zebraoss.commands.RequestRevision;
 import com.enioka.scanner.sdk.zebraoss.commands.ScanDisable;
 import com.enioka.scanner.sdk.zebraoss.commands.ScanEnable;
+import com.enioka.scanner.sdk.zebraoss.commands.SetPickListMode;
+import com.enioka.scanner.sdk.zebraoss.commands.StartSession;
 import com.enioka.scanner.sdk.zebraoss.data.ParamSend;
 import com.enioka.scanner.sdk.zebraoss.data.ReplyRevision;
 import com.enioka.scanner.sdk.zebraoss.data.RsmAttribute;
@@ -236,10 +239,10 @@ class ZebraOssScanner implements ScannerBackground {
         // Request scanner configuration
         startStatusCacheRefresh(null);
 
-        //this.btScanner.runCommand(new InitCommand(), null);
-        //this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
-        //this.btScanner.runCommand(new ScanEnable(), null);
-        //this.btScanner.runCommand(new StartSession(), null);
+        this.btScanner.runCommand(new InitCommand(), null);
+        this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
+        this.btScanner.runCommand(new ScanEnable(), null);
+        this.btScanner.runCommand(new StartSession(), null);
 
         // We are already connected if the scanner could be created...
         initCallback.onConnectionSuccessful(this);

@@ -9,12 +9,11 @@ import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiStatus;
 /**
  * Request a specific RSM attribute or a list of RSM attributes.
  */
-// FIXME: BLE value for packet constructor
 public class ManagementCommandGetAttribute implements Command<RsmAttributeReply> {
     private final SsiMonoPacket packet;
 
-    public ManagementCommandGetAttribute(int... prmCodes) {
-        packet = new SsiMonoPacket(SsiCommand.SSI_MGMT_COMMAND.getOpCode(), SsiStatus.DEFAULT.getByte(), prmCodesToByteArray(prmCodes), false);
+    public ManagementCommandGetAttribute(boolean isBle, int... prmCodes) {
+        packet = new SsiMonoPacket(SsiCommand.SSI_MGMT_COMMAND.getOpCode(), SsiStatus.DEFAULT.getByte(), prmCodesToByteArray(prmCodes), isBle);
     }
 
     private static byte[] prmCodesToByteArray(int[] prmCodes) {

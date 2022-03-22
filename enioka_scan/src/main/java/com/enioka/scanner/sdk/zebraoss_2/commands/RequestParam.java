@@ -9,16 +9,15 @@ import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiStatus;
 /**
  * Requests all params 0xC7 opcode, 0xFE request data)
  */
-// FIXME: BLE value for packet constructor
 public class RequestParam implements Command<ParamSend> {
     private final SsiMonoPacket packet;
 
-    public RequestParam() {
-        packet = new SsiMonoPacket(SsiCommand.PARAM_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[]{(byte) (0xFE)}, false);
+    public RequestParam(boolean isBle) {
+        packet = new SsiMonoPacket(SsiCommand.PARAM_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[]{(byte) (0xFE)}, isBle);
     }
 
-    public RequestParam(int prmCode) {
-        packet = new SsiMonoPacket(SsiCommand.PARAM_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), prmCodeToByteArray(prmCode), false);
+    public RequestParam(int prmCode, boolean isBle) {
+        packet = new SsiMonoPacket(SsiCommand.PARAM_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), prmCodeToByteArray(prmCode), isBle);
     }
 
     private static byte[] prmCodeToByteArray(int prmCode) {

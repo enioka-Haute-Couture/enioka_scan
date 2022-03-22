@@ -9,12 +9,11 @@ import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiStatus;
 /**
  * Special management command which should be sent before all others, requesting the RSM buffer size.
  */
-// FIXME: BLE value for packet constructor
 public class ManagementCommandGetBufferSize implements Command<RsmAttributeReply> {
     private final SsiMonoPacket packet;
 
-    public ManagementCommandGetBufferSize() {
-        packet = new SsiMonoPacket(SsiCommand.SSI_MGMT_COMMAND.getOpCode(), SsiStatus.DEFAULT.getByte(),new byte[]{0x00, 0x06, 0x20, 0x00, (byte) 0xFF, (byte) 0xFF}, false);
+    public ManagementCommandGetBufferSize(boolean isBle) {
+        packet = new SsiMonoPacket(SsiCommand.SSI_MGMT_COMMAND.getOpCode(), SsiStatus.DEFAULT.getByte(),new byte[]{0x00, 0x06, 0x20, 0x00, (byte) 0xFF, (byte) 0xFF}, isBle);
     }
 
     @Override

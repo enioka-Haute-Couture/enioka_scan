@@ -394,4 +394,9 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
     public void registerStatusCallback(ScannerStatusCallback statusCallback) {
 
     }
+
+    @Override
+    public boolean isBleDevice() {
+        return true;
+    }
 }

@@ -6,12 +6,11 @@ import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiCommand;
 import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiMonoPacket;
 import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiStatus;
 
-// FIXME: BLE value for packet constructor
 public class RequestRevision implements Command<ReplyRevision> {
     private final SsiMonoPacket packet;
 
-    public RequestRevision() {
-        packet = new SsiMonoPacket(SsiCommand.REQUEST_REVISION.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[0], false);
+    public RequestRevision(boolean isBle) {
+        packet = new SsiMonoPacket(SsiCommand.REQUEST_REVISION.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[0], isBle);
     }
 
     @Override

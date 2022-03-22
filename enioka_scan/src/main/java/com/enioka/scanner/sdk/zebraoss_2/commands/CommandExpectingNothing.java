@@ -4,16 +4,15 @@ import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiMonoPacket;
 import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiStatus;
 
-// FIXME: BLE value for packet constructor
 public abstract class CommandExpectingNothing implements Command<Void> {
     private final SsiMonoPacket packet;
 
-    public CommandExpectingNothing(byte opCode, byte[] data) {
-        packet = new SsiMonoPacket(opCode, SsiStatus.DEFAULT.getByte(), data, false);
+    public CommandExpectingNothing(byte opCode, byte[] data, boolean isBle) {
+        packet = new SsiMonoPacket(opCode, SsiStatus.DEFAULT.getByte(), data, isBle);
     }
 
-    public CommandExpectingNothing(byte opCode) {
-        packet = new SsiMonoPacket(opCode, SsiStatus.DEFAULT.getByte(), new byte[0], false);
+    public CommandExpectingNothing(byte opCode, boolean isBle) {
+        packet = new SsiMonoPacket(opCode, SsiStatus.DEFAULT.getByte(), new byte[0], isBle);
     }
 
     @Override

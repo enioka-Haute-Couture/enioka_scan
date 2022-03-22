@@ -336,6 +336,11 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         this.statusCallback = statusCallback;
     }
 
+    @Override
+    public boolean isBleDevice() {
+        return false;
+    }
+
     void handleInputBuffer(byte[] buffer, int offset, int length) {
         int read = offset;
         while (read < length) {

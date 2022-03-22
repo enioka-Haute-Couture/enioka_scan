@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
 
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.service.BackgroundScannerClient;
 import com.enioka.scanner.service.ScannerService;
@@ -27,7 +29,7 @@ import java.util.concurrent.Semaphore;
 /**
  * Tests that the mock is compatible with the library's instantiation methods: LaserScanner and ScannerService.
  */
-public class MockTest {
+public class MockAndroidTest {
 
     // Mock application context
     private static final Context ctx = InstrumentationRegistry.getContext();
@@ -84,11 +86,9 @@ public class MockTest {
         final ScannerServiceApi scannerService = serviceConnection.binder.getService();
         scannerService.registerClient(new BackgroundScannerClient() {
             @Override
-            public void onStatusChanged(String newStatus) {
-                if (newStatus.equals(ctx.getResources().getString(com.enioka.scanner.R.string.scanner_service_sdk_search_end))) {
-                    // Scanner discovery ended
+            public void onStatusChanged(@Nullable Scanner scanner, Status newStatus) {
+                if (newStatus == Status.SERVICE_SDK_SEARCH_OVER)
                     scannerDiscoverySemaphore.release();
-                }
             }
 
             @Override
@@ -116,14 +116,7 @@ public class MockTest {
                 Assert.fail();
             }
         };
-        public Scanner.ScannerStatusCallback statusCallback = new Scanner.ScannerStatusCallback() {
-            @Override
-            public void onStatusChanged(String newStatus) {}
-            @Override
-            public void onScannerReconnecting(Scanner s) {}
-            @Override
-            public void onScannerDisconnected(Scanner s) {}
-        };
+        public ScannerStatusCallback statusCallback = (scanner, newStatus) -> {};
         public Scanner.ScannerDataCallback dataCallback = (s, data) -> {};
         public MockScanner mock = null;
 

@@ -4,11 +4,10 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
-import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
-import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.zebraoss.commands.Beep;
 import com.enioka.scanner.sdk.zebraoss.commands.InitCommand;
@@ -192,24 +191,7 @@ class ZebraOssScanner implements ScannerBackground {
         final Handler uiHandler = new Handler(applicationContext.getMainLooper());
 
         // Hook connection / disconnection events
-        this.btScanner.registerStatusCallback(new Scanner.SppScannerStatusCallback() {
-            @Override
-            public void onScannerConnected() {
-                statusCallback.onStatusChanged(applicationContext.getString(R.string.scanner_status_connected));
-            }
-
-            @Override
-            public void onScannerReconnecting() {
-                statusCallback.onStatusChanged(applicationContext.getString(R.string.scanner_status_reconnecting));
-                statusCallback.onScannerReconnecting(ZebraOssScanner.this);
-            }
-
-            @Override
-            public void onScannerDisconnected() {
-                statusCallback.onStatusChanged(applicationContext.getString(R.string.scanner_status_lost));
-                statusCallback.onScannerDisconnected(ZebraOssScanner.this);
-            }
-        });
+        this.btScanner.registerStatusCallback(statusCallback);
 
         // Subscribe to read barcodes.
         this.btScanner.registerSubscription(new DataSubscriptionCallback<Barcode>() {

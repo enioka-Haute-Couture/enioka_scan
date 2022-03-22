@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class MockScanner implements ScannerBackground {
         statusCallback = scannerStatusCallback;
         this.mode = mode;
 
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
         scannerInitCallback.onConnectionSuccessful(this);
     }
 
@@ -69,21 +71,21 @@ public class MockScanner implements ScannerBackground {
     public void disconnect() {
         Log.d(LOG_TAG, "Scanner disconnected");
         disconnected = true;
-        statusCallback.onScannerDisconnected(this);
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.DISCONNECTED);
     }
 
     @Override
     public void pause() {
         Log.d(LOG_TAG, "Scanner paused");
         paused = true;
-        statusCallback.onStatusChanged("Paused");
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.PAUSED);
     }
 
     @Override
     public void resume() {
         Log.d(LOG_TAG, "Scanner resumed");
         paused = false;
-        statusCallback.onStatusChanged("Resumed");
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

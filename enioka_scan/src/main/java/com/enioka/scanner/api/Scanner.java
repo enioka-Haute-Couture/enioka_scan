@@ -59,30 +59,6 @@ public interface Scanner {
         void onData(Scanner s, List<Barcode> data);
     }
 
-    interface ScannerStatusCallback {
-        /**
-         * Called whenever the scanner has changed status.
-         *
-         * @param newStatus
-         */
-        void onStatusChanged(String newStatus);
-
-        /**
-         * Called whenever a scanner was disconnected with hopes of reconnection. If reconnection fails, {@link #onScannerDisconnected(Scanner)} is called.
-         * Reconnection parameters depend on the SDK used.
-         *
-         * @param s the scanner
-         */
-        void onScannerReconnecting(Scanner s);
-
-        /**
-         * A scanner was disconnected with no hope of coming back to life.
-         *
-         * @param s the scanner
-         */
-        void onScannerDisconnected(Scanner s);
-    }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // LIFE CYCLE

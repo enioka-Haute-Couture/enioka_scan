@@ -10,6 +10,7 @@ import android.util.Log;
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
@@ -94,10 +95,10 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
 
     @Override
     public void ConnectionChanged(BluetoothDevice bluetoothDevice, int i) {
-        String message = null;
+        final ScannerStatusCallback.Status status;
         switch (i) {
             case KDCConstants.CONNECTION_STATE_CONNECTED:
-                message = this.ctx.getResources().getString(R.string.scanner_status_connected);
+                status = ScannerStatusCallback.Status.CONNECTED;
 
                 configureScanner();
                 if (initCallback != null) {
@@ -111,16 +112,16 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
 
                 break;
             case KDCConstants.CONNECTION_STATE_CONNECTING:
-                message = this.ctx.getResources().getString(R.string.scanner_status_connecting);
+                status = ScannerStatusCallback.Status.CONNECTING;
                 break;
             case KDCConstants.CONNECTION_STATE_FAILED:
-                message = this.ctx.getResources().getString(R.string.scanner_status_initialization_failure);
+                status = ScannerStatusCallback.Status.FAILURE;
                 break;
             case KDCConstants.CONNECTION_STATE_INITIALIZING:
-                message = this.ctx.getResources().getString(R.string.scanner_status_initializing);
+                status = ScannerStatusCallback.Status.INITIALIZING;
                 break;
             case KDCConstants.CONNECTION_STATE_INITIALIZING_FAILED:
-                message = this.ctx.getResources().getString(R.string.scanner_status_initialization_failure);
+                status = ScannerStatusCallback.Status.FAILURE;
                 if (initCallback != null) {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
@@ -131,27 +132,27 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
                 }
                 break;
             case KDCConstants.CONNECTION_STATE_LISTEN:
-                message = this.ctx.getResources().getString(R.string.scanner_status_listen);
+                status = ScannerStatusCallback.Status.WAITING;
                 break;
             case KDCConstants.CONNECTION_STATE_LOST:
-                message = this.ctx.getResources().getString(R.string.scanner_status_lost);
+                status = ScannerStatusCallback.Status.DISCONNECTED;
                 break;
             case KDCConstants.CONNECTION_STATE_NONE:
+            default:
                 // Not doing anything.
-                message = null; // this.ctx.getResources().getString(R.string.scanner_status_unknown);
+                status = ScannerStatusCallback.Status.UNKNOWN;
                 break;
         }
 
-        if (message == null) {
+        if (status == ScannerStatusCallback.Status.UNKNOWN) {
             return;
         }
 
-        final String msg2 = message;
         if (this.statusCallback != null) {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    statusCallback.onStatusChanged(msg2);
+                    statusCallback.onStatusChanged(KoamtacScanner.this, status);
                 }
             });
         }

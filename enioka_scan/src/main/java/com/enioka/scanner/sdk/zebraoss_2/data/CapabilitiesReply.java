@@ -1,6 +1,6 @@
 package com.enioka.scanner.sdk.zebraoss_2.data;
 
-import com.enioka.scanner.sdk.zebraoss_2.commons.SsiCommand;
+import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiCommand;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -5,9 +5,10 @@ import android.util.Log;
 import com.enioka.scanner.bt.api.MessageRejectionReason;
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.sdk.zebraoss_2.commons.SsiCommand;
-import com.enioka.scanner.sdk.zebraoss_2.commons.SsiMonoPacket;
-import com.enioka.scanner.sdk.zebraoss_2.commons.SsiMultiPacket;
+import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiCommand;
+import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiMonoPacket;
+import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiMultiPacket;
+import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiSource;
 
 import java.util.Arrays;
 
@@ -57,6 +58,8 @@ public class SsiOverSppParser implements ScannerDataParser {
         if (meta.needsAck())
             res.acknowledger = null; // FIXME: needs ACK response
 
+        if (meta.getSource() == SsiSource.HOST)
+            throw new IllegalStateException("Should not receive host-sent messages");
         res.data = meta.getParser();//.parseData(ssiPacket); FIXME
         return res;
     }

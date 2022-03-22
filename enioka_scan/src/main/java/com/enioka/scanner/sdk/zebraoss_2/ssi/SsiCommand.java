@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.zebraoss_2.commons;
+package com.enioka.scanner.sdk.zebraoss_2.ssi;
 
 // FIXME
 import com.enioka.scanner.sdk.zebraoss.parsers.AckParser;
@@ -16,46 +16,48 @@ import com.enioka.scanner.sdk.zebraoss.parsers.ScannerInitParser;
 public enum SsiCommand {
     // Only messages coming from the scanner are actually needed here. For completion sake, all messages were added.
 
-    ABORT_MACRO_PDF(0x11, SsiSource.HOST),
-    AIM_OFF(0xC4, SsiSource.HOST),
-    AIM_ON(0xC5, SsiSource.HOST),
-    BATCH_DATA(0xD6, SsiSource.DECODER),
-    BATCH_REQUEST(0xD5, SsiSource.HOST),
-    BEEP(0xE6, SsiSource.HOST),
-    CAPABILITIES_REQUEST(0xD3, SsiSource.HOST),
-    CAPABILITIES_REPLY(0xD4, SsiSource.DECODER, false, new CapabilitiesParser()),
-    CHANGE_ALL_CODE_TYPES(0xC9, SsiSource.HOST),
-    CMD_ACK(0xD0, SsiSource.BOTH, false, new AckParser()),
-    CMD_ACK_ACTION(0xD8, SsiSource.HOST), // No ACK ever // Actual use??
-    CMD_NACK(0xD1, SsiSource.BOTH, false, new ErrorParser()),
-    CUSTOM_DEFAULTS(0x12, SsiSource.HOST),
-    DECODE_DATA(0xF3, SsiSource.DECODER, true, new BarcodeParser()),
-    EVENT(0xF6, SsiSource.DECODER, true, new EventParser()),
     FLUSH_MACRO_PDF(0x10, SsiSource.HOST),
-    FLUSH_QUEUE(0xD2, SsiSource.HOST),
+    ABORT_MACRO_PDF(0x11, SsiSource.HOST),
+    CUSTOM_DEFAULTS(0x12, SsiSource.HOST),
+    SEND_LOG(0x13, SsiSource.HOST),
+    LOG_DATA(0x14, SsiSource.DECODER, true, new GenericParser()),
+    SSI_MGMT_COMMAND(0x80, SsiSource.BOTH, true, new RsmResponseParser()),
+    SCANNER_INIT_COMMAND(0x90, SsiSource.HOST),
+    SCANNER_INIT(0x91, SsiSource.DECODER, new ScannerInitParser()),
+    TEMP_COMMAND(0x93, SsiSource.HOST),
+    REQUEST_REVISION(0xA3, SsiSource.HOST),
+    REPLY_REVISION(0xA4, SsiSource.DECODER, false, new ReplyRevisionParser()),
+    IMAGE_DATA(0xB1, SsiSource.DECODER, true, new GenericParser()),
+    VIDEO_DATA(0xB4, SsiSource.DECODER, true, new GenericParser()),
     ILLUMINATION_OFF(0xC0, SsiSource.HOST),
     ILLUMINATION_ON(0xC1, SsiSource.HOST),
-    IMAGE_DATA(0xB1, SsiSource.DECODER, true),
-    IMAGER_MODE(0xF7, SsiSource.HOST),
-    LED_OFF(0xE8, SsiSource.HOST),
-    LED_ON(0xE7, SsiSource.HOST),
-    PAGE_MOTOR_ACTIVATION(0xCA, SsiSource.HOST),
-    PARAM_DEFAULTS(0xC8, SsiSource.HOST),
-    PARAM_REQUEST(0xC7, SsiSource.HOST),
+    AIM_OFF(0xC4, SsiSource.HOST),
+    AIM_ON(0xC5, SsiSource.HOST),
     PARAM_SEND(0xC6, SsiSource.BOTH, true, new ParamSendParser()),
-    REPLY_REVISION(0xA4, SsiSource.DECODER, false, new ReplyRevisionParser()),
-    REQUEST_REVISION(0xA3, SsiSource.HOST),
-    SCAN_DISABLE(0xEA, SsiSource.HOST),
-    SCAN_ENABLE(0xE9, SsiSource.HOST),
-    SCANNER_INIT(0x91, SsiSource.DECODER, new ScannerInitParser()),
-    SLEEP(0xEB, SsiSource.HOST),
-    SSI_MGMT_COMMAND(0x80, SsiSource.BOTH, true, new RsmResponseParser()),
+    PARAM_REQUEST(0xC7, SsiSource.HOST),
+    PARAM_DEFAULTS(0xC8, SsiSource.HOST),
+    CHANGE_ALL_CODE_TYPES(0xC9, SsiSource.HOST),
+    PAGE_MOTOR_ACTIVATION(0xCA, SsiSource.HOST),
+    CMD_ACK(0xD0, SsiSource.BOTH, false, new AckParser()),
+    CMD_NACK(0xD1, SsiSource.BOTH, false, new ErrorParser()),
+    FLUSH_QUEUE(0xD2, SsiSource.HOST),
+    CAPABILITIES_REQUEST(0xD3, SsiSource.HOST),
+    CAPABILITIES_REPLY(0xD4, SsiSource.DECODER, false, new CapabilitiesParser()),
+    BATCH_REQUEST(0xD5, SsiSource.HOST),
+    BATCH_DATA(0xD6, SsiSource.DECODER, true, new GenericParser()), // FIXME: needs parser
+    CMD_ACK_ACTION(0xD8, SsiSource.HOST), // No ACK ever // Actual use??
     START_SESSION(0xE4, SsiSource.HOST),
     STOP_SESSION(0xE5, SsiSource.HOST),
-    VIDEO_DATA(0xB4, SsiSource.DECODER, true),
+    BEEP(0xE6, SsiSource.HOST),
+    LED_ON(0xE7, SsiSource.HOST),
+    LED_OFF(0xE8, SsiSource.HOST),
+    SCAN_ENABLE(0xE9, SsiSource.HOST),
+    SCAN_DISABLE(0xEA, SsiSource.HOST),
+    SLEEP(0xEB, SsiSource.HOST),
+    DECODE_DATA(0xF3, SsiSource.DECODER, true, new BarcodeParser()),
+    EVENT(0xF6, SsiSource.DECODER, true, new EventParser()),
+    IMAGER_MODE(0xF7, SsiSource.HOST),
     //WAKEUP(), // can only be a physical command
-    LOG_DATA(0x14, SsiSource.DECODER, true, new GenericParser()),
-    SEND_LOG(0x13, SsiSource.HOST),
     NONE(0xFF, SsiSource.BOTH);
 
     private final byte opCode;

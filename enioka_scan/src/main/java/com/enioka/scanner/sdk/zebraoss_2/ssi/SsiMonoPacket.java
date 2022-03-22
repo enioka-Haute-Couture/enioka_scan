@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.zebraoss_2.commons;
+package com.enioka.scanner.sdk.zebraoss_2.ssi;
 
 /**
  * SSI packet, containing the header and checksum bytes. Suitable for both incoming and outgoing packets.
@@ -29,7 +29,7 @@ public final class SsiMonoPacket {
     private byte checksumLsb;
 
     /**
-     * Creates a new SSI packet for reading data.
+     * Creates a new SSI packet for receiving data.
      * Only suitable for incoming packets. Checksum and length bytes will be verified and trigger an exception if invalid.
      */
     public SsiMonoPacket(final byte packetLengthWithoutChecksum,
@@ -55,7 +55,7 @@ public final class SsiMonoPacket {
     }
 
     /**
-     * Creates a new SSI packet for sending commands that contain data.
+     * Creates a new SSI packet for sending commands.
      * Only suitable for outgoing packets. Checksum and length are calculated automatically.
      * @param ble Whether the packet must contain BLE length bytes or not.
      */
@@ -66,23 +66,6 @@ public final class SsiMonoPacket {
         this.source = 0x04;
         this.status = status;
         this.data = data;
-
-        this.updateLengthAndChecksum();
-    }
-
-    /**
-     * Creates a new SSI packet for sending data-less commands.
-     * Only suitable for outgoing packets. Checksum and length are calculated automatically.
-     * @param ble Whether the packet must contain BLE length bytes or not.
-     */
-    public SsiMonoPacket(final byte opCode, final byte status, final boolean ble) {
-        this.ble = ble;
-
-        this.packetLengthWithoutChecksum = 0x04;
-        this.opCode = opCode;
-        this.source = 0x04;
-        this.status = status;
-        this.data = new byte[0];
 
         this.updateLengthAndChecksum();
     }
@@ -119,7 +102,6 @@ public final class SsiMonoPacket {
 
     /**
      * Calculates the packet's checksum.
-     * @return The packet's checksum
      */
     private short calculateChecksum() {
         // Rule is: add all bytes (except checksum itself) and substract the result from 0x10000
@@ -133,11 +115,10 @@ public final class SsiMonoPacket {
         return (short) (0x10000 - byteSum);
     }
 
-    public int getTimeOut() {
-        return 1000;
-    }
-
-    public byte[] toBuffer() {
+    /**
+     * Generates the raw packet buffer.
+     */
+    public byte[] toCommandBuffer() {
         validateLengthAndChecksum();
 
         final int totalLength = (ble ? 2 : 0) + 4 + data.length + 2; // bleLength + header + data + checksum

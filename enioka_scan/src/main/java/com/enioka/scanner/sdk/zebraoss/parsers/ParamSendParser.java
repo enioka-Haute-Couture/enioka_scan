@@ -3,8 +3,6 @@ package com.enioka.scanner.sdk.zebraoss.parsers;
 import android.support.v4.util.Pair;
 import android.util.Log;
 
-import com.enioka.scanner.sdk.zebraoss.SsiMultiPacketMessage;
-import com.enioka.scanner.sdk.zebraoss.SsiPacket;
 import com.enioka.scanner.sdk.zebraoss.data.ParamSend;
 
 import java.util.ArrayList;
@@ -14,19 +12,19 @@ import java.util.List;
  * Responsible for handling data in response to a parameter query call.
  */
 public class ParamSendParser implements PayloadParser<ParamSend> {
+    private static final String LOG_TAG = "RsmResponseParser";
+
     @Override
-    public ParamSend parseData(SsiMultiPacketMessage message) {
-        if (message.getPackets().size() < 1 || message.getPackets().get(0).getMessageData().length < 1) {
+    // FIXME: Legacy code handled multi-packets in a special way; which did not carry over to this rewrite. Will be worth re-checking if handling multi-packet ParamSend packets becomes needed.
+    public ParamSend parseData(final byte[] dataBuffer) {
+        if (dataBuffer.length < 1) {
             return null;
         }
 
         List<ParamSend.Param> parameters = new ArrayList<>();
 
         // The sound byte is repeated on each packet inside a multi-packet stream. Therefore analysis must be done packet per packet and not on the concatenated message.getData() byte array.
-        for (SsiPacket chunk : message.getPackets()) {
-            byte[] buffer = chunk.getData();
-            parameters.addAll(parseChunk(buffer, 1)); // Ignore first data byte, its a BEEP indicator we ignore.
-        }
+        parameters.addAll(parseChunk(dataBuffer, 1));  // Ignore first data byte, its a BEEP indicator we ignore.
 
         return new ParamSend(parameters);
     }
@@ -103,7 +101,7 @@ public class ParamSendParser implements PayloadParser<ParamSend> {
         int number;
 
         if (curByte == (byte) (0x8e & 0xFF)) {
-            Log.i("RRR", "rrrrrr");
+            Log.i(LOG_TAG, "rrrrrr"); // ???
         }
 
         switch (curByte) {

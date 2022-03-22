@@ -1,16 +1,16 @@
-package com.enioka.scanner.sdk.zebraoss_2.ssi;
+package com.enioka.scanner.sdk.zebraoss.ssi;
 
-import com.enioka.scanner.sdk.zebraoss_2.parsers.AckParser;
-import com.enioka.scanner.sdk.zebraoss_2.parsers.BarcodeParser;
-import com.enioka.scanner.sdk.zebraoss_2.parsers.CapabilitiesParser;
-import com.enioka.scanner.sdk.zebraoss_2.parsers.ErrorParser;
-import com.enioka.scanner.sdk.zebraoss_2.parsers.EventParser;
-import com.enioka.scanner.sdk.zebraoss_2.parsers.GenericParser;
-import com.enioka.scanner.sdk.zebraoss_2.parsers.ParamSendParser;
-import com.enioka.scanner.sdk.zebraoss_2.parsers.PayloadParser;
-import com.enioka.scanner.sdk.zebraoss_2.parsers.ReplyRevisionParser;
-import com.enioka.scanner.sdk.zebraoss_2.parsers.RsmResponseParser;
-import com.enioka.scanner.sdk.zebraoss_2.parsers.ScannerInitParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.AckParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.BarcodeParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.CapabilitiesParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.ErrorParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.EventParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.GenericParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.ParamSendParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.PayloadParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.ReplyRevisionParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.RsmResponseParser;
+import com.enioka.scanner.sdk.zebraoss.parsers.ScannerInitParser;
 
 public enum SsiCommand {
     // Only messages coming from the scanner are actually needed here. For completion sake, all messages were added.

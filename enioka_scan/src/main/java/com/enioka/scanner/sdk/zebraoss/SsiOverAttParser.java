@@ -1,8 +1,8 @@
-package com.enioka.scanner.sdk.zebraoss_2;
+package com.enioka.scanner.sdk.zebraoss;
 
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiParser;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiParser;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

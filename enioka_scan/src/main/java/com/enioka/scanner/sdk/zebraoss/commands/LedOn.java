@@ -1,10 +1,11 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
 import com.enioka.scanner.api.Color;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 
 public class LedOn extends CommandExpectingAck {
-    public LedOn(Color color) {
-        super((byte) 0xE7, new byte[]{getColorMask(color)});
+    public LedOn(Color color, boolean isBle) {
+        super(SsiCommand.LED_ON.getOpCode(), new byte[]{getColorMask(color)}, isBle);
     }
 
     private static byte getColorMask(Color color) {

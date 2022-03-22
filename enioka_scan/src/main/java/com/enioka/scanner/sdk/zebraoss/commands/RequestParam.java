@@ -1,22 +1,23 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
 import com.enioka.scanner.bt.api.Command;
-import com.enioka.scanner.sdk.zebraoss.SsiPacket;
 import com.enioka.scanner.sdk.zebraoss.data.ParamSend;
-import com.enioka.scanner.sdk.zebraoss.data.ReplyRevision;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiMonoPacket;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiStatus;
 
 /**
- * Requets all params 0xC7 opcode, 0xFE request data)
+ * Requests all params 0xC7 opcode, 0xFE request data)
  */
-public class RequestParam extends SsiPacket implements Command<com.enioka.scanner.sdk.zebraoss.data.ParamSend> {
-    private static final String LOG_TAG = "RequestParam";
+public class RequestParam implements Command<ParamSend> {
+    private final SsiMonoPacket packet;
 
-    public RequestParam() {
-        super((byte) (-57), new byte[]{(byte) (-2)});
-    } // 0xC7 => -57, -2 is 0xFE when signed... sigh.
+    public RequestParam(boolean isBle) {
+        packet = new SsiMonoPacket(SsiCommand.PARAM_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[]{(byte) (0xFE)}, isBle);
+    }
 
-    public RequestParam(int prmCode) {
-        super((byte) (-57), prmCodeToByteArray(prmCode));
+    public RequestParam(int prmCode, boolean isBle) {
+        packet = new SsiMonoPacket(SsiCommand.PARAM_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), prmCodeToByteArray(prmCode), isBle);
     }
 
     private static byte[] prmCodeToByteArray(int prmCode) {
@@ -36,7 +37,12 @@ public class RequestParam extends SsiPacket implements Command<com.enioka.scanne
     }
 
     @Override
-    public Class<? extends com.enioka.scanner.sdk.zebraoss.data.ParamSend> getReturnType() {
+    public byte[] getCommand() {
+        return packet.toCommandBuffer();
+    }
+
+    @Override
+    public Class<? extends ParamSend> getReturnType() {
         return ParamSend.class;
     }
 

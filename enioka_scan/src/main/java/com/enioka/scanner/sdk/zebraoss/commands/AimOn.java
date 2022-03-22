@@ -1,11 +1,9 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
-/**
- * A message or segment acknowledgment.
- */
-public class AimOn extends CommandExpectingAck {
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 
-    public AimOn() {
-        super((byte) 0xC5);
+public class AimOn extends CommandExpectingAck {
+    public AimOn(boolean isBle) {
+        super(SsiCommand.AIM_ON.getOpCode(), isBle);
     }
 }

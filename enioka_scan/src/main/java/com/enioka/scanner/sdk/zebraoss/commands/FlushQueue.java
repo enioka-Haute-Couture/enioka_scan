@@ -1,11 +1,9 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
-/**
- * A message or segment acknowledgment.
- */
-public class FlushQueue extends CommandExpectingNothing {
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 
-    public FlushQueue() {
-        super((byte) 0xD2);
+public class FlushQueue extends CommandExpectingNothing {
+    public FlushQueue(boolean isBle) {
+        super(SsiCommand.FLUSH_QUEUE.getOpCode(), isBle);
     }
 }

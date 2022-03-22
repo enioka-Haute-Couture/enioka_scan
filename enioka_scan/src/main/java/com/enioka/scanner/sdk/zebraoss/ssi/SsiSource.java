@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.zebraoss_2.ssi;
+package com.enioka.scanner.sdk.zebraoss.ssi;
 
 import android.support.annotation.Nullable;
 

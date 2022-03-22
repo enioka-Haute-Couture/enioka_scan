@@ -1,11 +1,13 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
+
 /**
  * Signal the device that we are a barcode scanning application host type.
  */
 public class InitCommand extends CommandExpectingAck {
-    public InitCommand() {
-        super((byte) 0x90, new byte[]{(byte) (0), (byte) (2), (byte) (0), (byte) (5)});
+    public InitCommand(boolean isBle) {
+        super(SsiCommand.SCANNER_INIT_COMMAND.getOpCode(), new byte[]{0x00, 0x02, 0x00, 0x05}, isBle);
     }
 
     @Override

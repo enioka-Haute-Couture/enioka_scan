@@ -2,8 +2,8 @@ package com.enioka.scanner.sdk.zebraoss;
 
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.sdk.zebraoss.data.ParamSend;
-import com.enioka.scanner.sdk.zebraoss.data.RsmAttribute;
 import com.enioka.scanner.sdk.zebraoss.data.RsmAttributeReply;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiParser;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
 
 
 public class TestSsi {
-    private SsiParser parser = new SsiParser();
+    private SsiParser parser = new SsiParser(false);
 
     @Test
     public void paramResultTest() {

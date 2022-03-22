@@ -1,14 +1,17 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
 import com.enioka.scanner.bt.api.MessageRejectionReason;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 
 /**
  * A message or segment explicit NON acknowledgment.
  */
 public class Nack extends CommandExpectingNothing {
-    public Nack(MessageRejectionReason reason) {
-        super((byte) 0xD1);
+    public Nack(MessageRejectionReason reason, boolean isBle) {
+        super(SsiCommand.CMD_NACK.getOpCode(), getReasonCode(reason), isBle);
+    }
 
+    private static byte[] getReasonCode(MessageRejectionReason reason) {
         byte reasonCode;
         switch (reason) {
             case CANNOT_PARSE:
@@ -25,6 +28,7 @@ public class Nack extends CommandExpectingNothing {
             default:
                 reasonCode = 0x2;
         }
-        this.data[0] = reasonCode;
+
+        return new byte[]{reasonCode};
     }
 }

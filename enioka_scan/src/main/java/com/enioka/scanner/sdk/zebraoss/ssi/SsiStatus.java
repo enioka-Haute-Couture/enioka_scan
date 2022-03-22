@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.zebraoss_2.ssi;
+package com.enioka.scanner.sdk.zebraoss.ssi;
 
 /**
  * Helper class for the status-byte of an SSI packet.

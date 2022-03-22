@@ -1,13 +1,13 @@
-package com.enioka.scanner.sdk.zebraoss_2.ssi;
+package com.enioka.scanner.sdk.zebraoss.ssi;
 
 import android.util.Log;
 
 import com.enioka.scanner.bt.api.MessageRejectionReason;
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.sdk.zebraoss_2.commands.Ack;
-import com.enioka.scanner.sdk.zebraoss_2.commands.MultipacketAck;
-import com.enioka.scanner.sdk.zebraoss_2.commands.Nack;
+import com.enioka.scanner.sdk.zebraoss.commands.Ack;
+import com.enioka.scanner.sdk.zebraoss.commands.MultipacketAck;
+import com.enioka.scanner.sdk.zebraoss.commands.Nack;
 
 import java.util.Arrays;
 
@@ -31,22 +31,25 @@ public class SsiParser implements ScannerDataParser {
                 multiPacketBuffer = new SsiMultiPacket();
             multiPacketBuffer.readPacket(buffer, offset, dataLength);
 
-            res.expectingMoreData = multiPacketBuffer.expectingMoreData();
             if (!multiPacketBuffer.expectingMoreData()) {
+                res.expectingMoreData = false;
                 res.data = multiPacketBuffer.toBarcode();
                 multiPacketBuffer = null;
+                res.acknowledger = new Ack(isBle);
+            } else {
+                res.acknowledger = new MultipacketAck(isBle); // FIXME: not quite understood how ACKs work yet or when to send these, scanner seems to work fine eiter way
             }
 
-            res.acknowledger = new MultipacketAck(isBle);
             return res;
         }
 
+        // Monopacket
         SsiMonoPacket ssiPacket;
         try {
             ssiPacket = new SsiMonoPacket(buffer[offset],
                     buffer[offset + 1],
                     buffer[offset + 3],
-                    Arrays.copyOfRange(buffer, offset + 4, offset + dataLength - 6),
+                    Arrays.copyOfRange(buffer, offset + 4, offset + dataLength - 2),
                     buffer[offset + dataLength - 2],
                     buffer[offset + dataLength - 1]);
         } catch (final IllegalStateException e) {
@@ -66,6 +69,7 @@ public class SsiParser implements ScannerDataParser {
         if (meta.getSource() == SsiSource.HOST)
             throw new IllegalStateException("Should not receive host-sent messages");
         res.data = meta.getParser().parseData(ssiPacket.getData());
+        res.expectingMoreData = false;
         return res;
     }
 }

@@ -1,11 +1,11 @@
-package com.enioka.scanner.sdk.zebraoss_2;
+package com.enioka.scanner.sdk.zebraoss;
 
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.sdk.zebraoss_2.commands.CapabilitiesRequest;
-import com.enioka.scanner.sdk.zebraoss_2.data.CapabilitiesReply;
+import com.enioka.scanner.sdk.zebraoss.commands.CapabilitiesRequest;
+import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 
 public class ZebraOssAttScannerProvider implements BtSppScannerProvider {
     private final ScannerDataParser inputHandler = new SsiOverAttParser();

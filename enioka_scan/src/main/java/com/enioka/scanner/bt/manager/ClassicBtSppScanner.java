@@ -14,7 +14,7 @@ import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.sdk.zebraoss.SsiParser;
+import com.enioka.scanner.sdk.zebraoss.SsiOverSppParser;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -70,7 +70,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         this.rawDevice = device;
         this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
-        this.inputHandler = new SsiParser();
+        this.inputHandler = new SsiOverSppParser();
         this.setUpTimeoutTimer();
     }
 
@@ -84,7 +84,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         this.rawDevice = socket.getRemoteDevice();
         this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
-        this.inputHandler = new SsiParser();
+        this.inputHandler = new SsiOverSppParser();
         this.masterBtDevice = true;
 
         this.clientSocket = socket;

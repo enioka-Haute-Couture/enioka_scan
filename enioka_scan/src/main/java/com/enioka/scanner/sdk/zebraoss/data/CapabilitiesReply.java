@@ -1,6 +1,6 @@
 package com.enioka.scanner.sdk.zebraoss.data;
 
-import com.enioka.scanner.sdk.zebraoss.SsiMessage;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,8 +24,8 @@ public class CapabilitiesReply {
         return this.opCodes.contains(opCode);
     }
 
-    public boolean supportsMessage(SsiMessage message) {
-        return this.supportsOpCode(message.getValue());
+    public boolean supportsMessage(SsiCommand command) {
+        return this.supportsOpCode(command.getOpCode());
     }
 
     @Override
@@ -38,9 +38,9 @@ public class CapabilitiesReply {
         sb.append("SSI device capabilities report\n");
 
         for (Byte b : sortedList) {
-            SsiMessage message = SsiMessage.GetValue(b);
+            SsiCommand message = SsiCommand.getCommand(b);
 
-            if (message != SsiMessage.NONE) {
+            if (message != SsiCommand.NONE) {
                 sb.append("Supports command ");
                 sb.append(message.name());
                 sb.append(" (");
@@ -54,12 +54,12 @@ public class CapabilitiesReply {
             }
         }
 
-        for (SsiMessage message : SsiMessage.values()) {
+        for (SsiCommand message : SsiCommand.values()) {
             if (!this.supportsMessage(message)) {
                 sb.append("Does not support command ");
                 sb.append(message.name());
                 sb.append(" (");
-                sb.append(String.format("0x%02x", message.getValue()));
+                sb.append(String.format("0x%02x", message.getOpCode()));
                 sb.append(")");
                 sb.append("\n");
             }

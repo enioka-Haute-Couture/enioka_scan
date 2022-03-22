@@ -60,12 +60,12 @@ class ZebraOssScanner implements ScannerBackground {
 
     @Override
     public void pause() {
-        this.btScanner.runCommand(new ScanDisable(), null);
+        this.btScanner.runCommand(new ScanDisable(btScanner.isBleDevice()), null);
     }
 
     @Override
     public void resume() {
-        this.btScanner.runCommand(new ScanEnable(), null);
+        this.btScanner.runCommand(new ScanEnable(btScanner.isBleDevice()), null);
     }
 
 
@@ -75,17 +75,17 @@ class ZebraOssScanner implements ScannerBackground {
 
     @Override
     public void beepScanSuccessful() {
-        this.btScanner.runCommand(new Beep((byte) 0x01), null);
+        this.btScanner.runCommand(new Beep((byte) 0x01, btScanner.isBleDevice()), null);
     }
 
     @Override
     public void beepScanFailure() {
-        this.btScanner.runCommand(new Beep((byte) 0x12), null);
+        this.btScanner.runCommand(new Beep((byte) 0x12, btScanner.isBleDevice()), null);
     }
 
     @Override
     public void beepPairingCompleted() {
-        this.btScanner.runCommand(new Beep((byte) 0x14), null);
+        this.btScanner.runCommand(new Beep((byte) 0x14, btScanner.isBleDevice()), null);
     }
 
 
@@ -125,12 +125,12 @@ class ZebraOssScanner implements ScannerBackground {
 
     @Override
     public void ledColorOn(Color color) {
-        this.btScanner.runCommand(new LedOn(color), null);
+        this.btScanner.runCommand(new LedOn(color, btScanner.isBleDevice()), null);
     }
 
     @Override
     public void ledColorOff(Color color) {
-        this.btScanner.runCommand(new LedOff(), null);
+        this.btScanner.runCommand(new LedOff(btScanner.isBleDevice()), null);
     }
 
 
@@ -221,17 +221,17 @@ class ZebraOssScanner implements ScannerBackground {
         // Request scanner configuration
         startStatusCacheRefresh(null);
 
-        this.btScanner.runCommand(new InitCommand(), null);
-        this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
-        this.btScanner.runCommand(new ScanEnable(), null);
-        this.btScanner.runCommand(new StartSession(), null);
+        this.btScanner.runCommand(new InitCommand(btScanner.isBleDevice()), null);
+        this.btScanner.runCommand(new SetPickListMode((byte) 2, btScanner.isBleDevice()), null);
+        this.btScanner.runCommand(new ScanEnable(btScanner.isBleDevice()), null);
+        this.btScanner.runCommand(new StartSession(btScanner.isBleDevice()), null);
 
         // We are already connected if the scanner could be created...
         initCallback.onConnectionSuccessful(this);
     }
 
     private void startStatusCacheRefresh(final DataSubscriptionCallback<String> finalCallback) {
-        this.btScanner.runCommand(new RequestParam(), new DataSubscriptionCallback<com.enioka.scanner.sdk.zebraoss.data.ParamSend>() {
+        this.btScanner.runCommand(new RequestParam(btScanner.isBleDevice()), new DataSubscriptionCallback<ParamSend>() {
             @Override
             public void onFailure() {
                 Log.e(LOG_TAG, "failed to get scanner parameters");
@@ -243,12 +243,12 @@ class ZebraOssScanner implements ScannerBackground {
             }
 
             @Override
-            public void onSuccess(com.enioka.scanner.sdk.zebraoss.data.ParamSend data) {
+            public void onSuccess(ParamSend data) {
                 for (ParamSend.Param prm : data.parameters) {
                     ZebraOssScanner.this.statusCache.put("ZEBRA_SSI_PRM_" + prm.number, prm.getStringValue());
                 }
 
-                ZebraOssScanner.this.btScanner.runCommand(new ManagementCommandGetBufferSize(), new DataSubscriptionCallback<RsmAttributeReply>() {
+                ZebraOssScanner.this.btScanner.runCommand(new ManagementCommandGetBufferSize(btScanner.isBleDevice()), new DataSubscriptionCallback<RsmAttributeReply>() {
                     @Override
                     public void onFailure() {
                         Log.e(LOG_TAG, "could not retrieve RSM buffer data - timeout");
@@ -264,7 +264,7 @@ class ZebraOssScanner implements ScannerBackground {
                         Log.i(LOG_TAG, "Zebra scanner has an RSM buffer of " + data);
 
                         // Model number, S/N, MAC address, battery%, battery health, battery model
-                        ZebraOssScanner.this.btScanner.runCommand(new ManagementCommandGetAttribute(533, 534, 541, 30012, 30013, 30017), new DataSubscriptionCallback<RsmAttributeReply>() {
+                        ZebraOssScanner.this.btScanner.runCommand(new ManagementCommandGetAttribute(btScanner.isBleDevice(), 533, 534, 541, 30012, 30013, 30017), new DataSubscriptionCallback<RsmAttributeReply>() {
                             @Override
                             public void onFailure() {
                                 Log.e(LOG_TAG, "could not retrieve RSM data");
@@ -284,7 +284,7 @@ class ZebraOssScanner implements ScannerBackground {
                                 }
 
                                 // Finally some revision data.
-                                ZebraOssScanner.this.btScanner.runCommand(new RequestRevision(), new DataSubscriptionCallback<ReplyRevision>() {
+                                ZebraOssScanner.this.btScanner.runCommand(new RequestRevision(btScanner.isBleDevice()), new DataSubscriptionCallback<ReplyRevision>() {
                                     @Override
                                     public void onSuccess(ReplyRevision data) {
                                         ZebraOssScanner.this.statusCache.put(com.enioka.scanner.api.Scanner.SCANNER_STATUS_FIRMWARE, data.softwareRevision);

@@ -1,18 +1,15 @@
 package com.enioka.scanner.sdk.zebraoss.data;
 
-import android.support.v4.util.Pair;
+import static com.enioka.scanner.bt.api.Helpers.byteArrayToHex;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-
-import static com.enioka.scanner.bt.api.Helpers.byteArrayToHex;
 
 /**
  * Answer to a parameter value query.
  */
 public class ParamSend {
-    public List<Param> parameters = new ArrayList<>();
+    public List<Param> parameters;
 
     public enum PARAM_TYPE {
         BYTE, STRING, WORD, ARRAY, MULTIPACKET

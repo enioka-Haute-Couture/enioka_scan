@@ -1,6 +1,6 @@
-package com.enioka.scanner.sdk.zebraoss_2.commands;
+package com.enioka.scanner.sdk.zebraoss.commands;
 
-import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiCommand;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 
 /**
  * A multipacket segment acknowledgment.

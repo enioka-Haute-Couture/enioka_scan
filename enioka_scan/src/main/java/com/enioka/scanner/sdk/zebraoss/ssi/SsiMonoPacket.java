@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.zebraoss_2.ssi;
+package com.enioka.scanner.sdk.zebraoss.ssi;
 
 /**
  * SSI packet, containing the header and checksum bytes. Suitable for both incoming and outgoing packets.
@@ -83,21 +83,21 @@ public final class SsiMonoPacket {
         }
 
         short checksum = this.calculateChecksum();
-        this.checksumMsb = (byte) ((checksum >> 8) & 0xff);
-        this.checksumLsb = (byte) (checksum & 0xff);
+        this.checksumMsb = (byte) ((checksum >> 8) & 0xFF);
+        this.checksumLsb = (byte) (checksum & 0xFF);
     }
 
     /**
      * Validates the packetLength and checksum fields, throws an exception in case of invalid values.
      */
     private void validateLengthAndChecksum() {
-        if (packetLengthWithoutChecksum != (byte) (0x04 + data.length))
-            throw new IllegalStateException("Invalid packet length");
+        if (packetLengthWithoutChecksum != data.length + 4)
+            throw new IllegalStateException("Invalid packet length, announced " + packetLengthWithoutChecksum + " but was " + (data.length + 4));
 
 
         short checksum = this.calculateChecksum();
-        if (this.checksumMsb != (byte) ((checksum >> 8) & 0xff) || this.checksumLsb != (byte) (checksum & 0xff))
-            throw new IllegalStateException("Invalid checksum");
+        if (this.checksumMsb != (byte) ((checksum >> 8) & 0xFF) || this.checksumLsb != (byte) (checksum & 0xFF))
+            throw new IllegalStateException("Invalid checksum, expected 0x" + (byte) ((checksum >> 8) & 0xFF) + (byte) (checksum & 0xFF) + " but was 0x" + checksumMsb + checksumLsb);
     }
 
     /**

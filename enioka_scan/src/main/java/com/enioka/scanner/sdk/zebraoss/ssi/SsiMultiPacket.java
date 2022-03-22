@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.zebraoss_2.ssi;
+package com.enioka.scanner.sdk.zebraoss.ssi;
 
 import android.util.Log;
 
@@ -54,7 +54,7 @@ public final class SsiMultiPacket {
                 throw new IllegalStateException("Multipacket content is not a barcode scan, the SDK does not know how to process this data");
 
             symbology = buffer[offset + 10];
-            barcodeLength = ByteBuffer.wrap(new byte[]{buffer[offset + 12], buffer[offset + 13]}).order(ByteOrder.BIG_ENDIAN).getInt();
+            barcodeLength = ByteBuffer.wrap(new byte[]{buffer[offset + 12], buffer[offset + 13]}).order(ByteOrder.BIG_ENDIAN).getShort();
             data = new byte[barcodeLength];
 
             offset += 14;
@@ -66,8 +66,10 @@ public final class SsiMultiPacket {
             length -= 5;
         }
 
-        System.arraycopy(buffer, offset, data, dataRead, length - 2);
-        dataRead += length - 2;
+        System.arraycopy(buffer, offset, data, dataRead, Math.min(length - 2, barcodeLength - dataRead));
+        dataRead += Math.min(length - 2, barcodeLength - dataRead);
+        if (dataRead == barcodeLength)
+            expectingMoreData = false;
     }
 
     public boolean expectingMoreData() {

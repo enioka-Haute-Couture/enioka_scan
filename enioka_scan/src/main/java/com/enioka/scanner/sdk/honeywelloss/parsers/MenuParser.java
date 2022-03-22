@@ -18,7 +18,8 @@ public class MenuParser implements ScannerDataParser {
     public ParsingResult parse(byte[] buffer, int offset, int dataLength) {
         ParsingResult res = new ParsingResult();
 
-        for (int i = offset; i < dataLength + offset; i++) {
+        for (int i = offset; i < dataLength; i++) {
+            res.read++;
             switch (buffer[i]) {
                 case 5: // ENQ: invalid tag or subtag
                     Log.e(LOG_TAG, "command does not exist");
@@ -42,7 +43,6 @@ public class MenuParser implements ScannerDataParser {
                     if (current.contains("REVINF")) {
                         res.data = new FirmwareVersion();
                     }
-                    Log.d(LOG_TAG, "Data received from scanner, ACK: " + current);
                     current = "";
                     break;
                 default:

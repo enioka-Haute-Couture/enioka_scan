@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.util.Log;
 
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
@@ -390,7 +391,7 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
     }
 
     @Override
-    public void registerStatusCallback(SppScannerStatusCallback statusCallback) {
+    public void registerStatusCallback(ScannerStatusCallback statusCallback) {
 
     }
 }

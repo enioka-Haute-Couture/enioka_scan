@@ -9,6 +9,7 @@ import android.util.Xml;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.zebra.scannercontrol.DCSSDKDefs;
@@ -38,7 +39,7 @@ class BtZebraScanner implements ScannerBackground {
     private Integer scannerId;
 
     private Scanner.ScannerDataCallback dataCb = null;
-    private Scanner.ScannerStatusCallback statusCb = null;
+    private ScannerStatusCallback statusCb = null;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,14 +93,13 @@ class BtZebraScanner implements ScannerBackground {
 
     void reconnected() {
         if (statusCb != null) {
-            statusCb.onScannerReconnecting(this);
-            statusCb.onStatusChanged("reconnected");
+            statusCb.onStatusChanged(this, ScannerStatusCallback.Status.CONNECTED);
         }
     }
 
     void disconnected() {
         if (statusCb != null) {
-            statusCb.onScannerReconnecting(this);
+            statusCb.onStatusChanged(this, ScannerStatusCallback.Status.DISCONNECTED);
         }
     }
 

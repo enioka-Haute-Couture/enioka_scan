@@ -1,5 +1,7 @@
 package com.enioka.scanner.bt.api;
 
+import com.enioka.scanner.api.ScannerStatusCallback;
+
 /**
  * Represents a connected SPP device, and can be used to run commands on it.
  */
@@ -30,25 +32,5 @@ public interface Scanner {
     /**
      * @param statusCallback
      */
-    void registerStatusCallback(SppScannerStatusCallback statusCallback);
-
-    /**
-     * For receiving notifications of the BT lifecycle.
-     */
-    interface SppScannerStatusCallback {
-        /**
-         * Scanner is available.
-         */
-        void onScannerConnected();
-
-        /**
-         * Scanner is temporarily unavailable, trying to reconnect. It may fail, in which case {@link #onScannerDisconnected()} is called.
-         */
-        void onScannerReconnecting();
-
-        /**
-         * The scanner is no longer available and will not come back automatically.
-         */
-        void onScannerDisconnected();
-    }
+    void registerStatusCallback(ScannerStatusCallback statusCallback);
 }

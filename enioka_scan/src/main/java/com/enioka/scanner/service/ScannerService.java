@@ -11,13 +11,13 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.LaserScanner;
-import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Note that the public API of this service is described in {@link ScannerServiceApi}, which the type obtained by binding to this service.
  * The other methods of this class should not be accessed by clients.
  */
-public class ScannerService extends Service implements ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, Scanner.ScannerStatusCallback, ScannerServiceApi {
+public class ScannerService extends Service implements ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, ScannerStatusCallback, ScannerServiceApi {
 
     protected final static String LOG_TAG = "ScannerService";
 
@@ -159,7 +159,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void scannerConnectionProgress(String providerKey, String scannerKey, String message) {
-        onStatusChanged(providerKey + " reports " + message);
+        onStatusChanged(null, Status.CONNECTING);
     }
 
     @Override
@@ -180,14 +180,14 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void noScannerAvailable() {
-        onStatusChanged(getResources().getString(R.string.scanner_service_no_compatible_sdk));
+        onStatusChanged(null, Status.SERVICE_SDK_SEARCH_NOCOMPATIBLE); // FIXME - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
         checkInitializationEnd();
     }
 
     @Override
     public void endOfScannerSearch() {
         Log.i(LOG_TAG, scanners.size() + " scanners from the different SDKs have reported for duty. Waiting for the initialization of the " + (scanners.size() - foregroundScanners.size()) + " background scanners.");
-        onStatusChanged(getResources().getString(R.string.scanner_service_sdk_search_end));
+        onStatusChanged(null, Status.SERVICE_SDK_SEARCH_OVER); // FIXME - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
         checkInitializationEnd();
     }
 
@@ -200,7 +200,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     public void onConnectionSuccessful(Scanner s) {
         Log.i(LOG_TAG, "A scanner has successfully initialized from provider " + s.getProviderKey());
         this.scanners.add(s);
-        onStatusChanged(getResources().getString(R.string.scanner_status_initialized));
+        onStatusChanged(s, Status.CONNECTED);
         initializingScannersCount.decrementAndGet();
         checkInitializationEnd();
     }
@@ -208,7 +208,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Override
     public void onConnectionFailure(Scanner s) {
         Log.i(LOG_TAG, "A scanner has failed to initialize from provider " + s.getProviderKey());
-        onStatusChanged(getResources().getString(R.string.scanner_status_initialization_failure));
+        onStatusChanged(s, Status.FAILURE);
         initializingScannersCount.decrementAndGet();
         checkInitializationEnd();
     }
@@ -233,36 +233,6 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         }
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////
-    // BLAH BLAH HANDLERS
-    ////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void onStatusChanged(final String newStatus) {
-        Log.d(LOG_TAG, "Status change: " + newStatus);
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                for (BackgroundScannerClient client : ScannerService.this.clients) {
-                    client.onStatusChanged(newStatus);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onScannerDisconnected(Scanner s) {
-        scanners.remove(s);
-        if (s instanceof ScannerForeground) {
-            foregroundScanners.remove(s);
-        }
-    }
-
-    @Override
-    public void onScannerReconnecting(Scanner s) {
-        // Nothing to do.
-    }
 
     ////////////////////////////////////////////////////////////////////////////
     // SCANNER DATA HANDLERS
@@ -416,5 +386,35 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Override
     public List<Scanner> getConnectedScanners() {
         return scanners;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // SCANNER STATUS CALLBACK
+    ////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void onStatusChanged(final Scanner scanner, final ScannerStatusCallback.Status newStatus) {
+        Log.d(LOG_TAG, "Status changed: " + newStatus.name() + " --- " + newStatus);
+        uiHandler.post(() -> {
+            for (BackgroundScannerClient client : ScannerService.this.clients) {
+                client.onStatusChanged(scanner, newStatus);
+            }
+        });
+
+        switch (newStatus) {
+            case DISCONNECTED:
+                onScannerDisconnected(scanner);
+                break;
+            default:
+                //ignore
+        }
+    }
+
+    private void onScannerDisconnected(final Scanner scanner) {
+        scanners.remove(scanner);
+        if (scanner instanceof ScannerForeground) {
+            foregroundScanners.remove(scanner);
+        }
     }
 }

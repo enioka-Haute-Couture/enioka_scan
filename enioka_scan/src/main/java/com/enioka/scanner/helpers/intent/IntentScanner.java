@@ -6,17 +6,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -51,7 +50,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected Scanner.ScannerDataCallback dataCb = null;
-    protected Scanner.ScannerStatusCallback statusCb = null;
+    protected ScannerStatusCallback statusCb = null;
     protected Scanner.Mode mode;
 
 
@@ -77,7 +76,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         }
 
         if (this.statusCb != null) {
-            this.statusCb.onStatusChanged(ctx.getString(R.string.scanner_status_waiting));
+            this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.READY);
         }
     }
 

@@ -3,31 +3,30 @@
     <string name="service_description">Helper service for scanner management</string>
 
     <!-- Scanner status -->
-    <string name="scanner_status_idle">Scanner is idle</string>
-    <string name="scanner_status_scanning">Scanner is scanning</string>
-    <string name="scanner_status_waiting">Scanner ready to scan on trigger press</string>
-    <string name="scanner_status_disabled">Scanner is disabled</string>
-    <string name="scanner_status_initialized">Scanner is correctly initialized</string>
-    <string name="scanner_status_initializing">Scanner is initializing</string>
-    <string name="scanner_status_initialization_failure">Scanner was found but failed to initialize</string>
-    <string name="scanner_status_no_camera">No camera available</string>
+    <string name="scanner_status_WAITING">Scanner is waiting for a connection</string>
+    <string name="scanner_status_CONNECTING">Scanner is in the process of connecting</string>
+    <string name="scanner_status_RECONNECTING">Scanner disconnected but is trying to reconnect</string>
+    <string name="scanner_status_CONNECTED">Scanner has finished connecting</string>
+    <string name="scanner_status_INITIALIZING">Scanner is in the process of initializing</string>
+    <string name="scanner_status_INITIALIZED">Scanner has finished initializing</string>
+    <string name="scanner_status_READY">Scanner is ready to scan and waiting to be used</string>
+    <string name="scanner_status_SCANNING">Scanner is in the process of scanning</string>
+    <string name="scanner_status_PAUSED">Scanner is enabled but not ready to scan</string>
+    <string name="scanner_status_DISABLED">Scanner has been disabled and cannot be used</string>
+    <string name="scanner_status_FAILURE">Scanner is no longer available after a critical error occurred</string>
+    <string name="scanner_status_DISCONNECTED">Scanner disconnected and can no longer be used</string>
+    <string name="scanner_status_UNKNOWN">Scanner is in an unknown status</string>
+    <!-- Scanner Service status -->
+    <string name="scanner_status_SERVICE_SDK_SEARCH_NOCOMPATIBLE">There are no compatible hardware barcode scanners on this device</string>
+    <string name="scanner_status_SERVICE_SDK_SEARCH_OVER">All hardware scanner providers have reported for duty</string>
 
-    <!-- Connection status -->
-    <string name="scanner_status_connected">Scanner connected</string>
-    <string name="scanner_status_connecting">Scanner connecting</string>
-    <string name="scanner_status_listen">Scanner is waiting for a connection</string>
-    <string name="scanner_status_lost">Scanner connection lost</string>
-    <string name="scanner_status_reconnecting">Scanner connection is being restored</string>
-    <string name="scanner_status_unknown">Scanner connection is weird</string>
+    <!-- Scanner status (Others) -->
+    <string name="scanner_status_no_camera">No camera available</string>
 
     <!-- ZBar specific -->
     <string name="scanner_camera_open_error_title">Cannot connect to camera service</string>
     <string name="scanner_camera_open_error">"Please check that no other applications (including scan helpers like ScanWedge) are using the camera. Also check if the Android camera app is working.\nApplication will now crash."</string>
     <string name="scanner_camera_no_camera">No fallback camera available on device. Please plugin your laser barcode scanner and restart application. Application will now crash.</string>
-
-    <!-- Scanner Service -->
-    <string name="scanner_service_no_compatible_sdk">There are no compatible hardware barcode scanners on this device</string>
-    <string name="scanner_service_sdk_search_end">All hardware scanner providers have reported for duty</string>
 
     <!-- Helper activities -->
     <string name="activity_scan_barcode_value_placeholder">10AL9271B2I8</string>

@@ -38,7 +38,7 @@ public final class SsiMonoPacket {
                          final byte[] data,
                          final byte checksumMsb,
                          final byte checksumLsb) {
-        if (opCode == 0x73)
+        if (opCode == SsiCommand.MULTIPACKET_SEGMENT.getOpCode())
             throw new IllegalArgumentException("Opcode indicates a multipacket, not a monopacket.");
 
         this.ble = false;

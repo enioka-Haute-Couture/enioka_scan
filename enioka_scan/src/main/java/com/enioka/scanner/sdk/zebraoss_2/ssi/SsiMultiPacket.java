@@ -41,7 +41,7 @@ public final class SsiMultiPacket {
         if (!expectingMoreData)
             throw new IllegalStateException("Not expecting more data");
 
-        if (buffer[offset + 1] != 0x73)
+        if (buffer[offset + 1] != SsiCommand.MULTIPACKET_SEGMENT.getOpCode())
             throw new IllegalStateException("Packet not part of a multipacket batch");
         Log.d(LOG_TAG, "Parsing packet #" + buffer[offset + 4] + " of a multi-packet batch");
 
@@ -50,7 +50,7 @@ public final class SsiMultiPacket {
                 throw new IllegalStateException("First packet of a multipacket batch is not full, should be a monopacket");
             if (buffer[offset + 2] != SsiStatus.MULTIPACKET_FIRST.getByte() || buffer[offset + 4] != 0x00)
                 throw new IllegalStateException("Expected the first packet of a multipacket batch, got a continuation");
-            if (buffer[offset + 5] != (byte) 0xF3)
+            if (buffer[offset + 5] != SsiCommand.DECODE_DATA.getOpCode())
                 throw new IllegalStateException("Multipacket content is not a barcode scan, the SDK does not know how to process this data");
 
             symbology = buffer[offset + 10];

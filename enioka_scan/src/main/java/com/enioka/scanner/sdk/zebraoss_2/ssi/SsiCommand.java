@@ -21,6 +21,8 @@ public enum SsiCommand {
     CUSTOM_DEFAULTS(0x12, SsiSource.HOST),
     SEND_LOG(0x13, SsiSource.HOST),
     LOG_DATA(0x14, SsiSource.DECODER, true, new GenericParser()),
+    MULTIPACKET_SEGMENT(0x73, SsiSource.DECODER), // Only observed for barcode scans, supported directly in the parser
+    MULTIPACKET_ACK(0x74, SsiSource.HOST), // Triggered directly in the parser
     SSI_MGMT_COMMAND(0x80, SsiSource.BOTH, true, new RsmResponseParser()),
     SCANNER_INIT_COMMAND(0x90, SsiSource.HOST),
     SCANNER_INIT(0x91, SsiSource.DECODER, new ScannerInitParser()),

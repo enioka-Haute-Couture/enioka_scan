@@ -5,6 +5,9 @@ import android.util.Log;
 import com.enioka.scanner.bt.api.MessageRejectionReason;
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
+import com.enioka.scanner.sdk.zebraoss_2.commands.Ack;
+import com.enioka.scanner.sdk.zebraoss_2.commands.MultipacketAck;
+import com.enioka.scanner.sdk.zebraoss_2.commands.Nack;
 import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiCommand;
 import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiMonoPacket;
 import com.enioka.scanner.sdk.zebraoss_2.ssi.SsiMultiPacket;
@@ -21,7 +24,7 @@ public class SsiOverSppParser implements ScannerDataParser {
         ParsingResult res = new ParsingResult();
         res.read = dataLength;
 
-        if (buffer[offset + 1] == 0x73) { // Multipacket
+        if (buffer[offset + 1] == SsiCommand.MULTIPACKET_SEGMENT.getOpCode()) { // Multipacket
             if (multiPacketBuffer == null)
                 multiPacketBuffer = new SsiMultiPacket();
             multiPacketBuffer.readPacket(buffer, offset, dataLength);
@@ -32,7 +35,7 @@ public class SsiOverSppParser implements ScannerDataParser {
                 multiPacketBuffer = null;
             }
 
-            // FIXME: needs ACK response, maybe a different opcode (0x74 instead of 0xD0)
+            res.acknowledger = new MultipacketAck();
             return res;
         }
 
@@ -46,7 +49,7 @@ public class SsiOverSppParser implements ScannerDataParser {
                     buffer[offset + dataLength - 1]);
         } catch (final IllegalStateException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
-            res.acknowledger = null; // FIXME: needs NACK response
+            res.acknowledger =  new Nack(MessageRejectionReason.CHECKSUM_FAILURE);
             return res;
         }
 
@@ -56,7 +59,7 @@ public class SsiOverSppParser implements ScannerDataParser {
             return new ParsingResult(MessageRejectionReason.INVALID_OPERATION);
         }
         if (meta.needsAck())
-            res.acknowledger = null; // FIXME: needs ACK response
+            res.acknowledger = new Ack();
 
         if (meta.getSource() == SsiSource.HOST)
             throw new IllegalStateException("Should not receive host-sent messages");

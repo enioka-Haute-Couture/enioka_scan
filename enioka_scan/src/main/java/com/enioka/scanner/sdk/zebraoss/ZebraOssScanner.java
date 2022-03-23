@@ -224,7 +224,7 @@ class ZebraOssScanner implements ScannerBackground {
         this.btScanner.runCommand(new InitCommand(btScanner.isBleDevice()), null);
         this.btScanner.runCommand(new SetPickListMode((byte) 2, btScanner.isBleDevice()), null);
         this.btScanner.runCommand(new ScanEnable(btScanner.isBleDevice()), null);
-        this.btScanner.runCommand(new StartSession(btScanner.isBleDevice()), null);
+        //this.btScanner.runCommand(new StartSession(btScanner.isBleDevice()), null); // This is a trigger press, not needed in the initialization
 
         // We are already connected if the scanner could be created...
         initCallback.onConnectionSuccessful(this);

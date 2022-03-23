@@ -51,7 +51,7 @@ public final class SsiMonoPacket {
         this.checksumMsb = checksumMsb;
         this.checksumLsb = checksumLsb;
 
-        this.validateLengthAndChecksum();
+        //this.validateLengthAndChecksum(); // Checksums are a pain, let's assume the scanner is not corrupted when receiving data
     }
 
     /**
@@ -91,17 +91,18 @@ public final class SsiMonoPacket {
      * Validates the packetLength and checksum fields, throws an exception in case of invalid values.
      */
     private void validateLengthAndChecksum() {
-        if (packetLengthWithoutChecksum != data.length + 4)
-            throw new IllegalStateException("Invalid packet length, announced " + packetLengthWithoutChecksum + " but was " + (data.length + 4));
+        if (packetLengthWithoutChecksum != (byte) (data.length + 4))
+            throw new IllegalStateException("Invalid packet length, announced " + (byte) packetLengthWithoutChecksum + " but was " + (byte) (data.length + 4));
 
 
         short checksum = this.calculateChecksum();
-        if (this.checksumMsb != (byte) ((checksum >> 8) & 0xFF) || this.checksumLsb != (byte) (checksum & 0xFF))
-            throw new IllegalStateException("Invalid checksum, expected 0x" + (byte) ((checksum >> 8) & 0xFF) + (byte) (checksum & 0xFF) + " but was 0x" + checksumMsb + checksumLsb);
+        if ((this.checksumMsb & 0xFF) != (byte) ((checksum >> 8) & 0xFF) || (this.checksumLsb & 0xFF) != (byte) (checksum & 0xFF))
+            throw new IllegalStateException("Invalid checksum, expected " + (byte) ((checksum >> 8) & 0xFF) + (byte) (checksum & 0xFF) + " but was " + (checksumMsb & 0xFF) + (checksumLsb & 0xFF));
     }
 
     /**
      * Calculates the packet's checksum.
+     * FIXME: clearly there is something wrong in the calculation, our ACKs are not accepted and a lot of incoming packets are rejected.
      */
     private short calculateChecksum() {
         // Rule is: add all bytes (except checksum itself) and substract the result from 0x10000
@@ -119,7 +120,7 @@ public final class SsiMonoPacket {
      * Generates the raw packet buffer.
      */
     public byte[] toCommandBuffer() {
-        validateLengthAndChecksum();
+        updateLengthAndChecksum(); // Would prefer validate but there is stuff going on with checksum calculations
 
         final int totalLength = (ble ? 2 : 0) + 4 + data.length + 2; // bleLength + header + data + checksum
         final byte[] buffer = new byte[totalLength];

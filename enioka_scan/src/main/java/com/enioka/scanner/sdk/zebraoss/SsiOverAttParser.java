@@ -8,12 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * Wraps the handling of SSI packets contained in ATT packets.
- *
- * Unlike with SPP where the entire payload is the entirerity of an SSI packet, BLE works with
- * much smaller payloads meaning a single SSI packet will usually be split over multiple ATT packets.
- * Only the first ATT packet of the batch will contain the information necessary to correctly concatenate
- * the SSI packet: the total size of the SSI packet.
+ * Wraps the handling of SSI packets contained in (possibly multiple) ATT packets.
  */
 public class SsiOverAttParser implements ScannerDataParser {
     private static final SsiParser ssiParser = new SsiParser(true);
@@ -25,18 +20,18 @@ public class SsiOverAttParser implements ScannerDataParser {
     @Override
     public ParsingResult parse(byte[] buffer, int offset, int dataLength) {
         ParsingResult res = new ParsingResult();
-        res.read = dataLength;
 
         if (packetLength == 0 || ssiBuffer.length == 0) { // new SSI packet
             packetLength = ByteBuffer.wrap(new byte[]{buffer[offset], buffer[offset + 1]}).order(ByteOrder.LITTLE_ENDIAN).getShort();
-            packetLength -= 2;
-            ssiBuffer = new byte[packetLength - 2];
+            packetLength -= 2; // exclude prefix bytes
+            ssiBuffer = new byte[packetLength];
             offset += 2;
             dataLength -= 2;
         }
 
         System.arraycopy(buffer, offset, ssiBuffer, read, Math.min(dataLength, packetLength - read));
         read += Math.min(dataLength, packetLength - read);
+        res.read = read;
 
         if (read == packetLength) { // SSI packet is complete
             res = ssiParser.parse(ssiBuffer, 0, packetLength);

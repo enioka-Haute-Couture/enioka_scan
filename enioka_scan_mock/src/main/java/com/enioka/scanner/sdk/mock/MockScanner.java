@@ -23,6 +23,7 @@ public class MockScanner implements ScannerBackground {
     private boolean paused = false;
     private boolean disconnected = false;
     private boolean illuminated = false;
+    private boolean softTriggered = false;
     private ScannerDataCallback dataCallback;
     private ScannerStatusCallback statusCallback;
     private Mode mode;
@@ -46,6 +47,25 @@ public class MockScanner implements ScannerBackground {
         final List<Barcode> barcodeList = new ArrayList<>();
         barcodeList.add(barcode);
         dataCallback.onData(this, barcodeList);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // SOFTWARE TRIGGERS
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void pressScanTrigger() {
+        Log.d(LOG_TAG, "Scanner trigger pressed");
+        softTriggered = true;
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.SCANNING);
+    }
+
+    @Override
+    public void releaseScanTrigger() {
+        Log.d(LOG_TAG, "Scanner trigger released");
+        softTriggered = false;
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

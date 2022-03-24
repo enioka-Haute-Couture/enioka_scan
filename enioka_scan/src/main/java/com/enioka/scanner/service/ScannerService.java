@@ -19,6 +19,7 @@ import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.sdk.athesi.DataWedge;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -295,6 +296,20 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     public void registerClient(BackgroundScannerClient client) {
         this.clients.add(client);
+    }
+
+    @Override
+    public void pressScanTrigger() {
+        for (Scanner s : this.scanners) {
+            s.pressScanTrigger();
+        }
+    }
+
+    @Override
+    public void releaseScanTrigger() {
+        for (Scanner s : this.scanners) {
+            s.releaseScanTrigger();
+        }
     }
 
     public boolean anyScannerSupportsIllumination() {

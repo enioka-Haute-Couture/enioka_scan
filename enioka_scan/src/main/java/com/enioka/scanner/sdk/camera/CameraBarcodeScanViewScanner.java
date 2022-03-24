@@ -45,8 +45,18 @@ public class CameraBarcodeScanViewScanner implements ScannerForeground, CameraBa
     }
 
     @Override
+    public void pressScanTrigger() {
+        // continuous scanning
+    }
+
+    @Override
+    public void releaseScanTrigger() {
+        // continuous scanning
+    }
+
+    @Override
     public void setDataCallBack(ScannerDataCallback cb) {
-        //
+        dataDb = cb;
     }
 
     @Override
@@ -81,6 +91,7 @@ public class CameraBarcodeScanViewScanner implements ScannerForeground, CameraBa
 
     @Override
     public void handleScanResult(String code, BarcodeType barcodeType) {
+        // FIXME: could use a timer to pause the scanning for a second as it otherwise keeps detecting the same barcode
         Log.v(LOG_TAG, "handleScanResult " + code + " - " + barcodeType);
         if (dataDb != null) {
             List<Barcode> res = new ArrayList<>(1);

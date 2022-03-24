@@ -50,8 +50,23 @@ public class HHTScanner extends IntentScanner<String> {
     @Override
     protected void configureProvider() {
         broadcastIntentFilters.add("DATA_SCAN");
-        disableTrigger = newIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.DISABLE_TRIGGERBUTTON, DataWedge.STOP_SCANNING});
-        enableTrigger = newIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.ENABLE_TRIGGERBUTTON, DataWedge.START_SCANNING});
+        // FIXME: Too many params (stop/start scanning is unrelated to pause/resume), and trigger activation/deactivation seems to have no effect after testing.
+        disableTrigger = null;//newIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.DISABLE_TRIGGERBUTTON, DataWedge.STOP_SCANNING}); // Does not appear to disable the trigger
+        enableTrigger = null;//newIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.ENABLE_TRIGGERBUTTON, DataWedge.START_SCANNING}); // Does not appear to enable the trigger
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // SOFTWARE TRIGGERS
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void pressScanTrigger() {
+        broadcastIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETER, DataWedge.START_SCANNING);
+    }
+
+    @Override
+    public void releaseScanTrigger() {
+        broadcastIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETER, DataWedge.STOP_SCANNING);
     }
 
 

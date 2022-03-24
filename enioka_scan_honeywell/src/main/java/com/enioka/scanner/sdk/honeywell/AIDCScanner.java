@@ -103,6 +103,16 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
     }
 
     @Override
+    public void pressScanTrigger() {
+        // FIXME
+    }
+
+    @Override
+    public void releaseScanTrigger() {
+        // FIXME
+    }
+
+    @Override
     public void setDataCallBack(ScannerDataCallback cb) {
         this.dataCb = cb;
     }
@@ -211,5 +221,20 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
     @Override
     public String getProviderKey() {
         return AIDCProvider.PROVIDER_NAME;
+    }
+
+    @Override
+    public String getStatus(String key) {
+        return null;
+    }
+
+    @Override
+    public String getStatus(String key, boolean allowCache) {
+        return null;
+    }
+
+    @Override
+    public Map<String, String> getStatus() {
+        return null;
     }
 }

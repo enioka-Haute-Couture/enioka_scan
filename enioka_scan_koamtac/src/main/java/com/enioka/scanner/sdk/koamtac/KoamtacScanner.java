@@ -15,6 +15,7 @@ import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import koamtac.kdc.sdk.KDCBarcodeDataReceivedListener;
 import koamtac.kdc.sdk.KDCConnectionListener;
@@ -178,6 +179,16 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
+    public void pressScanTrigger() {
+        // FIXME
+    }
+
+    @Override
+    public void releaseScanTrigger() {
+        // FIXME
+    }
+
+    @Override
     public void setDataCallBack(ScannerDataCallback cb) {
         this.dataCallback = cb;
     }
@@ -272,5 +283,20 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
     @Override
     public String getProviderKey() {
         return KoamtacScannerProvider.PROVIDER_KEY;
+    }
+
+    @Override
+    public String getStatus(String key) {
+        return null;
+    }
+
+    @Override
+    public String getStatus(String key, boolean allowCache) {
+        return null;
+    }
+
+    @Override
+    public Map<String, String> getStatus() {
+        return null;
     }
 }

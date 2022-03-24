@@ -39,12 +39,12 @@ class HoneywellOssScanner implements ScannerBackground {
 
     @Override
     public void pressScanTrigger() {
-        // FIXME
+        this.btScanner.runCommand(new ActivateTrigger(), null);
     }
 
     @Override
     public void releaseScanTrigger() {
-        // FIXME
+        this.btScanner.runCommand(new DeactivateTrigger(), null);
     }
 
 
@@ -64,7 +64,6 @@ class HoneywellOssScanner implements ScannerBackground {
 
     @Override
     public void pause() {
-        this.btScanner.runCommand(new DeactivateTrigger(), null);
         this.btScanner.runCommand(new DisableAimer(), null);
         this.btScanner.runCommand(new DisableIllumination(), null);
         this.btScanner.runCommand(new DisplayScreenColor(Color.RED), null);
@@ -72,7 +71,6 @@ class HoneywellOssScanner implements ScannerBackground {
 
     @Override
     public void resume() {
-        this.btScanner.runCommand(new ActivateTrigger(), null);
         this.btScanner.runCommand(new EnableAimer(), null);
         this.btScanner.runCommand(new EnableIllumination(), null);
         this.btScanner.runCommand(new DisplayScreenColor(null), null);
@@ -191,12 +189,7 @@ class HoneywellOssScanner implements ScannerBackground {
             public void onSuccess(final Barcode data) {
                 final List<Barcode> res = new ArrayList<>(1);
                 res.add(data);
-                uiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        HoneywellOssScanner.this.dataCallback.onData(HoneywellOssScanner.this, res);
-                    }
-                });
+                uiHandler.post(() -> HoneywellOssScanner.this.dataCallback.onData(HoneywellOssScanner.this, res));
             }
 
             @Override

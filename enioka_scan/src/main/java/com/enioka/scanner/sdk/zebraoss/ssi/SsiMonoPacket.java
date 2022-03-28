@@ -51,7 +51,7 @@ public final class SsiMonoPacket {
         this.checksumMsb = checksumMsb;
         this.checksumLsb = checksumLsb;
 
-        //this.validateLengthAndChecksum(); // Checksums are a pain, let's assume the scanner is not corrupted when receiving data
+        //this.validateLengthAndChecksum(); // FIXME - 2022/03/28: inbound packets are constantly rejected due to checksum. For now, assume they are all correct.
     }
 
     /**
@@ -102,7 +102,9 @@ public final class SsiMonoPacket {
 
     /**
      * Calculates the packet's checksum.
-     * FIXME: clearly there is something wrong in the calculation, our ACKs are not accepted and a lot of incoming packets are rejected.
+     * FIXME - 2022/03/28: This method produces checksums that match what could be observed in testing but for some reason does not seem to match the scanner anymore.
+     *                     Outgoing ACKs get rejected/ignored, and inbound packets do not seem to match those checksums.
+     *                     It does not affect the ability to scan, but it may affect the ability to send commands to the scanner, more testing is required.
      */
     private short calculateChecksum() {
         // Rule is: add all bytes (except checksum itself) and substract the result from 0x10000
@@ -120,7 +122,7 @@ public final class SsiMonoPacket {
      * Generates the raw packet buffer.
      */
     public byte[] toCommandBuffer() {
-        updateLengthAndChecksum(); // Would prefer validate but there is stuff going on with checksum calculations
+        //validateLengthAndChecksum(); // FIXME - 2022/03/28: Checksum problems may cause this to fail for inbound packets. Constructors both call update/validation and values cannot be changed outside so let's assume they are correct for now.
 
         final int totalLength = (ble ? 2 : 0) + 4 + data.length + 2; // bleLength + header + data + checksum
         final byte[] buffer = new byte[totalLength];

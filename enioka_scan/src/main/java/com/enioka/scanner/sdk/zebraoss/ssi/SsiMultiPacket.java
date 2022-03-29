@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
  * barcode with no other use. For this reason, many sanity checks are skipped.
  */
 public final class SsiMultiPacket {
-    private static final String LOG_TAG = "SsiMultiPacket";
+    private static final String LOG_TAG = "SsiParser";
 
     private byte symbology;
     private int barcodeLength = 0;
@@ -38,11 +38,14 @@ public final class SsiMultiPacket {
      * @param length The length of the packet data, including headers and checksum
      */
     public void readPacket(final byte[] buffer, int offset, int length) {
-        if (!expectingMoreData)
+        if (!expectingMoreData) {
             throw new IllegalStateException("Not expecting more data");
+        }
 
-        if (buffer[offset + 1] != SsiCommand.MULTIPACKET_SEGMENT.getOpCode())
+        if (buffer[offset + 1] != SsiCommand.MULTIPACKET_SEGMENT.getOpCode()) {
             throw new IllegalStateException("Packet not part of a multipacket batch");
+        }
+
         Log.d(LOG_TAG, "Parsing packet #" + buffer[offset + 4] + " of a multi-packet batch");
 
         if (data.length == 0) { // first packet
@@ -68,8 +71,9 @@ public final class SsiMultiPacket {
 
         System.arraycopy(buffer, offset, data, dataRead, Math.min(length - 2, barcodeLength - dataRead));
         dataRead += Math.min(length - 2, barcodeLength - dataRead);
-        if (dataRead == barcodeLength)
+        if (dataRead == barcodeLength) {
             expectingMoreData = false;
+        }
     }
 
     public boolean expectingMoreData() {

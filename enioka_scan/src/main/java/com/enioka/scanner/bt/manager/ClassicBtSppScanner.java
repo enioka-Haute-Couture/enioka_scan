@@ -344,7 +344,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
     void handleInputBuffer(byte[] buffer, int offset, int length) {
         int read = offset;
         while (read < length) {
-            read += handleInputBufferLoop(buffer, read, length); // FIXME: doubtful about the +1 ? If X bytes are read, read=X, so next start offset will be X which should be correct if we start at 0
+            read += handleInputBufferLoop(buffer, read, length);
             if (read < length) {
                 Log.d(LOG_TAG, "The buffer contains multiple tokens - a loop will happen starting at position " + read + " until " + length);
             }

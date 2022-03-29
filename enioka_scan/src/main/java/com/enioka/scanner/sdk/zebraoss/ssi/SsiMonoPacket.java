@@ -5,7 +5,7 @@ package com.enioka.scanner.sdk.zebraoss.ssi;
  * Multi-packets are (so far) read-only and in a separate class as they require extra header elements.
  */
 public final class SsiMonoPacket {
-    private static final String LOG_TAG = "SsiMonoPacket";
+    private static final String LOG_TAG = "SsiParser";
     private final boolean ble;
 
     // Packet attributes are in the same order as which they occur in the raw packet buffer
@@ -38,8 +38,9 @@ public final class SsiMonoPacket {
                          final byte[] data,
                          final byte checksumMsb,
                          final byte checksumLsb) {
-        if (opCode == SsiCommand.MULTIPACKET_SEGMENT.getOpCode())
+        if (opCode == SsiCommand.MULTIPACKET_SEGMENT.getOpCode()) {
             throw new IllegalArgumentException("Opcode indicates a multipacket, not a monopacket.");
+        }
 
         this.ble = false;
 
@@ -91,13 +92,15 @@ public final class SsiMonoPacket {
      * Validates the packetLength and checksum fields, throws an exception in case of invalid values.
      */
     private void validateLengthAndChecksum() {
-        if (packetLengthWithoutChecksum != (byte) (data.length + 4))
+        if (packetLengthWithoutChecksum != (byte) (data.length + 4)) {
             throw new IllegalStateException("Invalid packet length, announced " + (byte) packetLengthWithoutChecksum + " but was " + (byte) (data.length + 4));
+        }
 
 
         short checksum = this.calculateChecksum();
-        if ((this.checksumMsb & 0xFF) != (byte) ((checksum >> 8) & 0xFF) || (this.checksumLsb & 0xFF) != (byte) (checksum & 0xFF))
+        if ((this.checksumMsb & 0xFF) != (byte) ((checksum >> 8) & 0xFF) || (this.checksumLsb & 0xFF) != (byte) (checksum & 0xFF)) {
             throw new IllegalStateException("Invalid checksum, expected " + (byte) ((checksum >> 8) & 0xFF) + (byte) (checksum & 0xFF) + " but was " + (checksumMsb & 0xFF) + (checksumLsb & 0xFF));
+        }
     }
 
     /**

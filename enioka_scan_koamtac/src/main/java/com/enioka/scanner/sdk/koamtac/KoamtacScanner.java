@@ -179,16 +179,6 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void pressScanTrigger() {
-        // FIXME
-    }
-
-    @Override
-    public void releaseScanTrigger() {
-        // FIXME
-    }
-
-    @Override
     public void setDataCallBack(ScannerDataCallback cb) {
         this.dataCallback = cb;
     }

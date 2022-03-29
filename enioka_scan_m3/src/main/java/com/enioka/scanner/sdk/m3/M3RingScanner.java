@@ -105,16 +105,6 @@ class M3RingScanner implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void pressScanTrigger() {
-        // FIXME
-    }
-
-    @Override
-    public void releaseScanTrigger() {
-        // FIXME
-    }
-
-    @Override
     public void setDataCallBack(ScannerDataCallback cb) {
         this.dataCallback = cb;
     }

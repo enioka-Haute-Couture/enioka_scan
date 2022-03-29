@@ -73,16 +73,6 @@ public class GenericHidScanner implements ScannerForeground {
     }
 
     @Override
-    public void pressScanTrigger() {
-        // FIXME
-    }
-
-    @Override
-    public void releaseScanTrigger() {
-        // FIXME
-    }
-
-    @Override
     public void setDataCallBack(ScannerDataCallback cb) {
         this.dataCb = cb;
     }

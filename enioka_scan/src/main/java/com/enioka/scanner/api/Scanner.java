@@ -67,12 +67,16 @@ public interface Scanner {
     /**
      * Simulates a press on a hardware-trigger, firing the beam that will read barcodes.
      */
-    void pressScanTrigger();
+    default void pressScanTrigger() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Ends the effect of {@link #pressScanTrigger()}.
      */
-    void releaseScanTrigger();
+    default void releaseScanTrigger() {
+        throw new UnsupportedOperationException();
+    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

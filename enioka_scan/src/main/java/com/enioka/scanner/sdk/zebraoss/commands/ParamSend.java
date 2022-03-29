@@ -6,8 +6,8 @@ import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
  * Set a given configuration parameter on the scanner. Usually not used directly but with a specific command overriding it.
  */
 public class ParamSend extends CommandExpectingAck {
-    public ParamSend(int parameter, byte value, boolean isBle) {
-        super(SsiCommand.PARAM_SEND.getOpCode(), getData(parameter, value), isBle);
+    public ParamSend(int parameter, byte value) {
+        super(SsiCommand.PARAM_SEND.getOpCode(), getData(parameter, value));
     }
 
     private static byte[] getData(int parameter, byte value) {

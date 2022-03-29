@@ -306,7 +306,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
 
     @Override
     public <T> void runCommand(Command<T> command, DataSubscriptionCallback<T> subscription) {
-        byte[] cmd = command.getCommand();
+        byte[] cmd = command.getCommand(this);
 
         if (subscription != null) {
             synchronized (dataSubscriptions) {
@@ -358,7 +358,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             Log.w(LOG_TAG, "The buffer is abandoned as the parser did not read any byte on the latest loop");
             this.outputStreamWriter.endOfCommand();
             if (res.acknowledger != null) {
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }
             return length;
         }
@@ -369,7 +369,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             // ACK first - the event handlers may write to stream and create out of order ACKs.
             if (res.acknowledger != null) {
                 this.outputStreamWriter.endOfCommand();
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }
 
             // Subscriptions to fulfill on that data type?
@@ -391,19 +391,19 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         } else if (!res.expectingMoreData && !res.rejected) {
             Log.d(LOG_TAG, "Message was interpreted as: message without additional data");
             if (res.acknowledger != null) {
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }
             this.outputStreamWriter.endOfCommand();
         } else if (!res.expectingMoreData && res.rejected) {
             Log.d(LOG_TAG, "Message was rejected " + res.result);
             if (res.acknowledger != null) {
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }
             this.outputStreamWriter.endOfCommand();
         } else {
             Log.d(LOG_TAG, "Data was not interpreted yet as we are expecting more data");
             if (res.acknowledger != null) {
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }
         }
 

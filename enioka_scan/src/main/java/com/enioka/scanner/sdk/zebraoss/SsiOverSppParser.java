@@ -8,7 +8,7 @@ import com.enioka.scanner.sdk.zebraoss.ssi.SsiParser;
  * Wraps the handling of SSI packets contained in (possibly multiple) SPP packets.
  */
 public class SsiOverSppParser implements ScannerDataParser {
-    private static final SsiParser ssiParser = new SsiParser(false);
+    private static final SsiParser ssiParser = new SsiParser();
 
     private byte[] ssiBuffer = new byte[0];
     private int packetLength = 0;

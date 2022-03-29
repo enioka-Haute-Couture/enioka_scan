@@ -255,26 +255,26 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
 
             if (res.acknowledger != null) {
                 this.writer.endOfCommand();
-                this.writer.write(res.acknowledger.getCommand(), false);
+                this.writer.write(res.acknowledger.getCommand(this), false);
             }
 
             this.writer.endOfCommand();
         } else if (!res.expectingMoreData && !res.rejected) {
             Log.d(LOG_TAG, "Message was interpreted as: message without additional data");
             if (res.acknowledger != null) {
-                this.writer.write(res.acknowledger.getCommand(), false);
+                this.writer.write(res.acknowledger.getCommand(this), false);
             }
             this.writer.endOfCommand();
         } else if (!res.expectingMoreData) {
             Log.d(LOG_TAG, "Message was rejected " + res.result);
             if (res.acknowledger != null) {
-                this.writer.write(res.acknowledger.getCommand(), false);
+                this.writer.write(res.acknowledger.getCommand(this), false);
             }
             this.writer.endOfCommand();
         } else {
             Log.d(LOG_TAG, "Data was not interpreted yet as we are expecting more data");
             if (res.acknowledger != null) {
-                this.writer.write(res.acknowledger.getCommand(), false);
+                this.writer.write(res.acknowledger.getCommand(this), false);
             }
         }
     }
@@ -350,7 +350,7 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
     }
 
     public <T> void runCommand(Command<T> command, DataSubscriptionCallback<T> subscription) {
-        byte[] cmd = command.getCommand();
+        byte[] cmd = command.getCommand(this);
 
         if (subscription != null) {
             synchronized (dataSubscriptions) {

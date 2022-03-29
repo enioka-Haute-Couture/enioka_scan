@@ -1,6 +1,7 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
 import com.enioka.scanner.bt.api.Command;
+import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.sdk.zebraoss.data.RsmAttributeReply;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiMonoPacket;
@@ -12,8 +13,8 @@ import com.enioka.scanner.sdk.zebraoss.ssi.SsiStatus;
 public class ManagementCommandGetAttribute implements Command<RsmAttributeReply> {
     private final SsiMonoPacket packet;
 
-    public ManagementCommandGetAttribute(boolean isBle, int... prmCodes) {
-        packet = new SsiMonoPacket(SsiCommand.SSI_MGMT_COMMAND.getOpCode(), SsiStatus.DEFAULT.getByte(), prmCodesToByteArray(prmCodes), isBle);
+    public ManagementCommandGetAttribute(int... prmCodes) {
+        packet = new SsiMonoPacket(SsiCommand.SSI_MGMT_COMMAND.getOpCode(), SsiStatus.DEFAULT.getByte(), prmCodesToByteArray(prmCodes));
     }
 
     private static byte[] prmCodesToByteArray(int[] prmCodes) {
@@ -42,7 +43,12 @@ public class ManagementCommandGetAttribute implements Command<RsmAttributeReply>
 
     @Override
     public byte[] getCommand() {
-        return packet.toCommandBuffer();
+        return packet.toCommandBuffer(false);
+    }
+
+    @Override
+    public byte[] getCommand(final Scanner scanner) {
+        return packet.toCommandBuffer(scanner.isBleDevice());
     }
 
     @Override

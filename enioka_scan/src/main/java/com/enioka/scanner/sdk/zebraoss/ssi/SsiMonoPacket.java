@@ -6,13 +6,8 @@ package com.enioka.scanner.sdk.zebraoss.ssi;
  */
 public final class SsiMonoPacket {
     private static final String LOG_TAG = "SsiParser";
-    private final boolean ble;
 
     // Packet attributes are in the same order as which they occur in the raw packet buffer
-    /** MSB of total length in little-endian used by BLE only, for outgoing packets only (these bytes should be skipped for reading). */
-    private byte blePacketLengthMsb;
-    /** LSB of total length in little-endian used by BLE only, for outgoing packets only (these bytes should be skipped for reading). */
-    private byte blePacketLengthLsb;
     /** Length of the packet excluding the checksum. */
     private byte packetLengthWithoutChecksum;
     /** OpCode of the packet, describing the type of data it contains. */
@@ -42,8 +37,6 @@ public final class SsiMonoPacket {
             throw new IllegalArgumentException("Opcode indicates a multipacket, not a monopacket.");
         }
 
-        this.ble = false;
-
         this.packetLengthWithoutChecksum = packetLengthWithoutChecksum;
         this.opCode = opCode;
         this.source = 0x00;
@@ -60,9 +53,7 @@ public final class SsiMonoPacket {
      * Only suitable for outgoing packets. Checksum and length are calculated automatically.
      * @param ble Whether the packet must contain BLE length bytes or not.
      */
-    public SsiMonoPacket(final byte opCode, final byte status, final byte[] data, final boolean ble) {
-        this.ble = ble;
-
+    public SsiMonoPacket(final byte opCode, final byte status, final byte[] data) {
         this.opCode = opCode;
         this.source = 0x04;
         this.status = status;
@@ -77,12 +68,6 @@ public final class SsiMonoPacket {
     private void updateLengthAndChecksum() {
         packetLengthWithoutChecksum = (byte) (0x04 + this.data.length);
 
-        if (ble) {
-            short totalLength = (short) (packetLengthWithoutChecksum + 4);
-            blePacketLengthMsb = (byte) ((totalLength >> 8) & 0xFF);
-            blePacketLengthLsb = (byte) (totalLength & 0xFF);
-        }
-
         short checksum = this.calculateChecksum();
         this.checksumMsb = (byte) ((checksum >> 8) & 0xFF);
         this.checksumLsb = (byte) (checksum & 0xFF);
@@ -95,7 +80,6 @@ public final class SsiMonoPacket {
         if (packetLengthWithoutChecksum != (byte) (data.length + 4)) {
             throw new IllegalStateException("Invalid packet length, announced " + (byte) packetLengthWithoutChecksum + " but was " + (byte) (data.length + 4));
         }
-
 
         short checksum = this.calculateChecksum();
         if ((this.checksumMsb & 0xFF) != (byte) ((checksum >> 8) & 0xFF) || (this.checksumLsb & 0xFF) != (byte) (checksum & 0xFF)) {
@@ -124,16 +108,17 @@ public final class SsiMonoPacket {
     /**
      * Generates the raw packet buffer.
      */
-    public byte[] toCommandBuffer() {
+    public byte[] toCommandBuffer(final boolean ble) {
         //validateLengthAndChecksum(); // FIXME - 2022/03/28: Checksum problems may cause this to fail for inbound packets. Constructors both call update/validation and values cannot be changed outside so let's assume they are correct for now.
 
         final int totalLength = (ble ? 2 : 0) + 4 + data.length + 2; // bleLength + header + data + checksum
+        final int offset = (ble ? 2 : 0);
+
         final byte[] buffer = new byte[totalLength];
 
-        final int offset = (ble ? 2 : 0);
         if (ble) {
-            buffer[offset - 2] = blePacketLengthMsb;
-            buffer[offset - 1] = blePacketLengthLsb;
+            buffer[offset - 2] = (byte) ((totalLength >> 8) & 0xFF);
+            buffer[offset - 1] = (byte) (totalLength & 0xFF);
         }
         buffer[offset] = packetLengthWithoutChecksum;
         buffer[offset + 1] = opCode;

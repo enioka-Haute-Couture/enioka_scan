@@ -7,8 +7,8 @@ import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
  * A message or segment explicit NON acknowledgment.
  */
 public class Nack extends CommandExpectingNothing {
-    public Nack(MessageRejectionReason reason, boolean isBle) {
-        super(SsiCommand.CMD_NACK.getOpCode(), getReasonCode(reason), isBle);
+    public Nack(MessageRejectionReason reason) {
+        super(SsiCommand.CMD_NACK.getOpCode(), getReasonCode(reason));
     }
 
     private static byte[] getReasonCode(MessageRejectionReason reason) {

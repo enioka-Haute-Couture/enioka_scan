@@ -14,6 +14,16 @@ public interface Command<T> {
     byte[] getCommand();
 
     /**
+     * The command to send on the bluetooth socket.
+     *
+     * @param scanner The scanner that may be used to adapt some parameters in the command generation.
+     * @return command.
+     */
+    default byte[] getCommand(final Scanner scanner) {
+        return getCommand();
+    }
+
+    /**
      * The expected return type of the command (as in: the class returned by the parser when parsing an incoming stream from the scanner). Can be null.<br>
      * Only useful because of Java generic type erasure - otherwise, we know it's the generic parameter T!
      *

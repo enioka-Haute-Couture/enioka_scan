@@ -1,6 +1,7 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
 import com.enioka.scanner.bt.api.Command;
+import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.sdk.zebraoss.data.ParamSend;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiMonoPacket;
@@ -12,12 +13,12 @@ import com.enioka.scanner.sdk.zebraoss.ssi.SsiStatus;
 public class RequestParam implements Command<ParamSend> {
     private final SsiMonoPacket packet;
 
-    public RequestParam(boolean isBle) {
-        packet = new SsiMonoPacket(SsiCommand.PARAM_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[]{(byte) (0xFE)}, isBle);
+    public RequestParam() {
+        packet = new SsiMonoPacket(SsiCommand.PARAM_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[]{(byte) (0xFE)});
     }
 
-    public RequestParam(int prmCode, boolean isBle) {
-        packet = new SsiMonoPacket(SsiCommand.PARAM_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), prmCodeToByteArray(prmCode), isBle);
+    public RequestParam(int prmCode) {
+        packet = new SsiMonoPacket(SsiCommand.PARAM_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), prmCodeToByteArray(prmCode));
     }
 
     private static byte[] prmCodeToByteArray(int prmCode) {
@@ -38,7 +39,12 @@ public class RequestParam implements Command<ParamSend> {
 
     @Override
     public byte[] getCommand() {
-        return packet.toCommandBuffer();
+        return packet.toCommandBuffer(false);
+    }
+
+    @Override
+    public byte[] getCommand(final Scanner scanner) {
+        return packet.toCommandBuffer(scanner.isBleDevice());
     }
 
     @Override

@@ -13,7 +13,7 @@ import java.nio.charset.Charset;
 
 
 public class SsiParserTest {
-    private SsiParser parser = new SsiParser(false);
+    private SsiParser parser = new SsiParser();
 
     @Test
     public void multiPacketTest() {

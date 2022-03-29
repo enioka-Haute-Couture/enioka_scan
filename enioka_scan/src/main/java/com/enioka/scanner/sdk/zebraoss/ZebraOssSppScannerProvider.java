@@ -15,7 +15,7 @@ public class ZebraOssSppScannerProvider implements BtSppScannerProvider {
         if (device.isBleDevice())
             callback.cannotManage();
 
-        device.runCommand(new CapabilitiesRequest(false), new DataSubscriptionCallback<CapabilitiesReply>() {
+        device.runCommand(new CapabilitiesRequest(), new DataSubscriptionCallback<CapabilitiesReply>() {
             @Override
             public void onSuccess(CapabilitiesReply data) {
                 callback.canManage(new ZebraOssScanner(device));

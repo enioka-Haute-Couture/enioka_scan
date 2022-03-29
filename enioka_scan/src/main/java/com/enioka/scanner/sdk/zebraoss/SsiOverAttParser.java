@@ -11,7 +11,7 @@ import java.nio.ByteOrder;
  * Wraps the handling of SSI packets contained in (possibly multiple) ATT packets.
  */
 public class SsiOverAttParser implements ScannerDataParser {
-    private static final SsiParser ssiParser = new SsiParser(true);
+    private static final SsiParser ssiParser = new SsiParser();
 
     private byte[] ssiBuffer = new byte[0];
     private short packetLength = 0;

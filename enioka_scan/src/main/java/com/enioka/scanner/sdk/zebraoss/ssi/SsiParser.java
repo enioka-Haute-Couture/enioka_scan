@@ -13,13 +13,8 @@ import java.util.Arrays;
 
 public class SsiParser implements ScannerDataParser {
     private static final String LOG_TAG = "SsiParser";
-    private final boolean isBle;
 
     private SsiMultiPacket multiPacketBuffer = null;
-
-    public SsiParser(boolean isBle) {
-        this.isBle = isBle;
-    }
 
     @Override
     public ParsingResult parse(byte[] buffer, int offset, int dataLength) {
@@ -35,9 +30,9 @@ public class SsiParser implements ScannerDataParser {
                 res.expectingMoreData = false;
                 res.data = multiPacketBuffer.toBarcode();
                 multiPacketBuffer = null;
-                res.acknowledger = new Ack(isBle);
+                res.acknowledger = new Ack();
             } else {
-                res.acknowledger = new MultipacketAck(isBle); // FIXME: not quite understood how ACKs work yet or when to send these, scanner seems to work fine eiter way
+                res.acknowledger = new MultipacketAck(); // FIXME: not quite understood how ACKs work yet or when to send these, scanner seems to work fine eiter way
             }
 
             return res;
@@ -54,7 +49,7 @@ public class SsiParser implements ScannerDataParser {
                     buffer[offset + dataLength - 1]);
         } catch (final IllegalStateException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
-            res.acknowledger =  new Nack(MessageRejectionReason.CHECKSUM_FAILURE, isBle);
+            res.acknowledger =  new Nack(MessageRejectionReason.CHECKSUM_FAILURE);
             return res;
         }
 
@@ -64,7 +59,7 @@ public class SsiParser implements ScannerDataParser {
             return new ParsingResult(MessageRejectionReason.INVALID_OPERATION);
         }
         if (meta.needsAck())
-            res.acknowledger = new Ack(isBle);
+            res.acknowledger = new Ack();
 
         if (meta.getSource() == SsiSource.HOST)
             throw new IllegalStateException("Should not receive host-sent messages");

@@ -11,8 +11,8 @@ public class SsiChecksumTest {
 
     @Test
     public void testHostCmdAckChecksum() {
-        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.CMD_ACK.getOpCode(), (byte) 0x00, new byte[0], false);
-        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer();
+        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.CMD_ACK.getOpCode(), (byte) 0x00, new byte[0]);
+        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer(false);
 
         Assert.assertEquals(6, ssiPacketBuffer.length);
         Assert.assertEquals(4, ssiPacketBuffer[0]);
@@ -22,8 +22,8 @@ public class SsiChecksumTest {
 
     @Test
     public void testHostStartSessionChecksum() {
-        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.START_SESSION.getOpCode(), (byte) 0x00, new byte[0], false);
-        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer();
+        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.START_SESSION.getOpCode(), (byte) 0x00, new byte[0]);
+        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer(false);
 
         Assert.assertEquals(6, ssiPacketBuffer.length);
         Assert.assertEquals(4, ssiPacketBuffer[0]);
@@ -33,8 +33,8 @@ public class SsiChecksumTest {
 
     @Test
     public void testHostScanEnableChecksum() {
-        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.SCAN_ENABLE.getOpCode(), (byte) 0x08, new byte[0], false);
-        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer();
+        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.SCAN_ENABLE.getOpCode(), (byte) 0x08, new byte[0]);
+        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer(false);
 
         Assert.assertEquals(6, ssiPacketBuffer.length);
         Assert.assertEquals(4, ssiPacketBuffer[0]);
@@ -44,8 +44,8 @@ public class SsiChecksumTest {
 
     @Test
     public void testDecoderCmdAckChecksum() {
-        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.CMD_ACK.getOpCode(), (byte) 0x80, new byte[0], false);
-        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer();
+        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.CMD_ACK.getOpCode(), (byte) 0x80, new byte[0]);
+        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer(false);
 
         Assert.assertEquals(6, ssiPacketBuffer.length);
         Assert.assertEquals(4, ssiPacketBuffer[0]);
@@ -55,8 +55,8 @@ public class SsiChecksumTest {
 
     @Test
     public void testDecoderEvent20Checksum() {
-        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.EVENT.getOpCode(), (byte) 0x00, new byte[] {0x20}, false);
-        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer();
+        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.EVENT.getOpCode(), (byte) 0x00, new byte[] {0x20});
+        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer(false);
 
         Assert.assertEquals(7, ssiPacketBuffer.length);
         Assert.assertEquals(5, ssiPacketBuffer[0]);
@@ -66,8 +66,8 @@ public class SsiChecksumTest {
 
     @Test
     public void testDecoderEvent21Checksum() {
-        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.EVENT.getOpCode(), (byte) 0x00, new byte[] {0x21}, false);
-        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer();
+        final SsiMonoPacket ssiPacket = new SsiMonoPacket(SsiCommand.EVENT.getOpCode(), (byte) 0x00, new byte[] {0x21});
+        final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer(false);
 
         Assert.assertEquals(7, ssiPacketBuffer.length);
         Assert.assertEquals(5, ssiPacketBuffer[0]);

@@ -50,9 +50,8 @@ public class HHTScanner extends IntentScanner<String> {
     @Override
     protected void configureProvider() {
         broadcastIntentFilters.add("DATA_SCAN");
-        // FIXME: Too many params (stop/start scanning is unrelated to pause/resume), and trigger activation/deactivation seems to have no effect after testing.
-        disableTrigger = null;//newIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.DISABLE_TRIGGERBUTTON, DataWedge.STOP_SCANNING}); // Does not appear to disable the trigger
-        enableTrigger = null;//newIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.ENABLE_TRIGGERBUTTON, DataWedge.START_SCANNING}); // Does not appear to enable the trigger
+        disableTrigger = newIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_PLUGIN);
+        enableTrigger = newIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.ENABLE_PLUGIN);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

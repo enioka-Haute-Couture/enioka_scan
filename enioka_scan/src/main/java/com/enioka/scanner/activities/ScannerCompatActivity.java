@@ -19,7 +19,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -339,12 +338,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
             return;
         }
 
-        cameraScanner = new CameraBarcodeScanViewScanner(cameraView, new Scanner.ScannerDataCallback() {
-            @Override
-            public void onData(Scanner s, List<Barcode> data) {
-                ScannerCompatActivity.this.onData(data);
-            }
-        });
+        cameraScanner = new CameraBarcodeScanViewScanner(cameraView, (s, data) -> ScannerCompatActivity.this.onData(data));
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
@@ -466,20 +460,14 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         toggleTorch();
 
         if (cameraScanner != null) {
-            flashlight.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    cameraScanner.toggleIllumination();
-                    toggleTorch();
-                }
+            flashlight.setOnClickListener(v -> {
+                cameraScanner.toggleIllumination();
+                toggleTorch();
             });
         } else {
-            flashlight.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    scannerService.toggleIllumination();
-                    toggleTorch();
-                }
+            flashlight.setOnClickListener(v -> {
+                scannerService.toggleIllumination();
+                toggleTorch();
             });
         }
     }
@@ -513,31 +501,28 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
             return;
         }
 
-        bt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Pause camera or laser scanner during manual input.
-                scannerService.pause();
+        bt.setOnClickListener(view -> {
+            // Pause camera or laser scanner during manual input.
+            scannerService.pause();
 
-                manualInputFragment = ManualInputFragment.newInstance();
-                manualInputFragment.setAutocompletionItems(autocompletionItems, threshold);
-                manualInputFragment.setDialogInterface(new DialogInterface() {
-                    @Override
-                    public void cancel() {
-                        if (serviceBound) {
-                            scannerService.resume();
-                        }
+            manualInputFragment = ManualInputFragment.newInstance();
+            manualInputFragment.setAutocompletionItems(autocompletionItems, threshold);
+            manualInputFragment.setDialogInterface(new DialogInterface() {
+                @Override
+                public void cancel() {
+                    if (serviceBound) {
+                        scannerService.resume();
                     }
+                }
 
-                    @Override
-                    public void dismiss() {
-                        if (serviceBound) {
-                            scannerService.resume();
-                        }
+                @Override
+                public void dismiss() {
+                    if (serviceBound) {
+                        scannerService.resume();
                     }
-                });
-                manualInputFragment.show(getSupportFragmentManager(), "manual");
-            }
+                }
+            });
+            manualInputFragment.show(getSupportFragmentManager(), "manual");
         });
     }
 
@@ -546,12 +531,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
      */
     protected void resetCameraButton() {
         if (findViewById(R.id.scanner_bt_camera) != null) {
-            findViewById(R.id.scanner_bt_camera).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    initCamera();
-                }
-            });
+            findViewById(R.id.scanner_bt_camera).setOnClickListener(view -> initCamera());
         }
     }
 
@@ -561,13 +541,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
             return;
         }
 
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.i(LOG_TAG, "Changing reader mode");
-                CameraBarcodeScanView cameraView = findViewById(cameraViewId);
-                cameraView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
-            }
+        toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.i(LOG_TAG, "Changing reader mode");
+            CameraBarcodeScanView cameraView = findViewById(cameraViewId);
+            cameraView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
         });
     }
 
@@ -575,50 +552,32 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
 
     private void displayToggleLedButton() {
         if (findViewById(R.id.scanner_red_led) != null) {
-            findViewById(R.id.scanner_red_led).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (!ledToggle) {
-                        ScannerCompatActivity.this.scannerService.ledColorOn(Color.RED);
-                    } else {
-                        ScannerCompatActivity.this.scannerService.ledColorOff(Color.RED);
-                    }
-                    ledToggle = !ledToggle;
+            findViewById(R.id.scanner_red_led).setOnClickListener(view -> {
+                if (!ledToggle) {
+                    ScannerCompatActivity.this.scannerService.ledColorOn(Color.RED);
+                } else {
+                    ScannerCompatActivity.this.scannerService.ledColorOff(Color.RED);
                 }
+                ledToggle = !ledToggle;
             });
         }
     }
 
     private void displayDisableScanButton() {
         if (findViewById(R.id.scanner_trigger_off) != null) {
-            findViewById(R.id.scanner_trigger_off).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ScannerCompatActivity.this.scannerService.pause();
-                }
-            });
+            findViewById(R.id.scanner_trigger_off).setOnClickListener(view -> ScannerCompatActivity.this.scannerService.releaseScanTrigger()); // was pause()
         }
     }
 
     private void displayEnableScanButton() {
         if (findViewById(R.id.scanner_trigger_on) != null) {
-            findViewById(R.id.scanner_trigger_on).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ScannerCompatActivity.this.scannerService.resume();
-                }
-            });
+            findViewById(R.id.scanner_trigger_on).setOnClickListener(view -> ScannerCompatActivity.this.scannerService.pressScanTrigger()); // was resume()
         }
     }
 
     private void displayBellButton() {
         if (findViewById(R.id.scanner_bell) != null) {
-            findViewById(R.id.scanner_bell).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ScannerCompatActivity.this.scannerService.beep();
-                }
-            });
+            findViewById(R.id.scanner_bell).setOnClickListener(view -> ScannerCompatActivity.this.scannerService.beep());
         }
     }
 }

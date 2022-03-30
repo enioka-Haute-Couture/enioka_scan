@@ -4,6 +4,7 @@ import android.app.Activity;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.sdk.athesi.DataWedge;
 
 import java.util.HashMap;
 import java.util.List;
@@ -79,6 +80,21 @@ public interface ScannerServiceApi {
      * @param client a set of callbacks
      */
     void unregisterClient(BackgroundScannerClient client);
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // SOFTWARE TRIGGERS
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Simulates a press on a hardware-trigger, firing the beam that will read barcodes.
+     */
+    void pressScanTrigger();
+
+    /**
+     * Ends the effect of {@link #pressScanTrigger()}.
+     */
+    void releaseScanTrigger();
 
 
     ////////////////////////////////////////////////////////////////////////////

@@ -50,8 +50,22 @@ public class HHTScanner extends IntentScanner<String> {
     @Override
     protected void configureProvider() {
         broadcastIntentFilters.add("DATA_SCAN");
-        disableTrigger = newIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.DISABLE_TRIGGERBUTTON, DataWedge.STOP_SCANNING});
-        enableTrigger = newIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETERS, new String[]{DataWedge.ENABLE_TRIGGERBUTTON, DataWedge.START_SCANNING});
+        disableTrigger = newIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_PLUGIN);
+        enableTrigger = newIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.ENABLE_PLUGIN);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // SOFTWARE TRIGGERS
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void pressScanTrigger() {
+        broadcastIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETER, DataWedge.START_SCANNING);
+    }
+
+    @Override
+    public void releaseScanTrigger() {
+        broadcastIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETER, DataWedge.STOP_SCANNING);
     }
 
 

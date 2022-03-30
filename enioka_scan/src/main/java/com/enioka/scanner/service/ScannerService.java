@@ -297,6 +297,10 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         this.clients.add(client);
     }
 
+    public void unregisterClient(BackgroundScannerClient client) {
+        this.clients.remove(client);
+    }
+
     public boolean anyScannerSupportsIllumination() {
         for (Scanner s : this.scanners) {
             if (s.supportsIllumination()) {

@@ -20,4 +20,10 @@ public class Log {
         System.out.println("ERROR: " + tag + ": " + msg);
         return 0;
     }
+
+    public static int e(String tag, String msg, Throwable e) {
+        System.out.println("ERROR: " + tag + ": " + msg);
+        e.printStackTrace();
+        return 0;
+    }
 }

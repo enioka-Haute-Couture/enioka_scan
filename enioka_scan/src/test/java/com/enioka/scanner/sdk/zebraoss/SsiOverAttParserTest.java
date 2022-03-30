@@ -16,6 +16,9 @@ public class SsiOverAttParserTest {
 
         final SsiMonoPacketWrapper ssiPacket = new SsiMonoPacketWrapper(SsiCommand.CMD_ACK.getOpCode(), (byte) 0x80, new byte[0]);
         final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer(true);
+        // Adapting to incoming rather than outgoing
+        ssiPacketBuffer[4] -= 0x04;
+        ssiPacketBuffer[7] += 0x04;
 
         ParsingResult res = parser.parse(ssiPacketBuffer, 0, ssiPacketBuffer.length);
         Assert.assertFalse("Should not expect more data", res.expectingMoreData);
@@ -29,6 +32,9 @@ public class SsiOverAttParserTest {
 
         final SsiMonoPacketWrapper ssiPacket = new SsiMonoPacketWrapper(SsiCommand.CMD_ACK.getOpCode(), (byte) 0x80, new byte[0]);
         final byte[] ssiPacketBuffer = ssiPacket.toCommandBuffer(true);
+        // Adapting to incoming rather than outgoing
+        ssiPacketBuffer[4] -= 0x04;
+        ssiPacketBuffer[7] += 0x04;
 
         ParsingResult res = parser.parse(ssiPacketBuffer, 0, ssiPacketBuffer.length - 3);
         Assert.assertTrue("Should expect more data", res.expectingMoreData);

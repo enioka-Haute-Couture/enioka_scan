@@ -1,7 +1,5 @@
 package com.enioka.scanner.sdk.zebraoss.ssi;
 
-import android.util.Log;
-
 /**
  * SSI packet, containing the header and checksum bytes. Suitable for both incoming and outgoing packets.
  * Multi-packets are (so far) read-only and in a separate class as they require extra header elements.
@@ -47,7 +45,7 @@ public abstract class SsiMonoPacket {
         this.checksumMsb = checksumMsb;
         this.checksumLsb = checksumLsb;
 
-        this.validateLengthAndChecksum(); // FIXME - 2022/03/28: inbound packets are constantly rejected due to checksum. For now, assume they are all correct.
+        this.validateLengthAndChecksum();
     }
 
     /**
@@ -79,22 +77,20 @@ public abstract class SsiMonoPacket {
      */
     protected void validateLengthAndChecksum() {
         if (packetLengthWithoutChecksum != (byte) (data.length + 4)) {
-            Log.e(LOG_TAG, "Invalid packet length, announced " + String.format("%02x ", packetLengthWithoutChecksum) + " but was " + String.format("%02x ", data.length + 4));
-            //throw new IllegalStateException("Invalid packet length, announced " + (byte) packetLengthWithoutChecksum + " but was " + (byte) (data.length + 4));
+            throw new IllegalStateException("Invalid packet length, announced " + String.format("%02x", packetLengthWithoutChecksum) + " but was " + String.format("%02x", data.length + 4));
         }
 
         short checksum = this.calculateChecksum();
-        if ((this.checksumMsb & 0xFF) != (byte) ((checksum >> 8) & 0xFF) || (this.checksumLsb & 0xFF) != (byte) (checksum & 0xFF)) {
-            Log.e(LOG_TAG, "Invalid checksum, expected " + String.format("%02x ", ((checksum >> 8) & 0xFF)) + String.format("%02x ", checksum & 0xFF) + " but was " + String.format("%02x ", checksumMsb & 0xFF) + String.format("%02x ", checksumLsb & 0xFF));
-            //throw new IllegalStateException("Invalid checksum, expected " + (byte) ((checksum >> 8) & 0xFF) + (byte) (checksum & 0xFF) + " but was " + (checksumMsb & 0xFF) + (checksumLsb & 0xFF));
+        if ((this.checksumMsb & 0xFF) != ((checksum >> 8) & 0xFF)) {
+            throw new IllegalStateException("Invalid checksum MSB, expected " + String.format("%02x", ((checksum >> 8) & 0xFF)) + " but was " + String.format("%02x", checksumMsb & 0xFF));
+        }
+        if ((this.checksumLsb & 0xFF) != (checksum & 0xFF)) {
+            throw new IllegalStateException("Invalid checksum LSB, expected " + String.format("%02x", checksum & 0xFF) + " but was " + String.format("%02x", checksumLsb & 0xFF));
         }
     }
 
     /**
      * Calculates the packet's checksum.
-     * FIXME - 2022/03/28: This method produces checksums that match what could be observed in testing but for some reason does not seem to match the scanner anymore.
-     *                     Outgoing ACKs get rejected/ignored, and inbound packets do not seem to match those checksums.
-     *                     It does not affect the ability to scan, but it may affect the ability to send commands to the scanner, more testing is required.
      */
     protected short calculateChecksum() {
         // Rule is: add all bytes (except checksum itself) and substract the result from 0x10000

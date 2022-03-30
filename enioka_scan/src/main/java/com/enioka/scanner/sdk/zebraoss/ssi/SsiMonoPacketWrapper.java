@@ -17,7 +17,7 @@ public class SsiMonoPacketWrapper extends SsiMonoPacket {
      * Generates the raw packet bytearray.
      */
     public byte[] toCommandBuffer(final boolean ble) {
-        validateLengthAndChecksum(); // FIXME - 2022/03/28: Checksum problems may cause this to fail for inbound packets. Constructors both call update/validation and values cannot be changed outside so let's assume they are correct for now.
+        validateLengthAndChecksum();
 
         final int totalLength = (ble ? 2 : 0) + 4 + data.length + 2; // bleLength + header + data + checksum
         final int offset = (ble ? 2 : 0);

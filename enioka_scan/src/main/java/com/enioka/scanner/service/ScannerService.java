@@ -298,14 +298,16 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         this.clients.add(client);
     }
 
-    @Override
+    public void unregisterClient(BackgroundScannerClient client) {
+        this.clients.remove(client);
+    }
+
     public void pressScanTrigger() {
         for (Scanner s : this.scanners) {
             s.pressScanTrigger();
         }
     }
 
-    @Override
     public void releaseScanTrigger() {
         for (Scanner s : this.scanners) {
             s.releaseScanTrigger();

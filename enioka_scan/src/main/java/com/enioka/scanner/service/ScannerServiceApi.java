@@ -74,6 +74,13 @@ public interface ScannerServiceApi {
      */
     void registerClient(BackgroundScannerClient client);
 
+    /**
+     * Un-hooks all callbacks to the given client.
+     *
+     * @param client a set of callbacks
+     */
+    void unregisterClient(BackgroundScannerClient client);
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // SOFTWARE TRIGGERS

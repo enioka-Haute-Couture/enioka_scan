@@ -2,18 +2,18 @@ package com.enioka.scanner.sdk.zebraoss.commands;
 
 import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.Scanner;
-import com.enioka.scanner.sdk.zebraoss.ssi.SsiMonoPacket;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiMonoPacketWrapper;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiStatus;
 
 public abstract class CommandExpectingNothing implements Command<Void> {
-    private final SsiMonoPacket packet;
+    private final SsiMonoPacketWrapper packet;
 
     public CommandExpectingNothing(byte opCode, byte[] data) {
-        packet = new SsiMonoPacket(opCode, SsiStatus.DEFAULT.getByte(), data);
+        packet = new SsiMonoPacketWrapper(opCode, SsiStatus.DEFAULT.getByte(), data);
     }
 
     public CommandExpectingNothing(byte opCode) {
-        packet = new SsiMonoPacket(opCode, SsiStatus.DEFAULT.getByte(), new byte[0]);
+        packet = new SsiMonoPacketWrapper(opCode, SsiStatus.DEFAULT.getByte(), new byte[0]);
     }
 
     @Override

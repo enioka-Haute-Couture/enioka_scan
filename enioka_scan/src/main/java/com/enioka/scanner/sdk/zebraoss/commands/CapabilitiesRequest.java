@@ -4,14 +4,14 @@ import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
-import com.enioka.scanner.sdk.zebraoss.ssi.SsiMonoPacket;
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiMonoPacketWrapper;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiStatus;
 
 public class CapabilitiesRequest implements Command<CapabilitiesReply> {
-    private final SsiMonoPacket packet;
+    private final SsiMonoPacketWrapper packet;
 
     public CapabilitiesRequest() {
-        packet = new SsiMonoPacket(SsiCommand.CAPABILITIES_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[0]);
+        packet = new SsiMonoPacketWrapper(SsiCommand.CAPABILITIES_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[0]);
     }
 
     @Override

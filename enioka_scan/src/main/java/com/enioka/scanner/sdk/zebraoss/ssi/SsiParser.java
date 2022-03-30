@@ -39,9 +39,9 @@ public class SsiParser implements ScannerDataParser {
         }
 
         // Monopacket
-        SsiMonoPacket ssiPacket;
+        SsiMonoPacketWrapper ssiPacket;
         try {
-            ssiPacket = new SsiMonoPacket(buffer[offset],
+            ssiPacket = new SsiMonoPacketWrapper(buffer[offset],
                     buffer[offset + 1],
                     buffer[offset + 3],
                     Arrays.copyOfRange(buffer, offset + 4, offset + dataLength - 2),

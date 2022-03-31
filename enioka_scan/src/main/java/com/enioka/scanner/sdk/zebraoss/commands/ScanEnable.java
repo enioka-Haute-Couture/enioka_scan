@@ -1,11 +1,9 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
-/**
- * A message or segment acknowledgment.
- */
-public class ScanEnable extends CommandExpectingAck {
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 
+public class ScanEnable extends CommandExpectingAck {
     public ScanEnable() {
-        super((byte) 0xE9);
+        super(SsiCommand.SCAN_ENABLE.getOpCode());
     }
 }

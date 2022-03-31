@@ -1,18 +1,12 @@
 package com.enioka.scanner.sdk.zebraoss.data;
 
-import com.enioka.scanner.sdk.zebraoss.SsiMessage;
-
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
 
 public class ReplyRevision {
     public String softwareRevision, boardType, engineCode;
 
     public ReplyRevision(byte[] buffer) {
-        String temp = new String(buffer, Charset.forName("ASCII"));
+        String temp = new String(buffer, StandardCharsets.US_ASCII);
         temp = temp.replaceAll(" {2,10}", " ");
         if (!temp.isEmpty()) {
             String[] segments = temp.split(" ");

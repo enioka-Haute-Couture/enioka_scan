@@ -1,6 +1,5 @@
 package com.enioka.scanner.sdk.zebraoss.parsers;
 
-import com.enioka.scanner.sdk.zebraoss.SsiMultiPacketMessage;
 import com.enioka.scanner.sdk.zebraoss.data.ScannerInit;
 
 /**
@@ -8,7 +7,7 @@ import com.enioka.scanner.sdk.zebraoss.data.ScannerInit;
  */
 public class ScannerInitParser implements PayloadParser<ScannerInit> {
     @Override
-    public ScannerInit parseData(SsiMultiPacketMessage message) {
+    public ScannerInit parseData(final byte[] dataBuffer) {
         return new ScannerInit();
     }
 }

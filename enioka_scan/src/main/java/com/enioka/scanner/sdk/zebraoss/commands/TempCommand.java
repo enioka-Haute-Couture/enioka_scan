@@ -1,11 +1,9 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
-/**
- * A message or segment acknowledgment.
- */
-public class TempCommand extends CommandExpectingNothing {
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 
+public class TempCommand extends CommandExpectingNothing {
     public TempCommand() {
-        super((byte) 0x93, new byte[]{});
+        super(SsiCommand.TEMP_COMMAND.getOpCode());
     }
 }

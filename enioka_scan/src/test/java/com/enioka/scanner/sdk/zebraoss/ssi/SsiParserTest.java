@@ -1,8 +1,9 @@
-package com.enioka.scanner.sdk.zebraoss;
+package com.enioka.scanner.sdk.zebraoss.ssi;
 
 import com.enioka.scanner.bt.api.ParsingResult;
+import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.sdk.zebraoss.data.ParamSend;
-import com.enioka.scanner.sdk.zebraoss.data.RsmAttribute;
 import com.enioka.scanner.sdk.zebraoss.data.RsmAttributeReply;
 
 import org.junit.Assert;
@@ -11,8 +12,48 @@ import org.junit.Test;
 import java.nio.charset.Charset;
 
 
-public class TestSsi {
+public class SsiParserTest {
     private SsiParser parser = new SsiParser();
+
+    @Test
+    public void multiPacketTest() {
+        final StringBuffer barcodeData = new StringBuffer();
+        for (int i = 0; i < 500; i++)
+            barcodeData.append('Z');
+
+        final byte[] packet1of3 = new byte[257];
+        System.arraycopy(new byte[]{(byte)0xFF, 0x73, 0x02, 0x00, 0x00, (byte)0xF3, 0x00, 0x00, 0x01, (byte)0xF7, 0x1C, 0x01, 0x01, (byte)0xF4}, 0, packet1of3, 0, 14);
+        for (int i = 14; i < 255; i++)
+            packet1of3[i] = 0x5A;
+        packet1of3[255] = (byte)0xA6;
+        packet1of3[256] = (byte)0xD5;
+
+        final byte[] packet2of3 = new byte[257];
+        System.arraycopy(new byte[]{(byte)0xFF, 0x73, 0x00, 0x00, 0x01}, 0, packet2of3, 0, 5);
+        for (int i = 5; i < 255; i++)
+            packet2of3[i] = 0x5A;
+        packet2of3[255] = (byte)0xA6;
+        packet2of3[256] = (byte)0xA9;
+
+        final byte[] packet3of3 = new byte[16];
+        System.arraycopy(new byte[]{(byte)0x0E, 0x73, 0x00, 0x00, 0x02}, 0, packet3of3, 0, 5);
+        for (int i = 5; i < 14; i++)
+            packet3of3[i] = 0x5A;
+        packet3of3[14] = (byte)0xFC;
+        packet3of3[15] = (byte)0x53;
+
+        ParsingResult res = parser.parse(packet1of3, 0, packet1of3.length);
+        Assert.assertTrue("Expecting more data after first packet", res.expectingMoreData);
+
+        res = parser.parse(packet2of3, 0, packet2of3.length);
+        Assert.assertTrue("Expecting more data after second packet", res.expectingMoreData);
+
+        res = parser.parse(packet3of3, 0, packet3of3.length);
+        Assert.assertFalse("Not expecting more data after third packet", res.expectingMoreData);
+        Assert.assertTrue("Expecting result data to be a barcode", res.data instanceof Barcode);
+        Assert.assertEquals(BarcodeType.UNKNOWN, ((Barcode) res.data).getBarcodeType());
+        Assert.assertEquals(barcodeData.toString(), ((Barcode) res.data).getBarcode());
+    }
 
     @Test
     public void paramResultTest() {

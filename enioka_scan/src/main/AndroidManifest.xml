@@ -36,6 +36,17 @@
         </service>
 
         <service
+            android:name=".sdk.zebraoss.ZebraOssAttScannerProvider"
+            android:description="@string/service_description"
+            android:exported="false"
+            tools:ignore="Instantiatable">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
+            </intent-filter>
+        </service>
+
+        <service
             android:name=".sdk.honeywelloss.HoneywellOssSppScannerProvider"
             android:description="@string/service_description"
             android:exported="false"

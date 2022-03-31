@@ -7,12 +7,12 @@ import com.enioka.scanner.bt.api.ScannerDataParser;
 import com.enioka.scanner.sdk.zebraoss.commands.CapabilitiesRequest;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 
-public class ZebraOssSppScannerProvider implements BtSppScannerProvider {
-    private final ScannerDataParser inputHandler = new SsiOverSppParser();
+public class ZebraOssAttScannerProvider implements BtSppScannerProvider {
+    private final ScannerDataParser inputHandler = new SsiOverAttParser();
 
     @Override
     public void canManageDevice(final Scanner device, final ManagementCallback callback) {
-        if (device.isBleDevice())
+        if (!device.isBleDevice())
             callback.cannotManage();
 
         device.runCommand(new CapabilitiesRequest(), new DataSubscriptionCallback<CapabilitiesReply>() {

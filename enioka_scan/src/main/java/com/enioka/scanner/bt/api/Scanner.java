@@ -33,4 +33,9 @@ public interface Scanner {
      * @param statusCallback
      */
     void registerStatusCallback(ScannerStatusCallback statusCallback);
+
+    /**
+     * @return true if the device uses BLE, false if the device uses classic bluetooth
+     */
+    boolean isBleDevice();
 }

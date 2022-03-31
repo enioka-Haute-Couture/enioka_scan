@@ -246,7 +246,7 @@ class ZebraOssScanner implements ScannerBackground {
     }
 
     private void startStatusCacheRefresh(final DataSubscriptionCallback<String> finalCallback) {
-        this.btScanner.runCommand(new RequestParam(), new DataSubscriptionCallback<com.enioka.scanner.sdk.zebraoss.data.ParamSend>() {
+        this.btScanner.runCommand(new RequestParam(), new DataSubscriptionCallback<ParamSend>() {
             @Override
             public void onFailure() {
                 Log.e(LOG_TAG, "failed to get scanner parameters");
@@ -258,7 +258,7 @@ class ZebraOssScanner implements ScannerBackground {
             }
 
             @Override
-            public void onSuccess(com.enioka.scanner.sdk.zebraoss.data.ParamSend data) {
+            public void onSuccess(ParamSend data) {
                 for (ParamSend.Param prm : data.parameters) {
                     ZebraOssScanner.this.statusCache.put("ZEBRA_SSI_PRM_" + prm.number, prm.getStringValue());
                 }

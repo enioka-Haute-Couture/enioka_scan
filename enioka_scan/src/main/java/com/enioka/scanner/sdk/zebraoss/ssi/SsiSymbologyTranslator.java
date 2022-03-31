@@ -1,11 +1,11 @@
-package com.enioka.scanner.sdk.zebraoss;
+package com.enioka.scanner.sdk.zebraoss.ssi;
 
 import com.enioka.scanner.data.BarcodeType;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ZebraOssDataTranslator {
+public final class SsiSymbologyTranslator {
     private final static Map<Byte, BarcodeType> sdk2Api = new HashMap<>();
 
     static {

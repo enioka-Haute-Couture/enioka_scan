@@ -14,7 +14,7 @@ import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.sdk.zebraoss.SsiParser;
+import com.enioka.scanner.sdk.zebraoss.SsiOverSppParser;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -70,7 +70,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         this.rawDevice = device;
         this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
-        this.inputHandler = new SsiParser();
+        this.inputHandler = new SsiOverSppParser();
         this.setUpTimeoutTimer();
     }
 
@@ -84,7 +84,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         this.rawDevice = socket.getRemoteDevice();
         this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
-        this.inputHandler = new SsiParser();
+        this.inputHandler = new SsiOverSppParser();
         this.masterBtDevice = true;
 
         this.clientSocket = socket;
@@ -306,7 +306,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
 
     @Override
     public <T> void runCommand(Command<T> command, DataSubscriptionCallback<T> subscription) {
-        byte[] cmd = command.getCommand();
+        byte[] cmd = command.getCommand(this);
 
         if (subscription != null) {
             synchronized (dataSubscriptions) {
@@ -336,10 +336,15 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         this.statusCallback = statusCallback;
     }
 
+    @Override
+    public boolean isBleDevice() {
+        return false;
+    }
+
     void handleInputBuffer(byte[] buffer, int offset, int length) {
         int read = offset;
         while (read < length) {
-            read = handleInputBufferLoop(buffer, read, length) + 1;
+            read += handleInputBufferLoop(buffer, read, length);
             if (read < length) {
                 Log.d(LOG_TAG, "The buffer contains multiple tokens - a loop will happen starting at position " + read + " until " + length);
             }
@@ -353,7 +358,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             Log.w(LOG_TAG, "The buffer is abandoned as the parser did not read any byte on the latest loop");
             this.outputStreamWriter.endOfCommand();
             if (res.acknowledger != null) {
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }
             return length;
         }
@@ -364,7 +369,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             // ACK first - the event handlers may write to stream and create out of order ACKs.
             if (res.acknowledger != null) {
                 this.outputStreamWriter.endOfCommand();
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }
 
             // Subscriptions to fulfill on that data type?
@@ -386,19 +391,19 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         } else if (!res.expectingMoreData && !res.rejected) {
             Log.d(LOG_TAG, "Message was interpreted as: message without additional data");
             if (res.acknowledger != null) {
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }
             this.outputStreamWriter.endOfCommand();
         } else if (!res.expectingMoreData && res.rejected) {
             Log.d(LOG_TAG, "Message was rejected " + res.result);
             if (res.acknowledger != null) {
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }
             this.outputStreamWriter.endOfCommand();
         } else {
             Log.d(LOG_TAG, "Data was not interpreted yet as we are expecting more data");
             if (res.acknowledger != null) {
-                this.outputStreamWriter.write(res.acknowledger.getCommand(), true);
+                this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }
         }
 

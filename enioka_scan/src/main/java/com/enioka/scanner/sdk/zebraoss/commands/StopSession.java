@@ -1,11 +1,12 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
+import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
+
 /**
  * Equivalent to releasing the trigger.
  */
 public class StopSession extends CommandExpectingAck {
-
     public StopSession() {
-        super((byte) 0xE5);
+        super(SsiCommand.STOP_SESSION.getOpCode());
     }
 }

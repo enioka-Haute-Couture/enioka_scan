@@ -1,7 +1,5 @@
 package com.enioka.scanner.sdk.zebraoss.parsers;
 
-import com.enioka.scanner.sdk.zebraoss.SsiMultiPacketMessage;
-
 /**
  * Parser specific to a kind of message (opcode).
  *
@@ -10,8 +8,8 @@ import com.enioka.scanner.sdk.zebraoss.SsiMultiPacketMessage;
 public interface PayloadParser<T> {
 
     /**
-     * @param message message to parse. May be multi-packet.
+     * @param dataBuffer data content of the message to parse, headers and checksum excluded.
      * @return null means no meaningful data found.
      */
-    T parseData(SsiMultiPacketMessage message);
+    T parseData(final byte[] dataBuffer);
 }

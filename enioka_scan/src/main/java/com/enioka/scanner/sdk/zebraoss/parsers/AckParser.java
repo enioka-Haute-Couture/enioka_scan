@@ -1,6 +1,5 @@
 package com.enioka.scanner.sdk.zebraoss.parsers;
 
-import com.enioka.scanner.sdk.zebraoss.SsiMultiPacketMessage;
 import com.enioka.scanner.sdk.zebraoss.data.Ack;
 
 /**
@@ -8,7 +7,7 @@ import com.enioka.scanner.sdk.zebraoss.data.Ack;
  */
 public class AckParser implements PayloadParser<Ack> {
     @Override
-    public Ack parseData(SsiMultiPacketMessage message) {
+    public Ack parseData(final byte[] dataBuffer) {
         return new Ack();
     }
 }

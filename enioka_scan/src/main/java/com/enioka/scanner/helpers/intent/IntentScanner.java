@@ -9,7 +9,10 @@ import android.util.Log;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.BarcodeType;
 
@@ -49,17 +52,17 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     // LIFE CYCLE
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    protected Scanner.ScannerDataCallback dataCb = null;
-    protected ScannerStatusCallback statusCb = null;
+    protected ScannerDataCallbackProxy dataCb = null;
+    protected ScannerStatusCallbackProxy statusCb = null;
     protected Scanner.Mode mode;
 
 
     @Override
-    public void initialize(Context ctx, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
         this.dataCb = dataCallback;
         this.statusCb = statusCallback;
         this.mode = mode;
-        this.ctx = ctx;
+        this.ctx = applicationContext;
 
         // Let the child provider set all the configuration values if needed.
         configureProvider();
@@ -80,7 +83,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         }
     }
 
-    protected void registerReceivers(Context ctx, ScannerInitCallback initCallback, ScannerStatusCallback statusCallback) {
+    protected void registerReceivers(Context ctx, ScannerInitCallbackProxy initCallback, ScannerStatusCallbackProxy statusCallback) {
         IntentFilter intentFilter = new IntentFilter();
         for (String f : broadcastIntentFilters) {
             Log.i(getProviderKey(), "Registering an intent receiver with intent filter " + f);
@@ -103,7 +106,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCb = cb;
     }
 

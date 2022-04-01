@@ -1,11 +1,12 @@
 package com.enioka.scanner.sdk.postech;
 
 import android.content.Context;
-import android.os.Handler;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 class PostechSppScanner implements ScannerBackground {
-    private ScannerDataCallback dataCallback = null;
+    private ScannerDataCallbackProxy dataCallback = null;
     private final Scanner btScanner;
 
     PostechSppScanner(Scanner btScanner) {
@@ -39,10 +40,8 @@ class PostechSppScanner implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void initialize(final Context applicationContext, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
         this.dataCallback = dataCallback;
-
-        final Handler uiHandler = new Handler(applicationContext.getMainLooper());
 
         this.btScanner.registerStatusCallback(statusCallback);
 
@@ -51,12 +50,7 @@ class PostechSppScanner implements ScannerBackground {
             public void onSuccess(final Barcode data) {
                 final List<Barcode> res = new ArrayList<>(1);
                 res.add(data);
-                uiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        PostechSppScanner.this.dataCallback.onData(PostechSppScanner.this, res);
-                    }
-                });
+                PostechSppScanner.this.dataCallback.onData(PostechSppScanner.this, res);
 
             }
 
@@ -80,7 +74,7 @@ class PostechSppScanner implements ScannerBackground {
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCallback = cb;
     }
 

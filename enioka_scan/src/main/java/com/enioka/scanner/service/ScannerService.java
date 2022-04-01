@@ -14,12 +14,16 @@ import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerConnectionHandler;
+import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.api.ScannerSearchOptions;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerDataCallback;
+import com.enioka.scanner.api.callbacks.ScannerInitCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
-import com.enioka.scanner.sdk.athesi.DataWedge;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Note that the public API of this service is described in {@link ScannerServiceApi}, which the type obtained by binding to this service.
  * The other methods of this class should not be accessed by clients.
  */
-public class ScannerService extends Service implements ScannerConnectionHandler, Scanner.ScannerInitCallback, Scanner.ScannerDataCallback, ScannerStatusCallback, ScannerServiceApi {
+public class ScannerService extends Service implements ScannerConnectionHandler, ScannerInitCallback, ScannerDataCallback, ScannerStatusCallback, ScannerServiceApi {
 
     protected final static String LOG_TAG = "ScannerService";
 
@@ -169,7 +173,11 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
         if (s instanceof ScannerBackground) {
             initializingScannersCount.incrementAndGet();
-            ((ScannerBackground) s).initialize(this.getApplicationContext(), this, this, this, Scanner.Mode.BATCH);
+            ((ScannerBackground) s).initialize(this.getApplicationContext(),
+                    new ScannerInitCallbackProxy(this),
+                    new ScannerDataCallbackProxy(this),
+                    new ScannerStatusCallbackProxy(this),
+                    Scanner.Mode.BATCH);
         } else {
             Log.i(LOG_TAG, "This is a foreground scanner");
             // If foreground, only init it when we have an active activity.
@@ -181,14 +189,14 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void noScannerAvailable() {
-        onStatusChanged(null, Status.SERVICE_SDK_SEARCH_NOCOMPATIBLE); // FIXME - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
+        onStatusChanged(null, Status.SERVICE_SDK_SEARCH_NOCOMPATIBLE); // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
         checkInitializationEnd();
     }
 
     @Override
     public void endOfScannerSearch() {
         Log.i(LOG_TAG, scanners.size() + " scanners from the different SDKs have reported for duty. Waiting for the initialization of the " + (scanners.size() - foregroundScanners.size()) + " background scanners.");
-        onStatusChanged(null, Status.SERVICE_SDK_SEARCH_OVER); // FIXME - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
+        onStatusChanged(null, Status.SERVICE_SDK_SEARCH_OVER); // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
         checkInitializationEnd();
     }
 
@@ -263,31 +271,26 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
             if (backgroundScannersInitialized) {
                 Log.i(LOG_TAG, "Reinitializing all foreground scanners");
-                this.endOfInitCallbacks.add(new EndOfInitCallback() {
-                    @Override
-                    public void run() {
-                        client.onForegroundScannerInitEnded(foregroundScanners.size(), scanners.size() - foregroundScanners.size());
-                    }
-                });
+                this.endOfInitCallbacks.add(() -> client.onForegroundScannerInitEnded(foregroundScanners.size(), scanners.size() - foregroundScanners.size()));
                 for (ScannerForeground sf : foregroundScanners) {
                     ScannerService.this.initializingScannersCount.addAndGet(1);
-                    sf.initialize(activity, ScannerService.this, ScannerService.this, ScannerService.this, Scanner.Mode.SINGLE_SCAN);
+                    sf.initialize(activity,
+                            new ScannerInitCallbackProxy(ScannerService.this),
+                            new ScannerDataCallbackProxy(ScannerService.this),
+                            new ScannerStatusCallbackProxy(ScannerService.this),
+                            Scanner.Mode.SINGLE_SCAN);
                 }
             } else {
-                this.endOfInitCallbacks.add(new EndOfInitCallback() {
-                    @Override
-                    public void run() {
-                        Log.i(LOG_TAG, "Initializing all foreground scanners");
-                        ScannerService.this.endOfInitCallbacks.add(new EndOfInitCallback() {
-                            @Override
-                            public void run() {
-                                client.onForegroundScannerInitEnded(foregroundScanners.size(), scanners.size() - foregroundScanners.size());
-                            }
-                        });
-                        for (ScannerForeground sf : foregroundScanners) {
-                            ScannerService.this.initializingScannersCount.addAndGet(1);
-                            sf.initialize(activity, ScannerService.this, ScannerService.this, ScannerService.this, Scanner.Mode.SINGLE_SCAN);
-                        }
+                this.endOfInitCallbacks.add(() -> { // FIXME - 2022/04/01: why two layers of callbacks ?
+                    Log.i(LOG_TAG, "Initializing all foreground scanners");
+                    ScannerService.this.endOfInitCallbacks.add(() -> client.onForegroundScannerInitEnded(foregroundScanners.size(), scanners.size() - foregroundScanners.size()));
+                    for (ScannerForeground sf : foregroundScanners) {
+                        ScannerService.this.initializingScannersCount.addAndGet(1);
+                        sf.initialize(activity,
+                                new ScannerInitCallbackProxy(ScannerService.this),
+                                new ScannerDataCallbackProxy(ScannerService.this),
+                                new ScannerStatusCallbackProxy(ScannerService.this),
+                                Scanner.Mode.SINGLE_SCAN);
                     }
                 });
             }
@@ -413,7 +416,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Override
     public void onStatusChanged(final Scanner scanner, final ScannerStatusCallback.Status newStatus) {
         Log.d(LOG_TAG, "Status changed: " + newStatus.name() + " --- " + newStatus);
-        uiHandler.post(() -> {
+        uiHandler.post(() -> { // FIXME - 2022/04/01: Is this jump to UIthread always unwrapped ?
             for (BackgroundScannerClient client : ScannerService.this.clients) {
                 client.onStatusChanged(scanner, newStatus);
             }

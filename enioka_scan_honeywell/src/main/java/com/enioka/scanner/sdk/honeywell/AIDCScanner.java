@@ -1,6 +1,5 @@
 package com.enioka.scanner.sdk.honeywell;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -8,7 +7,10 @@ import android.util.Log;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.honeywell.aidc.AidcManager;
@@ -31,8 +33,8 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
 
     private Scanner selfScanner = this;
     AidcManager mgr;
-    ScannerDataCallback dataCb;
-    ScannerStatusCallback statusCb;
+    ScannerDataCallbackProxy dataCb;
+    ScannerStatusCallbackProxy statusCb;
     BarcodeReader reader;
 
     // Source is https://www.barcodesinc.com/news/?p=12768
@@ -52,9 +54,9 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
 
 
     @Override
-    public void initialize(Context applicationContext, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
-        this.dataCb = cb1;
-        this.statusCb = cb2;
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+        this.dataCb = dataCallback;
+        this.statusCb = statusCallback;
 
         this.reader = mgr.createBarcodeReader();
         this.reader.addBarcodeListener(this);
@@ -63,7 +65,7 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
             this.reader.setProperty(BarcodeReader.PROPERTY_TRIGGER_CONTROL_MODE,
                     BarcodeReader.TRIGGER_CONTROL_MODE_AUTO_CONTROL);
         } catch (UnsupportedPropertyException e) {
-            cb0.onConnectionFailure(this);
+            initCallback.onConnectionFailure(this);
         }
 
 
@@ -91,7 +93,7 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
             reader.claim();
         } catch (ScannerUnavailableException e) {
             Log.e(LOG_TAG, "Connection error to scanner", e);
-            cb0.onConnectionFailure(this);
+            initCallback.onConnectionFailure(this);
         }
 
         if (this.statusCb != null) {
@@ -99,11 +101,11 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
         }
         Log.i(LOG_TAG, "Scanner initialized");
 
-        cb0.onConnectionSuccessful(this);
+        initCallback.onConnectionSuccessful(this);
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCb = cb;
     }
 

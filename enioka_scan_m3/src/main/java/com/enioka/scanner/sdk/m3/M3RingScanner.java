@@ -2,13 +2,14 @@ package com.enioka.scanner.sdk.m3;
 
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.m3.ringscanner.ScannerIDCallback;
@@ -24,9 +25,9 @@ class M3RingScanner implements ScannerBackground {
     private static final String LOG_TAG = "M3RingScanner";
 
     private RingScannerService scanner;
-    private ScannerDataCallback dataCallback;
-    private ScannerStatusCallback statusCallback;
-    private ScannerInitCallback initCallback;
+    private ScannerDataCallbackProxy dataCallback;
+    private ScannerStatusCallbackProxy statusCallback;
+    private ScannerInitCallbackProxy initCallback;
     private Context context;
 
     M3RingScanner(RingScannerService scannerService) {
@@ -34,7 +35,7 @@ class M3RingScanner implements ScannerBackground {
     }
 
     @Override
-    public void initialize(Context applicationContext, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
         this.dataCallback = dataCallback;
         this.statusCallback = statusCallback;
         this.initCallback = initCallback;
@@ -83,12 +84,7 @@ class M3RingScanner implements ScannerBackground {
             res.add(barcode);
 
             // Use a handler from the main message loop to run on the UI thread, as this method is called by another thread.
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    dataCallback.onData(M3RingScanner.this, res);
-                }
-            });
+            dataCallback.onData(M3RingScanner.this, res);
         }
     }
 
@@ -105,7 +101,7 @@ class M3RingScanner implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCallback = cb;
     }
 

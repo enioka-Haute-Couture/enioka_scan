@@ -1,6 +1,6 @@
 package com.enioka.scanner.bt.api;
 
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 
 /**
  * Represents a connected SPP device, and can be used to run commands on it.
@@ -15,7 +15,7 @@ public interface Scanner {
      * @param subscription an optional subscription waiting for an asnwer to the command
      * @param <T>          expected return type of the command (implicit, found from command argument)
      */
-    <T> void runCommand(Command<T> command, DataSubscriptionCallback<T> subscription);
+    <T> void runCommand(final Command<T> command, final DataSubscriptionCallback<T> subscription);
 
     /**
      * @return the BT name
@@ -27,12 +27,12 @@ public interface Scanner {
      */
     void disconnect();
 
-    <T> void registerSubscription(DataSubscriptionCallback<T> subscription, Class<? extends T> targetType);
+    <T> void registerSubscription(final DataSubscriptionCallback<T> subscription, final Class<? extends T> targetType);
 
     /**
-     * @param statusCallback
+     * Updates the scanner's status callback.
      */
-    void registerStatusCallback(ScannerStatusCallback statusCallback);
+    void registerStatusCallback(final ScannerStatusCallbackProxy statusCallback);
 
     /**
      * @return true if the device uses BLE, false if the device uses classic bluetooth

@@ -1,7 +1,9 @@
 package com.enioka.scanner.sdk.mock;
 
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerDataCallback;
+import com.enioka.scanner.api.callbacks.ScannerInitCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 
@@ -20,7 +22,7 @@ public class MockTest {
     public void testOnDataCallback(){
         final List<Barcode> expectedData = new ArrayList<>();
 
-        final Scanner.ScannerInitCallback initCallback = new Scanner.ScannerInitCallback() {
+        final ScannerInitCallback initCallback = new ScannerInitCallback() {
             @Override
             public void onConnectionSuccessful(Scanner s) {}
             @Override
@@ -29,12 +31,12 @@ public class MockTest {
             }
         };
         final ScannerStatusCallback statusCallback = (scanner, newStatus) -> {};
-        final Scanner.ScannerDataCallback dataCallback = (s, data) -> Assert.assertEquals(expectedData, data);
+        final ScannerDataCallback dataCallback = (s, data) -> Assert.assertEquals(expectedData, data);
 
         final Barcode barcode = new Barcode("1234ABCD", BarcodeType.CODE39);
         final MockScanner mock = new MockScanner();
 
-        mock.initialize(null, initCallback, dataCallback, statusCallback, null);
+        mock.initialize(initCallback, dataCallback, statusCallback, null);
 
         expectedData.add(barcode);
         mock.scan(barcode);
@@ -45,7 +47,7 @@ public class MockTest {
         final List<Barcode> expectedData = new ArrayList<>();
         final List<ScannerStatusCallback.Status> expectedStatus = new ArrayList<ScannerStatusCallback.Status>() {{ add(ScannerStatusCallback.Status.UNKNOWN); }}; // Ugly way to allow expectedStatus to be used in lambdas below.
 
-        final Scanner.ScannerInitCallback initCallback = new Scanner.ScannerInitCallback() {
+        final ScannerInitCallback initCallback = new ScannerInitCallback() {
             @Override
             public void onConnectionSuccessful(Scanner s) {}
             @Override
@@ -54,13 +56,13 @@ public class MockTest {
             }
         };
         final ScannerStatusCallback statusCallback = (scanner, newStatus) -> Assert.assertEquals(expectedStatus.get(0), newStatus);
-        final Scanner.ScannerDataCallback dataCallback = (s, data) -> Assert.assertEquals(expectedData, data);
+        final ScannerDataCallback dataCallback = (s, data) -> Assert.assertEquals(expectedData, data);
 
         final Barcode barcode = new Barcode("1234ABCD", BarcodeType.CODE39);
         final MockScanner mock = new MockScanner();
 
         expectedStatus.set(0, ScannerStatusCallback.Status.READY);
-        mock.initialize(null, initCallback, dataCallback, statusCallback, null);
+        mock.initialize(initCallback, dataCallback, statusCallback, null);
 
         expectedStatus.set(0, ScannerStatusCallback.Status.PAUSED);
         mock.pause();

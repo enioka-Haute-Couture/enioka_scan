@@ -27,7 +27,8 @@ import android.widget.Toast;
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.camera.CameraReader;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
@@ -338,7 +339,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
             return;
         }
 
-        cameraScanner = new CameraBarcodeScanViewScanner(cameraView, (s, data) -> ScannerCompatActivity.this.onData(data));
+        cameraScanner = new CameraBarcodeScanViewScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)));
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);

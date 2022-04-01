@@ -9,13 +9,13 @@ import android.content.pm.ResolveInfo;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerConnectionHandler;
+import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
 import com.enioka.scanner.helpers.ProviderServiceHolder;
 import com.enioka.scanner.helpers.ProviderServiceMeta;
-import com.enioka.scanner.helpers.ScannerConnectionHandlerProxy;
+import com.enioka.scanner.api.proxies.ScannerConnectionHandlerProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;

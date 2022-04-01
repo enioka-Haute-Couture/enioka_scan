@@ -1,10 +1,11 @@
-package com.enioka.scanner.api;
+package com.enioka.scanner.api.callbacks;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.enioka.scanner.R;
+import com.enioka.scanner.api.Scanner;
 
 /**
  * Callback to deal with scanner status changes.

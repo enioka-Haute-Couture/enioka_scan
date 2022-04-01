@@ -8,7 +8,9 @@ import android.view.ViewGroup;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerForeground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 
@@ -22,17 +24,17 @@ public class GenericHidScanner implements ScannerForeground {
 
     private String keyboardInput = "";
     private boolean paused = false;
-    private ScannerDataCallback dataCb;
+    private ScannerDataCallbackProxy dataCb;
 
     @Override
-    public void initialize(Activity ctx, ScannerInitCallback cb0, final ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
-        this.dataCb = cb1;
+    public void initialize(final Activity activity, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+        this.dataCb = dataCallback;
 
         // Register an OnKeyListener onto the Activity root view, if any.
-        View rootParentView = ctx.findViewById(android.R.id.content);
+        View rootParentView = activity.findViewById(android.R.id.content);
 
         if (rootParentView == null) {
-            cb0.onConnectionFailure(this);
+            initCallback.onConnectionFailure(this);
             Log.w(LOG_TAG, "Tried to listen to a HID but no view is available - only views allow to listen to key presses");
         }
 
@@ -45,35 +47,32 @@ public class GenericHidScanner implements ScannerForeground {
         }
 
         rootParentView.setFocusable(true); // a precaution, as events may not be passed down if there is nothing focusable inside the view.
-        rootParentView.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (paused) {
-                    return false;
-                }
-
-                if (event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-                    // The ending CR is most often a simple UP without DOWN.
-                    Barcode b = new Barcode(GenericHidScanner.this.keyboardInput, BarcodeType.UNKNOWN);
-                    GenericHidScanner.this.dataCb.onData(null, new ArrayList<>(Collections.singleton(b)));
-                    GenericHidScanner.this.keyboardInput = "";
-                } else if (!event.isPrintingKey()) {
-                    // Skip un-printable characters.
-                } else if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    // Only use DOWN event - UP events are not synchronized with SHIFT events.
-                    GenericHidScanner.this.keyboardInput += (char) event.getKeyCharacterMap().get(event.getKeyCode(), event.getMetaState());
-                    Log.i(LOG_TAG, GenericHidScanner.this.keyboardInput);
-                }
-                return true;
+        rootParentView.setOnKeyListener((view, keyCode, event) -> {
+            if (paused) {
+                return false;
             }
+
+            if (event.getAction() == KeyEvent.ACTION_UP && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                // The ending CR is most often a simple UP without DOWN.
+                Barcode b = new Barcode(GenericHidScanner.this.keyboardInput, BarcodeType.UNKNOWN);
+                GenericHidScanner.this.dataCb.onData(null, new ArrayList<>(Collections.singleton(b)));
+                GenericHidScanner.this.keyboardInput = "";
+            } else if (!event.isPrintingKey()) {
+                // Skip un-printable characters.
+            } else if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                // Only use DOWN event - UP events are not synchronized with SHIFT events.
+                GenericHidScanner.this.keyboardInput += (char) event.getKeyCharacterMap().get(event.getKeyCode(), event.getMetaState());
+                Log.i(LOG_TAG, GenericHidScanner.this.keyboardInput);
+            }
+            return true;
         });
 
         Log.i(LOG_TAG, "HID scanner initialized");
-        cb0.onConnectionSuccessful(this);
+        initCallback.onConnectionSuccessful(this);
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCb = cb;
     }
 

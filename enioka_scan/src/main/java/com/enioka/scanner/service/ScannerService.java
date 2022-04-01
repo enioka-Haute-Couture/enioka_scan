@@ -416,11 +416,9 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Override
     public void onStatusChanged(final Scanner scanner, final ScannerStatusCallback.Status newStatus) {
         Log.d(LOG_TAG, "Status changed: " + newStatus.name() + " --- " + newStatus);
-        uiHandler.post(() -> { // FIXME - 2022/04/01: Is this jump to UIthread always unwrapped ?
-            for (BackgroundScannerClient client : ScannerService.this.clients) {
-                client.onStatusChanged(scanner, newStatus);
-            }
-        });
+        for (BackgroundScannerClient client : ScannerService.this.clients) {
+            client.onStatusChanged(scanner, newStatus);
+        }
 
         switch (newStatus) {
             case DISCONNECTED:

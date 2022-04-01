@@ -138,12 +138,7 @@ class HoneywellOssScanner implements ScannerBackground {
         this.btScanner.runCommand(new DisplayScreenColor(color), null);
 
         // This is needed otherwise the color is reused for every default action afterwards!
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                btScanner.runCommand(new DisplayScreenColor(null), null);
-            }
-        }, 5000);
+        new Handler().postDelayed(() -> btScanner.runCommand(new DisplayScreenColor(null), null), 5000);
     }
 
     @Override

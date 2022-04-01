@@ -9,7 +9,6 @@ import android.content.pm.ResolveInfo;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
@@ -135,7 +134,7 @@ public final class LaserScanner {
      * @param handler the callback.
      * @param options parameters for scanner search.
      */
-    public static void getLaserScanner(final Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+    public static void getLaserScanner(final Context ctx, final ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
         if (providerServices.isEmpty()) {
             getProviders(ctx, () -> startLaserSearchInProviders(ctx, handler, options));
         } else {
@@ -163,9 +162,8 @@ public final class LaserScanner {
         return true;
     }
 
-    private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+    private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
         Log.i(LOG_TAG, "Starting scanner search");
-        final ScannerConnectionHandler handlerProxy = new ScannerConnectionHandlerProxy(handler);
 
         if (options.useBlueTooth) {
             btRegistry.register(ctx);
@@ -174,8 +172,8 @@ public final class LaserScanner {
         // Trivial
         if (providerServices.isEmpty()) {
             Log.i(LOG_TAG, "There are no laser scanners available at all");
-            handlerProxy.noScannerAvailable();
-            handlerProxy.endOfScannerSearch();
+            handler.noScannerAvailable();
+            handler.endOfScannerSearch();
             return;
         }
 
@@ -196,7 +194,7 @@ public final class LaserScanner {
         }
 
         providersHavingAnswered.drainPermits();
-        final ScannerProvider.ProviderCallback providerCallback = getProviderCallback(handlerProxy, options);
+        final ScannerProvider.ProviderCallback providerCallback = getProviderCallback(handler, options);
 
         // Interrogate all providers, grouped by priority. (higher priority comes first).
         Log.i(LOG_TAG, "There are " + providersExpectedToAnswerCount + " providers which are going to be invoked for fresh laser scanners");
@@ -243,7 +241,7 @@ public final class LaserScanner {
         }
     }
 
-    private static ScannerProvider.ProviderCallback getProviderCallback(final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+    private static ScannerProvider.ProviderCallback getProviderCallback(final ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
         return new ScannerProvider.ProviderCallback() {
             @Override
             public void onScannerCreated(String providerKey, String scannerKey, Scanner s) {

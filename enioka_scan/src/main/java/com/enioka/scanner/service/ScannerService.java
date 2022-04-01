@@ -5,7 +5,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -20,6 +19,7 @@ import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.api.callbacks.ScannerDataCallback;
 import com.enioka.scanner.api.callbacks.ScannerInitCallback;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerConnectionHandlerProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -43,7 +43,6 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     protected final static String LOG_TAG = "ScannerService";
 
-    private Handler uiHandler;
     private boolean firstBind = true;
 
     /**
@@ -64,7 +63,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     /**
      * A helper count of scanners currently being initialized. When it reaches 0, we are ready.
      */
-    private AtomicInteger initializingScannersCount = new AtomicInteger(0);
+    private final AtomicInteger initializingScannersCount = new AtomicInteger(0);
 
     /**
      * True when all background scanners (which are only initialized once in the lifetime of the service) are OK.
@@ -138,7 +137,6 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     public void onCreate() {
         Log.i(LOG_TAG, "Starting scanner service");
         super.onCreate();
-        uiHandler = new Handler(getApplicationContext().getMainLooper());
     }
 
     @Override
@@ -159,7 +157,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     }
 
     protected synchronized void initLaserScannerSearch() {
-        LaserScanner.getLaserScanner(this.getApplicationContext(), this, scannerSearchOptions);
+        LaserScanner.getLaserScanner(this.getApplicationContext(), new ScannerConnectionHandlerProxy(this), scannerSearchOptions);
     }
 
     @Override

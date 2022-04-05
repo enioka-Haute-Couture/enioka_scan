@@ -68,6 +68,15 @@ class ClassicBtConnectToDeviceThread extends Thread {
         this.onConnectedCallback.connected(clientSocket);
     }
 
+    // Called when timeout is reached, will check if the connection succeeded. If yes, nothing happens. If not, the socket is closed.
+    void timeout() {
+        if (clientSocket != null && !clientSocket.isConnected()) {
+            Log.i(LOG_TAG, "Bluetooth reconnection timed out");
+            cancel();
+            onConnectedCallback.failed();
+        }
+    }
+
     // Closes the client socket and causes the thread to finish.
     void cancel() {
         try {

@@ -30,6 +30,9 @@ import java.util.TimerTask;
  */
 class ClassicBtSppScanner implements Closeable, ScannerInternal {
     private static final String LOG_TAG = "BtSppSdk";
+    private static final int RECONNECTION_MAX_ATTEMPTS = 60;
+    private static final int RECONNECTION_INTERVAL_MS = 1000;
+    private static final int RECONNECTION_TIMEOUT_MS = 5000;
 
     private final SerialBtScannerProvider parentProvider;
     private BtSppScannerProvider scannerDriver;
@@ -41,8 +44,6 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
     private final String name;
     private boolean masterBtDevice = false;
 
-    private final int maxReconnectionAttempts = 60;
-    private final int reconnectionIntervalMs = 1000;
     private int connectionFailures = 0;
 
     private BluetoothSocket clientSocket;
@@ -224,7 +225,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                 uiHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        ClassicBtSppScanner.this.statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.FAILURE);
+                        ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.FAILURE);
                     }
                 });
             }
@@ -236,7 +237,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             uiHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    ClassicBtSppScanner.this.statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.RECONNECTING);
+                    ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.RECONNECTING);
                 }
             });
         }
@@ -249,11 +250,16 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
     }
 
     private void reconnect() {
-        Log.w(LOG_TAG, "Reconnection attempt " + (this.connectionFailures + 1) + " out of " + this.maxReconnectionAttempts);
+        if (clientSocket != null && clientSocket.isConnected()) {
+            Log.w(LOG_TAG, "Reconnection failed: device is already connected");
+            return;
+        }
+
+        Log.w(LOG_TAG, "Reconnection attempt " + (this.connectionFailures + 1) + " out of " + RECONNECTION_MAX_ATTEMPTS);
 
         // Always sleeps first (and not only in case of failure) as sockets take time to close for small ring scanners.
         try {
-            Thread.sleep(reconnectionIntervalMs); // Allowed: we are in a dedicated thread which has nothing to do anyway.
+            Thread.sleep(RECONNECTION_INTERVAL_MS); // Allowed: we are in a dedicated thread which has nothing to do anyway.
         } catch (InterruptedException e) {
             // Ignore.
         }
@@ -271,7 +277,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                     uiHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            ClassicBtSppScanner.this.statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.CONNECTED);
+                            ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.CONNECTED);
                         }
                     });
                 }
@@ -281,7 +287,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             public void failed() {
                 ClassicBtSppScanner.this.connectionFailures++;
 
-                if (ClassicBtSppScanner.this.connectionFailures < ClassicBtSppScanner.this.maxReconnectionAttempts) {
+                if (ClassicBtSppScanner.this.connectionFailures < ClassicBtSppScanner.RECONNECTION_MAX_ATTEMPTS) {
                     ClassicBtSppScanner.this.reconnect();
                 } else {
                     Log.w(LOG_TAG, "Giving up on dead scanner " + ClassicBtSppScanner.this.name);
@@ -289,7 +295,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                         uiHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                ClassicBtSppScanner.this.statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.FAILURE);
+                                ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.FAILURE);
                             }
                         });
                     }
@@ -297,6 +303,16 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             }
         });
         connectionThread.start();
+
+        // Handling reconnection timeout
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (ClassicBtSppScanner.this.connectionThread != null) {
+                    ClassicBtSppScanner.this.connectionThread.timeout();
+                }
+            }
+        }, RECONNECTION_TIMEOUT_MS);
     }
 
     @Override

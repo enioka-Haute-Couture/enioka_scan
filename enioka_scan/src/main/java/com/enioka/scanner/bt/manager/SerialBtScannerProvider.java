@@ -24,9 +24,12 @@ import java.util.concurrent.Semaphore;
  * This is the entry point of the BT SPP/TIO SDK for the rest of the library.
  */
 public class SerialBtScannerProvider implements ScannerProvider {
-    private static final String LOG_TAG = "BtSppSdk";
+    public static final String PROVIDER_NAME = "BtSppSdk";
 
+    // Cache of all available providers, only initialized once
     private static final List<com.enioka.scanner.bt.api.BtSppScannerProvider> scannerProviders = new ArrayList<>();
+    // Filtered list of providers to respect the allowed/excluded providers options, reset on every scanner search
+    private final List<com.enioka.scanner.bt.api.BtSppScannerProvider> sortedScannerProviders = new ArrayList<>();
 
     private ClassicBtAcceptConnectionThread server;
     private ProviderCallback providerCallback;
@@ -46,7 +49,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
 
     @Override
     public String getKey() {
-        return LOG_TAG;
+        return PROVIDER_NAME;
     }
 
 
@@ -93,13 +96,13 @@ public class SerialBtScannerProvider implements ScannerProvider {
         for (ResolveInfo ri : ris) {
             // This just avoids processing the same service twice, which could mean duplicate instances now that services are no longer used.
             if (ri.serviceInfo.applicationInfo.uid != ctx.getApplicationInfo().uid) {
-                Log.d(LOG_TAG, "Skipping duplicate provider " + ri.serviceInfo.name + " : does not match application UID (Service=" + ri.serviceInfo.applicationInfo.uid + " | Application=" + ctx.getApplicationInfo().uid + ")");
+                Log.d(PROVIDER_NAME, "Skipping duplicate provider " + ri.serviceInfo.name + " : does not match application UID (Service=" + ri.serviceInfo.applicationInfo.uid + " | Application=" + ctx.getApplicationInfo().uid + ")");
                 continue;
             }
 
             try {
                 final BtSppScannerProvider provider = (BtSppScannerProvider) Class.forName(ri.serviceInfo.name).newInstance();
-                Log.i(LOG_TAG, "\tSPP SDK compatible provider found: " + ri.serviceInfo.name);
+                Log.i(PROVIDER_NAME, "\tSPP SDK compatible provider found: " + ri.serviceInfo.name);
                 scannerProviders.add(provider);
             } catch (Exception e) {
                 // Could not instantiate
@@ -113,8 +116,22 @@ public class SerialBtScannerProvider implements ScannerProvider {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void getDevices(Context ctx, ScannerSearchOptions options) {
-        // Init providers if needed.
+        // Init cache of providers if needed.
         getProviders(ctx);
+
+        // Filter providers based on options.
+        sortedScannerProviders.clear();
+        for (final BtSppScannerProvider provider : scannerProviders) {
+            if (options.excludedProviderKeys != null && options.excludedProviderKeys.contains(provider.getKey())) {
+                Log.d(PROVIDER_NAME, "Provider " + provider.getKey() + " skipped because blacklisted by option (excludes " + options.excludedProviderKeys + ")");
+                continue;
+            }
+            if (options.allowedProviderKeys != null && !options.allowedProviderKeys.isEmpty() && !options.allowedProviderKeys.contains(provider.getKey())) {
+                Log.d(PROVIDER_NAME, "Provider " + provider.getKey() + " skipped because not whitelisted by option (only allows " + options.allowedProviderKeys + ")");
+                continue;
+            }
+            sortedScannerProviders.add(provider);
+        }
 
         // Init bluetooth
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -133,7 +150,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
 
                 // Some devices may be already used by another SDK
                 if (this.providerCallback.isAlreadyConnected(bt)) {
-                    Log.i(LOG_TAG, "Ignoring device - it is already connected to another app or SDK");
+                    Log.i(PROVIDER_NAME, "Ignoring device - it is already connected to another app or SDK");
                 }
 
                 ScannerInternal btDevice;
@@ -171,7 +188,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
         }
 
         if (passiveScannersCount == 0) {
-            this.providerCallback.onAllScannersCreated(LOG_TAG);
+            this.providerCallback.onAllScannersCreated(PROVIDER_NAME);
         }
 
         // Done.
@@ -193,8 +210,8 @@ public class SerialBtScannerProvider implements ScannerProvider {
 
         // Describe device.
         String desc = bt.getAddress() + " - Name: " + bt.getName() + " - Bond state: " + BtConstHelpers.getBondStateDescription(bt.getBondState()) /*+ bt.getType() + " - " */ + " - Features: " + uuidString + " - Mode " + bt.getType();
-        Log.i(LOG_TAG, desc);
-        Log.i(LOG_TAG, "Class major: " + BtConstHelpers.getBtMajorClassDescription(bt.getBluetoothClass().getMajorDeviceClass()) + " - Minor: " + BtConstHelpers.getBtClassDescription(bt.getBluetoothClass().getDeviceClass()));
+        Log.i(PROVIDER_NAME, desc);
+        Log.i(PROVIDER_NAME, "Class major: " + BtConstHelpers.getBtMajorClassDescription(bt.getBluetoothClass().getMajorDeviceClass()) + " - Minor: " + BtConstHelpers.getBtClassDescription(bt.getBluetoothClass().getDeviceClass()));
     }
 
     /**
@@ -212,12 +229,12 @@ public class SerialBtScannerProvider implements ScannerProvider {
         @Override
         public void connected(ScannerInternal scanner) {
             btDevice = scanner;
-            Log.d(LOG_TAG, "A new BT connection was made. Launching provider resolution.");
+            Log.d(PROVIDER_NAME, "A new BT connection was made. Launching provider resolution.");
 
-            new Thread(new ScannerProviderResolutionThread(btDevice, scannerProviders, new ScannerProviderResolutionThread.ScannerResolutionCallback() {
+            new Thread(new ScannerProviderResolutionThread(btDevice, sortedScannerProviders, new ScannerProviderResolutionThread.ScannerResolutionCallback() {
                 @Override
                 public void onConnection(final Scanner scanner, com.enioka.scanner.bt.api.BtSppScannerProvider compatibleProvider) {
-                    Log.i(LOG_TAG, "Scanner " + btDevice.getName() + " was found compatible with provider " + compatibleProvider.getClass().getSimpleName());
+                    Log.i(PROVIDER_NAME, "Scanner " + btDevice.getName() + " was found compatible with provider " + compatibleProvider.getKey());
 
                     // Set the provider inside the BtSppScanner - it is needed for parsing data.
                     btDevice.setProvider(compatibleProvider);
@@ -229,7 +246,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
 
                 @Override
                 public void notCompatible(ScannerInternal device) {
-                    Log.i(LOG_TAG, "Scanner " + device + " could not be bound to a provider and will be disconnected");
+                    Log.i(PROVIDER_NAME, "Scanner " + device + " could not be bound to a provider and will be disconnected");
                     btDevice.disconnect();
                     waitForScanners.release(1);
                     checkEnd();
@@ -239,14 +256,14 @@ public class SerialBtScannerProvider implements ScannerProvider {
 
         @Override
         public void failed() {
-            Log.i(LOG_TAG, "Failure to connect to scanner");
+            Log.i(PROVIDER_NAME, "Failure to connect to scanner");
             waitForScanners.release(1);
             checkEnd();
         }
 
         private void checkEnd() {
             if (waitForScanners.tryAcquire(passiveScannersCount)) {
-                Log.i(LOG_TAG, "Slave BT SPP scanners are all initialized. Count is " + passiveScannersCount + ". Master scanners connect later.");
+                Log.i(PROVIDER_NAME, "Slave BT SPP scanners are all initialized. Count is " + passiveScannersCount + ". Master scanners connect later.");
                 providerCallback.onAllScannersCreated(getKey());
             }
         }

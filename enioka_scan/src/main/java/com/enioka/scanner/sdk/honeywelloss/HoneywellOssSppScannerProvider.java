@@ -10,6 +10,7 @@ import com.enioka.scanner.sdk.honeywelloss.data.FirmwareVersion;
 import com.enioka.scanner.sdk.honeywelloss.parsers.HoneywellOssParser;
 
 public class HoneywellOssSppScannerProvider implements BtSppScannerProvider {
+    public static final String PROVIDER_NAME = "BT_HoneywellOssProvider";
 
     private final ScannerDataParser inputHandler = new HoneywellOssParser();
 
@@ -17,6 +18,11 @@ public class HoneywellOssSppScannerProvider implements BtSppScannerProvider {
     public void canManageDevice(final Scanner device, final ManagementCallback callback) {
         device.runCommand(new Cleanup(), null);
         testFirmwareCommand(device, callback);
+    }
+
+    @Override
+    public String getKey() {
+        return PROVIDER_NAME;
     }
 
     private void testFirmwareCommand(final Scanner device, final ManagementCallback callback) {

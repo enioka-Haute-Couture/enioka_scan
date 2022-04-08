@@ -10,7 +10,7 @@ import com.enioka.scanner.helpers.intent.IntentScannerProvider;
  * Provider for the HHT Wrapper Layer
  */
 public class HHTProvider extends IntentScannerProvider {
-    static final String PROVIDER_NAME = "Athesi HHT internal scanner";
+    public static final String PROVIDER_NAME = "AthesiHHTProvider";
 
     @Override
     protected void configureProvider() {

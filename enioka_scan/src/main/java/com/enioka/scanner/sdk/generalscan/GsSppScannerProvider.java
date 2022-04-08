@@ -13,6 +13,7 @@ import com.enioka.scanner.sdk.generalscan.commands.OpenRead;
 import com.enioka.scanner.sdk.generalscan.data.DeviceId;
 
 public class GsSppScannerProvider implements BtSppScannerProvider {
+    public static final String PROVIDER_NAME = "BT_GeneralScanProvider";
 
     @Override
     public void canManageDevice(final Scanner device, final ManagementCallback callback) {
@@ -34,6 +35,11 @@ public class GsSppScannerProvider implements BtSppScannerProvider {
                 callback.cannotManage();
             }
         });
+    }
+
+    @Override
+    public String getKey() {
+        return PROVIDER_NAME;
     }
 
     @Override

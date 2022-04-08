@@ -10,7 +10,7 @@ import com.enioka.scanner.helpers.intent.IntentScannerProvider;
  * Provider for Bluebird integrated scanners through an intent service.
  */
 public class ProgloveProvider extends IntentScannerProvider {
-    static final String PROVIDER_NAME = "ProgloveProvider";
+    public static final String PROVIDER_NAME = "ProgloveProvider";
 
     @Override
     protected void configureProvider() {

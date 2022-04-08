@@ -39,8 +39,10 @@ class ZebraOssScanner implements ScannerBackground {
     private ScannerDataCallback dataCallback = null;
     private final com.enioka.scanner.bt.api.Scanner btScanner;
     private final Map<String, String> statusCache = new HashMap<>();
+    private final String providerKey;
 
-    ZebraOssScanner(com.enioka.scanner.bt.api.Scanner btScanner) {
+    ZebraOssScanner(final String providerKey, com.enioka.scanner.bt.api.Scanner btScanner) {
+        this.providerKey = providerKey;
         this.btScanner = btScanner;
     }
 
@@ -197,7 +199,7 @@ class ZebraOssScanner implements ScannerBackground {
 
     @Override
     public String getProviderKey() {
-        return "BtSppSdk";
+        return providerKey;
     }
 
     @Override

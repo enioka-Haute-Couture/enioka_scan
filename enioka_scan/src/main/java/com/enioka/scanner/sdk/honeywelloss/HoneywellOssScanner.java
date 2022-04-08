@@ -173,7 +173,7 @@ class HoneywellOssScanner implements ScannerBackground {
 
     @Override
     public String getProviderKey() {
-        return "BtSppSdk";
+        return HoneywellOssSppScannerProvider.PROVIDER_NAME;
     }
 
     @Override

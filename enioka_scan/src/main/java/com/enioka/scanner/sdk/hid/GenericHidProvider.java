@@ -8,21 +8,21 @@ import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
 
 public class GenericHidProvider implements ScannerProvider {
-    static final String LOG_TAG = "GenericHidProvider";
+    static final String PROVIDER_NAME = "GenericHidProvider";
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
         if (ctx.getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) {
             // We may have a BT keyboard connected
-            Log.i(LOG_TAG, "A BT keyboard seems to be connected");
+            Log.i(PROVIDER_NAME, "A BT keyboard seems to be connected");
 
-            cb.onScannerCreated(LOG_TAG, "HID", new GenericHidScanner());
+            cb.onScannerCreated(PROVIDER_NAME, "HID", new GenericHidScanner());
         }
-        cb.onAllScannersCreated(LOG_TAG);
+        cb.onAllScannersCreated(PROVIDER_NAME);
     }
 
     @Override
     public String getKey() {
-        return LOG_TAG;
+        return PROVIDER_NAME;
     }
 }

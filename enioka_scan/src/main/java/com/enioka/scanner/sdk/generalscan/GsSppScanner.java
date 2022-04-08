@@ -29,7 +29,7 @@ class GsSppScanner implements ScannerBackground {
 
     @Override
     public String getProviderKey() {
-        return GsSppScannerProvider.PROVIDER_NAME;
+        return GsSppScannerProvider.PROVIDER_KEY;
     }
 
 

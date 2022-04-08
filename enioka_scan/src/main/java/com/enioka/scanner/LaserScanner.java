@@ -139,10 +139,10 @@ public final class LaserScanner {
     public static void getLaserScanner(final Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
         // Removing the BtSppSdk provider, as it is already handled by the useBluetooth option.
         if (options.allowedProviderKeys != null) {
-            options.allowedProviderKeys.remove(SerialBtScannerProvider.PROVIDER_NAME);
+            options.allowedProviderKeys.remove(SerialBtScannerProvider.PROVIDER_KEY);
         }
         if (options.excludedProviderKeys != null) {
-            options.excludedProviderKeys.remove(SerialBtScannerProvider.PROVIDER_NAME);
+            options.excludedProviderKeys.remove(SerialBtScannerProvider.PROVIDER_KEY);
         }
 
         if (providerServices.isEmpty()) {

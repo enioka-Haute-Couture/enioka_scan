@@ -12,7 +12,7 @@ import com.enioka.scanner.sdk.postech.commands.GetDeviceName;
 import com.enioka.scanner.sdk.postech.data.DeviceName;
 
 public class PostechSppScannerProvider implements BtSppScannerProvider {
-    public static final String PROVIDER_NAME = "BT_PostechProvider";
+    public static final String PROVIDER_KEY = "BT_PostechProvider";
 
     @Override
     public void canManageDevice(final Scanner device, final ManagementCallback callback) {
@@ -39,7 +39,7 @@ public class PostechSppScannerProvider implements BtSppScannerProvider {
 
     @Override
     public String getKey() {
-        return PROVIDER_NAME;
+        return PROVIDER_KEY;
     }
 
     @Override

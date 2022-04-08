@@ -160,6 +160,6 @@ public class GenericHidScanner implements ScannerForeground {
 
     @Override
     public String getProviderKey() {
-        return GenericHidProvider.PROVIDER_NAME;
+        return GenericHidProvider.PROVIDER_KEY;
     }
 }

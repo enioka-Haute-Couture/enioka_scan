@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class BtZebraProvider implements ScannerProvider, IDcsSdkApiDelegate {
     private static final String LOG_TAG = "BtZebraProvider";
-    static final String PROVIDER_NAME = "BtZebraProvider";
+    public static final String PROVIDER_KEY = "BtZebraProvider";
 
     private ConcurrentHashMap<Integer, BtZebraScanner> createdScanners = new ConcurrentHashMap<>();
     private ProviderCallback providerCallback;
@@ -34,7 +34,7 @@ public class BtZebraProvider implements ScannerProvider, IDcsSdkApiDelegate {
         try {
             this.getClass().getClassLoader().loadClass("com.zebra.scannercontrol.SDKHandler");
         } catch (ClassNotFoundException e) {
-            cb.onProviderUnavailable(PROVIDER_NAME);
+            cb.onProviderUnavailable(PROVIDER_KEY);
         }
 
         this.providerCallback = cb;
@@ -98,7 +98,7 @@ public class BtZebraProvider implements ScannerProvider, IDcsSdkApiDelegate {
             cb.onAllScannersCreated(getKey());
         } else {
             Log.i(LOG_TAG, "No Zebra BT devices connected to this device and master device connection si disabled - disabling Zebra BT SDK");
-            cb.onProviderUnavailable(PROVIDER_NAME); // Costly search. We do not want it to do it on each scanner search.
+            cb.onProviderUnavailable(PROVIDER_KEY); // Costly search. We do not want it to do it on each scanner search.
             sdkHandler.dcssdkClose();
         }
 
@@ -112,7 +112,7 @@ public class BtZebraProvider implements ScannerProvider, IDcsSdkApiDelegate {
 
     @Override
     public String getKey() {
-        return PROVIDER_NAME;
+        return PROVIDER_KEY;
     }
 
 

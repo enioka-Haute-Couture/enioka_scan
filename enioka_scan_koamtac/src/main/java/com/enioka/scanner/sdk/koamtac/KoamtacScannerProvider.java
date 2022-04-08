@@ -13,7 +13,7 @@ import koamtac.kdc.sdk.KDCReader;
 
 public class KoamtacScannerProvider implements ScannerProvider {
     private static final String LOG_TAG = "KoamtacScannerProvider";
-    static String PROVIDER_KEY = "Koamtac";
+    public static final String PROVIDER_KEY = "Koamtac";
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {

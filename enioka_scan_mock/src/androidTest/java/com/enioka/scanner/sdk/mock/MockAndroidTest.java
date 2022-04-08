@@ -93,7 +93,7 @@ public class MockAndroidTest {
         scannerService.registerClient(new BackgroundScannerClient() {
             @Override
             public void onStatusChanged(@Nullable Scanner scanner, Status newStatus) {
-                if (newStatus == Status.CONNECTED) // should be SERVICE_SDK_SEARCH_OVER but because methods on the UI thread are queued the "success" init callback may be queued after the "end of search" event.
+                if (newStatus == Status.SERVICE_SDK_SEARCH_OVER)
                     scannerDiscoverySemaphore.release();
             }
 

@@ -11,6 +11,7 @@ public class MockProvider implements ScannerProvider {
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
         cb.onScannerCreated(PROVIDER_NAME, "Mock", new MockScanner());
+        cb.onAllScannersCreated(PROVIDER_NAME);
     }
 
     @Override

@@ -193,8 +193,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void endOfScannerSearch() {
-        Log.i(LOG_TAG, scanners.size() + " scanners from the different SDKs have reported for duty. Waiting for the initialization of the " + (scanners.size() - foregroundScanners.size()) + " background scanners.");
-        onStatusChanged(null, Status.SERVICE_SDK_SEARCH_OVER); // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
+        Log.i(LOG_TAG, (scanners.size() + initializingScannersCount.get()) + " scanners from the different SDKs have reported for duty. Waiting for the initialization of the " + (scanners.size() + initializingScannersCount.get() - foregroundScanners.size()) + " background scanners.");
         checkInitializationEnd();
     }
 
@@ -237,6 +236,9 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
             for (EndOfInitCallback callback : cbs) {
                 callback.run();
             }
+
+            // Notify
+            onStatusChanged(null, Status.SERVICE_SDK_SEARCH_OVER); // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
         }
     }
 

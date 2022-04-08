@@ -184,29 +184,27 @@ public final class LaserScanner {
             options.useBlueTooth = false;
         }
 
-        // Count providers which should actually be used.
+        // Only keep providers which should actually be used.
+        // Iterate on copies to avoid concurrent list modifications from other threads
+        List<ProviderServiceHolder> sortedProviders = new ArrayList<>();
         providersExpectedToAnswerCount = 0;
-        for (ProviderServiceHolder psh : new ArrayList<>(providerServices)) {
+        for (final ProviderServiceHolder psh : new ArrayList<>(providerServices)) {
             if (shouldProviderBeUsed(psh, options)) {
-                providersExpectedToAnswerCount++;
                 Log.d(LOG_TAG, "Provider " + psh.getProvider() + "accepted");
+                providersExpectedToAnswerCount++;
+                sortedProviders.add(psh);
             }
         }
+        Collections.sort(sortedProviders, Collections.reverseOrder()); // priority then name
+        Log.i(LOG_TAG, "There are " + providersExpectedToAnswerCount + " providers which are going to be invoked for fresh laser scanners");
 
         providersHavingAnswered.drainPermits();
         final ScannerProvider.ProviderCallback providerCallback = getProviderCallback(handler, options);
 
         // Interrogate all providers, grouped by priority. (higher priority comes first).
-        Log.i(LOG_TAG, "There are " + providersExpectedToAnswerCount + " providers which are going to be invoked for fresh laser scanners");
-        List<ProviderServiceHolder> sortedProviders = new ArrayList<>(providerServices); // iterate on a copy to avoid concurrent list modifications from other threads
-        Collections.sort(sortedProviders, Collections.reverseOrder()); // priority then name
         int previousPriority = sortedProviders.isEmpty() ? 0 : sortedProviders.get(0).getMeta().getPriority();
         int launchedThreads = 0;
         for (final ProviderServiceHolder psh : sortedProviders) {
-            if (!shouldProviderBeUsed(psh, options)) {
-                continue;
-            }
-
             if (previousPriority != psh.getMeta().getPriority()) {
                 // New group! wait.
                 Log.i(LOG_TAG, "Waiting for the end of priority group " + previousPriority);

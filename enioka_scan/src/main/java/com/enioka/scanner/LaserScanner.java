@@ -156,6 +156,10 @@ public final class LaserScanner {
      * Some options have an influence on whether a provider should be used or not. All the afferent rules are inside this method.
      */
     private static boolean shouldProviderBeUsed(ProviderServiceHolder psh, ScannerSearchOptions options) {
+        if (psh.getProvider().getKey().equals(SerialBtScannerProvider.PROVIDER_KEY) && options.useBlueTooth) {
+            // Default BT provider is always allowed when bluetooth is on, another check on specific BT providers will be done when they are queried.
+            return true;
+        }
         if (psh.getMeta().isBluetooth() && !options.useBlueTooth) {
             Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because bluetooth option is disabled");
             return false;
@@ -199,7 +203,7 @@ public final class LaserScanner {
         providersExpectedToAnswerCount = 0;
         for (final ProviderServiceHolder psh : new ArrayList<>(providerServices)) {
             if (shouldProviderBeUsed(psh, options)) {
-                Log.d(LOG_TAG, "Provider " + psh.getProvider() + "accepted");
+                Log.d(LOG_TAG, "Provider " + psh.getProvider().getKey() + " accepted");
                 providersExpectedToAnswerCount++;
                 sortedProviders.add(psh);
             }

@@ -527,7 +527,7 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
 
     @Override
     public String getProviderKey() {
-        return EmdkZebraProvider.PROVIDER_NAME;
+        return EmdkZebraProvider.PROVIDER_KEY;
     }
 }
 

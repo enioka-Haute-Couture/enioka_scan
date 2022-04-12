@@ -8,6 +8,7 @@ import com.enioka.scanner.sdk.zebraoss.commands.CapabilitiesRequest;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 
 public class ZebraOssAttScannerProvider implements BtSppScannerProvider {
+    private static final String PROVIDER_KEY = "BT_ZebraOssATTProvider";
     private final ScannerDataParser inputHandler = new SsiOverAttParser();
 
     @Override
@@ -20,7 +21,7 @@ public class ZebraOssAttScannerProvider implements BtSppScannerProvider {
         device.runCommand(new CapabilitiesRequest(), new DataSubscriptionCallback<CapabilitiesReply>() {
             @Override
             public void onSuccess(CapabilitiesReply data) {
-                callback.canManage(new ZebraOssScanner(device));
+                callback.canManage(new ZebraOssScanner(PROVIDER_KEY, device));
             }
 
             @Override
@@ -33,6 +34,11 @@ public class ZebraOssAttScannerProvider implements BtSppScannerProvider {
                 callback.cannotManage();
             }
         });
+    }
+
+    @Override
+    public String getKey() {
+        return PROVIDER_KEY;
     }
 
     @Override

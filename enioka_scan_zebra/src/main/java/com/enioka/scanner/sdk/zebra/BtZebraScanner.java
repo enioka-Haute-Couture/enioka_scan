@@ -271,7 +271,7 @@ class BtZebraScanner implements ScannerBackground {
 
     @Override
     public String getProviderKey() {
-        return BtZebraProvider.PROVIDER_NAME;
+        return BtZebraProvider.PROVIDER_KEY;
     }
 
     private void pullTrigger() {

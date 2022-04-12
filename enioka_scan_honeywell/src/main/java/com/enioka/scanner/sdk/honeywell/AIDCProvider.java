@@ -13,7 +13,7 @@ import com.honeywell.aidc.BarcodeReaderInfo;
  * For the Honeywell PDA "Android data collection (AIDC)" SDK. This is actually the Intermec SDK.
  */
 public class AIDCProvider implements ScannerProvider {
-    static final String PROVIDER_NAME = "HONEYWELL_AIDC";
+    public static final String PROVIDER_KEY = "HONEYWELL_AIDC";
     private static final String LOG_TAG = "AIDCProvider";
 
     @Override
@@ -23,7 +23,7 @@ public class AIDCProvider implements ScannerProvider {
         // Basic check.
         if (!Common.checkIntentListener("com.honeywell.decode.DecodeService", ctx)) {
             Log.i(LOG_TAG, "This is not an Honeywell/Intermec device");
-            cb.onProviderUnavailable(PROVIDER_NAME);
+            cb.onProviderUnavailable(PROVIDER_KEY);
             return;
         }
 
@@ -34,17 +34,17 @@ public class AIDCProvider implements ScannerProvider {
                 if (aidcManager != null && options.waitDisconnected && aidcManager.listBarcodeDevices().size() > 0) {
                     for (BarcodeReaderInfo bri : aidcManager.listBarcodeDevices()) {
                         Log.i(LOG_TAG, "A connected or disconnected barcode device was detected: " + bri.getFriendlyName());
-                        cb.onScannerCreated(PROVIDER_NAME, bri.getScannerId(), new AIDCScanner(aidcManager));
+                        cb.onScannerCreated(PROVIDER_KEY, bri.getScannerId(), new AIDCScanner(aidcManager));
                     }
                     return;
                 } else if (aidcManager != null && !options.waitDisconnected && aidcManager.listConnectedBarcodeDevices().size() > 0) {
                     for (BarcodeReaderInfo bri : aidcManager.listConnectedBarcodeDevices()) {
                         Log.i(LOG_TAG, "A connected barcode device was detected: " + bri.getFriendlyName());
-                        cb.onScannerCreated(PROVIDER_NAME, bri.getScannerId(), new AIDCScanner(aidcManager));
+                        cb.onScannerCreated(PROVIDER_KEY, bri.getScannerId(), new AIDCScanner(aidcManager));
                     }
                     return;
                 }
-                cb.onScannerCreated(PROVIDER_NAME, null, null);
+                cb.onScannerCreated(PROVIDER_KEY, null, null);
             }
         });
         Log.i(LOG_TAG, "End scanner search");
@@ -52,6 +52,6 @@ public class AIDCProvider implements ScannerProvider {
 
     @Override
     public String getKey() {
-        return PROVIDER_NAME;
+        return PROVIDER_KEY;
     }
 }

@@ -11,6 +11,7 @@ import android.util.Log;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.bt.manager.SerialBtScannerProvider;
 import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
 import com.enioka.scanner.helpers.ProviderServiceHolder;
 import com.enioka.scanner.helpers.ProviderServiceMeta;
@@ -135,6 +136,14 @@ public final class LaserScanner {
      * @param options parameters for scanner search.
      */
     public static void getLaserScanner(final Context ctx, final ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
+        // Removing the BtSppSdk provider, as it is already handled by the useBluetooth option.
+        if (options.allowedProviderKeys != null) {
+            options.allowedProviderKeys.remove(SerialBtScannerProvider.PROVIDER_KEY);
+        }
+        if (options.excludedProviderKeys != null) {
+            options.excludedProviderKeys.remove(SerialBtScannerProvider.PROVIDER_KEY);
+        }
+
         if (providerServices.isEmpty()) {
             getProviders(ctx, () -> startLaserSearchInProviders(ctx, handler, options));
         } else {

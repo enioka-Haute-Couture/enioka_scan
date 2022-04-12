@@ -212,7 +212,7 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
 
     @Override
     public String getProviderKey() {
-        return AIDCProvider.PROVIDER_NAME;
+        return AIDCProvider.PROVIDER_KEY;
     }
 
     @Override

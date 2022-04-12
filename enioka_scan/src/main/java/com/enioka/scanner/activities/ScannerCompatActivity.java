@@ -29,6 +29,7 @@ import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.camera.CameraReader;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
@@ -183,11 +184,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
 
         // Bind to ScannerService service
         Intent intent = new Intent(this, ScannerService.class);
-        intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, useBluetooth);
-        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, useBluetooth);
-        //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
-        //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, new String[]{"BtZebraProvider"});
-        //intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, true);
+        ScannerSearchOptions.defaultOptions().fromIntentExtras(getIntent()).toIntentExtras(intent);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 

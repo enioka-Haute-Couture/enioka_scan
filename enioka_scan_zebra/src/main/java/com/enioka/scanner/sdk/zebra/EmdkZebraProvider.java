@@ -12,7 +12,7 @@ import com.enioka.scanner.api.ScannerSearchOptions;
  */
 public class EmdkZebraProvider implements ScannerProvider {
     private final static String LOG_TAG = "EmdkProvider";
-    static final String PROVIDER_NAME = "Zebra EMDK";
+    public static final String PROVIDER_KEY = "Zebra EMDK";
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
@@ -24,11 +24,11 @@ public class EmdkZebraProvider implements ScannerProvider {
 
             // Note the use of reflection: otherwise, the class would be loaded even on platform without the Symbol lib available!
             // It would result in ClassNotFoundException at startup.
-            cb.onScannerCreated(PROVIDER_NAME, "r", Class.forName("com.enioka.scanner.sdk.zebra.EmdkZebraScanner").asSubclass(Scanner.class).newInstance());
+            cb.onScannerCreated(PROVIDER_KEY, "r", Class.forName("com.enioka.scanner.sdk.zebra.EmdkZebraScanner").asSubclass(Scanner.class).newInstance());
         } catch (ClassNotFoundException e) {
             // Symbol lib not found => this SDK is not supported on this platform.
             Log.i(LOG_TAG, "Not a Zebra EMDK device");
-            cb.onProviderUnavailable(PROVIDER_NAME);
+            cb.onProviderUnavailable(PROVIDER_KEY);
         } catch (Exception e) {
             Log.e(LOG_TAG, "Could not create a Scanner instance - the implementation may lack a default constructor.", e);
             throw new RuntimeException(e);
@@ -37,6 +37,6 @@ public class EmdkZebraProvider implements ScannerProvider {
 
     @Override
     public String getKey() {
-        return PROVIDER_NAME;
+        return PROVIDER_KEY;
     }
 }

@@ -6,16 +6,16 @@ import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
 
 public class MockProvider implements ScannerProvider {
-    static final String PROVIDER_NAME = "MockProvider";
+    public static final String PROVIDER_KEY = "MockProvider";
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
-        cb.onScannerCreated(PROVIDER_NAME, "Mock", new MockScanner());
-        cb.onAllScannersCreated(PROVIDER_NAME);
+        cb.onScannerCreated(PROVIDER_KEY, "Mock", new MockScanner());
+        cb.onAllScannersCreated(PROVIDER_KEY);
     }
 
     @Override
     public String getKey() {
-        return PROVIDER_NAME;
+        return PROVIDER_KEY;
     }
 }

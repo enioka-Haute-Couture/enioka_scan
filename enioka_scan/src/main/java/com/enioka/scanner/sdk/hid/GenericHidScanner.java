@@ -159,6 +159,6 @@ public class GenericHidScanner implements ScannerForeground {
 
     @Override
     public String getProviderKey() {
-        return GenericHidProvider.LOG_TAG;
+        return GenericHidProvider.PROVIDER_KEY;
     }
 }

@@ -37,7 +37,7 @@ public class MockScanner implements ScannerBackground {
 
     @Override
     public String getProviderKey() {
-        return MockProvider.PROVIDER_NAME;
+        return MockProvider.PROVIDER_KEY;
     }
 
     /**

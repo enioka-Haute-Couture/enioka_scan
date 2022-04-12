@@ -275,6 +275,6 @@ public class ProgloveScanner extends IntentScanner<String> {
 
     @Override
     public String getProviderKey() {
-        return ProgloveProvider.PROVIDER_NAME;
+        return ProgloveProvider.PROVIDER_KEY;
     }
 }

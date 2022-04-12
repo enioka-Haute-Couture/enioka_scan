@@ -14,6 +14,13 @@ public interface BtSppScannerProvider {
     void canManageDevice(Scanner device, ManagementCallback callback);
 
     /**
+     * The unique key which identifies this provider.
+     *
+     * @return the key
+     */
+    String getKey();
+
+    /**
      * The {@link ScannerDataParser} which should be used to parse results.
      */
     ScannerDataParser getInputHandler();

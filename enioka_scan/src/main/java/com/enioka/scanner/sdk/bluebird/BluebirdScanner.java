@@ -129,6 +129,6 @@ public class BluebirdScanner extends IntentScanner<Integer> {
 
     @Override
     public String getProviderKey() {
-        return BluebirdProvider.PROVIDER_NAME;
+        return BluebirdProvider.PROVIDER_KEY;
     }
 }

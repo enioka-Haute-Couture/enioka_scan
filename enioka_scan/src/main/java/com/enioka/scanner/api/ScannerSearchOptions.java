@@ -1,5 +1,12 @@
 package com.enioka.scanner.api;
 
+import android.content.Intent;
+import android.os.Bundle;
+
+import com.enioka.scanner.service.ScannerServiceApi;
+
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -53,5 +60,54 @@ public class ScannerSearchOptions {
     public ScannerSearchOptions getAllAvailableScanners() {
         returnOnlyFirst = false;
         return this;
+    }
+
+    /**
+     * Sets the option's attributes based on a given intent's extras.
+     * The expected extras are those used by the Scanner Service API.
+     * @param intent The intent to translate
+     */
+    public ScannerSearchOptions fromIntentExtras(final Intent intent) {
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            useBlueTooth = extras.getBoolean(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, useBlueTooth);
+            allowLaterConnections = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, allowLaterConnections);
+            allowPairingFlow = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, allowPairingFlow);
+            allowInitialSearch = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, allowInitialSearch);
+
+            String[] allowedProviderKeysArray = extras.getStringArray(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY);
+            if (allowedProviderKeysArray != null && allowedProviderKeysArray.length > 0) {
+                allowedProviderKeys = new HashSet<>();
+                allowedProviderKeys.addAll(Arrays.asList(allowedProviderKeysArray));
+            }
+
+            String[] excludedProviderKeysArray = extras.getStringArray(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY);
+            if (excludedProviderKeysArray != null && excludedProviderKeysArray.length > 0) {
+                excludedProviderKeys = new HashSet<>();
+                excludedProviderKeys.addAll(Arrays.asList(excludedProviderKeysArray));
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     * Sets an intent's extras based on the option's attributes.
+     * The expected extras are those used by the Scanner Service API.
+     * @param intent The intent to update
+     */
+    public void toIntentExtras(final Intent intent) {
+        //intent.putExtra("", waitDisconnected); // No corresponding extra
+        //intent.putExtra("", returnOnlyFirst); // No corresponding extra
+        intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, useBlueTooth);
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, allowLaterConnections);
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, allowInitialSearch);
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, allowPairingFlow);
+        if (allowedProviderKeys != null && allowedProviderKeys.size() > 0) {
+            intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys.toArray());
+        }
+        if (excludedProviderKeys != null && excludedProviderKeys.size() > 0) {
+            intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, excludedProviderKeys.toArray());
+        }
     }
 }

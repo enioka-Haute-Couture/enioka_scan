@@ -4,4 +4,20 @@
     <string name="scanner_tester">Scanner tester</string>
     <string name="test_scan">Test scanner library</string>
     <string name="test_camera2">Test camera2 scanner (WIP)</string>
+    <string name="settings">Scanner settings</string>
+
+    <string name="scanner_search_settings">Settings</string>
+    <string name="use_bluetooth">Use Bluetooth:</string>
+    <string name="allow_initial_search">Allow Initial Search:</string>
+    <string name="allow_later_connections">Allow Later Connections:</string>
+    <string name="allow_pairing_flow">Allow Pairing Flow:</string>
+    <string name="allowed_providers">Allowed Providers (empty = all):</string>
+    <string name="excluded_providers">Excluded Providers (empty = none):</string>
+    <string name="save">Save</string>
+
+    <string name="generichidprovider">GenericHidProvider</string>
+    <string name="hhtprovider">HHTProvider</string>
+    <string name="bluebirdprovider">BluebirdProvider</string>
+    <string name="progloveprovider">ProgloveProvider</string>
+    <string name="serialbtscannerprovider">SerialBtScannerProvider</string>
 </resources>

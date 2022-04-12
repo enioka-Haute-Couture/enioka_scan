@@ -30,7 +30,7 @@ class PostechSppScanner implements ScannerBackground {
 
     @Override
     public String getProviderKey() {
-        return "BtSppSdk";
+        return PostechSppScannerProvider.PROVIDER_KEY;
     }
 
 

@@ -186,6 +186,6 @@ public class HHTScanner extends IntentScanner<String> {
 
     @Override
     public String getProviderKey() {
-        return HHTProvider.PROVIDER_NAME;
+        return HHTProvider.PROVIDER_KEY;
     }
 }

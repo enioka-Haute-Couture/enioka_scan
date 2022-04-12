@@ -13,7 +13,7 @@ import com.m3.ringscannersdk.RingScannerService;
 
 public class M3RingScannerProvider implements ScannerProvider {
     private static final String LOG_TAG = "M3RingScannerProvider";
-    static String PROVIDER_KEY = "M3RingScannerProvider";
+    public static final String PROVIDER_KEY = "M3RingScannerProvider";
 
     @Override
     public void getScanner(Context ctx, final ProviderCallback cb, ScannerSearchOptions options) {

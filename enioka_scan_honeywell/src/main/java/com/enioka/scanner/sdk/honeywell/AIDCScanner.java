@@ -1,6 +1,5 @@
 package com.enioka.scanner.sdk.honeywell;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -210,7 +209,7 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
 
     @Override
     public String getProviderKey() {
-        return AIDCProvider.PROVIDER_NAME;
+        return AIDCProvider.PROVIDER_KEY;
     }
 
     @Override

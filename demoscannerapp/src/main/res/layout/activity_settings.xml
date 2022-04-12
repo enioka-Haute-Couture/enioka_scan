@@ -252,30 +252,105 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedBluebirdProvider" />
 
-            <!-- Bluetooth Serial -->
+            <!-- GeneralScan -->
             <TextView
-                android:id="@+id/textViewAllowedSerialBtScannerProvider"
+                android:id="@+id/textViewAllowedGsSppScannerProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="48dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/serialbtscannerprovider"
+                android:text="@string/gssppscannerprovider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProgloveProvider" />
 
             <CheckBox
-                android:id="@+id/checkAllowedSerialBtScannerProvider"
+                android:id="@+id/checkAllowedGsSppScannerProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedSerialBtScannerProvider"
+                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedGsSppScannerProvider"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProgloveProvider" />
+
+            <!-- Zebra OSS SPP -->
+            <TextView
+                android:id="@+id/textViewAllowedZebraOssSppScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/zebraosssppscannerprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedGsSppScannerProvider" />
+
+            <CheckBox
+                android:id="@+id/checkAllowedZebraOssSppScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedZebraOssSppScannerProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedGsSppScannerProvider" />
+
+            <!-- Zebra OSS ATT -->
+            <TextView
+                android:id="@+id/textViewAllowedZebraOssAttScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/zebraossattscannerprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedZebraOssSppScannerProvider" />
+
+            <CheckBox
+                android:id="@+id/checkAllowedZebraOssAttScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedZebraOssAttScannerProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedZebraOssSppScannerProvider" />
+
+            <!-- Honeywell OSS -->
+            <TextView
+                android:id="@+id/textViewAllowedHoneywellOssSppScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/honeywellosssppscannerprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedZebraOssAttScannerProvider" />
+
+            <CheckBox
+                android:id="@+id/checkAllowedHoneywellOssSppScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedHoneywellOssSppScannerProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedZebraOssAttScannerProvider" />
 
             <!-- EXCLUDED PROVIDERS -->
 
@@ -289,7 +364,7 @@
                 android:text="@string/excluded_providers"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedSerialBtScannerProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHoneywellOssSppScannerProvider" />
 
             <!-- HID -->
             <TextView
@@ -391,30 +466,105 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedBluebirdProvider" />
 
-            <!-- Bluetooth Serial -->
+            <!-- GeneralScan -->
             <TextView
-                android:id="@+id/textViewExcludedSerialBtScannerProvider"
+                android:id="@+id/textViewExcludedGsSppScannerProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="48dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/serialbtscannerprovider"
+                android:text="@string/gssppscannerprovider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedProgloveProvider" />
 
             <CheckBox
-                android:id="@+id/checkExcludedSerialBtScannerProvider"
+                android:id="@+id/checkExcludedGsSppScannerProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedSerialBtScannerProvider"
+                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedGsSppScannerProvider"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedProgloveProvider" />
+
+            <!-- Zebra OSS SPP -->
+            <TextView
+                android:id="@+id/textViewExcludedZebraOssSppScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/zebraosssppscannerprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedGsSppScannerProvider" />
+
+            <CheckBox
+                android:id="@+id/checkExcludedZebraOssSppScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedZebraOssSppScannerProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedGsSppScannerProvider" />
+
+            <!-- Zebra OSS ATT -->
+            <TextView
+                android:id="@+id/textViewExcludedZebraOssAttScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/zebraossattscannerprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedZebraOssSppScannerProvider" />
+
+            <CheckBox
+                android:id="@+id/checkExcludedZebraOssAttScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedZebraOssAttScannerProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedZebraOssSppScannerProvider" />
+
+            <!-- Honeywell OSS -->
+            <TextView
+                android:id="@+id/textViewExcludedHoneywellOssSppScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/honeywellosssppscannerprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedZebraOssAttScannerProvider" />
+
+            <CheckBox
+                android:id="@+id/checkExcludedHoneywellOssSppScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedHoneywellOssSppScannerProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedZebraOssAttScannerProvider" />
 
             <!-- SAVE -->
 
@@ -428,7 +578,7 @@
                 android:text="@string/save"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedSerialBtScannerProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssSppScannerProvider" />
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>

@@ -8,7 +8,7 @@ import com.enioka.scanner.sdk.zebraoss.commands.CapabilitiesRequest;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 
 public class ZebraOssAttScannerProvider implements BtSppScannerProvider {
-    private static final String PROVIDER_KEY = "BT_ZebraOssATTProvider";
+    public static final String PROVIDER_KEY = "BT_ZebraOssATTProvider";
     private final ScannerDataParser inputHandler = new SsiOverAttParser();
 
     @Override

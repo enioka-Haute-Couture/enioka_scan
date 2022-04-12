@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -19,10 +18,8 @@ import com.enioka.scanner.api.ScannerForeground;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.api.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
-import com.enioka.scanner.sdk.athesi.DataWedge;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -99,25 +96,8 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Bundle extras = intent.getExtras();
-        if (extras != null) {
-            scannerSearchOptions.useBlueTooth = extras.getBoolean(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, scannerSearchOptions.useBlueTooth);
-            scannerSearchOptions.allowLaterConnections = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, scannerSearchOptions.allowLaterConnections);
-            scannerSearchOptions.allowPairingFlow = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, scannerSearchOptions.allowPairingFlow);
-            scannerSearchOptions.allowInitialSearch = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, scannerSearchOptions.allowInitialSearch);
+        scannerSearchOptions.fromIntentExtras(intent);
 
-            String[] allowedProviderKeys = extras.getStringArray(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY);
-            if (allowedProviderKeys != null && allowedProviderKeys.length > 0) {
-                scannerSearchOptions.allowedProviderKeys = new HashSet<>();
-                scannerSearchOptions.allowedProviderKeys.addAll(Arrays.asList(allowedProviderKeys));
-            }
-
-            String[] excludedProviderKeys = extras.getStringArray(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY);
-            if (excludedProviderKeys != null && excludedProviderKeys.length > 0) {
-                scannerSearchOptions.excludedProviderKeys = new HashSet<>();
-                scannerSearchOptions.excludedProviderKeys.addAll(Arrays.asList(excludedProviderKeys));
-            }
-        }
         if (firstBind) {
             this.initLaserScannerSearch();
         }

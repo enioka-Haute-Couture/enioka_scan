@@ -5,4 +5,20 @@
     <string name="scanner_tester">Testeur de scanner</string>
     <string name="test_scan">Tester la librairie de scan</string>
     <string name="test_camera2">Tester le scan via camera2 (WIP)</string>
+    <string name="settings">Paramètres du scanner</string>
+
+    <string name="scanner_search_settings">Paramètres</string>
+    <string name="use_bluetooth">Utiliser le Bluetooth:</string>
+    <string name="allow_initial_search">Autoriser la recherche initiale:</string>
+    <string name="allow_later_connections">Autoriser les connexions retardataires:</string>
+    <string name="allow_pairing_flow">Autoriser les séquences d\'appairage:</string>
+    <string name="allowed_providers">Providers Autorisés (vide = tous):</string>
+    <string name="excluded_providers">Providers Exclus (vide = aucun):</string>
+    <string name="save">Enregistrer</string>
+
+    <string name="generichidprovider">GenericHidProvider</string>
+    <string name="hhtprovider">HHTProvider</string>
+    <string name="bluebirdprovider">BluebirdProvider</string>
+    <string name="progloveprovider">ProgloveProvider</string>
+    <string name="serialbtscannerprovider">SerialBtScannerProvider</string>
 </resources>

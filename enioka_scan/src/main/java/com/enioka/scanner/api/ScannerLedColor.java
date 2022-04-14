@@ -1,5 +1,5 @@
 package com.enioka.scanner.api;
 
-public enum Color {
+public enum ScannerLedColor {
     RED, GREEN
 }

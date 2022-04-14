@@ -8,6 +8,8 @@
     <string name="settings">Paramètres du scanner</string>
 
     <string name="scanner_search_settings">Paramètres</string>
+    <string name="wait_disconnected">Attendre les scanners déconnectés:</string>
+    <string name="return_only_first">Premier connecté uniquement:</string>
     <string name="use_bluetooth">Utiliser le Bluetooth:</string>
     <string name="allow_initial_search">Autoriser la recherche initiale:</string>
     <string name="allow_later_connections">Autoriser les connexions retardataires:</string>
@@ -16,7 +18,6 @@
     <string name="excluded_providers">Providers Exclus (vide = aucun):</string>
     <string name="save">Enregistrer</string>
 
-    <string name="generichidprovider">GenericHidProvider</string>
     <string name="hhtprovider">HHTProvider</string>
     <string name="bluebirdprovider">BluebirdProvider</string>
     <string name="progloveprovider">ProgloveProvider</string>

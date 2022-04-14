@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.util.Log;
 
-import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.bt.api.Command;
@@ -26,7 +25,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
-class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Closeable {
+class BleTerminalIODevice implements BleStateMachineDevice, BluetoothScannerInternal, Closeable {
     private static final String LOG_TAG = "BtSppSdk";
 
     private Context ctx;

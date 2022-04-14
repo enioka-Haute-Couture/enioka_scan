@@ -27,9 +27,9 @@ public class SerialBtScannerProvider implements ScannerProvider {
     public static final String PROVIDER_KEY = "BtSppSdk";
 
     // Cache of all available providers, only initialized once
-    private static final List<com.enioka.scanner.bt.api.BtSppScannerProvider> scannerProviders = new ArrayList<>();
+    private static final List<BtSppScannerProvider> scannerProviders = new ArrayList<>();
     // Filtered list of providers to respect the allowed/excluded providers options, reset on every scanner search
-    private final List<com.enioka.scanner.bt.api.BtSppScannerProvider> sortedScannerProviders = new ArrayList<>();
+    private final List<BtSppScannerProvider> sortedScannerProviders = new ArrayList<>();
 
     private ClassicBtAcceptConnectionThread server;
     private ProviderCallback providerCallback;
@@ -40,6 +40,17 @@ public class SerialBtScannerProvider implements ScannerProvider {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Interface with the rest of the library
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Analogous method to {@link com.enioka.scanner.LaserScanner#getProviderCache()} for bluetooth providers.
+     */
+    public List<String> getProviderCache() {
+        final List<String> providerKeys = new ArrayList<>();
+        for (final BtSppScannerProvider btProvider : scannerProviders) {
+            providerKeys.add(btProvider.getKey());
+        }
+        return providerKeys;
+    }
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
@@ -83,10 +94,9 @@ public class SerialBtScannerProvider implements ScannerProvider {
      *
      * @param ctx a context used to retrieve a PackageManager
      */
-    private static void getProviders(Context ctx) {
-        if (!scannerProviders.isEmpty()) {
-            return;
-        }
+    public static void discoverProviders(Context ctx) {
+        // Clear cache
+        scannerProviders.clear();
 
         PackageManager pkManager = ctx.getPackageManager();
 
@@ -117,7 +127,9 @@ public class SerialBtScannerProvider implements ScannerProvider {
 
     private void getDevices(Context ctx, ScannerSearchOptions options) {
         // Init cache of providers if needed.
-        getProviders(ctx);
+        if (scannerProviders.isEmpty()) {
+            discoverProviders(ctx);
+        }
 
         // Filter providers based on options.
         sortedScannerProviders.clear();
@@ -153,7 +165,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
                     Log.i(PROVIDER_KEY, "Ignoring device - it is already connected to another app or SDK");
                 }
 
-                ScannerInternal btDevice;
+                BluetoothScannerInternal btDevice;
                 if (bt.getType() == BluetoothDevice.DEVICE_TYPE_CLASSIC) { // Only set for already paired devices.
                     // We only allow SPP devices.
                     boolean found = false;
@@ -218,7 +230,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
      * What to do when a connection is successful (i.e. socket opened or GATT server connected): try to resolve the BT SPP provider associated to the device.
      */
     private class ConnectionCallback implements ClassicBtConnectToDeviceThread.OnConnectedCallback {
-        private ScannerInternal btDevice;
+        private BluetoothScannerInternal btDevice;
         private final SerialBtScannerProvider parentProvider;
 
         // btDevice can be null - created from socket in that case. (master scanner).
@@ -227,7 +239,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
         }
 
         @Override
-        public void connected(ScannerInternal scanner) {
+        public void connected(BluetoothScannerInternal scanner) {
             btDevice = scanner;
             Log.d(PROVIDER_KEY, "A new BT connection was made. Launching provider resolution.");
 
@@ -245,7 +257,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
                 }
 
                 @Override
-                public void notCompatible(ScannerInternal device) {
+                public void notCompatible(BluetoothScannerInternal device) {
                     Log.i(PROVIDER_KEY, "Scanner " + device + " could not be bound to a provider and will be disconnected");
                     btDevice.disconnect();
                     waitForScanners.release(1);

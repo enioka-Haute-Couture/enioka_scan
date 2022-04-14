@@ -9,18 +9,18 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
- * Responsible for transforming {@link ScannerInternal} into {@link Scanner}. As this is a long and costly operation
+ * Responsible for transforming {@link BluetoothScannerInternal} into {@link Scanner}. As this is a long and costly operation
  * (as providers may need to wait for device answer timeout to their "are you a type XXX device" questions)
  * there is one thread per BT device.
  */
 class ScannerProviderResolutionThread implements Runnable, BtSppScannerProvider.ManagementCallback {
     private static final String LOG_TAG = "BtSppSdk";
 
-    private ScannerInternal device;
+    private BluetoothScannerInternal device;
     private List<BtSppScannerProvider> scannerProviders;
     private ScannerResolutionCallback callback;
     private final Semaphore providerLock = new Semaphore(0);
-    private com.enioka.scanner.api.Scanner foundLibraryScanner;
+    private Scanner foundLibraryScanner;
 
     /**
      * Methods to call at the end of the analysis of a given scanner by all provider.
@@ -40,10 +40,10 @@ class ScannerProviderResolutionThread implements Runnable, BtSppScannerProvider.
          *
          * @param device the scanner which failed to find a home provider. Very sad.
          */
-        void notCompatible(ScannerInternal device);
+        void notCompatible(BluetoothScannerInternal device);
     }
 
-    ScannerProviderResolutionThread(ScannerInternal device, List<BtSppScannerProvider> scannerProviders, ScannerResolutionCallback callback) {
+    ScannerProviderResolutionThread(BluetoothScannerInternal device, List<BtSppScannerProvider> scannerProviders, ScannerResolutionCallback callback) {
         this.device = device;
         this.scannerProviders = scannerProviders;
         this.callback = callback;

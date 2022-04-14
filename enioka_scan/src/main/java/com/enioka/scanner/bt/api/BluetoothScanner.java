@@ -5,7 +5,7 @@ import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 /**
  * Represents a connected SPP device, and can be used to run commands on it.
  */
-public interface Scanner {
+public interface BluetoothScanner {
     /**
      * Run a command on the scanner. Asynchronous - this call returns before the command is actually sent to the scanner.<br>
      * If the command expects an answer, it will be received as any data from the scanner and sent to the registered {@link ScannerDataParser}

@@ -75,7 +75,7 @@ class BleHelpers {
                 BleTerminalIODevice device = new BleTerminalIODevice(ctx, btDevice);
                 device.connect(new ClassicBtConnectToDeviceThread.OnConnectedCallback() {
                     @Override
-                    public void connected(ScannerInternal scanner) {
+                    public void connected(BluetoothScannerInternal scanner) {
 
                     }
 

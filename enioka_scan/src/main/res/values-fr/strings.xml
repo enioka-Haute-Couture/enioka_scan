@@ -14,12 +14,13 @@
     <string name="scanner_status_FAILURE">Scanner non disponible suite à une erreur critique</string>
     <string name="scanner_status_DISCONNECTED">Scanner déconnecté définitivement</string>
     <string name="scanner_status_UNKNOWN">Scanner dans un état inconnu</string>
+    <string name="scanner_status_SERVICE_PROVIDER_SEARCH_OVER">ScannerService a terminé la découverte de providers de scanner</string>
     <string name="scanner_status_SERVICE_SDK_SEARCH_NOCOMPATIBLE">Aucun scanner de code barre matériel compatible n\'est disponible sur cet appareil</string>
     <string name="scanner_status_SERVICE_SDK_SEARCH_OVER">Tous les fournisseurs de scanners matériels ont répondu</string>
 
     <!-- Others -->
     <string name="scanner_camera_no_camera">Aucune caméra disponible. Veuillez brancher votre lecteur laser. L\'application va s\'arrêter.</string>
-    <string name="scanner_camera_open_error">Veuillez vérifier qu\'aucune autre application n\'utilise la caméra (comme ScanWedge, DataWedge...). Vérifiez aussi que la caméra fnction dans l\'application idoine.</string>
+    <string name="scanner_camera_open_error">Veuillez vérifier qu\'aucune autre application n\'utilise la caméra (comme ScanWedge, DataWedge…). Vérifiez aussi que la caméra fnction dans l\'application idoine.</string>
     <string name="scanner_camera_open_error_title">Impossible de se connecter à la caméra</string>
     <string name="activity_scan_barcode_value_placeholder">10AL9271B2I8</string>
     <string name="activity_scan_scanner_not_initialized">placeholder</string>

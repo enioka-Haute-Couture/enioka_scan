@@ -1,8 +1,8 @@
 package com.enioka.scanner.sdk.zebraoss;
 
+import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
-import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.bt.api.ScannerDataParser;
 import com.enioka.scanner.sdk.zebraoss.commands.CapabilitiesRequest;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
@@ -12,7 +12,7 @@ public class ZebraOssSppScannerProvider implements BtSppScannerProvider {
     private final ScannerDataParser inputHandler = new SsiOverSppParser();
 
     @Override
-    public void canManageDevice(final Scanner device, final ManagementCallback callback) {
+    public void canManageDevice(final BluetoothScanner device, final ManagementCallback callback) {
         if (device.isBleDevice()) {
             callback.cannotManage();
             return;

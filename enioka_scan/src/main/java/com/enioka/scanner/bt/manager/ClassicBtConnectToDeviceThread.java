@@ -21,7 +21,7 @@ class ClassicBtConnectToDeviceThread extends Thread {
     private final OnStreamConnectedCallback onConnectedCallback;
 
     interface OnConnectedCallback {
-        void connected(ScannerInternal scanner);
+        void connected(BluetoothScannerInternal scanner);
 
         void failed();
     }

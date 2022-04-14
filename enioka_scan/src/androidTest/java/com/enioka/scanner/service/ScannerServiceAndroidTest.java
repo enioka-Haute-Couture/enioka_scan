@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.mock;
+package com.enioka.scanner.service;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,21 +9,11 @@ import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
-import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerSearchOptions;
-import com.enioka.scanner.api.callbacks.ScannerDataCallback;
-import com.enioka.scanner.api.callbacks.ScannerInitCallback;
-import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
-import com.enioka.scanner.api.proxies.ScannerConnectionHandlerProxy;
-import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
-import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
-import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
-import com.enioka.scanner.service.ScannerClient;
-import com.enioka.scanner.service.ScannerService;
-import com.enioka.scanner.service.ScannerServiceApi;
+import com.enioka.scanner.sdk.mock.MockProvider;
+import com.enioka.scanner.sdk.mock.MockScanner;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,9 +24,9 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
- * Tests that the mock is compatible with the library's instantiation methods: LaserScanner and ScannerService.
+ * Tests public methods of ScannerService
  */
-public class MockAndroidTest {
+public class ScannerServiceAndroidTest {
 
     // Mock application context
     private static final Context ctx = InstrumentationRegistry.getContext();
@@ -47,10 +37,14 @@ public class MockAndroidTest {
     // Semaphore gaining permits only when the process of searching a Scanner ends.
     private static final Semaphore scannerDiscoverySemaphore = new Semaphore(0);
 
+    // Semaphore gaining permits only when the process of discovering ScannerProviders ends.
+    private static final Semaphore providerDiscoverySemaphore = new Semaphore(0);
+
     @Before
     public void drainSemaphorePermits() {
         serviceBindingSemaphore.drainPermits();
         scannerDiscoverySemaphore.drainPermits();
+        providerDiscoverySemaphore.drainPermits();
     }
 
     private static void waitOnSemaphore(final Semaphore semaphore) {
@@ -62,23 +56,7 @@ public class MockAndroidTest {
     }
 
     @Test
-    public void testMockRetrievableByLaserScanner(){
-        final ScannerSearchOptions options = ScannerSearchOptions.defaultOptions();
-        options.useBlueTooth = false;
-        options.allowedProviderKeys = new HashSet<>();
-        options.allowedProviderKeys.add(MockProvider.PROVIDER_KEY);
-
-        final TestScannerConnectionHandler handler = new TestScannerConnectionHandler();
-        LaserScanner.getLaserScanner(ctx, new ScannerConnectionHandlerProxy(handler), options);
-
-        // Wait for LaserScanner to finish Scanner discovery
-        waitOnSemaphore(scannerDiscoverySemaphore);
-
-        Assert.assertNotNull("Mock scanner was not found", handler.mock);
-    }
-
-    @Test
-    public void testMockRetrievableByScannerService(){
+    public void testScannerSearchDelayedAfterBind() {
         final TestServiceConnection serviceConnection = new TestServiceConnection();
 
         final ScannerSearchOptions options = ScannerSearchOptions.defaultOptions();
@@ -88,6 +66,7 @@ public class MockAndroidTest {
 
         final Intent serviceIntent = new Intent(ctx, ScannerService.class);
         options.toIntentExtras(serviceIntent);
+        serviceIntent.putExtra(ScannerServiceApi.EXTRA_START_SEARCH_ON_SERVICE_BIND, false);
         ctx.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         // Wait for binding with ScannerService
@@ -101,14 +80,24 @@ public class MockAndroidTest {
             public void onStatusChanged(@Nullable Scanner scanner, Status newStatus) {}
             @Override
             public void onScannerInitEnded(int count) {
-                Log.d("TESTUITE -- testMockRetrievableByScannerService", "Scanner init ended with " + count + " scanners.");
                 scannerDiscoverySemaphore.release();
             }
             @Override
-            public void onProviderDiscoveryEnded() {}
+            public void onProviderDiscoveryEnded() {
+                providerDiscoverySemaphore.release();
+            }
             @Override
             public void onData(List<Barcode> data) {}
         });
+
+        // Wait for ScannerService to finish Provider discovery
+        waitOnSemaphore(providerDiscoverySemaphore);
+
+        final List<String> providers = scannerService.getAvailableProviders();
+        Assert.assertFalse("List of provider keys should not be empty", providers.isEmpty());
+        Assert.assertTrue("List of provider keys should contain the Mock provider", providers.contains(MockProvider.PROVIDER_KEY));
+
+        scannerService.restartScannerDiscovery();
 
         // Wait for ScannerService to finish Scanner discovery
         waitOnSemaphore(scannerDiscoverySemaphore);
@@ -119,42 +108,6 @@ public class MockAndroidTest {
     }
 
     // TOOLS
-
-    private static class TestScannerConnectionHandler implements ScannerConnectionHandler {
-        public ScannerInitCallback initCallback = new ScannerInitCallback() {
-            @Override
-            public void onConnectionSuccessful(Scanner s) {}
-            @Override
-            public void onConnectionFailure(Scanner s) {
-                Assert.fail();
-            }
-        };
-        public ScannerStatusCallback statusCallback = (scanner, newStatus) -> {};
-        public ScannerDataCallback dataCallback = (s, data) -> {};
-        public MockScanner mock = null;
-
-        @Override
-        public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
-            if (s instanceof MockScanner) {
-                mock = ((MockScanner) s);
-                mock.initialize(ctx, new ScannerInitCallbackProxy(initCallback), new ScannerDataCallbackProxy(dataCallback), new ScannerStatusCallbackProxy(statusCallback), null);
-            } else {
-                Assert.fail("Wrong scanner was detected");
-            }
-        }
-
-        @Override
-        public void endOfScannerSearch() {
-            Assert.assertNotNull("Mock was not found", mock);
-            // Scanner discovery ended
-            scannerDiscoverySemaphore.release();
-        }
-
-        @Override
-        public void noScannerAvailable() {}
-        @Override
-        public void scannerConnectionProgress(String providerKey, String scannerKey, String message) {}
-    }
 
     private static class TestServiceConnection implements ServiceConnection {
         public ScannerService.LocalBinder binder;

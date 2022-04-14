@@ -10,7 +10,10 @@ import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
@@ -36,9 +39,9 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
 
     private Scanner selfScanner = this;
     private boolean waitingForResult = false;
-    private Scanner.ScannerDataCallback dataCb = null;
+    private ScannerDataCallbackProxy dataCb = null;
     private ScannerStatusCallback statusCb = null;
-    private Scanner.ScannerInitCallback initCb = null;
+    private ScannerInitCallbackProxy initCb = null;
     private Scanner.Mode mode;
 
     private Context ctx;
@@ -394,16 +397,16 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void initialize(Context ctx, ScannerInitCallback cb0, ScannerDataCallback cb1, ScannerStatusCallback cb2, Mode mode) {
-        this.initCb = cb0;
-        this.dataCb = cb1;
-        this.statusCb = cb2;
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+        this.initCb = initCallback;
+        this.dataCb = dataCallback;
+        this.statusCb = statusCallback;
         this.mode = mode;
         initEMDK(ctx);
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCb = cb;
     }
 

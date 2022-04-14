@@ -1,12 +1,15 @@
 package com.enioka.scanner.sdk.zebraoss;
 
 import android.content.Context;
-import android.os.Handler;
+
 import android.util.Log;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.zebraoss.commands.Beep;
@@ -36,7 +39,7 @@ import java.util.concurrent.Semaphore;
 class ZebraOssScanner implements ScannerBackground {
     private static final String LOG_TAG = "SsiParser";
 
-    private ScannerDataCallback dataCallback = null;
+    private ScannerDataCallbackProxy dataCallback = null;
     private final com.enioka.scanner.bt.api.Scanner btScanner;
     private final Map<String, String> statusCache = new HashMap<>();
     private final String providerKey;
@@ -67,7 +70,7 @@ class ZebraOssScanner implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCallback = cb;
     }
 
@@ -203,10 +206,8 @@ class ZebraOssScanner implements ScannerBackground {
     }
 
     @Override
-    public void initialize(final Context applicationContext, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
         this.dataCallback = dataCallback;
-
-        final Handler uiHandler = new Handler(applicationContext.getMainLooper());
 
         // Hook connection / disconnection events
         this.btScanner.registerStatusCallback(statusCallback);
@@ -217,12 +218,7 @@ class ZebraOssScanner implements ScannerBackground {
             public void onSuccess(final Barcode data) {
                 final List<Barcode> res = new ArrayList<>(1);
                 res.add(data);
-                uiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        ZebraOssScanner.this.dataCallback.onData(ZebraOssScanner.this, res);
-                    }
-                });
+                ZebraOssScanner.this.dataCallback.onData(ZebraOssScanner.this, res);
             }
 
             @Override

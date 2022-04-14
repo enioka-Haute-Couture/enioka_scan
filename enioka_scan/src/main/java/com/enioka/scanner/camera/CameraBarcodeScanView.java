@@ -715,12 +715,9 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
         }*/
 
         // Return result on main thread
-        this.post(new Runnable() {
-            @Override
-            public void run() {
-                if (CameraBarcodeScanView.this.handler != null) {
-                    CameraBarcodeScanView.this.handler.handleScanResult(result, type);
-                }
+        this.post(() -> {
+            if (CameraBarcodeScanView.this.handler != null) {
+                CameraBarcodeScanView.this.handler.handleScanResult(result, type);
             }
         });
     }

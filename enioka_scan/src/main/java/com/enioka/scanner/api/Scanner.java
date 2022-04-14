@@ -1,8 +1,7 @@
 package com.enioka.scanner.api;
 
-import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,32 +34,6 @@ public interface Scanner {
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // CALLBACKS
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Callback handling scanner init events
-     */
-    interface ScannerInitCallback {
-        void onConnectionSuccessful(Scanner s);
-
-        void onConnectionFailure(Scanner s);
-    }
-
-    /**
-     * Callback to deal with data read by the scanner.
-     */
-    interface ScannerDataCallback {
-        /**
-         * Note: called on the UI thread.
-         *
-         * @param data the data read by the reader.
-         */
-        void onData(Scanner s, List<Barcode> data);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // SOFTWARE TRIGGERS
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -88,7 +61,7 @@ public interface Scanner {
      *
      * @param cb a callback to call when data is read.
      */
-    void setDataCallBack(ScannerDataCallback cb);
+    void setDataCallBack(ScannerDataCallbackProxy cb);
 
     /**
      * Disconnect scanner from the App (the app does not need the scanner anymore)

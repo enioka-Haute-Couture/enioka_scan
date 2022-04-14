@@ -5,7 +5,12 @@ import android.util.Log;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerDataCallback;
+import com.enioka.scanner.api.callbacks.ScannerInitCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
@@ -72,18 +77,36 @@ public class MockScanner implements ScannerBackground {
     // Lifecycle
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Finishes the initialization of the Mock. This version of the method is best suited for unit tests as it will not require callback proxies (the context may be null).
+     */
     @Override
-    public void initialize(final Context ctx, final ScannerInitCallback scannerInitCallback, final ScannerDataCallback scannerDataCallback, final ScannerStatusCallback scannerStatusCallback, final Mode mode) {
-        dataCallback = scannerDataCallback;
-        statusCallback = scannerStatusCallback;
+    public void initialize(final Context applicationContext, final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, final Mode mode) {
+        Log.w(LOG_TAG, "The Mock was initialized with non-proxy callbacks, UI-thread won't be used (best suitable for unit tests)");
+        this.dataCallback = dataCallback;
+        this.statusCallback = statusCallback;
         this.mode = mode;
 
         statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
-        scannerInitCallback.onConnectionSuccessful(this);
+        initCallback.onConnectionSuccessful(this);
+    }
+
+    /**
+     * Finishes the initialization of the Mock. This version of the method is best suited for integrated tests as proxy callbacks are used, meaning jumps to UI-thread which are not mocked.
+     */
+    @Override
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+        Log.w(LOG_TAG, "The Mock was initialized with proxy callbacks, UI-thread will be used (only suitable for android integrated tests)");
+        this.dataCallback = dataCallback;
+        this.statusCallback = statusCallback;
+        this.mode = mode;
+
+        statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
+        initCallback.onConnectionSuccessful(this);
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         dataCallback = cb;
     }
 

@@ -1,6 +1,8 @@
-package com.enioka.scanner.api;
+package com.enioka.scanner.api.callbacks;
 
 import com.enioka.scanner.LaserScanner;
+import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerSearchOptions;
 
 /**
  * Interface to implement in order to be able to retrieve scanners created by {@link LaserScanner} (the main scanner factory).
@@ -12,7 +14,7 @@ public interface ScannerConnectionHandler {
      * @param scannerKey a unique identifier for the scanner being connected.
      * @param message    a SDK-specific message (localized)
      */
-    public void scannerConnectionProgress(String providerKey, String scannerKey, String message);
+    void scannerConnectionProgress(final String providerKey, final String scannerKey, final String message);
 
     /**
      * Called when a scanner was found and created. Depending on {@link ScannerSearchOptions#returnOnlyFirst} may be called multiple times.
@@ -20,7 +22,7 @@ public interface ScannerConnectionHandler {
      * @param scannerKey a unique identifier for the scanner being connected.
      * @param s          the new scanner. Never null.
      */
-    public void scannerCreated(String providerKey, String scannerKey, Scanner s);
+    void scannerCreated(final String providerKey, final String scannerKey, final Scanner s);
 
     /**
      * Called when there is no scanner available on the device.

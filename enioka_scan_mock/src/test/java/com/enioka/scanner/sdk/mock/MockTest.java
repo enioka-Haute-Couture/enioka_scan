@@ -36,7 +36,7 @@ public class MockTest {
         final Barcode barcode = new Barcode("1234ABCD", BarcodeType.CODE39);
         final MockScanner mock = new MockScanner();
 
-        mock.initialize(initCallback, dataCallback, statusCallback, null);
+        mock.initialize(null, initCallback, dataCallback, statusCallback, null);
 
         expectedData.add(barcode);
         mock.scan(barcode);
@@ -62,7 +62,7 @@ public class MockTest {
         final MockScanner mock = new MockScanner();
 
         expectedStatus.set(0, ScannerStatusCallback.Status.READY);
-        mock.initialize(initCallback, dataCallback, statusCallback, null);
+        mock.initialize(null, initCallback, dataCallback, statusCallback, null);
 
         expectedStatus.set(0, ScannerStatusCallback.Status.PAUSED);
         mock.pause();

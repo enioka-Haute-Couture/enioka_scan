@@ -11,6 +11,7 @@ import android.util.Log;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.bt.manager.SerialBtScannerProvider;
 import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
 import com.enioka.scanner.helpers.ProviderServiceHolder;
@@ -127,6 +128,17 @@ public final class LaserScanner {
      * Scanner search: used to determine the first scanner returned.
      */
     private static Boolean scannerFound = false;
+
+    /**
+     * Get a new laser scanner. The scanner is provided through a callback. There is a specific callback when no scanner is available.
+     *
+     * @param ctx     the activity wishing to retrieve a scanner. Must be an actual activity, not simply the application context.
+     * @param handler the callback.
+     * @param options parameters for scanner search.
+     */
+    public static void getLaserScanner(final Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+        getLaserScanner(ctx, new ScannerConnectionHandlerProxy(handler), options);
+    }
 
     /**
      * Get a new laser scanner. The scanner is provided through a callback. There is a specific callback when no scanner is available.

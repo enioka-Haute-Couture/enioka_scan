@@ -78,9 +78,10 @@ public class MockScanner implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Finishes the initialization of the Mock. This version of the method is best suited for unit tests as it will not require callback proxies.
+     * Finishes the initialization of the Mock. This version of the method is best suited for unit tests as it will not require callback proxies (the context may be null).
      */
-    public void initialize(final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, final Mode mode) {
+    @Override
+    public void initialize(final Context applicationContext, final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, final Mode mode) {
         Log.w(LOG_TAG, "The Mock was initialized with non-proxy callbacks, UI-thread won't be used (best suitable for unit tests)");
         this.dataCallback = dataCallback;
         this.statusCallback = statusCallback;

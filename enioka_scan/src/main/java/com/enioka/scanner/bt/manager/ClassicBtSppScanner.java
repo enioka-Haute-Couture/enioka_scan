@@ -31,6 +31,9 @@ import java.util.TimerTask;
  */
 class ClassicBtSppScanner implements Closeable, ScannerInternal {
     private static final String LOG_TAG = "BtSppSdk";
+    private static final int RECONNECTION_MAX_ATTEMPTS = 5;
+    private static final int RECONNECTION_INTERVAL_MS = 1000;
+    private static final int RECONNECTION_TIMEOUT_MS = 5000;
 
     private final SerialBtScannerProvider parentProvider;
     private BtSppScannerProvider scannerDriver;
@@ -42,8 +45,6 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
     private final String name;
     private boolean masterBtDevice = false;
 
-    private final int maxReconnectionAttempts = 60;
-    private final int reconnectionIntervalMs = 1000;
     private int connectionFailures = 0;
 
     private BluetoothSocket clientSocket;
@@ -222,14 +223,14 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             Log.w(LOG_TAG, "Reconnection will not be attempted as it was a master device - the device itself should reconnect.");
             this.parentProvider.resetListener(BluetoothAdapter.getDefaultAdapter());
             if (statusCallback != null) {
-                statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.FAILURE);
+                statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.FAILURE);
             }
             return;
         }
 
         Log.w(LOG_TAG, "This is a slave device, attempting reconnection");
         if (statusCallback != null) {
-            statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.RECONNECTING);
+            statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.RECONNECTING);
         }
 
         // We choose to disable master connection if socket is still open - that way devices which are both master and slave will not reconnect the "wrong" way.
@@ -240,11 +241,16 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
     }
 
     private void reconnect() {
-        Log.w(LOG_TAG, "Reconnection attempt " + (this.connectionFailures + 1) + " out of " + this.maxReconnectionAttempts);
+        if (clientSocket != null && clientSocket.isConnected()) {
+            Log.w(LOG_TAG, "Reconnection failed: device is already connected");
+            return;
+        }
+
+        Log.w(LOG_TAG, "Reconnection attempt " + (this.connectionFailures + 1) + " out of " + RECONNECTION_MAX_ATTEMPTS);
 
         // Always sleeps first (and not only in case of failure) as sockets take time to close for small ring scanners.
         try {
-            Thread.sleep(reconnectionIntervalMs); // Allowed: we are in a dedicated thread which has nothing to do anyway.
+            Thread.sleep(RECONNECTION_INTERVAL_MS); // Allowed: we are in a dedicated thread which has nothing to do anyway.
         } catch (InterruptedException e) {
             // Ignore.
         }
@@ -259,7 +265,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                 connectStreams();
 
                 if (ClassicBtSppScanner.this.statusCallback != null) {
-                    ClassicBtSppScanner.this.statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.CONNECTED);
+                    ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.CONNECTED);
                 }
             }
 
@@ -267,17 +273,27 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
             public void failed() {
                 ClassicBtSppScanner.this.connectionFailures++;
 
-                if (ClassicBtSppScanner.this.connectionFailures < ClassicBtSppScanner.this.maxReconnectionAttempts) {
+                if (ClassicBtSppScanner.this.connectionFailures < ClassicBtSppScanner.RECONNECTION_MAX_ATTEMPTS) {
                     ClassicBtSppScanner.this.reconnect();
                 } else {
                     Log.w(LOG_TAG, "Giving up on dead scanner " + ClassicBtSppScanner.this.name);
                     if (ClassicBtSppScanner.this.statusCallback != null) {
-                        ClassicBtSppScanner.this.statusCallback.onStatusChanged((Scanner) ClassicBtSppScanner.this, ScannerStatusCallback.Status.FAILURE);
+                        ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.FAILURE);
                     }
                 }
             }
         });
         connectionThread.start();
+
+        // Handling reconnection timeout
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (ClassicBtSppScanner.this.connectionThread != null) {
+                    ClassicBtSppScanner.this.connectionThread.timeout();
+                }
+            }
+        }, RECONNECTION_TIMEOUT_MS);
     }
 
     @Override

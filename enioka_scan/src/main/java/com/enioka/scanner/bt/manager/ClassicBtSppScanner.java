@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
@@ -29,7 +28,7 @@ import java.util.TimerTask;
 /**
  * Internal class used as the main interaction entry point for bluetooth devices.
  */
-class ClassicBtSppScanner implements Closeable, ScannerInternal {
+class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal {
     private static final String LOG_TAG = "BtSppSdk";
     private static final int RECONNECTION_MAX_ATTEMPTS = 5;
     private static final int RECONNECTION_INTERVAL_MS = 1000;

@@ -5,10 +5,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-
-import com.enioka.scanner.camera.CameraBarcodeScanView;
 
 /**
  * A set of helpers for scanner SDK providers.
@@ -18,21 +18,27 @@ public final class Common {
      * Short high beep to indicate successful scan
      */
     public static void beepScanSuccessful() {
-        CameraBarcodeScanView.beepOk();
+        ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+        tg.startTone(ToneGenerator.TONE_PROP_PROMPT, 100);
+        tg.release();
     }
 
     /**
      * Long low beep to indicate unsuccessful scan
      */
     public static void beepScanFailure() {
-        CameraBarcodeScanView.beepKo();
+        ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+        tg.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 300);
+        tg.release();
     }
 
     /**
      * Different beep to indicate a completed barcode pairing
      */
     public static void beepPairingCompleted() {
-        CameraBarcodeScanView.beepWaiting();
+        ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+        tg.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 300);
+        tg.release();
     }
 
     /**

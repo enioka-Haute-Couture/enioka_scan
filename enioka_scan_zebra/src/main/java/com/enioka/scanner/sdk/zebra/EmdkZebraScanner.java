@@ -7,9 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.enioka.scanner.R;
-import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -34,7 +32,7 @@ import java.util.Map;
 /**
  * Zebra implementation for internal SYMBOL (not real Zebra) scanners.
  */
-public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKListener, com.symbol.emdk.barcode.Scanner.StatusListener, com.symbol.emdk.barcode.Scanner.DataListener {
+public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKManager.EMDKListener, com.symbol.emdk.barcode.Scanner.StatusListener, com.symbol.emdk.barcode.Scanner.DataListener {
     private final static String LOG_TAG = "ScannerZebra";
 
     private Scanner selfScanner = this;
@@ -468,61 +466,6 @@ public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKList
     @Override
     public void beepPairingCompleted() {
         Common.beepPairingCompleted();
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // ILLUMINATION
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void enableIllumination() {
-        //TODO.
-    }
-
-    @Override
-    public void disableIllumination() {
-        //TODO.
-    }
-
-    @Override
-    public void toggleIllumination() {
-        //TODO
-    }
-
-    @Override
-    public boolean supportsIllumination() {
-        return false;
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return false;
-    }
-
-    @Override
-    public void ledColorOn(Color color) {
-    }
-
-    @Override
-    public void ledColorOff(Color color) {
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // INVENTORY
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public String getStatus(String key) {
-        return null;
-    }
-
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    public Map<String, String> getStatus() {
-        return new HashMap<>();
     }
 
     @Override

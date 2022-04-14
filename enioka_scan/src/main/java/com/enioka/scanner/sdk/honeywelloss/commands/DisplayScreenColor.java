@@ -1,12 +1,12 @@
 package com.enioka.scanner.sdk.honeywelloss.commands;
 
-import com.enioka.scanner.api.Color;
+import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.bt.api.Command;
 
 public class DisplayScreenColor implements Command<Void> {
     private byte b1, b2;
 
-    public DisplayScreenColor(Color color) {
+    public DisplayScreenColor(ScannerLedColor color) {
         if (color == null) {
             b1 = 48;
             b2 = 48;

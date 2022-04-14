@@ -7,7 +7,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
-import com.enioka.scanner.api.Color;
+import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
@@ -15,9 +16,7 @@ import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -25,7 +24,7 @@ import java.util.TimerTask;
  * Scanner provider for ProGlove MARK II BT gloves.<br>
  * TODO: symbology configuration.
  */
-public class ProgloveScanner extends IntentScanner<String> {
+public class ProgloveScanner extends IntentScanner<String> implements Scanner.WithLedSupport {
     private static final String LOG_TAG = "ProgloveScanner";
     private static final int MAX_CONNECTION_ATTEMPTS = 10;
 
@@ -71,6 +70,36 @@ public class ProgloveScanner extends IntentScanner<String> {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // LIFE CYCLE
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void stopSchedule() {
+        if (beepTimer != null) {
+            beepTimer.cancel();
+            beepTimer = null;
+        }
+        broadcastIntent("com.proglove.api.UNBLOCK_TRIGGER", "com.proglove.api.extra.REPLACE_QUEUE", true);
+    }
+
+    @Override
+    public void pause() {
+        if (!connected) {
+            return;
+        }
+        broadcastIntent("com.proglove.api.BLOCK_TRIGGER", "com.proglove.api.extra.REPLACE_QUEUE", true);
+        if (beepTimer == null) {
+            beepTimer = new Timer();
+            beepTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    broadcastIntent("com.proglove.api.PLAY_FEEDBACK", "com.proglove.api.extra.FEEDBACK_SEQUENCE_ID", 4);
+                }
+            }, 0, 3000);
+        }
+    }
+
+    @Override
+    public void resume() {
+        stopSchedule();
+    }
 
     @Override
     public void disconnect() {
@@ -203,7 +232,7 @@ public class ProgloveScanner extends IntentScanner<String> {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(Color color) {
+    public void ledColorOn(ScannerLedColor color) {
         int c = 0;
         switch (color) {
             case GREEN:
@@ -216,56 +245,9 @@ public class ProgloveScanner extends IntentScanner<String> {
         broadcastIntent("com.proglove.api.PLAY_FEEDBACK", "com.proglove.api.extra.FEEDBACK_SEQUENCE_ID", c);
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // INVENTORY
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public String getStatus(String key) {
-        return null;
-    }
-
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    public Map<String, String> getStatus() {
-        return new HashMap<>();
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // TRIGGER
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
     @Override
-    public void pause() {
-        if (!connected) {
-            return;
-        }
-        broadcastIntent("com.proglove.api.BLOCK_TRIGGER", "com.proglove.api.extra.REPLACE_QUEUE", true);
-        if (beepTimer == null) {
-            beepTimer = new Timer();
-            beepTimer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    broadcastIntent("com.proglove.api.PLAY_FEEDBACK", "com.proglove.api.extra.FEEDBACK_SEQUENCE_ID", 4);
-                }
-            }, 0, 3000);
-        }
-    }
-
-    @Override
-    public void resume() {
-        stopSchedule();
-    }
-
-    private void stopSchedule() {
-        if (beepTimer != null) {
-            beepTimer.cancel();
-            beepTimer = null;
-        }
-        broadcastIntent("com.proglove.api.UNBLOCK_TRIGGER", "com.proglove.api.extra.REPLACE_QUEUE", true);
+    public void ledColorOff(ScannerLedColor color) {
+        // FIXME
     }
 
 

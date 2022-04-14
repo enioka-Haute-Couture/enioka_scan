@@ -4,9 +4,8 @@ import android.content.Context;
 import android.util.Log;
 import android.util.Xml;
 
-import com.enioka.scanner.api.Color;
+import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -22,14 +21,12 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Scanner provider for external BT Zebra (Symbol, Motorola...) devices.
  */
-class BtZebraScanner implements ScannerBackground {
+class BtZebraScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIlluminationSupport, Scanner.WithLedSupport {
     private static final String LOG_TAG = "BtZebraProvider";
 
     private static final int BEEP_HIGH_SHORT_1 = 0;
@@ -157,13 +154,8 @@ class BtZebraScanner implements ScannerBackground {
     }
 
     @Override
-    public boolean supportsIllumination() {
-        return true;
-    }
-
-    @Override
     public boolean isIlluminationOn() {
-        return false;
+        return illuminated;
     }
 
 
@@ -172,11 +164,11 @@ class BtZebraScanner implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(Color color) {
+    public void ledColorOn(ScannerLedColor color) {
         int attrCode;
-        if (color == Color.GREEN) {
+        if (color == ScannerLedColor.GREEN) {
             attrCode = 43;
-        } else if (color == Color.RED) {
+        } else if (color == ScannerLedColor.RED) {
             attrCode = 47;
         } else {
             attrCode = 45;
@@ -187,11 +179,11 @@ class BtZebraScanner implements ScannerBackground {
     }
 
     @Override
-    public void ledColorOff(Color color) {
+    public void ledColorOff(ScannerLedColor color) {
         int attrCode;
-        if (color == Color.GREEN) {
+        if (color == ScannerLedColor.GREEN) {
             attrCode = 42;
-        } else if (color == Color.RED) {
+        } else if (color == ScannerLedColor.RED) {
             attrCode = 48;
         } else {
             attrCode = 46;
@@ -199,23 +191,6 @@ class BtZebraScanner implements ScannerBackground {
 
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" + attrCode + "</arg-int></cmdArgs></inArgs>";
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, inXML);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // INVENTORY
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public String getStatus(String key) {
-        return null;
-    }
-
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    public Map<String, String> getStatus() {
-        return new HashMap<>();
     }
 
 
@@ -274,6 +249,7 @@ class BtZebraScanner implements ScannerBackground {
         return BtZebraProvider.PROVIDER_KEY;
     }
 
+    // FIXME: software trigger scanner feature ?
     private void pullTrigger() {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_PULL_TRIGGER, inXML);

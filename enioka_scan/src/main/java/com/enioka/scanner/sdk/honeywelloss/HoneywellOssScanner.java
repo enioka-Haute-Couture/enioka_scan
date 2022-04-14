@@ -3,13 +3,13 @@ package com.enioka.scanner.sdk.honeywelloss;
 import android.content.Context;
 import android.os.Handler;
 
-import com.enioka.scanner.api.Color;
-import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.ScannerLedColor;
+import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
+import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
-import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.honeywelloss.commands.ActivateTrigger;
 import com.enioka.scanner.sdk.honeywelloss.commands.Beep;
@@ -22,15 +22,13 @@ import com.enioka.scanner.sdk.honeywelloss.commands.EnableBarcodeMetadata;
 import com.enioka.scanner.sdk.honeywelloss.commands.EnableIllumination;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-class HoneywellOssScanner implements ScannerBackground {
+class HoneywellOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.WithBeepSupport, Scanner.WithLedSupport {
     private ScannerDataCallbackProxy dataCallback = null;
-    private final Scanner btScanner;
+    private final BluetoothScanner btScanner;
 
-    HoneywellOssScanner(Scanner btScanner) {
+    HoneywellOssScanner(BluetoothScanner btScanner) {
         this.btScanner = btScanner;
     }
 
@@ -68,7 +66,7 @@ class HoneywellOssScanner implements ScannerBackground {
     public void pause() {
         this.btScanner.runCommand(new DisableAimer(), null);
         this.btScanner.runCommand(new DisableIllumination(), null);
-        this.btScanner.runCommand(new DisplayScreenColor(Color.RED), null);
+        this.btScanner.runCommand(new DisplayScreenColor(ScannerLedColor.RED), null);
     }
 
     @Override
@@ -100,41 +98,11 @@ class HoneywellOssScanner implements ScannerBackground {
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Illumination
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void enableIllumination() {
-
-    }
-
-    @Override
-    public void disableIllumination() {
-
-    }
-
-    @Override
-    public void toggleIllumination() {
-
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsIllumination() {
-        return false;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // LEDs
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(Color color) {
+    public void ledColorOn(ScannerLedColor color) {
         this.btScanner.runCommand(new DisplayScreenColor(color), null);
 
         // This is needed otherwise the color is reused for every default action afterwards!
@@ -142,25 +110,8 @@ class HoneywellOssScanner implements ScannerBackground {
     }
 
     @Override
-    public void ledColorOff(Color color) {
+    public void ledColorOff(ScannerLedColor color) {
         this.btScanner.runCommand(new DisplayScreenColor(null), null);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // INVENTORY
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public String getStatus(String key) {
-        return null;
-    }
-
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    public Map<String, String> getStatus() {
-        return new HashMap<>();
     }
 
 

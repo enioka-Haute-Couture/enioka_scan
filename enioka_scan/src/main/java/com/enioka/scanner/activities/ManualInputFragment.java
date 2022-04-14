@@ -22,7 +22,7 @@ import android.widget.TextView;
 import com.enioka.scanner.R;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
-import com.enioka.scanner.service.ForegroundScannerClient;
+import com.enioka.scanner.service.ScannerClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class ManualInputFragment extends DialogFragment {
 
-    private ForegroundScannerClient cb;
+    private ScannerClient cb;
     private Boolean closeOnValidation;
     private int inviteTextId;
     protected List<ManualInputItem> items = new ArrayList<>();
@@ -74,9 +74,9 @@ public class ManualInputFragment extends DialogFragment {
         super.onAttach(activity);
         try {
             // The host should be an activity implementing a barcode listener.
-            cb = (ForegroundScannerClient) activity;
+            cb = (ScannerClient) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement Scanner.ScannerDataCallback");
+            throw new ClassCastException(activity.toString() + " must implement ScannerDataCallback");
         }
     }
 

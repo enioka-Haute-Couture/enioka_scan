@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.bt.api.Scanner;
+import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.sdk.generalscan.commands.CloseRead;
@@ -16,7 +16,7 @@ public class GsSppScannerProvider implements BtSppScannerProvider {
     public static final String PROVIDER_KEY = "BT_GeneralScanProvider";
 
     @Override
-    public void canManageDevice(final Scanner device, final ManagementCallback callback) {
+    public void canManageDevice(final BluetoothScanner device, final ManagementCallback callback) {
         device.runCommand(new CloseRead(), null);
         device.runCommand(new GetDeviceId(), new DataSubscriptionCallback<DeviceId>() {
             @Override
@@ -51,7 +51,7 @@ public class GsSppScannerProvider implements BtSppScannerProvider {
      * Helper to discover protocol. Debug only.
      */
     @SuppressWarnings("unused")
-    private void discoverCodes(Scanner device) {
+    private void discoverCodes(BluetoothScanner device) {
         for (int i = 0; i < 300; i++) {
             Log.i("TEST", "Command: " + i);
             device.runCommand(new CloseRead(), null);

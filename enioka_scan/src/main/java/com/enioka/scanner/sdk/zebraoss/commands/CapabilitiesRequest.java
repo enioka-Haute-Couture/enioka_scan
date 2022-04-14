@@ -1,7 +1,7 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
 import com.enioka.scanner.bt.api.Command;
-import com.enioka.scanner.bt.api.Scanner;
+import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiMonoPacketWrapper;
@@ -20,8 +20,8 @@ public class CapabilitiesRequest implements Command<CapabilitiesReply> {
     }
 
     @Override
-    public byte[] getCommand(final Scanner scanner) {
-        return packet.toCommandBuffer(scanner.isBleDevice());
+    public byte[] getCommand(final BluetoothScanner bluetoothScanner) {
+        return packet.toCommandBuffer(bluetoothScanner.isBleDevice());
     }
 
     @Override

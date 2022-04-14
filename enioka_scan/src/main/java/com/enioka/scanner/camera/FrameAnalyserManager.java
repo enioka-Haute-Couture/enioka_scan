@@ -4,6 +4,7 @@ import android.graphics.Point;
 import android.util.Log;
 
 import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.helpers.Common;
 
 import java.util.ArrayDeque;
 import java.util.Calendar;
@@ -13,8 +14,6 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-
-import static com.enioka.scanner.camera.CameraBarcodeScanView.beepOk;
 
 /**
  * Holder for analyser thread pool.
@@ -204,7 +203,7 @@ class FrameAnalyserManager {
         latestBarcodeRead = result;
         latestResultTime = Calendar.getInstance();
 
-        beepOk();
+        Common.beepScanSuccessful();
         Log.d(TAG, "barcode read: " + result);
         parent.analyserCallback(result, symType, imagePreview);
     }

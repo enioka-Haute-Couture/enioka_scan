@@ -4,9 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -28,7 +26,7 @@ import java.util.Map;
 /**
  * Scanner implementation for Honeywell/Intermec AIDC SDK.
  */
-public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeListener {
+public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
     private final static String LOG_TAG = "ScannerHoneywellAidc";
 
     private Scanner selfScanner = this;
@@ -127,54 +125,6 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
 
     }
 
-    @Override
-    public void beepScanSuccessful() {
-
-    }
-
-    @Override
-    public void beepScanFailure() {
-
-    }
-
-    @Override
-    public void beepPairingCompleted() {
-
-    }
-
-    @Override
-    public void enableIllumination() {
-
-    }
-
-    @Override
-    public void disableIllumination() {
-
-    }
-
-    @Override
-    public void toggleIllumination() {
-
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsIllumination() {
-        return false;
-    }
-
-    @Override
-    public void ledColorOn(Color color) {
-    }
-
-    @Override
-    public void ledColorOff(Color color) {
-    }
-
     private class AsyncResultHandler extends AsyncTask<BarcodeReadEvent, Void, Barcode> {
 
         @Override
@@ -213,20 +163,5 @@ public class AIDCScanner implements ScannerBackground, BarcodeReader.BarcodeList
     @Override
     public String getProviderKey() {
         return AIDCProvider.PROVIDER_KEY;
-    }
-
-    @Override
-    public String getStatus(String key) {
-        return null;
-    }
-
-    @Override
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getStatus() {
-        return null;
     }
 }

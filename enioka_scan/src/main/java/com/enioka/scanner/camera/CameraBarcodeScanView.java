@@ -12,8 +12,6 @@ import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
-import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -758,24 +756,6 @@ public class CameraBarcodeScanView extends FrameLayout implements Camera.Preview
     public void pauseScanner() {
         Log.d(VIEW_LOG_TAG, "Scanning stopped");
         this.scanningStarted = false;
-    }
-
-    public static void beepOk() {
-        ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
-        tg.startTone(ToneGenerator.TONE_PROP_PROMPT, 100);
-        tg.release();
-    }
-
-    public static void beepWaiting() {
-        ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
-        tg.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 300);
-        tg.release();
-    }
-
-    public static void beepKo() {
-        ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
-        tg.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 300);
-        tg.release();
     }
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////

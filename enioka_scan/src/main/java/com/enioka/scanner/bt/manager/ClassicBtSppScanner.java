@@ -30,7 +30,7 @@ import java.util.TimerTask;
  */
 class ClassicBtSppScanner implements Closeable, ScannerInternal {
     private static final String LOG_TAG = "BtSppSdk";
-    private static final int RECONNECTION_MAX_ATTEMPTS = 60;
+    private static final int RECONNECTION_MAX_ATTEMPTS = 5;
     private static final int RECONNECTION_INTERVAL_MS = 1000;
     private static final int RECONNECTION_TIMEOUT_MS = 5000;
 

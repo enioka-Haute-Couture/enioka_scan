@@ -6,7 +6,6 @@ import android.util.Xml;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -29,7 +28,7 @@ import java.util.Map;
 /**
  * Scanner provider for external BT Zebra (Symbol, Motorola...) devices.
  */
-class BtZebraScanner implements ScannerBackground {
+class BtZebraScanner implements Scanner {
     private static final String LOG_TAG = "BtZebraProvider";
 
     private static final int BEEP_HIGH_SHORT_1 = 0;

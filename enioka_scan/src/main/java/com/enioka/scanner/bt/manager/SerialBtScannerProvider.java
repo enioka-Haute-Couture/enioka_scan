@@ -153,7 +153,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
                     Log.i(PROVIDER_KEY, "Ignoring device - it is already connected to another app or SDK");
                 }
 
-                ScannerInternal btDevice;
+                BluetoothScannerInternal btDevice;
                 if (bt.getType() == BluetoothDevice.DEVICE_TYPE_CLASSIC) { // Only set for already paired devices.
                     // We only allow SPP devices.
                     boolean found = false;
@@ -218,7 +218,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
      * What to do when a connection is successful (i.e. socket opened or GATT server connected): try to resolve the BT SPP provider associated to the device.
      */
     private class ConnectionCallback implements ClassicBtConnectToDeviceThread.OnConnectedCallback {
-        private ScannerInternal btDevice;
+        private BluetoothScannerInternal btDevice;
         private final SerialBtScannerProvider parentProvider;
 
         // btDevice can be null - created from socket in that case. (master scanner).
@@ -227,7 +227,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
         }
 
         @Override
-        public void connected(ScannerInternal scanner) {
+        public void connected(BluetoothScannerInternal scanner) {
             btDevice = scanner;
             Log.d(PROVIDER_KEY, "A new BT connection was made. Launching provider resolution.");
 
@@ -245,7 +245,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
                 }
 
                 @Override
-                public void notCompatible(ScannerInternal device) {
+                public void notCompatible(BluetoothScannerInternal device) {
                     Log.i(PROVIDER_KEY, "Scanner " + device + " could not be bound to a provider and will be disconnected");
                     btDevice.disconnect();
                     waitForScanners.release(1);

@@ -1,8 +1,8 @@
 package com.enioka.scanner.sdk.honeywelloss;
 
+import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
-import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.bt.api.ScannerDataParser;
 import com.enioka.scanner.sdk.honeywelloss.commands.Cleanup;
 import com.enioka.scanner.sdk.honeywelloss.commands.GetFirmware;
@@ -15,7 +15,7 @@ public class HoneywellOssSppScannerProvider implements BtSppScannerProvider {
     private final ScannerDataParser inputHandler = new HoneywellOssParser();
 
     @Override
-    public void canManageDevice(final Scanner device, final ManagementCallback callback) {
+    public void canManageDevice(final BluetoothScanner device, final ManagementCallback callback) {
         device.runCommand(new Cleanup(), null);
         testFirmwareCommand(device, callback);
     }
@@ -25,7 +25,7 @@ public class HoneywellOssSppScannerProvider implements BtSppScannerProvider {
         return PROVIDER_KEY;
     }
 
-    private void testFirmwareCommand(final Scanner device, final ManagementCallback callback) {
+    private void testFirmwareCommand(final BluetoothScanner device, final ManagementCallback callback) {
         device.runCommand(new GetFirmware(), new DataSubscriptionCallback<FirmwareVersion>() {
             @Override
             public void onSuccess(FirmwareVersion data) {

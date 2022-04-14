@@ -1,10 +1,10 @@
 package com.enioka.scanner.sdk.camera;
 
-import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 
 import com.enioka.scanner.api.Color;
-import com.enioka.scanner.api.ScannerForeground;
+import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  *
  */
-public class CameraBarcodeScanViewScanner implements ScannerForeground, CameraBarcodeScanView.ResultHandler {
+public class CameraBarcodeScanViewScanner implements Scanner, CameraBarcodeScanView.ResultHandler {
     private static final String LOG_TAG = "CamBarcodeScanVScanner";
 
     private CameraBarcodeScanView scanner;
@@ -41,7 +41,7 @@ public class CameraBarcodeScanViewScanner implements ScannerForeground, CameraBa
     }
 
     @Override
-    public void initialize(final Activity activity, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
         // Do nothing. The camera view implementation is special, as it is built directly and not through the LaserScanner.
         initCallback.onConnectionSuccessful(this);
     }

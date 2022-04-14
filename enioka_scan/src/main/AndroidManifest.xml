@@ -70,16 +70,6 @@
         </service> -->
 
         <!-- Other scanner providers -->
-        <service
-            android:name=".sdk.hid.GenericHidProvider"
-            android:description="@string/service_description"
-            android:exported="false"
-            tools:ignore="Instantiatable">
-
-            <intent-filter>
-                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
-            </intent-filter>
-        </service>
 
         <service
             android:name=".sdk.athesi.HHTProvider"

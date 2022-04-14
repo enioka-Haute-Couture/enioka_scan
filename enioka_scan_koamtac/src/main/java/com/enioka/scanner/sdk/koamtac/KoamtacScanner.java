@@ -6,7 +6,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.enioka.scanner.api.Color;
-import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -26,7 +26,7 @@ import koamtac.kdc.sdk.KDCErrorListener;
 import koamtac.kdc.sdk.KDCReader;
 import koamtac.kdc.sdk.KDCSymbology;
 
-class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListener, KDCConnectionListener, KDCErrorListener {
+class KoamtacScanner implements Scanner, KDCBarcodeDataReceivedListener, KDCConnectionListener, KDCErrorListener {
     private static final String LOG_TAG = "KoamtacScanner";
 
     private KDCReader scanner;

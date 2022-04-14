@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -26,7 +25,7 @@ import java.util.Map;
  * (be it a system service or a service provided by another app).<br>
  * This class factors all the boilerplate code to communicate with such services.
  */
-public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver implements ScannerBackground {
+public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver implements Scanner {
 
     private Context ctx;
 

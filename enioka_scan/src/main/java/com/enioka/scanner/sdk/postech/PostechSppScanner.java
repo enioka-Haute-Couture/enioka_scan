@@ -3,12 +3,12 @@ package com.enioka.scanner.sdk.postech;
 import android.content.Context;
 
 import com.enioka.scanner.api.Color;
-import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
-import com.enioka.scanner.bt.api.Scanner;
+import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.generalscan.commands.Bell;
 import com.enioka.scanner.sdk.generalscan.commands.CloseRead;
@@ -21,11 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class PostechSppScanner implements ScannerBackground {
+class PostechSppScanner implements Scanner {
     private ScannerDataCallbackProxy dataCallback = null;
-    private final Scanner btScanner;
+    private final BluetoothScanner btScanner;
 
-    PostechSppScanner(Scanner btScanner) {
+    PostechSppScanner(BluetoothScanner btScanner) {
         this.btScanner = btScanner;
     }
 

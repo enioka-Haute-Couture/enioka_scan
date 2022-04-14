@@ -20,7 +20,7 @@ import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
-import com.enioka.scanner.service.BackgroundScannerClient;
+import com.enioka.scanner.service.ScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 
@@ -90,7 +90,7 @@ public class MockAndroidTest {
         Assert.assertNotNull("ScannerService was not found", serviceConnection.binder);
 
         final ScannerServiceApi scannerService = serviceConnection.binder.getService();
-        scannerService.registerClient(new BackgroundScannerClient() {
+        scannerService.registerClient(new ScannerClient() {
             @Override
             public void onStatusChanged(@Nullable Scanner scanner, Status newStatus) {
                 if (newStatus == Status.SERVICE_SDK_SEARCH_OVER)
@@ -98,7 +98,7 @@ public class MockAndroidTest {
             }
 
             @Override
-            public void onBackgroundScannerInitEnded(int count) {}
+            public void onScannerInitEnded(int count) {}
             @Override
             public void onData(List<Barcode> data) {}
         });

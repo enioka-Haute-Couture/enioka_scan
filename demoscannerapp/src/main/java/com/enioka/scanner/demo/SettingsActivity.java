@@ -11,7 +11,6 @@ import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.sdk.athesi.HHTProvider;
 import com.enioka.scanner.sdk.bluebird.BluebirdProvider;
 import com.enioka.scanner.sdk.generalscan.GsSppScannerProvider;
-import com.enioka.scanner.sdk.hid.GenericHidProvider;
 import com.enioka.scanner.sdk.honeywelloss.HoneywellOssSppScannerProvider;
 import com.enioka.scanner.sdk.proglove.ProgloveProvider;
 import com.enioka.scanner.sdk.zebraoss.ZebraOssAttScannerProvider;
@@ -37,7 +36,6 @@ public class SettingsActivity extends AppCompatActivity {
         ((Switch) findViewById(R.id.switchPairingFlow)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, options.allowPairingFlow));
 
         final Set<String> allowedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
-        ((CheckBox) findViewById(R.id.checkAllowedGenericHidProvider)).setChecked(allowedProviderKeys.contains(GenericHidProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkAllowedHHTProvider)).setChecked(allowedProviderKeys.contains(HHTProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkAllowedBluebirdProvider)).setChecked(allowedProviderKeys.contains(BluebirdProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkAllowedProgloveProvider)).setChecked(allowedProviderKeys.contains(ProgloveProvider.PROVIDER_KEY));
@@ -47,7 +45,6 @@ public class SettingsActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.checkAllowedHoneywellOssSppScannerProvider)).setChecked(allowedProviderKeys.contains(HoneywellOssSppScannerProvider.PROVIDER_KEY));
 
         final Set<String> excludedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
-        ((CheckBox) findViewById(R.id.checkExcludedGenericHidProvider)).setChecked(excludedProviderKeys.contains(GenericHidProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).setChecked(excludedProviderKeys.contains(HHTProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkExcludedBluebirdProvider)).setChecked(excludedProviderKeys.contains(BluebirdProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkExcludedProgloveProvider)).setChecked(excludedProviderKeys.contains(ProgloveProvider.PROVIDER_KEY));
@@ -66,7 +63,6 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, ((Switch) findViewById(R.id.switchPairingFlow)).isChecked());
 
         final Set<String> allowedProviderKeys = new HashSet<>();
-        if (((CheckBox) findViewById(R.id.checkAllowedGenericHidProvider)).isChecked()) { allowedProviderKeys.add(GenericHidProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkAllowedHHTProvider)).isChecked()) { allowedProviderKeys.add(HHTProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkAllowedBluebirdProvider)).isChecked()) { allowedProviderKeys.add(BluebirdProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkAllowedProgloveProvider)).isChecked()) { allowedProviderKeys.add(ProgloveProvider.PROVIDER_KEY); }
@@ -77,7 +73,6 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys);
 
         final Set<String> excludedProviderKeys = new HashSet<>();
-        if (((CheckBox) findViewById(R.id.checkExcludedGenericHidProvider)).isChecked()) { excludedProviderKeys.add(GenericHidProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).isChecked()) { excludedProviderKeys.add(HHTProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkExcludedBluebirdProvider)).isChecked()) { excludedProviderKeys.add(BluebirdProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkExcludedProgloveProvider)).isChecked()) { excludedProviderKeys.add(ProgloveProvider.PROVIDER_KEY); }

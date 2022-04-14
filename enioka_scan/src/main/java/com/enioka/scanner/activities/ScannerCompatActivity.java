@@ -35,7 +35,7 @@ import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.helpers.Common;
 import com.enioka.scanner.sdk.camera.CameraBarcodeScanViewScanner;
-import com.enioka.scanner.service.ForegroundScannerClient;
+import com.enioka.scanner.service.ScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 
@@ -49,7 +49,7 @@ import java.util.List;
  * By default, a basic test layout is provided.<br>
  * Also, {@link #cameraViewId} points to the camera view inside your camera layout.
  */
-public class ScannerCompatActivity extends AppCompatActivity implements ForegroundScannerClient {
+public class ScannerCompatActivity extends AppCompatActivity implements ScannerClient {
     protected final static String LOG_TAG = "ScannerActivity";
     protected final static int PERMISSION_REQUEST_ID_CAMERA = 1790;
     protected final static int PERMISSION_REQUEST_ID_BT_EMDK = 1791;
@@ -200,7 +200,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
             ScannerService.LocalBinder binder = (ScannerService.LocalBinder) service;
             scannerService = binder.getService();
             serviceBound = true;
-            scannerService.takeForegroundControl(ScannerCompatActivity.this, ScannerCompatActivity.this);
+            scannerService.registerClient(ScannerCompatActivity.this);
         }
 
         @Override
@@ -242,7 +242,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
         // If no scanners are available at all, this will still call onForegroundScannerInitEnded with 0 scanners, and the activity will launch the camera.
         if (serviceBound) {
             scannerService.resume(); // does nothing if not init.
-            scannerService.takeForegroundControl(this, this);
+            scannerService.registerClient(this);
         } else {
             bindAndStartService();
         }
@@ -400,15 +400,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements Foregrou
     }
 
     @Override
-    public void onBackgroundScannerInitEnded(int count) {
-        // We want all scanners, so nothing here.
-    }
+    public void onScannerInitEnded(int scannerCount) {
+        Log.i(LOG_TAG, "Activity can now use all received scanners (" + scannerCount + ")");
 
-    @Override
-    public void onForegroundScannerInitEnded(int foregroundScannerCount, int backgroundScannerCount) {
-        Log.i(LOG_TAG, "Activity can now use all received scanners (foreground " + foregroundScannerCount + " - background " + backgroundScannerCount + ")");
-
-        if (foregroundScannerCount + backgroundScannerCount == 0 && !laserModeOnly) {
+        if (scannerCount == 0 && !laserModeOnly) {
             // In that case try to connect to a camera.
             initCamera();
         }

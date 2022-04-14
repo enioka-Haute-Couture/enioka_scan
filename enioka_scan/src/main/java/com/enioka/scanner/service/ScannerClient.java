@@ -5,8 +5,8 @@ import com.enioka.scanner.data.Barcode;
 
 import java.util.List;
 
-public interface BackgroundScannerClient extends ScannerStatusCallback {
-    void onBackgroundScannerInitEnded(int count);
+public interface ScannerClient extends ScannerStatusCallback {
+    void onScannerInitEnded(int count);
 
     void onData(List<Barcode> data);
 }

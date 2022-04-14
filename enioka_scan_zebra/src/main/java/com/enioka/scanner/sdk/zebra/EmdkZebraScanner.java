@@ -9,7 +9,6 @@ import android.util.Log;
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerBackground;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -34,7 +33,7 @@ import java.util.Map;
 /**
  * Zebra implementation for internal SYMBOL (not real Zebra) scanners.
  */
-public class EmdkZebraScanner implements ScannerBackground, EMDKManager.EMDKListener, com.symbol.emdk.barcode.Scanner.StatusListener, com.symbol.emdk.barcode.Scanner.DataListener {
+public class EmdkZebraScanner implements Scanner, EMDKManager.EMDKListener, com.symbol.emdk.barcode.Scanner.StatusListener, com.symbol.emdk.barcode.Scanner.DataListener {
     private final static String LOG_TAG = "ScannerZebra";
 
     private Scanner selfScanner = this;

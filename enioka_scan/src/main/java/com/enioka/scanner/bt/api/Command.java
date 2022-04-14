@@ -16,10 +16,10 @@ public interface Command<T> {
     /**
      * The command to send on the bluetooth socket.
      *
-     * @param scanner The scanner that may be used to adapt some parameters in the command generation.
+     * @param bluetoothScanner The bluetoothScanner that may be used to adapt some parameters in the command generation.
      * @return command.
      */
-    default byte[] getCommand(final Scanner scanner) {
+    default byte[] getCommand(final BluetoothScanner bluetoothScanner) {
         return getCommand();
     }
 

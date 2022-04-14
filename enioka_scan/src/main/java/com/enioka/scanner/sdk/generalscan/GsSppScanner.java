@@ -3,10 +3,11 @@ package com.enioka.scanner.sdk.generalscan;
 import android.content.Context;
 
 import com.enioka.scanner.api.Color;
-import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
+import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.sdk.generalscan.commands.Bell;
@@ -20,11 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class GsSppScanner implements ScannerBackground {
+class GsSppScanner implements Scanner {
     private ScannerDataCallbackProxy dataCallback = null;
-    private final com.enioka.scanner.bt.api.Scanner btScanner;
+    private final BluetoothScanner btScanner;
 
-    GsSppScanner(com.enioka.scanner.bt.api.Scanner btScanner) {
+    GsSppScanner(BluetoothScanner btScanner) {
         this.btScanner = btScanner;
     }
 

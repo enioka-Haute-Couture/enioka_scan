@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.enioka.scanner.api.Color;
-import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerDataCallback;
 import com.enioka.scanner.api.callbacks.ScannerInitCallback;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
@@ -22,7 +22,7 @@ import java.util.Map;
  * Mock scanner used to test callbacks and basic scanner interactions.
  * It does not bind to any bluetooth device or intent, "scanned" data has to be passed manually.
  */
-public class MockScanner implements ScannerBackground {
+public class MockScanner implements Scanner {
     static final String LOG_TAG = "MockScanner";
 
     private boolean paused = false;

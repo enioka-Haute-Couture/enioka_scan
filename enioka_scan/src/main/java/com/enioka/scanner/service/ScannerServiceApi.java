@@ -1,12 +1,8 @@
 package com.enioka.scanner.service;
 
-import android.app.Activity;
-
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.sdk.athesi.DataWedge;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,26 +56,18 @@ public interface ScannerServiceApi {
     ////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Binds all hooks and uses the given activity to enable possible scanners needing foreground control (such as HIDs).
-     *
-     * @param activity the activity requesting the registration
-     * @param client   the callbacks used by the service to notify the client
-     */
-    void takeForegroundControl(final Activity activity, final ForegroundScannerClient client);
-
-    /**
      * Hooks all callbacks to the given client.
      *
      * @param client a set of callbacks
      */
-    void registerClient(BackgroundScannerClient client);
+    void registerClient(ScannerClient client);
 
     /**
      * Un-hooks all callbacks to the given client.
      *
      * @param client a set of callbacks
      */
-    void unregisterClient(BackgroundScannerClient client);
+    void unregisterClient(ScannerClient client);
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

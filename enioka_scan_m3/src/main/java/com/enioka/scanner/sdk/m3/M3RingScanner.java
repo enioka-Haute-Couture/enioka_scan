@@ -5,7 +5,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.enioka.scanner.api.Color;
-import com.enioka.scanner.api.ScannerBackground;
+import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-class M3RingScanner implements ScannerBackground {
+class M3RingScanner implements Scanner {
     private static final String LOG_TAG = "M3RingScanner";
 
     private RingScannerService scanner;

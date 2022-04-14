@@ -8,7 +8,8 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
@@ -52,7 +53,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
 
     private ScannerDataParser inputHandler;
 
-    private ScannerStatusCallback statusCallback;
+    private ScannerStatusCallbackProxy statusCallback;
     private Handler uiHandler = new Handler(Looper.getMainLooper());
 
     /**
@@ -221,25 +222,15 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         if (this.masterBtDevice) {
             Log.w(LOG_TAG, "Reconnection will not be attempted as it was a master device - the device itself should reconnect.");
             this.parentProvider.resetListener(BluetoothAdapter.getDefaultAdapter());
-            if (this.statusCallback != null) {
-                uiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.FAILURE);
-                    }
-                });
+            if (statusCallback != null) {
+                statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.FAILURE);
             }
             return;
         }
 
         Log.w(LOG_TAG, "This is a slave device, attempting reconnection");
-        if (this.statusCallback != null) {
-            uiHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.RECONNECTING);
-                }
-            });
+        if (statusCallback != null) {
+            statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.RECONNECTING);
         }
 
         // We choose to disable master connection if socket is still open - that way devices which are both master and slave will not reconnect the "wrong" way.
@@ -274,12 +265,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                 connectStreams();
 
                 if (ClassicBtSppScanner.this.statusCallback != null) {
-                    uiHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.CONNECTED);
-                        }
-                    });
+                    ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.CONNECTED);
                 }
             }
 
@@ -292,12 +278,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
                 } else {
                     Log.w(LOG_TAG, "Giving up on dead scanner " + ClassicBtSppScanner.this.name);
                     if (ClassicBtSppScanner.this.statusCallback != null) {
-                        uiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.FAILURE);
-                            }
-                        });
+                        ClassicBtSppScanner.this.statusCallback.onStatusChanged(null, ScannerStatusCallback.Status.FAILURE);
                     }
                 }
             }
@@ -321,7 +302,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
     }
 
     @Override
-    public <T> void runCommand(Command<T> command, DataSubscriptionCallback<T> subscription) {
+    public <T> void runCommand(final Command<T> command, final DataSubscriptionCallback<T> subscription) {
         byte[] cmd = command.getCommand(this);
 
         if (subscription != null) {
@@ -338,7 +319,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
         this.outputStreamWriter.write(cmd);
     }
 
-    public <T> void registerSubscription(DataSubscriptionCallback<T> subscription, Class<? extends T> targetType) {
+    public <T> void registerSubscription(final DataSubscriptionCallback<T> subscription, final Class<? extends T> targetType) {
         if (subscription != null) {
             synchronized (dataSubscriptions) {
                 String expectedDataClass = targetType.getCanonicalName();
@@ -348,7 +329,7 @@ class ClassicBtSppScanner implements Closeable, ScannerInternal {
     }
 
     @Override
-    public void registerStatusCallback(ScannerStatusCallback statusCallback) {
+    public void registerStatusCallback(final ScannerStatusCallbackProxy statusCallback) {
         this.statusCallback = statusCallback;
     }
 

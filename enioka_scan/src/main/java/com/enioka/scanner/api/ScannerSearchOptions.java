@@ -5,8 +5,10 @@ import android.os.Bundle;
 
 import com.enioka.scanner.service.ScannerServiceApi;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -104,10 +106,10 @@ public class ScannerSearchOptions {
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, allowInitialSearch);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, allowPairingFlow);
         if (allowedProviderKeys != null && allowedProviderKeys.size() > 0) {
-            intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys.toArray());
+            intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys.toArray(new String[0]));
         }
         if (excludedProviderKeys != null && excludedProviderKeys.size() > 0) {
-            intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, excludedProviderKeys.toArray());
+            intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, excludedProviderKeys.toArray(new String[0]));
         }
     }
 }

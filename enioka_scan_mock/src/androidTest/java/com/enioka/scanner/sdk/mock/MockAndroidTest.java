@@ -10,9 +10,15 @@ import android.support.test.InstrumentationRegistry;
 
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerConnectionHandler;
+import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerSearchOptions;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerDataCallback;
+import com.enioka.scanner.api.callbacks.ScannerInitCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerConnectionHandlerProxy;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.service.BackgroundScannerClient;
 import com.enioka.scanner.service.ScannerService;
@@ -62,7 +68,7 @@ public class MockAndroidTest {
         options.allowedProviderKeys.add("MockProvider");
 
         final TestScannerConnectionHandler handler = new TestScannerConnectionHandler();
-        LaserScanner.getLaserScanner(ctx, handler, options);
+        LaserScanner.getLaserScanner(ctx, new ScannerConnectionHandlerProxy(handler), options);
 
         // Wait for LaserScanner to finish Scanner discovery
         waitOnSemaphore(scannerDiscoverySemaphore);
@@ -108,7 +114,7 @@ public class MockAndroidTest {
     // TOOLS
 
     private static class TestScannerConnectionHandler implements ScannerConnectionHandler {
-        public Scanner.ScannerInitCallback initCallback = new Scanner.ScannerInitCallback() {
+        public ScannerInitCallback initCallback = new ScannerInitCallback() {
             @Override
             public void onConnectionSuccessful(Scanner s) {}
             @Override
@@ -117,14 +123,14 @@ public class MockAndroidTest {
             }
         };
         public ScannerStatusCallback statusCallback = (scanner, newStatus) -> {};
-        public Scanner.ScannerDataCallback dataCallback = (s, data) -> {};
+        public ScannerDataCallback dataCallback = (s, data) -> {};
         public MockScanner mock = null;
 
         @Override
         public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
             if (s instanceof MockScanner) {
                 mock = ((MockScanner) s);
-                mock.initialize(ctx, initCallback, dataCallback, statusCallback, null);
+                mock.initialize(ctx, new ScannerInitCallbackProxy(initCallback), new ScannerDataCallbackProxy(dataCallback), new ScannerStatusCallbackProxy(statusCallback), null);
             } else {
                 Assert.fail("Wrong scanner was detected");
             }

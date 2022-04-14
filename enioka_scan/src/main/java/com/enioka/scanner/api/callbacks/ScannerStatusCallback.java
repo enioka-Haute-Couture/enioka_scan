@@ -1,10 +1,11 @@
-package com.enioka.scanner.api;
+package com.enioka.scanner.api.callbacks;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.enioka.scanner.R;
+import com.enioka.scanner.api.Scanner;
 
 /**
  * Callback to deal with scanner status changes.
@@ -13,7 +14,6 @@ public interface ScannerStatusCallback {
     /**
      * Enum describing the scanner's lifecycle and current status.
      * Some elements may not be used depending on which scanner SDK is used.
-     * FIXME - 2022/03/02: Cannot get the resource reading to work, enum instantiation fails. Seems incompatible with unit tests.
      */
     enum Status {
         /** The scanner is waiting for a connection. */

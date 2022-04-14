@@ -7,7 +7,8 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.util.Log;
 
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
@@ -349,7 +350,7 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
         }, 0, 100);
     }
 
-    public <T> void runCommand(Command<T> command, DataSubscriptionCallback<T> subscription) {
+    public <T> void runCommand(final Command<T> command, final DataSubscriptionCallback<T> subscription) {
         byte[] cmd = command.getCommand(this);
 
         if (subscription != null) {
@@ -381,7 +382,7 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
     }
 
     @Override
-    public <T> void registerSubscription(DataSubscriptionCallback<T> subscription, Class<? extends T> targetType) {
+    public <T> void registerSubscription(final DataSubscriptionCallback<T> subscription, final Class<? extends T> targetType) {
         if (subscription != null) {
             synchronized (dataSubscriptions) {
                 String expectedDataClass = targetType.getCanonicalName();
@@ -391,7 +392,7 @@ class BleTerminalIODevice implements BleStateMachineDevice, ScannerInternal, Clo
     }
 
     @Override
-    public void registerStatusCallback(ScannerStatusCallback statusCallback) {
+    public void registerStatusCallback(final ScannerStatusCallbackProxy statusCallback) {
 
     }
 

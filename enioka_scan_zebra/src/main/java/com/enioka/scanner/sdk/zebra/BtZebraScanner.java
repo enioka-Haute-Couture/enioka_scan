@@ -1,15 +1,16 @@
 package com.enioka.scanner.sdk.zebra;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.util.Xml;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.zebra.scannercontrol.DCSSDKDefs;
@@ -38,8 +39,8 @@ class BtZebraScanner implements ScannerBackground {
     private SDKHandler sdkHandler;
     private Integer scannerId;
 
-    private Scanner.ScannerDataCallback dataCb = null;
-    private ScannerStatusCallback statusCb = null;
+    private ScannerDataCallbackProxy dataCb = null;
+    private ScannerStatusCallbackProxy statusCb = null;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +53,7 @@ class BtZebraScanner implements ScannerBackground {
     }
 
     @Override
-    public void initialize(Context applicationContext, final ScannerInitCallback initCallback, ScannerDataCallback dataCallback, ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
         this.dataCb = dataCallback;
         this.statusCb = statusCallback;
 
@@ -77,7 +78,7 @@ class BtZebraScanner implements ScannerBackground {
     }
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCb = cb;
     }
 
@@ -120,12 +121,7 @@ class BtZebraScanner implements ScannerBackground {
             res.add(new Barcode(new String(barcodeData).trim(), type));
 
             // Use a handler from the main message loop to run on the UI thread, as dcssdkEventBarcode is called by another thread.
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    dataCb.onData(BtZebraScanner.this, res);
-                }
-            });
+            dataCb.onData(BtZebraScanner.this, res);
         }
     }
 

@@ -9,14 +9,14 @@ import android.content.pm.ResolveInfo;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.bt.manager.SerialBtScannerProvider;
 import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
 import com.enioka.scanner.helpers.ProviderServiceHolder;
 import com.enioka.scanner.helpers.ProviderServiceMeta;
-import com.enioka.scanner.helpers.ScannerConnectionHandlerProxy;
+import com.enioka.scanner.api.proxies.ScannerConnectionHandlerProxy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -137,6 +137,17 @@ public final class LaserScanner {
      * @param options parameters for scanner search.
      */
     public static void getLaserScanner(final Context ctx, final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+        getLaserScanner(ctx, new ScannerConnectionHandlerProxy(handler), options);
+    }
+
+    /**
+     * Get a new laser scanner. The scanner is provided through a callback. There is a specific callback when no scanner is available.
+     *
+     * @param ctx     the activity wishing to retrieve a scanner. Must be an actual activity, not simply the application context.
+     * @param handler the callback.
+     * @param options parameters for scanner search.
+     */
+    public static void getLaserScanner(final Context ctx, final ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
         // Removing the BtSppSdk provider, as it is already handled by the useBluetooth option.
         if (options.allowedProviderKeys != null) {
             options.allowedProviderKeys.remove(SerialBtScannerProvider.PROVIDER_KEY);
@@ -157,6 +168,10 @@ public final class LaserScanner {
      * Some options have an influence on whether a provider should be used or not. All the afferent rules are inside this method.
      */
     private static boolean shouldProviderBeUsed(ProviderServiceHolder psh, ScannerSearchOptions options) {
+        if (psh.getProvider().getKey().equals(SerialBtScannerProvider.PROVIDER_KEY) && options.useBlueTooth) {
+            // Default BT provider is always allowed when bluetooth is on, another check on specific BT providers will be done when they are queried.
+            return true;
+        }
         if (psh.getMeta().isBluetooth() && !options.useBlueTooth) {
             Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because bluetooth option is disabled");
             return false;
@@ -172,9 +187,8 @@ public final class LaserScanner {
         return true;
     }
 
-    private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+    private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
         Log.i(LOG_TAG, "Starting scanner search");
-        final ScannerConnectionHandler handlerProxy = new ScannerConnectionHandlerProxy(handler);
 
         if (options.useBlueTooth) {
             btRegistry.register(ctx);
@@ -183,8 +197,8 @@ public final class LaserScanner {
         // Trivial
         if (providerServices.isEmpty()) {
             Log.i(LOG_TAG, "There are no laser scanners available at all");
-            handlerProxy.noScannerAvailable();
-            handlerProxy.endOfScannerSearch();
+            handler.noScannerAvailable();
+            handler.endOfScannerSearch();
             return;
         }
 
@@ -195,29 +209,27 @@ public final class LaserScanner {
             options.useBlueTooth = false;
         }
 
-        // Count providers which should actually be used.
+        // Only keep providers which should actually be used.
+        // Iterate on copies to avoid concurrent list modifications from other threads
+        List<ProviderServiceHolder> sortedProviders = new ArrayList<>();
         providersExpectedToAnswerCount = 0;
-        for (ProviderServiceHolder psh : new ArrayList<>(providerServices)) {
+        for (final ProviderServiceHolder psh : new ArrayList<>(providerServices)) {
             if (shouldProviderBeUsed(psh, options)) {
+                Log.d(LOG_TAG, "Provider " + psh.getProvider().getKey() + " accepted");
                 providersExpectedToAnswerCount++;
-                Log.d(LOG_TAG, "Provider " + psh.getProvider() + "accepted");
+                sortedProviders.add(psh);
             }
         }
+        Collections.sort(sortedProviders, Collections.reverseOrder()); // priority then name
+        Log.i(LOG_TAG, "There are " + providersExpectedToAnswerCount + " providers which are going to be invoked for fresh laser scanners");
 
         providersHavingAnswered.drainPermits();
-        final ScannerProvider.ProviderCallback providerCallback = getProviderCallback(handlerProxy, options);
+        final ScannerProvider.ProviderCallback providerCallback = getProviderCallback(handler, options);
 
         // Interrogate all providers, grouped by priority. (higher priority comes first).
-        Log.i(LOG_TAG, "There are " + providersExpectedToAnswerCount + " providers which are going to be invoked for fresh laser scanners");
-        List<ProviderServiceHolder> sortedProviders = new ArrayList<>(providerServices); // iterate on a copy to avoid concurrent list modifications from other threads
-        Collections.sort(sortedProviders, Collections.reverseOrder()); // priority then name
         int previousPriority = sortedProviders.isEmpty() ? 0 : sortedProviders.get(0).getMeta().getPriority();
         int launchedThreads = 0;
         for (final ProviderServiceHolder psh : sortedProviders) {
-            if (!shouldProviderBeUsed(psh, options)) {
-                continue;
-            }
-
             if (previousPriority != psh.getMeta().getPriority()) {
                 // New group! wait.
                 Log.i(LOG_TAG, "Waiting for the end of priority group " + previousPriority);
@@ -252,7 +264,7 @@ public final class LaserScanner {
         }
     }
 
-    private static ScannerProvider.ProviderCallback getProviderCallback(final ScannerConnectionHandler handler, final ScannerSearchOptions options) {
+    private static ScannerProvider.ProviderCallback getProviderCallback(final ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
         return new ScannerProvider.ProviderCallback() {
             @Override
             public void onScannerCreated(String providerKey, String scannerKey, Scanner s) {

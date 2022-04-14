@@ -3,14 +3,14 @@ package com.enioka.scanner.sdk.koamtac;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
-import com.enioka.scanner.R;
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
@@ -31,9 +31,9 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
 
     private KDCReader scanner;
     private BluetoothDevice btDevice;
-    private ScannerDataCallback dataCallback;
-    private ScannerStatusCallback statusCallback;
-    private ScannerInitCallback initCallback;
+    private ScannerDataCallbackProxy dataCallback;
+    private ScannerStatusCallbackProxy statusCallback;
+    private ScannerInitCallbackProxy initCallback;
     private Context ctx;
 
     KoamtacScanner(BluetoothDevice device) {
@@ -41,7 +41,7 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
     }
 
     @Override
-    public void initialize(Context applicationContext, ScannerInitCallback initCallback, ScannerDataCallback dataCallback, ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
         this.ctx = applicationContext;
         this.dataCallback = dataCallback;
         this.statusCallback = statusCallback;
@@ -85,12 +85,7 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
             res.add(barcode);
 
             // Use a handler from the main message loop to run on the UI thread, as this method is called by another thread.
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    dataCallback.onData(KoamtacScanner.this, res);
-                }
-            });
+            dataCallback.onData(KoamtacScanner.this, res);
         }
     }
 
@@ -103,12 +98,7 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
 
                 configureScanner();
                 if (initCallback != null) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            initCallback.onConnectionSuccessful(KoamtacScanner.this);
-                        }
-                    });
+                    initCallback.onConnectionSuccessful(KoamtacScanner.this);
                 }
 
                 break;
@@ -124,12 +114,7 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
             case KDCConstants.CONNECTION_STATE_INITIALIZING_FAILED:
                 status = ScannerStatusCallback.Status.FAILURE;
                 if (initCallback != null) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            initCallback.onConnectionFailure(KoamtacScanner.this);
-                        }
-                    });
+                    initCallback.onConnectionFailure(KoamtacScanner.this);
                 }
                 break;
             case KDCConstants.CONNECTION_STATE_LISTEN:
@@ -150,12 +135,7 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
         }
 
         if (this.statusCallback != null) {
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    statusCallback.onStatusChanged(KoamtacScanner.this, status);
-                }
-            });
+            statusCallback.onStatusChanged(KoamtacScanner.this, status);
         }
     }
 
@@ -179,7 +159,7 @@ class KoamtacScanner implements ScannerBackground, KDCBarcodeDataReceivedListene
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCallback = cb;
     }
 

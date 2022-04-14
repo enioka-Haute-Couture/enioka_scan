@@ -1,6 +1,6 @@
 package com.enioka.scanner.service;
 
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.data.Barcode;
 
 import java.util.List;

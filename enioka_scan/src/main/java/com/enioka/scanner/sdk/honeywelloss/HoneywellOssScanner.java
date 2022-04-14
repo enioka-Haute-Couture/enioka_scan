@@ -5,7 +5,9 @@ import android.os.Handler;
 
 import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.ScannerBackground;
-import com.enioka.scanner.api.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.Scanner;
 import com.enioka.scanner.data.Barcode;
@@ -25,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 class HoneywellOssScanner implements ScannerBackground {
-    private ScannerDataCallback dataCallback = null;
+    private ScannerDataCallbackProxy dataCallback = null;
     private final Scanner btScanner;
 
     HoneywellOssScanner(Scanner btScanner) {
@@ -53,7 +55,7 @@ class HoneywellOssScanner implements ScannerBackground {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void setDataCallBack(ScannerDataCallback cb) {
+    public void setDataCallBack(ScannerDataCallbackProxy cb) {
         this.dataCallback = cb;
     }
 
@@ -136,12 +138,7 @@ class HoneywellOssScanner implements ScannerBackground {
         this.btScanner.runCommand(new DisplayScreenColor(color), null);
 
         // This is needed otherwise the color is reused for every default action afterwards!
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                btScanner.runCommand(new DisplayScreenColor(null), null);
-            }
-        }, 5000);
+        new Handler().postDelayed(() -> btScanner.runCommand(new DisplayScreenColor(null), null), 5000);
     }
 
     @Override
@@ -177,10 +174,8 @@ class HoneywellOssScanner implements ScannerBackground {
     }
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
         this.dataCallback = dataCallback;
-
-        final Handler uiHandler = new Handler(applicationContext.getMainLooper());
 
         this.btScanner.registerStatusCallback(statusCallback);
 
@@ -189,7 +184,7 @@ class HoneywellOssScanner implements ScannerBackground {
             public void onSuccess(final Barcode data) {
                 final List<Barcode> res = new ArrayList<>(1);
                 res.add(data);
-                uiHandler.post(() -> HoneywellOssScanner.this.dataCallback.onData(HoneywellOssScanner.this, res));
+                HoneywellOssScanner.this.dataCallback.onData(HoneywellOssScanner.this, res);
             }
 
             @Override

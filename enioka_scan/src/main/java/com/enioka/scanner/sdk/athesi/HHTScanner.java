@@ -7,21 +7,20 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * Scanner provider for HHT Wrapper Layer (i.e. SPA43)
  */
-public class HHTScanner extends IntentScanner<String> {
+public class HHTScanner extends IntentScanner<String> implements Scanner.WithTriggerSupport {
     private static final String LOG_TAG = "HHTScanner";
 
     // Initial parameters for SOFTSCANTRIGGER action.
@@ -140,23 +139,6 @@ public class HHTScanner extends IntentScanner<String> {
 
         // Apply changes.
         broadcastIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETERS, confChanges.toArray(new String[0]));
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // INVENTORY
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public String getStatus(String key) {
-        return null;
-    }
-
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    public Map<String, String> getStatus() {
-        return new HashMap<>();
     }
 
 

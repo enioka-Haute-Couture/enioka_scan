@@ -6,14 +6,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
-import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
-import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.helpers.Common;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +24,7 @@ import java.util.Map;
  * (be it a system service or a service provided by another app).<br>
  * This class factors all the boilerplate code to communicate with such services.
  */
-public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver implements Scanner {
+public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver implements Scanner, Scanner.WithBeepSupport {
 
     private Context ctx;
 
@@ -136,53 +135,20 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     // BEEPS
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @Override
     public void beepScanSuccessful() {
-        CameraBarcodeScanView.beepOk();
+        Common.beepScanSuccessful();
     }
 
+    @Override
     public void beepScanFailure() {
-        CameraBarcodeScanView.beepKo();
+        Common.beepScanFailure();
     }
 
+    @Override
     public void beepPairingCompleted() {
-        CameraBarcodeScanView.beepWaiting();
+        Common.beepPairingCompleted();
     }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // ILLUMINATION
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public boolean supportsIllumination() {
-        return false;
-    }
-
-    @Override
-    public void enableIllumination() {
-    }
-
-    @Override
-    public void disableIllumination() {
-    }
-
-    @Override
-    public void toggleIllumination() {
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return false;
-    }
-
-    @Override
-    public void ledColorOn(Color color) {
-    }
-
-    @Override
-    public void ledColorOff(Color color) {
-    }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // EXTERNAL INTENT SERVICE CALLBACK

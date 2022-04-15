@@ -2,7 +2,6 @@ package com.enioka.scanner.sdk.generalscan;
 
 import android.content.Context;
 
-import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -17,11 +16,9 @@ import com.enioka.scanner.sdk.generalscan.commands.OpenRead;
 import com.enioka.scanner.sdk.generalscan.commands.SetBeepLevel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-class GsSppScanner implements Scanner {
+class GsSppScanner implements Scanner, Scanner.WithBeepSupport {
     private ScannerDataCallbackProxy dataCallback = null;
     private final BluetoothScanner btScanner;
 
@@ -116,67 +113,5 @@ class GsSppScanner implements Scanner {
         this.btScanner.runCommand(new CloseRead(), null);
         this.btScanner.runCommand(new Bell(), null);
         this.btScanner.runCommand(new OpenRead(), null);
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Illumination
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void enableIllumination() {
-        // No illumination on device.
-    }
-
-    @Override
-    public void disableIllumination() {
-        // No illumination on device.
-    }
-
-    @Override
-    public void toggleIllumination() {
-        // No illumination on device.
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsIllumination() {
-        return false;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // LED
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void ledColorOn(Color color) {
-        // No programmable LED on device.
-    }
-
-    @Override
-    public void ledColorOff(Color color) {
-        // No programmable LED on device.
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // INVENTORY
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public String getStatus(String key) {
-        return null;
-    }
-
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    public Map<String, String> getStatus() {
-        return new HashMap<>();
     }
 }

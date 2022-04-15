@@ -3,7 +3,6 @@ package com.enioka.scanner.sdk.camera;
 import android.content.Context;
 import android.util.Log;
 
-import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -11,16 +10,15 @@ import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.helpers.Common;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
  */
-public class CameraBarcodeScanViewScanner implements Scanner, CameraBarcodeScanView.ResultHandler {
+public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIlluminationSupport, CameraBarcodeScanView.ResultHandler {
     private static final String LOG_TAG = "CamBarcodeScanVScanner";
 
     private CameraBarcodeScanView scanner;
@@ -41,9 +39,30 @@ public class CameraBarcodeScanViewScanner implements Scanner, CameraBarcodeScanV
     }
 
     @Override
+    public void handleScanResult(String code, BarcodeType barcodeType) {
+        // TODO: could use a timer to pause the scanning for a second as it otherwise keeps detecting the same barcode
+        Log.v(LOG_TAG, "handleScanResult " + code + " - " + barcodeType);
+        if (dataDb != null) {
+            List<Barcode> res = new ArrayList<>(1);
+            res.add(new Barcode(code.trim(), barcodeType));
+            dataDb.onData(this, res);
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // SCANNER LIFECYCLE
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
     public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
         // Do nothing. The camera view implementation is special, as it is built directly and not through the LaserScanner.
         initCallback.onConnectionSuccessful(this);
+    }
+
+    @Override
+    public String getProviderKey() {
+        return "CAMERA_SCANNER";
     }
 
     @Override
@@ -66,36 +85,37 @@ public class CameraBarcodeScanViewScanner implements Scanner, CameraBarcodeScanV
         scanner.resumeCamera();
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // BEEPS
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     @Override
     public void beepScanSuccessful() {
-        CameraBarcodeScanView.beepOk();
+        Common.beepScanSuccessful();
     }
 
     @Override
     public void beepScanFailure() {
-        CameraBarcodeScanView.beepKo();
+        Common.beepScanFailure();
     }
 
     @Override
     public void beepPairingCompleted() {
-        CameraBarcodeScanView.beepWaiting();
-    }
-
-    @Override
-    public void handleScanResult(String code, BarcodeType barcodeType) {
-        // TODO: could use a timer to pause the scanning for a second as it otherwise keeps detecting the same barcode
-        Log.v(LOG_TAG, "handleScanResult " + code + " - " + barcodeType);
-        if (dataDb != null) {
-            List<Barcode> res = new ArrayList<>(1);
-            res.add(new Barcode(code.trim(), barcodeType));
-            dataDb.onData(this, res);
-        }
+        Common.beepPairingCompleted();
     }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // ILLUMINATION
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public WithIlluminationSupport getIlluminationSupport() {
+        if(scanner.getSupportTorch())
+            return this;
+        return null;
+    }
 
     @Override
     public void enableIllumination() {
@@ -113,42 +133,7 @@ public class CameraBarcodeScanViewScanner implements Scanner, CameraBarcodeScanV
     }
 
     @Override
-    public boolean supportsIllumination() {
-        return scanner.getSupportTorch();
-    }
-
-    @Override
     public boolean isIlluminationOn() {
         return scanner.getTorchOn();
     }
-
-    @Override
-    public void ledColorOn(Color color) {
-    }
-
-    @Override
-    public void ledColorOff(Color color) {
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // INVENTORY
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public String getStatus(String key) {
-        return null;
-    }
-
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    public Map<String, String> getStatus() {
-        return new HashMap<>();
-    }
-
-    @Override
-    public String getProviderKey() {
-        return "CAMERA_SCANNER";
-    }
-
 }

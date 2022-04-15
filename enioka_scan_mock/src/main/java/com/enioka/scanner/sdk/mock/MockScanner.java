@@ -3,7 +3,7 @@ package com.enioka.scanner.sdk.mock;
 import android.content.Context;
 import android.util.Log;
 
-import com.enioka.scanner.api.Color;
+import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerDataCallback;
 import com.enioka.scanner.api.callbacks.ScannerInitCallback;
@@ -22,7 +22,7 @@ import java.util.Map;
  * Mock scanner used to test callbacks and basic scanner interactions.
  * It does not bind to any bluetooth device or intent, "scanned" data has to be passed manually.
  */
-public class MockScanner implements Scanner {
+public class MockScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.WithBeepSupport, Scanner.WithIlluminationSupport, Scanner.WithLedSupport, Scanner.WithInventorySupport {
     static final String LOG_TAG = "MockScanner";
 
     private boolean paused = false;
@@ -177,22 +177,17 @@ public class MockScanner implements Scanner {
         return illuminated;
     }
 
-    @Override
-    public boolean supportsIllumination() {
-        return true;
-    }
-
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // LED
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(Color color) {
+    public void ledColorOn(ScannerLedColor color) {
         Log.d(LOG_TAG, "LED color on with color " + color.name());
     }
 
     @Override
-    public void ledColorOff(Color color) {
+    public void ledColorOff(ScannerLedColor color) {
         Log.d(LOG_TAG, "LED color off");
     }
 
@@ -202,16 +197,19 @@ public class MockScanner implements Scanner {
 
     @Override
     public String getStatus(String key) {
+        Log.d(LOG_TAG, "Returning status " + key + " (null)");
         return null;
     }
 
     @Override
     public String getStatus(String key, boolean allowCache) {
+        Log.d(LOG_TAG, "Returning status " + key + " with cache " + (allowCache ? "enabled" : "disabled") + " (null)");
         return null;
     }
 
     @Override
     public Map<String, String> getStatus() {
+        Log.d(LOG_TAG, "Returning map of status values (empty map)");
         return new HashMap<>();
     }
 }

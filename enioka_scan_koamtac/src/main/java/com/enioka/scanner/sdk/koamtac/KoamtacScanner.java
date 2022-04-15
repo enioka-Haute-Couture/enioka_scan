@@ -1,11 +1,10 @@
 package com.enioka.scanner.sdk.koamtac;
 
-
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.util.Log;
 
-import com.enioka.scanner.api.Color;
+import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
@@ -15,7 +14,6 @@ import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import koamtac.kdc.sdk.KDCBarcodeDataReceivedListener;
 import koamtac.kdc.sdk.KDCConnectionListener;
@@ -26,7 +24,7 @@ import koamtac.kdc.sdk.KDCErrorListener;
 import koamtac.kdc.sdk.KDCReader;
 import koamtac.kdc.sdk.KDCSymbology;
 
-class KoamtacScanner implements Scanner, KDCBarcodeDataReceivedListener, KDCConnectionListener, KDCErrorListener {
+class KoamtacScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithLedSupport, KDCBarcodeDataReceivedListener, KDCConnectionListener, KDCErrorListener {
     private static final String LOG_TAG = "KoamtacScanner";
 
     private KDCReader scanner;
@@ -205,68 +203,21 @@ class KoamtacScanner implements Scanner, KDCBarcodeDataReceivedListener, KDCConn
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // ILLUMINATION
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void enableIllumination() {
-    }
-
-    @Override
-    public void disableIllumination() {
-    }
-
-    @Override
-    public void toggleIllumination() {
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return false;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // LED
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(Color color) {
+    public void ledColorOn(ScannerLedColor color) {
         this.scanner.SetDisplayMessage(color.toString());
     }
 
     @Override
-    public void ledColorOff(Color color) {
+    public void ledColorOff(ScannerLedColor color) {
         this.scanner.SetDisplayMessage("");
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // FUNCTION SUPPORT
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public boolean supportsIllumination() {
-        return false;
     }
 
     @Override
     public String getProviderKey() {
         return KoamtacScannerProvider.PROVIDER_KEY;
-    }
-
-    @Override
-    public String getStatus(String key) {
-        return null;
-    }
-
-    @Override
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getStatus() {
-        return null;
     }
 }

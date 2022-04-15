@@ -25,7 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enioka.scanner.R;
-import com.enioka.scanner.api.Color;
+import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
@@ -460,7 +460,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         } else {
             flashlight.setOnClickListener(v -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
-                    s.toggleIllumination();
+                    if (s.getIlluminationSupport() != null)
+                        s.getIlluminationSupport().toggleIllumination();
                 }
                 toggleTorch();
             });
@@ -489,7 +490,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
     private boolean anyScannerSupportsIllumination() {
         for (final Scanner s : scannerService.getConnectedScanners()) {
-            if (s.supportsIllumination()) {
+            if (s.getIlluminationSupport() != null) {
                 return true;
             }
         }
@@ -498,7 +499,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
     private boolean anyScannerHasIlluminationOn() {
         for (final Scanner s : scannerService.getConnectedScanners()) {
-            if (s.isIlluminationOn()) {
+            if (s.getIlluminationSupport() != null && s.getIlluminationSupport().isIlluminationOn()) {
                 return true;
             }
         }
@@ -568,11 +569,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             findViewById(R.id.scanner_red_led).setOnClickListener(view -> {
                 if (!ledToggle) {
                     for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
-                        s.ledColorOn(Color.RED);
+                        if (s.getLedSupport() != null)
+                            s.getLedSupport().ledColorOn(ScannerLedColor.RED);
                     }
                 } else {
                     for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
-                        s.ledColorOff(Color.RED);
+                        if (s.getLedSupport() != null)
+                            s.getLedSupport().ledColorOff(ScannerLedColor.RED);
                     }
                 }
                 ledToggle = !ledToggle;
@@ -584,7 +587,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (findViewById(R.id.scanner_trigger_off) != null) {
             findViewById(R.id.scanner_trigger_off).setOnClickListener(view -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
-                    s.releaseScanTrigger();
+                    if (s.getTriggerSupport() != null)
+                        s.getTriggerSupport().releaseScanTrigger();
                 }
             });
         }
@@ -594,7 +598,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (findViewById(R.id.scanner_trigger_on) != null) {
             findViewById(R.id.scanner_trigger_on).setOnClickListener(view -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
-                    s.pressScanTrigger();
+                    if (s.getTriggerSupport() != null)
+                        s.getTriggerSupport().pressScanTrigger();
                 }
             });
         }
@@ -604,7 +609,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (findViewById(R.id.scanner_bell) != null) {
             findViewById(R.id.scanner_bell).setOnClickListener(view -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
-                    s.beepScanSuccessful();
+                    if (s.getBeepSupport() != null)
+                        s.getBeepSupport().beepScanSuccessful();
                 }
             });
         }

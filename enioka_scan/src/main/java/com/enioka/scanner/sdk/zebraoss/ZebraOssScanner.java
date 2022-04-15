@@ -4,7 +4,7 @@ import android.content.Context;
 
 import android.util.Log;
 
-import com.enioka.scanner.api.Color;
+import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
-class ZebraOssScanner implements Scanner {
+class ZebraOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.WithBeepSupport, Scanner.WithLedSupport, Scanner.WithInventorySupport {
     private static final String LOG_TAG = "SsiParser";
 
     private ScannerDataCallbackProxy dataCallback = null;
@@ -111,46 +111,16 @@ class ZebraOssScanner implements Scanner {
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Illumination
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void enableIllumination() {
-
-    }
-
-    @Override
-    public void disableIllumination() {
-
-    }
-
-    @Override
-    public void toggleIllumination() {
-
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsIllumination() {
-        return false;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // LEDs
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(Color color) {
+    public void ledColorOn(ScannerLedColor color) {
         this.btScanner.runCommand(new LedOn(color), null);
     }
 
     @Override
-    public void ledColorOff(Color color) {
+    public void ledColorOff(ScannerLedColor color) {
         this.btScanner.runCommand(new LedOff(), null);
     }
 
@@ -159,10 +129,12 @@ class ZebraOssScanner implements Scanner {
     // INVENTORY
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @Override
     public String getStatus(String key) {
         return statusCache.get(key);
     }
 
+    @Override
     public String getStatus(String key, boolean allowCache) {
         if (!allowCache) {
             final Semaphore s = new Semaphore(0);
@@ -191,6 +163,7 @@ class ZebraOssScanner implements Scanner {
         return getStatus(key);
     }
 
+    @Override
     public Map<String, String> getStatus() {
         return new HashMap<>(statusCache);
     }
@@ -300,7 +273,7 @@ class ZebraOssScanner implements Scanner {
                                 ZebraOssScanner.this.btScanner.runCommand(new RequestRevision(), new DataSubscriptionCallback<ReplyRevision>() {
                                     @Override
                                     public void onSuccess(ReplyRevision data) {
-                                        ZebraOssScanner.this.statusCache.put(Scanner.SCANNER_STATUS_FIRMWARE, data.softwareRevision);
+                                        ZebraOssScanner.this.statusCache.put(SCANNER_STATUS_FIRMWARE, data.softwareRevision);
 
                                         normalizeAttributes();
 
@@ -330,29 +303,29 @@ class ZebraOssScanner implements Scanner {
     private void normalizeAttributes() {
         String var = this.statusCache.get("ZEBRA_RSM_ATTR_533");
         if (var != null) {
-            this.statusCache.put(Scanner.SCANNER_STATUS_SCANNER_SN, var);
+            this.statusCache.put(SCANNER_STATUS_SCANNER_SN, var);
         }
         var = this.statusCache.get("ZEBRA_RSM_ATTR_533");
         if (var != null) {
-            this.statusCache.put(Scanner.SCANNER_STATUS_SCANNER_MODEL, var);
+            this.statusCache.put(SCANNER_STATUS_SCANNER_MODEL, var);
         }
 
         var = this.statusCache.get("ZEBRA_RSM_ATTR_30017");
         if (var != null) {
-            this.statusCache.put(Scanner.SCANNER_STATUS_BATTERY_MODEL, var);
+            this.statusCache.put(SCANNER_STATUS_BATTERY_MODEL, var);
         }
         var = this.statusCache.get("ZEBRA_RSM_ATTR_30013");
         if (var != null) {
-            this.statusCache.put(Scanner.SCANNER_STATUS_BATTERY_WEAR, var);
+            this.statusCache.put(SCANNER_STATUS_BATTERY_WEAR, var);
         }
         var = this.statusCache.get("ZEBRA_RSM_ATTR_30012");
         if (var != null) {
-            this.statusCache.put(Scanner.SCANNER_STATUS_BATTERY_CHARGE, var);
+            this.statusCache.put(SCANNER_STATUS_BATTERY_CHARGE, var);
         }
 
         var = this.statusCache.get("ZEBRA_RSM_ATTR_541");
         if (var != null) {
-            this.statusCache.put(Scanner.SCANNER_STATUS_BT_MAC, var);
+            this.statusCache.put(SCANNER_STATUS_BT_MAC, var);
         }
 
         Log.i(LOG_TAG, "Scanner status cache contains: ");

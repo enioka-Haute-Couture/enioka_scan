@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
@@ -126,54 +125,6 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
 
     }
 
-    @Override
-    public void beepScanSuccessful() {
-
-    }
-
-    @Override
-    public void beepScanFailure() {
-
-    }
-
-    @Override
-    public void beepPairingCompleted() {
-
-    }
-
-    @Override
-    public void enableIllumination() {
-
-    }
-
-    @Override
-    public void disableIllumination() {
-
-    }
-
-    @Override
-    public void toggleIllumination() {
-
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return false;
-    }
-
-    @Override
-    public boolean supportsIllumination() {
-        return false;
-    }
-
-    @Override
-    public void ledColorOn(Color color) {
-    }
-
-    @Override
-    public void ledColorOff(Color color) {
-    }
-
     private class AsyncResultHandler extends AsyncTask<BarcodeReadEvent, Void, Barcode> {
 
         @Override
@@ -212,20 +163,5 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
     @Override
     public String getProviderKey() {
         return AIDCProvider.PROVIDER_KEY;
-    }
-
-    @Override
-    public String getStatus(String key) {
-        return null;
-    }
-
-    @Override
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getStatus() {
-        return null;
     }
 }

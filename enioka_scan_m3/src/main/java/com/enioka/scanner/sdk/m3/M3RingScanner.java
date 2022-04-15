@@ -4,7 +4,6 @@ package com.enioka.scanner.sdk.m3;
 import android.content.Context;
 import android.util.Log;
 
-import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
@@ -19,7 +18,6 @@ import com.m3.ringscannersdk.RingScannerService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 class M3RingScanner implements Scanner {
     private static final String LOG_TAG = "M3RingScanner";
@@ -124,89 +122,8 @@ class M3RingScanner implements Scanner {
         this.scanner.setReadable(true);
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // BEEPS
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void beepScanSuccessful() {
-
-    }
-
-    @Override
-    public void beepScanFailure() {
-
-    }
-
-    @Override
-    public void beepPairingCompleted() {
-
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // ILLUMINATION
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void enableIllumination() {
-    }
-
-    @Override
-    public void disableIllumination() {
-    }
-
-    @Override
-    public void toggleIllumination() {
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return false;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // LED
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void ledColorOn(Color color) {
-    }
-
-    @Override
-    public void ledColorOff(Color color) {
-
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // FUNCTION SUPPORT
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public boolean supportsIllumination() {
-        return false;
-    }
-
     @Override
     public String getProviderKey() {
         return M3RingScannerProvider.PROVIDER_KEY;
-    }
-
-    @Override
-    public String getStatus(String key) {
-        return null;
-    }
-
-    @Override
-    public String getStatus(String key, boolean allowCache) {
-        return null;
-    }
-
-    @Override
-    public Map<String, String> getStatus() {
-        return null;
     }
 }

@@ -19,12 +19,4 @@ jobs:
       - name: Build and test
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build
-      - name: Test Core
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: enioka_scan:test
-      - name: Test Mock
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: enioka_scan_mock:test
+          arguments: build enioka_scan:test enioka_scan_mock:test

@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
+import android.util.Log;
 
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
@@ -79,9 +80,14 @@ public class MockAndroidTest {
     @Test
     public void testMockRetrievableByScannerService(){
         final TestServiceConnection serviceConnection = new TestServiceConnection();
-        final Intent serviceIntent = new Intent(ctx, ScannerService.class);
-        serviceIntent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, new String[]{"MockProvider"});
 
+        final ScannerSearchOptions options = ScannerSearchOptions.defaultOptions();
+        options.useBlueTooth = false;
+        options.allowedProviderKeys = new HashSet<>();
+        options.allowedProviderKeys.add("MockProvider");
+
+        final Intent serviceIntent = new Intent(ctx, ScannerService.class);
+        options.toIntentExtras(serviceIntent);
         ctx.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         // Wait for binding with ScannerService
@@ -92,13 +98,12 @@ public class MockAndroidTest {
         final ScannerServiceApi scannerService = serviceConnection.binder.getService();
         scannerService.registerClient(new ScannerClient() {
             @Override
-            public void onStatusChanged(@Nullable Scanner scanner, Status newStatus) {
-                if (newStatus == Status.SERVICE_SDK_SEARCH_OVER)
-                    scannerDiscoverySemaphore.release();
-            }
-
+            public void onStatusChanged(@Nullable Scanner scanner, Status newStatus) {}
             @Override
-            public void onScannerInitEnded(int count) {}
+            public void onScannerInitEnded(int count) {
+                Log.d("TESTUITE -- testMockRetrievableByScannerService", "Scanner init ended with " + count + " scanners.");
+                scannerDiscoverySemaphore.release();
+            }
             @Override
             public void onData(List<Barcode> data) {}
         });

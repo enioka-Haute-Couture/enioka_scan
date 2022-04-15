@@ -459,7 +459,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             });
         } else {
             flashlight.setOnClickListener(v -> {
-                scannerService.toggleIllumination();
+                for (final Scanner s : scannerService.getConnectedScanners()) {
+                    s.toggleIllumination();
+                }
                 toggleTorch();
             });
         }
@@ -471,18 +473,36 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
-        if (!scannerService.anyScannerSupportsIllumination() && cameraScanner == null) {
+        if (!anyScannerSupportsIllumination() && cameraScanner == null) {
             flashlight.setVisibility(View.GONE);
         } else {
             flashlight.setVisibility(View.VISIBLE);
         }
 
-        boolean isOn = scannerService.anyScannerHasIlluminationOn() || (cameraScanner != null && cameraScanner.isIlluminationOn());
+        boolean isOn = anyScannerHasIlluminationOn() || (cameraScanner != null && cameraScanner.isIlluminationOn());
         int iconId = isOn ? R.drawable.icn_flash_off_on : R.drawable.icn_flash_off;
 
         final int newColor = getResources().getColor(R.color.flashButtonColor);
         flashlight.setColorFilter(newColor, PorterDuff.Mode.SRC_ATOP);
         flashlight.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), iconId));
+    }
+
+    private boolean anyScannerSupportsIllumination() {
+        for (final Scanner s : scannerService.getConnectedScanners()) {
+            if (s.supportsIllumination()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean anyScannerHasIlluminationOn() {
+        for (final Scanner s : scannerService.getConnectedScanners()) {
+            if (s.isIlluminationOn()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -547,9 +567,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (findViewById(R.id.scanner_red_led) != null) {
             findViewById(R.id.scanner_red_led).setOnClickListener(view -> {
                 if (!ledToggle) {
-                    ScannerCompatActivity.this.scannerService.ledColorOn(Color.RED);
+                    for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
+                        s.ledColorOn(Color.RED);
+                    }
                 } else {
-                    ScannerCompatActivity.this.scannerService.ledColorOff(Color.RED);
+                    for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
+                        s.ledColorOff(Color.RED);
+                    }
                 }
                 ledToggle = !ledToggle;
             });
@@ -558,19 +582,31 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
     private void displayDisableScanButton() {
         if (findViewById(R.id.scanner_trigger_off) != null) {
-            findViewById(R.id.scanner_trigger_off).setOnClickListener(view -> ScannerCompatActivity.this.scannerService.releaseScanTrigger()); // was pause()
+            findViewById(R.id.scanner_trigger_off).setOnClickListener(view -> {
+                for (final Scanner s : scannerService.getConnectedScanners()) {
+                    s.releaseScanTrigger();
+                }
+            });
         }
     }
 
     private void displayEnableScanButton() {
         if (findViewById(R.id.scanner_trigger_on) != null) {
-            findViewById(R.id.scanner_trigger_on).setOnClickListener(view -> ScannerCompatActivity.this.scannerService.pressScanTrigger()); // was resume()
+            findViewById(R.id.scanner_trigger_on).setOnClickListener(view -> {
+                for (final Scanner s : scannerService.getConnectedScanners()) {
+                    s.pressScanTrigger();
+                }
+            });
         }
     }
 
     private void displayBellButton() {
         if (findViewById(R.id.scanner_bell) != null) {
-            findViewById(R.id.scanner_bell).setOnClickListener(view -> ScannerCompatActivity.this.scannerService.beep());
+            findViewById(R.id.scanner_bell).setOnClickListener(view -> {
+                for (final Scanner s : scannerService.getConnectedScanners()) {
+                    s.beepScanSuccessful();
+                }
+            });
         }
     }
 }

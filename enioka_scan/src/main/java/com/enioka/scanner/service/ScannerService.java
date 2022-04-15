@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.LaserScanner;
-import com.enioka.scanner.api.Color;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerSearchOptions;
@@ -22,10 +21,8 @@ import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -68,7 +65,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     /**
      * The options (which can be adapted from intent extra data) with which we look for scanners on this device.
      */
-    private final ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions().getAllAvailableScanners();
+    private final ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions();
 
     private interface EndOfInitCallback {
         void run();
@@ -121,21 +118,69 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
 
     ////////////////////////////////////////////////////////////////////////////
-    // SCANNER PROVIDER CONNECTION HANDLERS
+    // SCANNER SERVICE API IMPL
     ////////////////////////////////////////////////////////////////////////////
-
-    public void restartScannerDiscovery() {
-        this.disconnect();
-        this.initLaserScannerSearch();
-    }
 
     protected synchronized void initLaserScannerSearch() {
         LaserScanner.getLaserScanner(this.getApplicationContext(), new ScannerConnectionHandlerProxy(this), scannerSearchOptions);
     }
 
     @Override
+    public void registerClient(ScannerClient client) {
+        this.clients.add(client);
+
+        if (allScannersInitialized) {
+            // Notify late clients that scanners are already connected.
+            client.onScannerInitEnded(scanners.size());
+        }
+    }
+
+    @Override
+    public void unregisterClient(ScannerClient client) {
+        this.clients.remove(client);
+    }
+
+    @Override
+    public void resume() {
+        for (Scanner s : this.scanners) {
+            s.resume();
+        }
+    }
+
+    @Override
+    public void pause() {
+        for (Scanner s : this.scanners) {
+            s.pause();
+        }
+    }
+
+    @Override
+    public void disconnect() {
+        for (Scanner s : this.scanners) {
+            s.disconnect();
+        }
+    }
+
+    @Override
+    public void restartScannerDiscovery() {
+        this.disconnect();
+        this.initLaserScannerSearch();
+    }
+
+    @Override
+    public List<Scanner> getConnectedScanners() {
+        return scanners;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+    // SCANNER CONNECTION HANDLER IMPL
+    ////////////////////////////////////////////////////////////////////////////
+
+    @Override
     public void scannerConnectionProgress(String providerKey, String scannerKey, String message) {
         onStatusChanged(null, Status.CONNECTING);
+        Log.d(LOG_TAG, "Progress on connection of scanner " + scannerKey + " from " + providerKey + ": " + message);
     }
 
     @Override
@@ -143,6 +188,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         Log.d(LOG_TAG, "Service has received a new scanner from provider " + providerKey + " and will initialize it. Its key is " + scannerKey);
 
         initializingScannersCount.incrementAndGet();
+        Log.d(LOG_TAG, "New scanner initializing, total initializing: " + initializingScannersCount.get());
         s.initialize(this.getApplicationContext(),
                 new ScannerInitCallbackProxy(this),
                 new ScannerDataCallbackProxy(this),
@@ -164,7 +210,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
 
     ////////////////////////////////////////////////////////////////////////////
-    // SCANNER INIT HANDLERS
+    // SCANNER INIT CALLBACK IMPL
     ////////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -173,6 +219,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         this.scanners.add(s);
         onStatusChanged(s, Status.CONNECTED);
         initializingScannersCount.decrementAndGet();
+        Log.d(LOG_TAG, "New scanner initialized (success), total initializing: " + initializingScannersCount.get());
         checkInitializationEnd();
     }
 
@@ -181,6 +228,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         Log.i(LOG_TAG, "A scanner has failed to initialize from provider " + s.getProviderKey());
         onStatusChanged(s, Status.FAILURE);
         initializingScannersCount.decrementAndGet();
+        Log.d(LOG_TAG, "New scanner initialized (failure), total initializing: " + initializingScannersCount.get());
         checkInitializationEnd();
     }
 
@@ -204,140 +252,28 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
             // Notify
             onStatusChanged(null, Status.SERVICE_SDK_SEARCH_OVER); // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
+
+            for (final ScannerClient client : clients) {
+                client.onScannerInitEnded(scanners.size());
+            }
         }
     }
 
 
     ////////////////////////////////////////////////////////////////////////////
-    // SCANNER DATA HANDLERS
+    // SCANNER DATA CALLBACK IMPL
     ////////////////////////////////////////////////////////////////////////////
 
     @Override
     public void onData(Scanner s, List<Barcode> data) {
-        for (ScannerClient client : this.clients) {
+        for (final ScannerClient client : clients) {
             client.onData(data);
         }
     }
 
 
     ////////////////////////////////////////////////////////////////////////////
-    // SERVICE API
-    ////////////////////////////////////////////////////////////////////////////
-
-    public void registerClient(ScannerClient client) {
-        this.clients.add(client);
-    }
-
-    public void unregisterClient(ScannerClient client) {
-        this.clients.remove(client);
-    }
-
-    public void pressScanTrigger() {
-        for (Scanner s : this.scanners) {
-            s.pressScanTrigger();
-        }
-    }
-
-    public void releaseScanTrigger() {
-        for (Scanner s : this.scanners) {
-            s.releaseScanTrigger();
-        }
-    }
-
-    public boolean anyScannerSupportsIllumination() {
-        for (Scanner s : this.scanners) {
-            if (s.supportsIllumination()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean anyScannerHasIlluminationOn() {
-        for (Scanner s : this.scanners) {
-            if (s.isIlluminationOn()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void toggleIllumination() {
-        for (Scanner s : this.scanners) {
-            s.toggleIllumination();
-        }
-    }
-
-    public void resume() {
-        for (Scanner s : this.scanners) {
-            s.resume();
-        }
-    }
-
-    public void pause() {
-        for (Scanner s : this.scanners) {
-            s.pause();
-        }
-    }
-
-    public void disconnect() {
-        for (Scanner s : this.scanners) {
-            s.disconnect();
-        }
-    }
-
-    public void beep() {
-        for (Scanner s : this.scanners) {
-            s.beepScanSuccessful();
-        }
-    }
-
-    public void ledColorOn(Color color) {
-        for (Scanner s : this.scanners) {
-            s.ledColorOn(color);
-        }
-    }
-
-    public void ledColorOff(Color color) {
-        for (Scanner s : this.scanners) {
-            s.ledColorOff(color);
-        }
-    }
-
-    // On ajoute quand même ces apis pour le ScannerServiceAPI pour plus de control sur le contenu et on expose tous les autres scanners pour donner une liberter pour les clients de la librairie
-
-    @Override
-    public Map<String, String> getFirstScannerStatus() {
-        if (!this.scanners.isEmpty()) {
-            return this.scanners.get(0).getStatus();
-        }
-        return new HashMap<>();
-    }
-
-    @Override
-    public String getFirstScannerStatus(String key) {
-        if (!this.scanners.isEmpty()) {
-            return this.scanners.get(0).getStatus(key);
-        }
-        return null;
-    }
-
-    @Override
-    public String getFirstScannerStatus(String key, boolean allowCache) {
-        if (!this.scanners.isEmpty()) {
-            return this.scanners.get(0).getStatus(key, allowCache);
-        }
-        return null;
-    }
-
-    @Override
-    public List<Scanner> getConnectedScanners() {
-        return scanners;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////
-    // SCANNER STATUS CALLBACK
+    // SCANNER STATUS CALLBACK IMPL
     ////////////////////////////////////////////////////////////////////////////
 
     @Override

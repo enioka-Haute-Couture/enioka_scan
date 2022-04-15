@@ -5,10 +5,8 @@ import android.os.Bundle;
 
 import com.enioka.scanner.service.ScannerServiceApi;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -72,7 +70,9 @@ public class ScannerSearchOptions {
     public ScannerSearchOptions fromIntentExtras(final Intent intent) {
         Bundle extras = intent.getExtras();
         if (extras != null) {
-            useBlueTooth = extras.getBoolean(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, useBlueTooth);
+            waitDisconnected = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_WAIT_DISCONNECTED_BOOLEAN, waitDisconnected);
+            returnOnlyFirst = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_RETURN_ONLY_FIRST_BOOLEAN, returnOnlyFirst);
+            useBlueTooth = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_BT_BOOLEAN, useBlueTooth);
             allowLaterConnections = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, allowLaterConnections);
             allowPairingFlow = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, allowPairingFlow);
             allowInitialSearch = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, allowInitialSearch);
@@ -99,9 +99,9 @@ public class ScannerSearchOptions {
      * @param intent The intent to update
      */
     public void toIntentExtras(final Intent intent) {
-        //intent.putExtra("", waitDisconnected); // No corresponding extra
-        //intent.putExtra("", returnOnlyFirst); // No corresponding extra
-        intent.putExtra(ScannerServiceApi.EXTRA_BT_ALLOW_BT_BOOLEAN, useBlueTooth);
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_WAIT_DISCONNECTED_BOOLEAN, waitDisconnected);
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_RETURN_ONLY_FIRST_BOOLEAN, returnOnlyFirst);
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_BT_BOOLEAN, useBlueTooth);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, allowLaterConnections);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, allowInitialSearch);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, allowPairingFlow);

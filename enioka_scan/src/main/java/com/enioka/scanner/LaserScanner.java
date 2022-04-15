@@ -188,6 +188,7 @@ public final class LaserScanner {
     }
 
     private static void startLaserSearchInProviders(final Context ctx, ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
+        scannerFound = false; // Scanners are not cached like providers so we need to reset this flag every time.
         Log.i(LOG_TAG, "Starting scanner search");
 
         if (options.useBlueTooth) {

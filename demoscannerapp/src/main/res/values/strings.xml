@@ -7,6 +7,8 @@
     <string name="settings">Scanner settings</string>
 
     <string name="scanner_search_settings">Settings</string>
+    <string name="wait_disconnected">Wait Disconnected:</string>
+    <string name="return_only_first">Return Only First:</string>
     <string name="use_bluetooth">Use Bluetooth:</string>
     <string name="allow_initial_search">Allow Initial Search:</string>
     <string name="allow_later_connections">Allow Later Connections:</string>

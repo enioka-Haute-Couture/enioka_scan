@@ -4,10 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.callbacks.ScannerCommandCallback;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -109,24 +112,37 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(getProviderKey(), "Removing subscription to scanner service");
         ctx.unregisterReceiver(this);
-    }
-
-    @Override
-    public void pause() {
-        if (disableTrigger != null) {
-            Log.d(getProviderKey(), "Sending intent to scanner to disable the trigger");
-            ctx.sendBroadcast(disableTrigger);
+        if (cb != null) {
+            cb.onSuccess();
         }
     }
 
     @Override
-    public void resume() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
+        if (disableTrigger != null) {
+            Log.d(getProviderKey(), "Sending intent to scanner to disable the trigger");
+            ctx.sendBroadcast(disableTrigger);
+            if (cb != null) {
+                cb.onSuccess();
+            }
+        } else if (cb != null) {
+            cb.onFailure();
+        }
+    }
+
+    @Override
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         if (enableTrigger != null) {
             Log.d(getProviderKey(), "Sending intent to scanner to enable the trigger");
             ctx.sendBroadcast(enableTrigger);
+            if (cb != null) {
+                cb.onSuccess();
+            }
+        } else if (cb != null) {
+            cb.onFailure();
         }
     }
 
@@ -136,18 +152,27 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void beepScanSuccessful() {
+    public void beepScanSuccessful(@Nullable ScannerCommandCallbackProxy cb) {
         Common.beepScanSuccessful();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepScanFailure() {
+    public void beepScanFailure(@Nullable ScannerCommandCallbackProxy cb) {
         Common.beepScanFailure();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepPairingCompleted() {
+    public void beepPairingCompleted(@Nullable ScannerCommandCallbackProxy cb) {
         Common.beepPairingCompleted();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

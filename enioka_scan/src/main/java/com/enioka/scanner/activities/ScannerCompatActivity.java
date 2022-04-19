@@ -255,7 +255,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             scannerService.pause();
         }
         if (cameraScanner != null) {
-            cameraScanner.disconnect();
+            cameraScanner.disconnect(null);
         }
         super.onPause();
     }
@@ -459,14 +459,14 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         if (cameraScanner != null) {
             flashlight.setOnClickListener(v -> {
-                cameraScanner.toggleIllumination();
+                cameraScanner.toggleIllumination(null);
                 toggleTorch();
             });
         } else {
             flashlight.setOnClickListener(v -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
                     if (s.getIlluminationSupport() != null)
-                        s.getIlluminationSupport().toggleIllumination();
+                        s.getIlluminationSupport().toggleIllumination(null);
                 }
                 toggleTorch();
             });
@@ -575,12 +575,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 if (!ledToggle) {
                     for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
                         if (s.getLedSupport() != null)
-                            s.getLedSupport().ledColorOn(ScannerLedColor.RED);
+                            s.getLedSupport().ledColorOn(ScannerLedColor.RED, null);
                     }
                 } else {
                     for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
                         if (s.getLedSupport() != null)
-                            s.getLedSupport().ledColorOff(ScannerLedColor.RED);
+                            s.getLedSupport().ledColorOff(ScannerLedColor.RED, null);
                     }
                 }
                 ledToggle = !ledToggle;
@@ -593,7 +593,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             findViewById(R.id.scanner_trigger_off).setOnClickListener(view -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
                     if (s.getTriggerSupport() != null)
-                        s.getTriggerSupport().releaseScanTrigger();
+                        s.getTriggerSupport().releaseScanTrigger(null);
                 }
             });
         }
@@ -604,7 +604,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             findViewById(R.id.scanner_trigger_on).setOnClickListener(view -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
                     if (s.getTriggerSupport() != null)
-                        s.getTriggerSupport().pressScanTrigger();
+                        s.getTriggerSupport().pressScanTrigger(null);
                 }
             });
         }
@@ -615,7 +615,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             findViewById(R.id.scanner_bell).setOnClickListener(view -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
                     if (s.getBeepSupport() != null)
-                        s.getBeepSupport().beepScanSuccessful();
+                        s.getBeepSupport().beepScanSuccessful(null);
                 }
             });
         }

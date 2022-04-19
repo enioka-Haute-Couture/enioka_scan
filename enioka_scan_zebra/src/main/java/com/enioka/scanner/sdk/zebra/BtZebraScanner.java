@@ -1,12 +1,14 @@
 package com.enioka.scanner.sdk.zebra;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Xml;
 
 import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -80,12 +82,17 @@ class BtZebraScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIl
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         if (scannerId != null) {
             Log.i(LOG_TAG, "disconnect");
             sdkHandler.dcssdkTerminateCommunicationSession(scannerId);
             //sdkHandler.dcssdkUnsubsribeForEvents(notificationsMask);
             //sdkHandler.dcssdkClose();
+            if (cb != null) {
+                cb.onSuccess();
+            }
+        } else if (cb != null) {
+            cb.onFailure();
         }
     }
 
@@ -130,26 +137,32 @@ class BtZebraScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIl
     private boolean illuminated = true;
 
     @Override
-    public void enableIllumination() {
+    public void enableIllumination(@Nullable ScannerCommandCallbackProxy cb) {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_AIM_ON, inXML);
         illuminated = true;
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void disableIllumination() {
+    public void disableIllumination(@Nullable ScannerCommandCallbackProxy cb) {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_AIM_OFF, inXML);
         illuminated = false;
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void toggleIllumination() {
-        beepScanSuccessful();
+    public void toggleIllumination(@Nullable ScannerCommandCallbackProxy cb) {
+        beepScanSuccessful(cb);
         if (illuminated) {
-            disableIllumination();
+            disableIllumination(cb);
         } else {
-            enableIllumination();
+            enableIllumination(cb);
         }
     }
 
@@ -164,7 +177,7 @@ class BtZebraScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIl
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(ScannerLedColor color) {
+    public void ledColorOn(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         int attrCode;
         if (color == ScannerLedColor.GREEN) {
             attrCode = 43;
@@ -176,10 +189,14 @@ class BtZebraScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIl
 
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" + attrCode + "</arg-int></cmdArgs></inArgs>";
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, inXML);
+
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void ledColorOff(ScannerLedColor color) {
+    public void ledColorOff(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         int attrCode;
         if (color == ScannerLedColor.GREEN) {
             attrCode = 42;
@@ -191,6 +208,10 @@ class BtZebraScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIl
 
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" + attrCode + "</arg-int></cmdArgs></inArgs>";
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, inXML);
+
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -199,15 +220,21 @@ class BtZebraScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIl
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void pause() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_DISABLE, inXML);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void resume() {
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID></inArgs>";
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_DEVICE_SCAN_ENABLE, inXML);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -216,27 +243,36 @@ class BtZebraScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIl
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void beepScanSuccessful() {
+    public void beepScanSuccessful(@Nullable ScannerCommandCallbackProxy cb) {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" +
                 +BEEP_HIGH_SHORT_1 + "</arg-int></cmdArgs></inArgs>";
 
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, inXML);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepScanFailure() {
+    public void beepScanFailure(@Nullable ScannerCommandCallbackProxy cb) {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" +
                 +BEEP_LOW_LONG_2 + "</arg-int></cmdArgs></inArgs>";
 
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, inXML);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepPairingCompleted() {
+    public void beepPairingCompleted(@Nullable ScannerCommandCallbackProxy cb) {
         String inXML = "<inArgs><scannerID>" + scannerId + "</scannerID><cmdArgs><arg-int>" +
                 +BEEP_HIGH_LOW_HIGH + "</arg-int></cmdArgs></inArgs>";
 
         BtZebraAsyncTask.fireAndForgetCommand(sdkHandler, scannerId, DCSSDKDefs.DCSSDK_COMMAND_OPCODE.DCSSDK_SET_ACTION, inXML);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 

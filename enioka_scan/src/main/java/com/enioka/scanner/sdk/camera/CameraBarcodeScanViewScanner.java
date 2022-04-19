@@ -1,9 +1,12 @@
 package com.enioka.scanner.sdk.camera;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.callbacks.ScannerCommandCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -71,18 +74,27 @@ public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSu
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         scanner.cleanUp();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void pause() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
         scanner.pauseCamera();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void resume() {
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         scanner.resumeCamera();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -91,18 +103,27 @@ public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSu
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void beepScanSuccessful() {
+    public void beepScanSuccessful(@Nullable ScannerCommandCallbackProxy cb) {
         Common.beepScanSuccessful();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepScanFailure() {
+    public void beepScanFailure(@Nullable ScannerCommandCallbackProxy cb) {
         Common.beepScanFailure();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepPairingCompleted() {
+    public void beepPairingCompleted(@Nullable ScannerCommandCallbackProxy cb) {
         Common.beepPairingCompleted();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -118,18 +139,27 @@ public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSu
     }
 
     @Override
-    public void enableIllumination() {
+    public void enableIllumination(@Nullable ScannerCommandCallbackProxy cb) {
         scanner.setTorch(true);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void disableIllumination() {
+    public void disableIllumination(@Nullable ScannerCommandCallbackProxy cb) {
         scanner.setTorch(false);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void toggleIllumination() {
+    public void toggleIllumination(@Nullable ScannerCommandCallbackProxy cb) {
         scanner.setTorch(!scanner.getTorchOn());
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override

@@ -3,12 +3,14 @@ package com.enioka.scanner.sdk.zebra;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.enioka.scanner.R;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -329,7 +331,7 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
 
                 // Allow a new scan?
                 if (mode == Mode.BATCH) {
-                    resume();
+                    resume(null);
                 } else {
                     waitingForResult = false;
                 }
@@ -365,7 +367,7 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
 
             if (res.size() == 0) {
                 waitingForResult = true;
-                resume();
+                resume(null);
             }
 
             // Return result to be handled on UI thread
@@ -409,42 +411,60 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         if (this.scanner != null) {
             try {
                 this.scanner.release();
             } catch (ScannerException e) {
                 Log.i(LOG_TAG, "Error when releasing the scanner", e);
                 // Just ignore, we are quitting.
+                //if (cb != null) {
+                //    cb.onFailure();
+                //}
             }
             this.scanner = null;
         }
         if (this.emdkManager != null) {
             this.emdkManager.release();
         }
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void pause() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
         waitingForResult = false;
         try {
             if (scanner.isReadPending()) {
                 scanner.cancelRead();
             }
         } catch (ScannerException e) {
+            if (cb != null) {
+                cb.onFailure();
+            }
             throw new RuntimeException(e);
+        }
+        if (cb != null) {
+            cb.onSuccess();
         }
     }
 
     @Override
-    public void resume() {
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         waitingForResult = true;
         try {
             if (!scanner.isReadPending()) {
                 scanner.read();
             }
         } catch (ScannerException e) {
+            if (cb != null) {
+                cb.onFailure();
+            }
             throw new RuntimeException(e);
+        }
+        if (cb != null) {
+            cb.onSuccess();
         }
     }
 
@@ -454,18 +474,27 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void beepScanSuccessful() {
+    public void beepScanSuccessful(@Nullable ScannerCommandCallbackProxy cb) {
         Common.beepScanSuccessful();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepScanFailure() {
+    public void beepScanFailure(@Nullable ScannerCommandCallbackProxy cb) {
         Common.beepScanFailure();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepPairingCompleted() {
+    public void beepPairingCompleted(@Nullable ScannerCommandCallbackProxy cb) {
         Common.beepPairingCompleted();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override

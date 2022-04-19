@@ -191,21 +191,21 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Override
     public void resume() {
         for (Scanner s : this.scanners) {
-            s.resume();
+            s.resume(null);
         }
     }
 
     @Override
     public void pause() {
         for (Scanner s : this.scanners) {
-            s.pause();
+            s.pause(null);
         }
     }
 
     @Override
     public void disconnect() {
         for (Scanner s : this.scanners) {
-            s.disconnect();
+            s.disconnect(null);
         }
     }
 

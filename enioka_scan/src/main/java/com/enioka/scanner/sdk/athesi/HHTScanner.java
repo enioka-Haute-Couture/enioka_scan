@@ -5,9 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.callbacks.ScannerCommandCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
@@ -58,13 +61,19 @@ public class HHTScanner extends IntentScanner<String> implements Scanner.WithTri
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void pressScanTrigger() {
+    public void pressScanTrigger(@Nullable ScannerCommandCallbackProxy cb) {
         broadcastIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETER, DataWedge.START_SCANNING);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void releaseScanTrigger() {
+    public void releaseScanTrigger(@Nullable ScannerCommandCallbackProxy cb) {
         broadcastIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETER, DataWedge.STOP_SCANNING);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -87,10 +96,10 @@ public class HHTScanner extends IntentScanner<String> implements Scanner.WithTri
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         broadcastIntent(DataWedge.SOFTSCANTRIGGER, DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_TRIGGERBUTTON);
         broadcastIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_PLUGIN);
-        super.disconnect();
+        super.disconnect(cb);
     }
 
     private void syncConfig(Context ctx) {

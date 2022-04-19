@@ -33,6 +33,13 @@ public class ScannerProviderMeta implements Comparable {
         this.name = si.name;
     }
 
+    public ScannerProviderMeta(boolean bluetooth, int priority, String name) {
+        this.bluetooth = bluetooth;
+        this.priority = priority;
+
+        this.name = name;
+    }
+
     public boolean isBluetooth() {
         return bluetooth;
     }

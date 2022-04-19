@@ -11,7 +11,9 @@ import android.util.Log;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.api.callbacks.ProviderDiscoveredCallback;
 import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
+import com.enioka.scanner.api.proxies.ProviderDiscoveredCallbackProxy;
 import com.enioka.scanner.bt.manager.SerialBtScannerProvider;
 import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
 import com.enioka.scanner.helpers.ScannerProviderHolder;
@@ -53,8 +55,7 @@ public final class LaserScanner {
     /**
      * Private constructor to prevent ever creating an instance from this class.
      */
-    private LaserScanner() {
-    }
+    private LaserScanner() {}
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +68,17 @@ public final class LaserScanner {
      *
      * @param ctx a context used to retrieve a PackageManager
      */
-    public static void discoverProviders(Context ctx, OnProvidersDiscovered cb) {
+    public static void discoverProviders(Context ctx, ProviderDiscoveredCallback cb) {
+        discoverProviders(ctx, new ProviderDiscoveredCallbackProxy(cb));
+    }
+
+    /**
+     * Discovers scanner providers through service intent and retrieves them through reflection.
+     * The providers are cached and do not need to be discovered again unless new entries are expected, it is a costly operation.
+     *
+     * @param ctx a context used to retrieve a PackageManager
+     */
+    public static void discoverProviders(Context ctx, ProviderDiscoveredCallbackProxy cb) {
         // Clear cache
         declaredProviderServices.clear();
         providerServices.clear();
@@ -108,13 +119,6 @@ public final class LaserScanner {
 
         Log.i(LOG_TAG, "Provider discovery done");
         cb.onDiscoveryDone();
-    }
-
-    /**
-     * Callback used at the end of the ScannerProvider search.
-     */
-    public interface OnProvidersDiscovered {
-        void onDiscoveryDone();
     }
 
     /**

@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.callbacks.ProviderDiscoveredCallback;
 import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.api.callbacks.ScannerDataCallback;
@@ -36,6 +37,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     protected final static String LOG_TAG = "ScannerService";
 
+    private boolean startScannerSearchOnFirstBind = true;
     private boolean firstBind = true;
 
     /**
@@ -92,16 +94,13 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     public IBinder onBind(Intent intent) {
         scannerSearchOptions.fromIntentExtras(intent);
 
-        this.initProviderDiscovery(() -> finishFirstBind(intent.getExtras()));
-        return new LocalBinder();
-    }
-
-    private void finishFirstBind(final Bundle extras) {
-        if (firstBind && (extras == null || extras.getBoolean(ScannerServiceApi.EXTRA_START_SEARCH_ON_SERVICE_BIND, true))) {
-            this.initLaserScannerSearch();
+        final Bundle extras = intent.getExtras();
+        if (extras != null) {
+            startScannerSearchOnFirstBind = extras.getBoolean(EXTRA_START_SEARCH_ON_SERVICE_BIND, startScannerSearchOnFirstBind);
         }
-        firstBind = false;
-        Log.d(LOG_TAG, "Service has finished its post-init processes");
+
+        this.initProviderDiscovery();
+        return new LocalBinder();
     }
 
 
@@ -132,14 +131,18 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         LaserScanner.getLaserScanner(this.getApplicationContext(), new ScannerConnectionHandlerProxy(this), scannerSearchOptions);
     }
 
-    protected synchronized void initProviderDiscovery(final LaserScanner.OnProvidersDiscovered endOfDiscoveryCallback) {
+    protected synchronized void initProviderDiscovery() {
         Log.i(LOG_TAG, "(re)starting provider discovery!");
         LaserScanner.discoverProviders(this.getApplicationContext(), () -> {
             onStatusChanged(null, Status.SERVICE_PROVIDER_SEARCH_OVER); // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
             for (final ScannerClient client : clients) {
                 client.onProviderDiscoveryEnded();
             }
-            endOfDiscoveryCallback.onDiscoveryDone();
+
+            if (firstBind && startScannerSearchOnFirstBind) {
+                this.initLaserScannerSearch();
+            }
+            firstBind = false;
         });
     }
 
@@ -171,8 +174,8 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     }
 
     @Override
-    public void restartProviderDiscovery(final LaserScanner.OnProvidersDiscovered endOfDiscoveryCallback) {
-        this.initProviderDiscovery(endOfDiscoveryCallback);
+    public void restartProviderDiscovery() {
+        this.initProviderDiscovery();
     }
 
     @Override

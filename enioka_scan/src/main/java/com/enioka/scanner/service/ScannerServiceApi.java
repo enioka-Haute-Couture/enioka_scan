@@ -3,6 +3,7 @@ package com.enioka.scanner.service;
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.api.callbacks.ProviderDiscoveredCallback;
 
 import java.util.List;
 
@@ -105,7 +106,7 @@ public interface ScannerServiceApi {
     /**
      * Clears the cache of discovered scanner providers and re-starts their discovery. This is a costly operation.
      */
-    void restartProviderDiscovery(final LaserScanner.OnProvidersDiscovered endOfDiscoveryCallback);
+    void restartProviderDiscovery();
 
     /**
      * Returns the list of keys of currently-available scanner providers, useful to tune scanner search options at runtime.

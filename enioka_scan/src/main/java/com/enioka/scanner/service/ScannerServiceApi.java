@@ -1,6 +1,8 @@
 package com.enioka.scanner.service;
 
+import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerSearchOptions;
 
 import java.util.List;
 
@@ -8,6 +10,17 @@ import java.util.List;
  * The public API of the {@link ScannerService}. Obtained by binding to the service.
  */
 public interface ScannerServiceApi {
+
+    ////////////////////////////////////////////////////////////////////////////
+    // SEARCH OPTIONS INTENT EXTRAS
+    ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * If true, the service will start searching for scanners immediately upon binding.
+     * If false, the service will only discover available providers without requesting scanners immediately.
+     * Default is true.
+     */
+    String EXTRA_START_SEARCH_ON_SERVICE_BIND = "startSearchOnServiceBind";
 
     ////////////////////////////////////////////////////////////////////////////
     // SEARCH OPTIONS INTENT EXTRAS
@@ -81,6 +94,31 @@ public interface ScannerServiceApi {
 
 
     ////////////////////////////////////////////////////////////////////////////
+    // SCANNER SEARCH
+    ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Disconnects all currently-connected scanners then starts the initialization process all over again.
+     */
+    void restartScannerDiscovery();
+
+    /**
+     * Clears the cache of discovered scanner providers and re-starts their discovery. This is a costly operation.
+     */
+    void restartProviderDiscovery(final LaserScanner.OnProvidersDiscovered endOfDiscoveryCallback);
+
+    /**
+     * Returns the list of keys of currently-available scanner providers, useful to tune scanner search options at runtime.
+     */
+    List<String> getAvailableProviders();
+
+    /**
+     * Updates the service's scanner search options.
+     */
+    void updateScannerSearchOptions(final ScannerSearchOptions newOptions);
+
+
+    ////////////////////////////////////////////////////////////////////////////
     // SCANNER LIFECYCLE
     ////////////////////////////////////////////////////////////////////////////
 
@@ -103,11 +141,6 @@ public interface ScannerServiceApi {
      *        still needed internally to handle re-discovery / destruction of the service.
      */
     void disconnect();
-
-    /**
-     * Disconnects all currently-connected scanners then starts the initialization process all over again.
-     */
-    void restartScannerDiscovery();
 
 
     ////////////////////////////////////////////////////////////////////////////

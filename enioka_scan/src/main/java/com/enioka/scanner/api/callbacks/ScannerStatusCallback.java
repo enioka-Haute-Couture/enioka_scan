@@ -42,6 +42,8 @@ public interface ScannerStatusCallback {
         DISCONNECTED(R.string.scanner_status_DISCONNECTED),
         /** The scanner is in an unknown status. */
         UNKNOWN(R.string.scanner_status_UNKNOWN),
+        /** ScannerService's provider search is over. */
+        SERVICE_PROVIDER_SEARCH_OVER(R.string.scanner_status_SERVICE_PROVIDER_SEARCH_OVER), // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
         /** ScannerService's SDK search is over. */
         SERVICE_SDK_SEARCH_OVER(R.string.scanner_status_SERVICE_SDK_SEARCH_OVER), // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
         /** ScannerService's SDK search found no scanner. **/

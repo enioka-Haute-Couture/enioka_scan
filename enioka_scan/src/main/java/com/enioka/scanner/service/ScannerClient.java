@@ -11,9 +11,16 @@ import java.util.List;
 public interface ScannerClient extends ScannerStatusCallback {
     /**
      * Callback used once the initialization of scanners is over.
+     * This method is retroactively called on new clients if at least one scanner initialization happened.
      * @param count The amount of initialized scanners.
      */
     void onScannerInitEnded(int count);
+
+    /**
+     * Callback used once the discovery of providers is over, which also implies that the scanner service is ready to be used.
+     * This method is retroactively called on new clients if at least one provider discovery happened.
+     */
+    void onProviderDiscoveryEnded();
 
     /**
      * Callback used when a scanner successfully reads data.

@@ -415,6 +415,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         displayBellButton();
     }
 
+    @Override
+    public void onProviderDiscoveryEnded() {
+        // Do nothing
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Scanner data callback

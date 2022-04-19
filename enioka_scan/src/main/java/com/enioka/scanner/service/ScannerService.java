@@ -3,6 +3,7 @@ package com.enioka.scanner.service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -65,7 +66,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     /**
      * The options (which can be adapted from intent extra data) with which we look for scanners on this device.
      */
-    private final ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions();
+    private ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions();
 
     private interface EndOfInitCallback {
         void run();
@@ -91,11 +92,16 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     public IBinder onBind(Intent intent) {
         scannerSearchOptions.fromIntentExtras(intent);
 
-        if (firstBind) {
+        this.initProviderDiscovery(() -> finishFirstBind(intent.getExtras()));
+        return new LocalBinder();
+    }
+
+    private void finishFirstBind(final Bundle extras) {
+        if (firstBind && (extras == null || extras.getBoolean(ScannerServiceApi.EXTRA_START_SEARCH_ON_SERVICE_BIND, true))) {
             this.initLaserScannerSearch();
         }
         firstBind = false;
-        return new LocalBinder();
+        Log.d(LOG_TAG, "Service has finished its post-init processes");
     }
 
 
@@ -122,15 +128,33 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     ////////////////////////////////////////////////////////////////////////////
 
     protected synchronized void initLaserScannerSearch() {
+        Log.i(LOG_TAG, "(re)starting scanner search!");
         LaserScanner.getLaserScanner(this.getApplicationContext(), new ScannerConnectionHandlerProxy(this), scannerSearchOptions);
+    }
+
+    protected synchronized void initProviderDiscovery(final LaserScanner.OnProvidersDiscovered endOfDiscoveryCallback) {
+        Log.i(LOG_TAG, "(re)starting provider discovery!");
+        LaserScanner.discoverProviders(this.getApplicationContext(), () -> {
+            onStatusChanged(null, Status.SERVICE_PROVIDER_SEARCH_OVER); // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
+            for (final ScannerClient client : clients) {
+                client.onProviderDiscoveryEnded();
+            }
+            endOfDiscoveryCallback.onDiscoveryDone();
+        });
     }
 
     @Override
     public void registerClient(ScannerClient client) {
+        Log.d(LOG_TAG, "Registering new client: " + client.toString());
         this.clients.add(client);
 
+        if (!firstBind) {
+            Log.d(LOG_TAG, "Notifying late clients that providers are already discovered");
+            client.onProviderDiscoveryEnded();
+        }
+
         if (allScannersInitialized) {
-            // Notify late clients that scanners are already connected.
+            Log.d(LOG_TAG, "Notifying late clients that scanners are already connected");
             client.onScannerInitEnded(scanners.size());
         }
     }
@@ -138,6 +162,27 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Override
     public void unregisterClient(ScannerClient client) {
         this.clients.remove(client);
+    }
+
+    @Override
+    public void restartScannerDiscovery() {
+        this.disconnect();
+        this.initLaserScannerSearch();
+    }
+
+    @Override
+    public void restartProviderDiscovery(final LaserScanner.OnProvidersDiscovered endOfDiscoveryCallback) {
+        this.initProviderDiscovery(endOfDiscoveryCallback);
+    }
+
+    @Override
+    public List<String> getAvailableProviders() {
+        return LaserScanner.getProviderCache();
+    }
+
+    @Override
+    public void updateScannerSearchOptions(ScannerSearchOptions newOptions) {
+        this.scannerSearchOptions = newOptions;
     }
 
     @Override
@@ -159,12 +204,6 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         for (Scanner s : this.scanners) {
             s.disconnect();
         }
-    }
-
-    @Override
-    public void restartScannerDiscovery() {
-        this.disconnect();
-        this.initLaserScannerSearch();
     }
 
     @Override
@@ -278,7 +317,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void onStatusChanged(final Scanner scanner, final ScannerStatusCallback.Status newStatus) {
-        Log.d(LOG_TAG, "Status changed: " + newStatus.name() + " --- " + newStatus);
+        Log.d(LOG_TAG, "Status changed: " + newStatus.name() + " --- " + newStatus.getLocalizedMessage(this));
         for (ScannerClient client : ScannerService.this.clients) {
             client.onStatusChanged(scanner, newStatus);
         }

@@ -14,8 +14,8 @@ import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.bt.manager.SerialBtScannerProvider;
 import com.enioka.scanner.helpers.BtScannerConnectionRegistry;
-import com.enioka.scanner.helpers.ProviderServiceHolder;
-import com.enioka.scanner.helpers.ProviderServiceMeta;
+import com.enioka.scanner.helpers.ScannerProviderHolder;
+import com.enioka.scanner.helpers.ScannerProviderMeta;
 import com.enioka.scanner.api.proxies.ScannerConnectionHandlerProxy;
 
 import java.util.ArrayList;
@@ -36,12 +36,12 @@ public final class LaserScanner {
     /**
      * The list of available scanner providers, as declared inside their metadata.
      */
-    private static final Map<String, ProviderServiceMeta> declaredProviderServices = new HashMap<>();
+    private static final Map<String, ScannerProviderMeta> declaredProviderServices = new HashMap<>();
 
     /**
      * The list of scanner providers which could actually be created.
      */
-    private static final Set<ProviderServiceHolder> providerServices = new HashSet<>();
+    private static final Set<ScannerProviderHolder> providerServices = new HashSet<>();
 
     private static final BtScannerConnectionRegistry btRegistry = new BtScannerConnectionRegistry();
 
@@ -63,10 +63,15 @@ public final class LaserScanner {
 
     /**
      * Discovers scanner providers through service intent and retrieves them through reflection.
+     * The providers are cached and do not need to be discovered again unless new entries are expected, it is a costly operation.
      *
      * @param ctx a context used to retrieve a PackageManager
      */
-    private static void getProviders(Context ctx, OnProvidersDiscovered cb) {
+    public static void discoverProviders(Context ctx, OnProvidersDiscovered cb) {
+        // Clear cache
+        declaredProviderServices.clear();
+        providerServices.clear();
+
         Log.i(LOG_TAG, "Starting provider discovery");
         PackageManager pkManager = ctx.getPackageManager();
         Intent i = new Intent("com.enioka.scan.PROVIDE_SCANNER");
@@ -81,15 +86,20 @@ public final class LaserScanner {
                 continue;
             }
 
-            ProviderServiceMeta meta = new ProviderServiceMeta(ri.serviceInfo);
+            ScannerProviderMeta meta = new ScannerProviderMeta(ri.serviceInfo);
             declaredProviderServices.put(meta.getName(), meta);
 
             Log.d(LOG_TAG, "Trying to instantiate provider " + meta.getName() + (meta.isBluetooth() ? " - BT    " : " - not BT") + " - " + meta.getPriority());
             try {
                 final ScannerProvider provider = (ScannerProvider) Class.forName(meta.getName()).newInstance();
                 meta.setProviderKey(provider.getKey());
-                providerServices.add(new ProviderServiceHolder(provider, meta));
+                providerServices.add(new ScannerProviderHolder(provider, meta));
                 Log.d(LOG_TAG, "Provider " + provider.getKey() + " was successfully instantiated");
+
+                if (provider.getKey().equals(SerialBtScannerProvider.PROVIDER_KEY)) {
+                    // Initialize the bluetooth provider if available.
+                    SerialBtScannerProvider.discoverProviders(ctx);
+                }
             } catch (Exception e) {
                 declaredProviderServices.remove(meta.getName());
                 Log.w(LOG_TAG, "Could not instantiate provider - usual cause is missing SDK from classpath", e);
@@ -97,11 +107,34 @@ public final class LaserScanner {
         }
 
         Log.i(LOG_TAG, "Provider discovery done");
-        cb.discoveryDone();
+        cb.onDiscoveryDone();
     }
 
-    private interface OnProvidersDiscovered {
-        void discoveryDone();
+    /**
+     * Callback used at the end of the ScannerProvider search.
+     */
+    public interface OnProvidersDiscovered {
+        void onDiscoveryDone();
+    }
+
+    /**
+     * Returns the list of provider keys from the current provider cache, including bluetooth ones if available (the cache needs to have been initialized first).
+     * Because of the way Bluetooth providers are handled, only the key String may be returned and not metadata.
+     *
+     * @return The list of cached provider keys, including bluetooth providers.
+     */
+    public static List<String> getProviderCache() {
+        final List<String> providerKeys = new ArrayList<>();
+        for (final ScannerProviderHolder provider : providerServices) {
+            if (provider.getProvider().getKey().equals(SerialBtScannerProvider.PROVIDER_KEY)) {
+                // BT providers
+                providerKeys.addAll(((SerialBtScannerProvider)provider.getProvider()).getProviderCache());
+            } else {
+                // Regular provider, add to the list
+                providerKeys.add(provider.getProvider().getKey());
+            }
+        }
+        return providerKeys;
     }
 
 
@@ -157,7 +190,7 @@ public final class LaserScanner {
         }
 
         if (providerServices.isEmpty()) {
-            getProviders(ctx, () -> startLaserSearchInProviders(ctx, handler, options));
+            discoverProviders(ctx, () -> startLaserSearchInProviders(ctx, handler, options));
         } else {
             // We are here if this was called a second time. In this case just launch scanner search from existing providers.
             startLaserSearchInProviders(ctx, handler, options);
@@ -167,7 +200,7 @@ public final class LaserScanner {
     /**
      * Some options have an influence on whether a provider should be used or not. All the afferent rules are inside this method.
      */
-    private static boolean shouldProviderBeUsed(ProviderServiceHolder psh, ScannerSearchOptions options) {
+    private static boolean shouldProviderBeUsed(ScannerProviderHolder psh, ScannerSearchOptions options) {
         if (psh.getProvider().getKey().equals(SerialBtScannerProvider.PROVIDER_KEY) && options.useBlueTooth) {
             // Default BT provider is always allowed when bluetooth is on, another check on specific BT providers will be done when they are queried.
             return true;
@@ -191,16 +224,16 @@ public final class LaserScanner {
         scannerFound = false; // Scanners are not cached like providers so we need to reset this flag every time.
         Log.i(LOG_TAG, "Starting scanner search");
 
-        if (options.useBlueTooth) {
-            btRegistry.register(ctx);
-        }
-
         // Trivial
         if (providerServices.isEmpty()) {
             Log.i(LOG_TAG, "There are no laser scanners available at all");
             handler.noScannerAvailable();
             handler.endOfScannerSearch();
             return;
+        }
+
+        if (options.useBlueTooth) {
+            btRegistry.register(ctx);
         }
 
         // BT disabled?
@@ -212,9 +245,9 @@ public final class LaserScanner {
 
         // Only keep providers which should actually be used.
         // Iterate on copies to avoid concurrent list modifications from other threads
-        List<ProviderServiceHolder> sortedProviders = new ArrayList<>();
+        List<ScannerProviderHolder> sortedProviders = new ArrayList<>();
         providersExpectedToAnswerCount = 0;
-        for (final ProviderServiceHolder psh : new ArrayList<>(providerServices)) {
+        for (final ScannerProviderHolder psh : new ArrayList<>(providerServices)) {
             if (shouldProviderBeUsed(psh, options)) {
                 Log.d(LOG_TAG, "Provider " + psh.getProvider().getKey() + " accepted");
                 providersExpectedToAnswerCount++;
@@ -230,7 +263,7 @@ public final class LaserScanner {
         // Interrogate all providers, grouped by priority. (higher priority comes first).
         int previousPriority = sortedProviders.isEmpty() ? 0 : sortedProviders.get(0).getMeta().getPriority();
         int launchedThreads = 0;
-        for (final ProviderServiceHolder psh : sortedProviders) {
+        for (final ScannerProviderHolder psh : sortedProviders) {
             if (previousPriority != psh.getMeta().getPriority()) {
                 // New group! wait.
                 Log.i(LOG_TAG, "Waiting for the end of priority group " + previousPriority);
@@ -299,8 +332,8 @@ public final class LaserScanner {
 
                 // Remove the provider for ever - that way future searches are faster.
                 synchronized (LaserScanner.providerServices) {
-                    ProviderServiceHolder toRemove = null;
-                    for (ProviderServiceHolder sph : LaserScanner.providerServices) {
+                    ScannerProviderHolder toRemove = null;
+                    for (ScannerProviderHolder sph : LaserScanner.providerServices) {
                         if (sph.getProvider().getKey().equals(providerKey)) {
                             toRemove = sph;
                             break;
@@ -334,7 +367,7 @@ public final class LaserScanner {
 
             private void checkEnd(String providerKey) {
                 // Free BT mutex - another BT provider may run. (copy set: concurrent usage otherwise)
-                for (ProviderServiceMeta psm : declaredProviderServices.values()) {
+                for (ScannerProviderMeta psm : declaredProviderServices.values()) {
                     // key null happens when the provider was not initialized (it is not selected or is excluded by the user)
                     // We could iterate providerServices instead but this would force us to lock it to avoid concurrent modifications.
                     if (psm.getProviderKey() != null && psm.getProviderKey().equals(providerKey) && psm.isBluetooth()) {

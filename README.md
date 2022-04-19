@@ -9,20 +9,19 @@ It is compatible with:
 * Honeywell AIDC integrated devices (including CN* devices)
 * Athesi SPA43
 * GeneralScan Bluetooth rings
-* All hardware scanners acting as keyboards (HID), like most BlueTooth cheap handled scanners.
 * And a few others, check full compatibility table below.
 
 When there are no compatible hardware devices available, the library provides a camera reader based on ZBar (default) or ZXing.
 
 Through a common abstraction, it provides access to the following methods (provided the hardware supports them):
-* pause/resume scanning
+* press/release the scanner's trigger
+* pause/resume scanning abilities
 * disconnect/reconnect scanners
 * enable/disable illumination from the scanner
+* enable/disable colored LEDs
 * set scanner enabled symbologies
 
-Also of note, even if the OS actually provides direct HID integration, they were integrated alongside the other input systems in this library to allow a single API for all scanning devices including them.
-
-Finally, it provides a ready to use Service as well as an Activity, as well as a sample demo
+Finally, it provides a ready to use Service that handles scanner lifecycles, as well as a template Activity, and a sample demo
 application, allowing to use scanners in a matter of minutes.
 
 # Compatibility matrix
@@ -40,18 +39,19 @@ Manufacturer | Device family          | Plugin AAR needed | SDK needed | Provide
 ------------ | ---------------------- | ----------------- | ---------- | ------------------------------------------- | ---------- | ------------------------------ | -------------- | --------------------------- | --------------------- | ----------------------- | -------------------- | --------------- | ----------- | ------------
 Zebra        | Integrated: TC25...    | Yes               | No         | EmdkProvider                                | Integrated | EMDK devices                   | Yes            | All 1D                      | Yes                   | On startup              | No                   | Yes             | N/A         | No?
 Zebra        | BT ring RS6000,5100    | Yes               | Yes        | BtZebraProvider                             | BT SPP     |                                | Yes            | All 1D                      | Yes                   | On startup              | No                   | Yes             | Yes         | Yes
-Zebra        | BT ring RS6000,5100    | No                | Yes        | BtSppSdk                                    | BT SPP     | Alternate pure OSS provider    | Yes            | All 1D                      | Yes                   | On startup              | No                   | Yes             | Yes         | Yes    
+Zebra        | BT ring RS6000,5100    | No                | No         | ZebraOssSppScannerProvider                  | BT SPP     | Alternate pure OSS provider    | Yes            | All 1D                      | Yes                   | On startup              | No                   | Yes             | Yes         | Yes    
 Bluebird     | Integrated: EF500...   | No                | No         | BluebirdProvider                            | Integrated |                                | Yes            | Most, save D25              | Yes                   | ?                       | No                   | Yes             | N/A         | ?
-Athesi       | Integrated: SPA43...   | No                | No         | Athesi HHT internal scanner                 | Integrated |                                | Yes            | All 1D                      | Yes                   | On startup              | No                   | Yes             | N/A         | No?
+Athesi       | Integrated: SPA43...   | No                | No         | HHTProvider                                 | Integrated |                                | Yes            | All 1D                      | Yes                   | On startup              | No                   | Yes             | N/A         | No?
 Honeywell    | Integrated: EDA50...   | Yes               | Yes        | AIDCProvider                                | Integrated | AIDC devices (Intermec)        | Yes            | All 1D                      | Yes                   | On startup              | No                   | ?               | N/A         | No?
-GeneralScan  | BT ring R5000BT        | No                | No         | BtSppSdk                                    | BT SPP     |                                | Yes            | All 1D                      | No                    | ?                       | No                   | No              | No          | No
+Honeywell    | BT Voyager 1602g       | No                | No         | HoneywellOssSppScannerProvider              | BT SPP     | Pure OSS provider              | Yes            | All 1D                      | Yes                   | On startup              | No                   | ?               | N/A         | No?
+GeneralScan  | BT ring R5000BT        | No                | No         | GsSppScannerProvider                        | BT SPP     |                                | Yes            | All 1D                      | No                    | ?                       | No                   | No              | No          | No
 ProGlove     | BT glove Mark II       | No                | No         | ProgloveProvider                            | BT BLE     | ProGlove app needed            | Yes            | All 1D                      | Yes                   | ?                       | No                   | No              | Yes         | No?
 Koamtac      | BT KDC (180...)        | Yes               | No         | Koamtac                                     | BT BLE     | Device must be named KDC*      | Yes            | All 1D                      | Yes                   | ?                       | No                   | Yes             | Yes         | Yes
 M3           | RingScanners           | Yes               | No         | M3RingScannerProvider                       | BT SPP     | M3 app needed                  | Yes            | All 1D                      | No                    | No                      | No                   | Yes             | No          | No
 Camera       | Devices with camera    | No                | No         |                                             | Integrated | Capabilities depend on device  | Yes            | All 1D                      | Yes                   | On startup              | Yes (flash light)    | Yes             | N/A         | Yes
 
 There also are traces of Postech BT ring scanner compatibility - their communication protocol is like the GeneralScan one, but the authors of the library lacked a test device to finish it, so it was disabled.
-Also, the HID provider is named GenericHidProvider.
+Note that many scanners not mentioned here are interpreted by the OS as a keyboard (HID devices), and as such are not supported in a specific way by the library. As for the camera, it is initialized in a different way than other scanners, we recommend taking a look at the template activity to understand its usage.
 
 # Adding the library to an Android application
 
@@ -87,10 +87,7 @@ Inside the manifest of your application add: nothing to do.
 # Using the library
 
 There are different ways to use the library, depending on where it has to be used. And in any ways, the library does not hide its low-level objects which are an always available fallback.
-
-Note that depending on where the scanner is used, not all scanners will be available. For example, it is impossible to use the camera scanner from a background service as it has no UI to display the camera feed on, but it is entirely possible to use an integrated laser scanner from it. We therefore differentiate "background scanners", which only need an application context to run, from "foreground scanners", which need an Activity to be used. Most scanners are background except:
-* The camera scanner, for the reason specified above
-* HID scanners. They are controlled by the OS which only sends their input events to the active activity.
+Most scanner capabilities are exposed through the `Scanner` API, though the default behavior of the `ScannerService` API ought to be enough for simply scanning data with no further configuration.
 
 ## In an Activity
 
@@ -123,6 +120,7 @@ Most importantly, the `ScannerCompatActivity.onData(List<Barcode> data)` method 
 ## Outside an activity
 
 The library exposes a service which can be bound as any other bound service:
+
 ```
 ScannerServiceApi scannerService;
 boolean serviceBound = false;
@@ -151,21 +149,14 @@ bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
 It is then possible to use the `ScannerServiceApi` object to access the different APIs of the service. The most interesting one is `registerClient` which hooks scanning callbacks, including a "data was received from scanner" callback.
 
-Note that foreground scanners are not available using this method.
-
 Please remember to unbind the service when it is not needed anymore, as for any other service. This will often be in "onDestroy" hooks. Also, as this is a bound service, it is destroyed whenever it has no bound clients left. Many applications actually bind the service on startup onto the application context to be sure it is never destroyed and therefore is very quick to bind from anywhere, but this depends on the use-case and is not compulsory at all.
 
-Finally, there are a few Intent extra properties which can be set to control the behaviour of the service.
+Finally, there are a few Intent extra properties which can be set to control the behaviour of the service such as filters used in the scanner search.
 These can be found as static strings inside the `ScannerServiceApi` interface.
 
-
-## With an activity object
-
-This often happens when dealing with UI frameworks which have their own lifecycle handling such as Cordova. The programmer does not directly write activities deriving from Activity, but has access to the underlying Activity object used by the framework. In this case, it is just a matter of binding to the service like above, and then call `ScannerServiceApi.takeForegroundControl(Activity, ForegroundScannerClient)` (this internally calls `registerClient` too). This will register the activity as having foreground control, and full foreground scanner access will be available.
-
-This method can also be used inside an Activity, when the use of an external base class for an Activity is not possible (for example when there already is a base class, or when using `AppCompatActivity` is not desired). This is exactly what `ScannerCompatActivity` does - it simply binds to the service.
-
 # Developer quick start (modifying this library)
+
+## Developing for Android
 
 In order to start developing and testing the library:
 * Have Android Studio installed and open the project with it
@@ -176,10 +167,11 @@ In case the android device is not detected by Android Studio:
 * Make sure the device is in developer mode and has USB Debugging enabled
 * Make sure the USB cable supports data transfer (some cables only support charging)
 
-# Adding another SDK to the library
+## Adding another SDK to the library
 
 In order for a new scanner SDK to be recognized by the library, the provider class needs to be declared as a service in `AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER`.
-The associated Java class does not need to extend Android's Service class (the `tools:ignore="Instantiatable"` attribute may be added to the service in the manifest), but it must provide a default constructor as it will be instantiated using `Class.getName()`, and it needs to implement the ScannerProvider interface. See `/enioka_scan_mock` for an example of addon SDK.
+The associated Java class does not need to extend Android's Service class (the `tools:ignore="Instantiatable"` attribute may be added to the service in the manifest), but it must provide a default constructor as it will be instantiated using `Class.getName()`, and it needs to implement the ScannerProvider interface.
+See `/enioka_scan_mock` for an example of addon SDK.
 
 # Release process
 

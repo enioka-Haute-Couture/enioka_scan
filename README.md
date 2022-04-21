@@ -63,7 +63,7 @@ That's all if you do not need an AAR plugin. If you also need a plugin AAR (prov
 
 Inside aar_zebra:
 
-```
+```groovy
 configurations.maybeCreate("default")
 artifacts.add("default", file('barcode_scanner_library_v2.0.8.0.aar'))
 ```
@@ -72,7 +72,7 @@ Inside settings.gradle, add 'aar_zebra" to the list of includes.
 
 Inside the application build.gradle, add:
 
-```
+```groovy
 dependencies {
     compile project(':aar_zebra')
 
@@ -88,42 +88,40 @@ Inside the manifest of your application, nothing to do.
 # Using the library
 
 There are different ways to use the library, depending on where it has to be used. And in any ways, the library does not hide its low-level objects which are an always available fallback.
-Most scanner capabilities are exposed through the [`Scanner`][scanner-api] API, though the default behavior of the [`ScannerServiceApi`][scanner-service-api] API ought to be enough for simply scanning data with no further configuration.
+Most scanner capabilities are exposed through the [`Scanner`][scanner-api] API, though the default behavior of the [`ScannerServiceApi`][scanner-service-api] API ought to be enough for simply receiving scanned data.
 
 ## In an Activity
 
 This is the most usual use of for the library. The library provides the class [`ScannerCompatActivity`][scanner-compat-activity] from which to inherit. The most simple activity ever possible to use a scanner is this:
 
-```
-package com.enioka.scanner.demo;
-
+```java
 import com.enioka.scanner.activities.ScannerCompatActivity;
 
 public class MyScanningActivity extends ScannerCompatActivity {
 }
 ```
 
-This creates an activity with a very simple layout which display status messages from the scanners as well as scanning results and a button to toggle illumination. Now, most activities of course want to use their own layouts. This is allowed by setting a two fields (one for the camera layout, one for the laser layout) in onCreate or constructor:
+This creates an activity with a very simple layout which display status messages from the scanners as well as scanning results and a button to toggle illumination. Now, most activities of course want to use their own layouts. This is allowed by setting two fields (one for the camera layout, one for the laser layout) in the `onCreate()` method or the constructor:
 
-```
+```java
 @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        layoutIdLaser = R.layout.activity_parcel_scan_laser;
-        layoutIdCamera = R.layout.activity_parcel_scan_camera;
+protected void onCreate(Bundle savedInstanceState) {
+    layoutIdLaser = R.layout.activity_parcel_scan_laser;
+    layoutIdCamera = R.layout.activity_parcel_scan_camera;
 
-        super.onCreate(savedInstanceState);
-    }
+    super.onCreate(savedInstanceState);
+}
 ```
 
 There are a few other fields to allow you to customize further the activity, which are all documented inside the class. These include options to rename the toggle illumination button ID, to disable camera or laser or both, or enable a fallback dialog with manual input and auto-completion.
 
-Most importantly, the `ScannerCompatActivity.onData(List<Barcode> data)` method will usually be overloaded by child classes.
+If the provided template does not suit your needs, but you still want to take advantage of the [`ScannerServiceApi`][scanner-service-api], simply make sure that your activity follows the steps described in the section below.
 
 ## Outside an activity
 
 The library exposes a service which can be bound as any other bound service:
 
-```
+```java
 ScannerServiceApi scannerService;
 boolean serviceBound = false;
 
@@ -150,7 +148,7 @@ Intent intent = new Intent(this, ScannerService.class);
 bindService(intent, connection, Context.BIND_AUTO_CREATE);
 ```
 
-It is then possible to use the [`ScannerServiceApi`][scanner-service-api] object to access the different endpoints of the service. The most interesting one is `registerClient` which hooks scanning callbacks, including a "data was received from scanner" callback.
+It is then possible to use the [`ScannerServiceApi`][scanner-service-api] object to access the different endpoints of the service. The most interesting one is `registerClient()` which hooks scanning callbacks and scanner/provider discovery notifications to a class implementing the [`ScannerClient`][scanner-client] interface such as a custom activity.
 
 Please remember to unbind the service when it is not needed anymore, as for any other service. This will often be in "onDestroy" hooks. Also, as this is a bound service, it is destroyed whenever it has no bound clients left. Many applications actually bind the service on startup onto the application context to be sure it is never destroyed and therefore is very quick to bind from anywhere, but this depends on the use-case and is not compulsory at all.
 
@@ -173,9 +171,11 @@ In case the android device is not detected by Android Studio:
 ## Adding another SDK to the library
 
 A scanner SDK contains at least a [`Scanner`][scanner-api] implementation (interfacing between the code and the device) and a [`ScannerProvider`][scanner-provider-api] implementation (handling scanner creation and whether the SDK is compatible with the search).
-In order for a new scanner SDK to be recognized by the library, the provider class needs to be declared as a service in `AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER`.
-The associated Java class does not need to extend Android's Service class (the `tools:ignore="Instantiatable"` attribute may be added to the service in the manifest), but it must provide a default constructor as it will be instantiated using `Class.getName()`, and it needs to implement the ScannerProvider interface.
-See [`/enioka_scan_mock`][mock-sdk] for an example of addon SDK.
+
+In order for a new scanner SDK to be found by the library, the [`ScannerProvider`][scanner-provider-api] implementation needs to be declared as a service in its `AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER`.
+The associated Java class does not need to extend Android's `Service` class (the `tools:ignore="Instantiatable"` attribute may be added to the service in the manifest), but it must provide a public default constructor as it will be instantiated using `Class.getName()`.
+
+See the [Mock SDK][mock-sdk] for an example of addon SDK.
 
 # Release process
 
@@ -184,8 +184,9 @@ The tag will trigger a workflow that will automatically create a github release 
 If the release is created manually, the workflow will not run and the library will not be published correctly. Only the tag needs to be manually created.
 
 [mock-sdk]: ./enioka_scan_mock
-[scanner-service-api]: ./enioka_scan/src/main/java/com/enioka/scanner/service/ScannerServiceApi.java
-[scanner-search-options]: ./enioka_scan/src/main/java/com/enioka/scanner/api/ScannerSearchOptions.java
 [scanner-api]: ./enioka_scan/src/main/java/com/enioka/scanner/api/Scanner.java
-[scanner-provider-api]: ./enioka_scan/src/main/java/com/enioka/scanner/api/ScannerProvider.java
+[scanner-client]: ./enioka_scan/src/main/java/com/enioka/scanner/service/ScannerClient.java
 [scanner-compat-activity]: ./enioka_scan/src/main/java/com/enioka/scanner/activities/ScannerCompatActivity.java
+[scanner-provider-api]: ./enioka_scan/src/main/java/com/enioka/scanner/api/ScannerProvider.java
+[scanner-search-options]: ./enioka_scan/src/main/java/com/enioka/scanner/api/ScannerSearchOptions.java
+[scanner-service-api]: ./enioka_scan/src/main/java/com/enioka/scanner/service/ScannerServiceApi.java

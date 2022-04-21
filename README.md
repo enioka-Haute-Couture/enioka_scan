@@ -62,6 +62,7 @@ That's all if you do not need an AAR plugin. If you also need a plugin AAR (prov
 * copy DataCollection.jar (Honeywell SDK) to barcodelibs
 
 Inside aar_zebra:
+
 ```
 configurations.maybeCreate("default")
 artifacts.add("default", file('barcode_scanner_library_v2.0.8.0.aar'))
@@ -82,16 +83,17 @@ dependencies {
 }
 ```
 
-Inside the manifest of your application add: nothing to do.
+Inside the manifest of your application, nothing to do.
 
 # Using the library
 
 There are different ways to use the library, depending on where it has to be used. And in any ways, the library does not hide its low-level objects which are an always available fallback.
-Most scanner capabilities are exposed through the `Scanner` API, though the default behavior of the `ScannerService` API ought to be enough for simply scanning data with no further configuration.
+Most scanner capabilities are exposed through the [`Scanner`][scanner-api] API, though the default behavior of the [`ScannerServiceApi`][scanner-service-api] API ought to be enough for simply scanning data with no further configuration.
 
 ## In an Activity
 
-This is the most usual use of for the library. The library provides the class `ScannerCompatActivity` from which to inherit. The most simple activity ever possible to use a scanner is this:
+This is the most usual use of for the library. The library provides the class [`ScannerCompatActivity`][scanner-compat-activity] from which to inherit. The most simple activity ever possible to use a scanner is this:
+
 ```
 package com.enioka.scanner.demo;
 
@@ -143,16 +145,17 @@ ServiceConnection connection = new ServiceConnection() {
     };
 
 // Bind to ScannerService service
+// Make sure to bind the ScannerService class (or any implementation of the API), not the ScannerServiceApi interface
 Intent intent = new Intent(this, ScannerService.class);
 bindService(intent, connection, Context.BIND_AUTO_CREATE);
 ```
 
-It is then possible to use the `ScannerServiceApi` object to access the different APIs of the service. The most interesting one is `registerClient` which hooks scanning callbacks, including a "data was received from scanner" callback.
+It is then possible to use the [`ScannerServiceApi`][scanner-service-api] object to access the different endpoints of the service. The most interesting one is `registerClient` which hooks scanning callbacks, including a "data was received from scanner" callback.
 
 Please remember to unbind the service when it is not needed anymore, as for any other service. This will often be in "onDestroy" hooks. Also, as this is a bound service, it is destroyed whenever it has no bound clients left. Many applications actually bind the service on startup onto the application context to be sure it is never destroyed and therefore is very quick to bind from anywhere, but this depends on the use-case and is not compulsory at all.
 
 Finally, there are a few Intent extra properties which can be set to control the behaviour of the service such as filters used in the scanner search.
-These can be found as static strings inside the `ScannerServiceApi` interface.
+These can be found as static strings inside the [`ScannerServiceApi`][scanner-service-api] interface, and methods in the [`ScannerSearchOptions`][scanner-search-options] class help converting search parameters to and from those intent extras.
 
 # Developer quick start (modifying this library)
 
@@ -169,12 +172,20 @@ In case the android device is not detected by Android Studio:
 
 ## Adding another SDK to the library
 
+A scanner SDK contains at least a [`Scanner`][scanner-api] implementation (interfacing between the code and the device) and a [`ScannerProvider`][scanner-provider-api] implementation (handling scanner creation and whether the SDK is compatible with the search).
 In order for a new scanner SDK to be recognized by the library, the provider class needs to be declared as a service in `AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER`.
 The associated Java class does not need to extend Android's Service class (the `tools:ignore="Instantiatable"` attribute may be added to the service in the manifest), but it must provide a default constructor as it will be instantiated using `Class.getName()`, and it needs to implement the ScannerProvider interface.
-See `/enioka_scan_mock` for an example of addon SDK.
+See [`/enioka_scan_mock`][mock-sdk] for an example of addon SDK.
 
 # Release process
 
 To publish the library to Maven Central and GitHub releases, a tag must be created and attached to the appropriate commit.
 The tag will trigger a workflow that will automatically create a github release containing the AAR file, and publish the library to Maven Central.
 If the release is created manually, the workflow will not run and the library will not be published correctly. Only the tag needs to be manually created.
+
+[mock-sdk]: ./enioka_scan_mock
+[scanner-service-api]: ./enioka_scan/src/main/java/com/enioka/scanner/service/ScannerServiceApi.java
+[scanner-search-options]: ./enioka_scan/src/main/java/com/enioka/scanner/api/ScannerSearchOptions.java
+[scanner-api]: ./enioka_scan/src/main/java/com/enioka/scanner/api/Scanner.java
+[scanner-provider-api]: ./enioka_scan/src/main/java/com/enioka/scanner/api/ScannerProvider.java
+[scanner-compat-activity]: ./enioka_scan/src/main/java/com/enioka/scanner/activities/ScannerCompatActivity.java

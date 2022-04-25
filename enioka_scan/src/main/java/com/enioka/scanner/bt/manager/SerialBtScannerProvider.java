@@ -13,6 +13,13 @@ import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
+import com.enioka.scanner.bt.manager.bleserial.BleTerminalIODevice;
+import com.enioka.scanner.bt.manager.classicserial.ClassicBtAcceptConnectionThread;
+import com.enioka.scanner.bt.manager.classicserial.ClassicBtSppScanner;
+import com.enioka.scanner.bt.manager.common.BluetoothScannerInternal;
+import com.enioka.scanner.bt.manager.common.BtConstHelpers;
+import com.enioka.scanner.bt.manager.common.OnConnectedCallback;
+import com.enioka.scanner.bt.manager.common.SerialBtScannerPassiveConnectionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +28,12 @@ import java.util.concurrent.Semaphore;
 
 /**
  * Responsible for finding bluetooth devices and starting their initialization, converting them to {@link com.enioka.scanner.api.Scanner}.<br><br>
- * This is the entry point of the BT SPP/TIO SDK for the rest of the library.
+ * This is the entry point of the [Classic BT SPP/BLE TIO/Other BLE] SDK for the rest of the library.<br><br>
+ * <p>
+ * This is an extension point, looking for all services implementing {@link BtSppScannerProvider}.<br>
+ * It lists all already bound BT devices (classic or BLE) and then asks the different BtSppScannerProvider if they are compatible with the different devices.<br>
  */
-public class SerialBtScannerProvider implements ScannerProvider {
+public class SerialBtScannerProvider implements ScannerProvider, SerialBtScannerPassiveConnectionManager {
     public static final String PROVIDER_KEY = "BtSppSdk";
 
     // Cache of all available providers, only initialized once
@@ -71,14 +81,14 @@ public class SerialBtScannerProvider implements ScannerProvider {
     /**
      * Allow new master BT SPP devices to connect to the Android device.
      */
-    void resetListener(BluetoothAdapter bluetoothAdapter) {
+    public void resetListener(BluetoothAdapter bluetoothAdapter) {
         if (server == null || server.isDone()) {
             server = new ClassicBtAcceptConnectionThread(bluetoothAdapter, new ConnectionCallback(this), this);
             server.start();
         }
     }
 
-    void stopMasterListener() {
+    public void stopMasterListener() {
         if (server != null && !server.isDone()) {
             server.cancel();
         }
@@ -166,14 +176,14 @@ public class SerialBtScannerProvider implements ScannerProvider {
                 }
 
                 BluetoothScannerInternal btDevice;
-                if (bt.getType() == BluetoothDevice.DEVICE_TYPE_CLASSIC) { // Only set for already paired devices.
-                    // We only allow SPP devices.
+                if (bt.getType() == BluetoothDevice.DEVICE_TYPE_CLASSIC) { // Note: Only set for already paired devices.
+                    // Remove classic BT devices without the SPP service, as this SDK is only for SPP devices.
                     boolean found = false;
                     if (bt.getUuids() == null) {
                         continue;
                     }
                     for (ParcelUuid uuid : bt.getUuids()) {
-                        if (uuid.getUuid().equals(ClassicBtConnectToDeviceThread.SERVER_BT_SERVICE_UUID)) {
+                        if (uuid.getUuid().equals(BtConstHelpers.SERVER_BT_SERVICE_UUID)) {
                             found = true;
                             break;
                         }
@@ -182,12 +192,14 @@ public class SerialBtScannerProvider implements ScannerProvider {
                         continue;
                     }
 
-                    // Launch device resolution
+                    // Create BT device holder
                     btDevice = new ClassicBtSppScanner(this, bt);
                 } else {
-                    // Launch device resolution
+                    // Create BT device holder
                     btDevice = new BleTerminalIODevice(ctx, bt);
                 }
+
+                // Launch device resolution
                 btDevice.connect(new ConnectionCallback(this));
                 passiveScannersCount++;
             }
@@ -229,7 +241,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
     /**
      * What to do when a connection is successful (i.e. socket opened or GATT server connected): try to resolve the BT SPP provider associated to the device.
      */
-    private class ConnectionCallback implements ClassicBtConnectToDeviceThread.OnConnectedCallback {
+    private class ConnectionCallback implements OnConnectedCallback {
         private BluetoothScannerInternal btDevice;
         private final SerialBtScannerProvider parentProvider;
 
@@ -275,7 +287,7 @@ public class SerialBtScannerProvider implements ScannerProvider {
 
         private void checkEnd() {
             if (waitForScanners.tryAcquire(passiveScannersCount)) {
-                Log.i(PROVIDER_KEY, "Slave BT SPP scanners are all initialized. Count is " + passiveScannersCount + ". Master scanners connect later.");
+                Log.i(PROVIDER_KEY, "Slave BT SPP/BLE scanners are all initialized. Count is " + passiveScannersCount + ". Master scanners connect later.");
                 providerCallback.onAllScannersCreated(getKey());
             }
         }

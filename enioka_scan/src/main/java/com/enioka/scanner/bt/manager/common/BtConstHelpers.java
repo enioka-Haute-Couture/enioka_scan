@@ -1,13 +1,27 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.common;
 
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 
+import java.util.UUID;
+
 /**
  * Log helpers.
  */
-class BtConstHelpers {
-    static String getBtClassDescription(int btClass) {
+public class BtConstHelpers {
+
+    /**
+     * This is the SPP service UUID. From http://sviluppomobile.blogspot.com/2012/11/bluetooth-services-uuids.html
+     **/
+    public static final UUID SERVER_BT_SERVICE_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
+    /**
+     * Mostly for debugging/logging purposes. Translates a given BT ID in int form into a string.
+     *
+     * @param btClass the int ID of the BT class
+     * @return a normalized string description for this class or "UNKNOWN".
+     */
+    public static String getBtClassDescription(int btClass) {
         switch (btClass) {
             case BluetoothClass.Device.AUDIO_VIDEO_CAMCORDER:
                 return "AUDIO_VIDEO_CAMCORDER";
@@ -114,7 +128,13 @@ class BtConstHelpers {
         }
     }
 
-    static String getBtMajorClassDescription(int btMajorClass) {
+    /**
+     * Mostly for debugging/logging purposes. Translates a given BT ID in int form into a string.
+     *
+     * @param btMajorClass the int ID of the BT device major class.
+     * @return a normalized string description for this device major class or "UNKNOWN".
+     */
+    public static String getBtMajorClassDescription(int btMajorClass) {
         switch (btMajorClass) {
             case BluetoothClass.Device.Major.AUDIO_VIDEO:
                 return "AUDIO_VIDEO";
@@ -143,7 +163,13 @@ class BtConstHelpers {
         }
     }
 
-    static String getBondStateDescription(int bondState) {
+    /**
+     * Mostly for debugging/logging purposes. Translates a given BT ID in int form into a string.
+     *
+     * @param bondState the int ID of the BT device bond state.
+     * @return a normalized string description for this bond state or "UNKNOWN".
+     */
+    public static String getBondStateDescription(int bondState) {
         switch (bondState) {
             case BluetoothDevice.BOND_BONDED:
                 return "BONDED";

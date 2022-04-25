@@ -1,7 +1,8 @@
 package com.enioka.scanner.bt.api;
 
-public class Helpers {
-    private static final String LOG_TAG = "BtSppSdk";
+public final class Helpers {
+
+    private Helpers(){}
 
     public static String byteArrayToHex(byte[] buffer, int length) {
         return byteArrayToHex(buffer, 0, length);

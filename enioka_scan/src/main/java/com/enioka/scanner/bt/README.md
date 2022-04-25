@@ -7,6 +7,9 @@ The library provides a small SDK to help creating connectors to most Bluetooth (
 It is centered on devices which use the SPP (Serial Port Profile) BT profile - the case for most if not all evolved BT scanners (while simple/cheap BT scanners are most often dumb HID/keyboards without SPP).
 Note that most devices that are MFi-certified (Made For iOS) are also SPP compatible.
 
+It also offers a compatibility layer for BLE (Bluetooth Low Energy, also called Bluetooth Smart or sometimes abusively Bluetooth 4.0) devices which actually encapsulate an older serial protocol inside BLE GATT attributes.
+Again, this is the case for most evolved BT scanners - manufacturers went the easiest route when switching from BT classic to BLE and did not redesign their decades old protocols.
+
 All the connection details are handled by the SDK, and the connector simply has to deal with the specific protocol needed by a device category, using a set of provided interfaces.
 This protocol is usually described inside the integration documentation or the programming guide of their respective devices.
 
@@ -17,7 +20,7 @@ So instead of using this generic SDK, it is simpler to just create a connector u
 
 However:
 * Most vendor SDK (perhaps even all?) are rather OSS unfriendly and just cannot be redistributed or even linked to.
-* Vendor SDK tend to consider they are alone in the world, notably when using the Bluetooth manager, while a point of eniokascan is to allow the use of multiple devices from multiple vendors without thinking twice about it.
+* Vendor SDK tend to consider they are alone in the world, notably when using the Bluetooth manager, while a point of this library is to allow the use of multiple devices from multiple vendors without thinking twice about it.
 * Many mid-priced devices actually have incomplete/limiting SDKs, even for the rather small needs of this library.
 
 Therefore, a generic BT SDK was created. Note however that the connectors made using this SDK will likely be compatible with less devices than those created from vendor SDK.
@@ -26,7 +29,7 @@ Therefore, a generic BT SDK was created. Note however that the connectors made u
 
 Coming soon(TM).
 
-For now, the SDK only deals with BT slave devices which are already paired with the Android device, and master devices.
+For now, the SDK only deals with BT slave devices which are already paired with the Android device, as well as master devices.
 
 ## Device discovery process
 
@@ -34,7 +37,7 @@ On startup, the library lists all BT provider services. A provider implements Bt
 
 ### Slave devices (Android opens the connection to the scanners)
 
-It then lists all BT slave devices which are already paired and feature the SPP BT service.
+It then lists all BT slave devices which are already paired and feature the SPP BT service in their BT descriptors.
 
 It connects to each one. Devices which fail to connect are ignored.
 
@@ -53,8 +56,8 @@ In both cases, the connector is responsible for identifying if it can handle a B
 
 * Metadata
   * MAC address: all BT interface vendors have a dedicated MAC prefix, which can be found [here](https://www.adminsub.net/mac-address-finder/). But this is often not reliable at all, for the scanner vendors all use the same BT interface providers. For example, the RS-6000 from Zebra uses a Texas Instrument interface, which can also be found in some Honeywell devices... Also, different generations of the same device may not use the same BT interface.
-  * BT services. All BT services are also prefixed! Prefixes can be found [here](https://www.bluetooth.com/specifications/assigned-numbers/16-bit-uuids-for-members/). The issue here is that most of the time the devices only advertise the SPP service. But if there are vendor-specific services available, this is quite reliable.
-  * Naming conventions on the BT device name, like a name prefix. In that case, the connector must provide a way to parameter the convention. As this has impacts on daily usability, this is a last resort.
+  * BT services. All BT services are also prefixed! Prefixes can be found [here](https://www.bluetooth.com/specifications/assigned-numbers/16-bit-uuids-for-members/). The issue here is that most of the time the devices only advertise the SPP service. But if there are vendor-specific services available (as is very often the case in BLE), this is quite reliable.
+  * Naming conventions on the BT device name, like a name prefix. In that case, the connector must provide a way to parameter the convention. As this has impacts on daily usability (need to pre-configure scanners with a compatible name), this is a last resort.
 * Commands
   * All devices have specific commands (and giving a simple API to them is the very goal of this library!). So trying to run a command, like "give me your model and version", available on most devices, is often the best way to discriminate between devices. That being said:
     * remember to always set a low timeout for detection commands - on a wrong device, the detection commands will likely do not return anything at all, and certainly not the expected end of answer delimitor.

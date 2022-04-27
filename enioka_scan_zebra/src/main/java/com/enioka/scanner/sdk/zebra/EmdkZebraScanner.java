@@ -331,7 +331,7 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
 
                 // Allow a new scan?
                 if (mode == Mode.BATCH) {
-                    resume(null);
+                    resume();
                 } else {
                     waitingForResult = false;
                 }
@@ -367,7 +367,7 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
 
             if (res.size() == 0) {
                 waitingForResult = true;
-                resume(null);
+                resume();
             }
 
             // Return result to be handled on UI thread

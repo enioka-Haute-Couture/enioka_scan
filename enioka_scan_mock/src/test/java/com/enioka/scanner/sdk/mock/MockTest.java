@@ -65,7 +65,7 @@ public class MockTest {
         mock.initialize(null, initCallback, dataCallback, statusCallback, null);
 
         expectedStatus.set(0, ScannerStatusCallback.Status.PAUSED);
-        mock.pause(null);
+        mock.pause();
 
         try {
             mock.scan(barcode);
@@ -75,7 +75,7 @@ public class MockTest {
         }
 
         expectedStatus.set(0, ScannerStatusCallback.Status.READY);
-        mock.resume(null);
+        mock.resume();
 
         try {
             expectedData.add(barcode);
@@ -87,7 +87,7 @@ public class MockTest {
         }
 
         expectedStatus.set(0, ScannerStatusCallback.Status.DISCONNECTED);
-        mock.disconnect(null);
+        mock.disconnect();
 
         try {
             mock.scan(barcode);

@@ -73,32 +73,48 @@ public interface Scanner {
     /**
      * Disconnect scanner from the App (the app does not need the scanner anymore)
      */
-    default void disconnect(@Nullable ScannerCommandCallback cb) {
+    default void disconnect(ScannerCommandCallback cb) {
         disconnect(new ScannerCommandCallbackProxy(cb));
+    }
+    /**
+     * Disconnect scanner from the App (the app does not need the scanner anymore)
+     */
+    default void disconnect() {
+        disconnect(null);
     }
 
     /**
      * The app keeps the scanner for itself but does not need it immediately. It may free whatever resources it has, or ignore this call.
-     * FIXME: may be considered a feature not supported by all (e.g. GsSppScanner does not support it, PostechSppScanner may not support it)
      */
     void pause(@Nullable ScannerCommandCallbackProxy cb);
     /**
      * The app keeps the scanner for itself but does not need it immediately. It may free whatever resources it has, or ignore this call.
      */
-    default void pause(@Nullable ScannerCommandCallback cb) {
+    default void pause(ScannerCommandCallback cb) {
         pause(new ScannerCommandCallbackProxy(cb));
+    }
+    /**
+     * The app keeps the scanner for itself but does not need it immediately. It may free whatever resources it has, or ignore this call.
+     */
+    default void pause() {
+        pause(null);
     }
 
     /**
      * Reverse the effects of {@link #pause(ScannerCommandCallback)}. The scanner is once again ready to scan after this call. Status callback should be called if needed. Idempotent.
-     * FIXME: may be considered a feature not supported by all (e.g. GsSppScanner does not support it, PostechSppScanner may not support it)
      */
     void resume(@Nullable ScannerCommandCallbackProxy cb);
     /**
      * Reverse the effects of {@link #pause(ScannerCommandCallback)}. The scanner is once again ready to scan after this call. Status callback should be called if needed. Idempotent.
      */
-    default void resume(@Nullable ScannerCommandCallback cb) {
+    default void resume(ScannerCommandCallback cb) {
         resume(new ScannerCommandCallbackProxy(cb));
+    }
+    /**
+     * Reverse the effects of {@link #pause(ScannerCommandCallback)}. The scanner is once again ready to scan after this call. Status callback should be called if needed. Idempotent.
+     */
+    default void resume() {
+        resume(null);
     }
 
 
@@ -177,8 +193,14 @@ public interface Scanner {
         /**
          * Short high beep to indicate successful scan
          */
-        default void beepScanSuccessful(@Nullable ScannerCommandCallback cb) {
+        default void beepScanSuccessful(ScannerCommandCallback cb) {
             beepScanSuccessful(new ScannerCommandCallbackProxy(cb));
+        }
+        /**
+         * Short high beep to indicate successful scan
+         */
+        default void beepScanSuccessful() {
+            beepScanSuccessful(null);
         }
 
         /**
@@ -188,8 +210,14 @@ public interface Scanner {
         /**
          * Long low beep to indicate unsuccessful scan
          */
-        default void beepScanFailure(@Nullable ScannerCommandCallback cb) {
+        default void beepScanFailure(ScannerCommandCallback cb) {
             beepScanFailure(new ScannerCommandCallbackProxy(cb));
+        }
+        /**
+         * Long low beep to indicate unsuccessful scan
+         */
+        default void beepScanFailure() {
+            beepScanFailure(null);
         }
 
         /**
@@ -199,8 +227,14 @@ public interface Scanner {
         /**
          * Different beep to indicate a completed barcode pairing
          */
-        default void beepPairingCompleted(@Nullable ScannerCommandCallback cb) {
+        default void beepPairingCompleted(ScannerCommandCallback cb) {
             beepPairingCompleted(new ScannerCommandCallbackProxy(cb));
+        }
+        /**
+         * Different beep to indicate a completed barcode pairing
+         */
+        default void beepPairingCompleted() {
+            beepPairingCompleted(null);
         }
     }
 
@@ -220,8 +254,14 @@ public interface Scanner {
         /**
          * Simulates a press on a hardware-trigger, firing the beam that will read barcodes.
          */
-        default void pressScanTrigger(@Nullable ScannerCommandCallback cb) {
+        default void pressScanTrigger(ScannerCommandCallback cb) {
             pressScanTrigger(new ScannerCommandCallbackProxy(cb));
+        }
+        /**
+         * Simulates a press on a hardware-trigger, firing the beam that will read barcodes.
+         */
+        default void pressScanTrigger() {
+            pressScanTrigger(null);
         }
 
         /**
@@ -231,8 +271,14 @@ public interface Scanner {
         /**
          * Ends the effect of {@link #pressScanTrigger(ScannerCommandCallback)}.
          */
-        default void releaseScanTrigger(@Nullable ScannerCommandCallback cb) {
+        default void releaseScanTrigger(ScannerCommandCallback cb) {
             releaseScanTrigger(new ScannerCommandCallbackProxy(cb));
+        }
+        /**
+         * Ends the effect of {@link #pressScanTrigger(ScannerCommandCallback)}.
+         */
+        default void releaseScanTrigger() {
+            releaseScanTrigger(null);
         }
     }
 
@@ -252,8 +298,14 @@ public interface Scanner {
         /**
          * If the device used has a way to illuminate the target, enable it. Idempotent.
          */
-        default void enableIllumination(@Nullable ScannerCommandCallback cb) {
+        default void enableIllumination(ScannerCommandCallback cb) {
             enableIllumination(new ScannerCommandCallbackProxy(cb));
+        }
+        /**
+         * If the device used has a way to illuminate the target, enable it. Idempotent.
+         */
+        default void enableIllumination() {
+            enableIllumination(null);
         }
 
         /**
@@ -263,8 +315,14 @@ public interface Scanner {
         /**
          * Reverse of {@link #enableIllumination(ScannerCommandCallback)}
          */
-        default void disableIllumination(@Nullable ScannerCommandCallback cb) {
+        default void disableIllumination(ScannerCommandCallback cb) {
             disableIllumination(new ScannerCommandCallbackProxy(cb));
+        }
+        /**
+         * Reverse of {@link #enableIllumination(ScannerCommandCallback)}
+         */
+        default void disableIllumination() {
+            disableIllumination(null);
         }
 
         /**
@@ -274,8 +332,14 @@ public interface Scanner {
         /**
          * See {@link #enableIllumination(ScannerCommandCallback)}
          */
-        default void toggleIllumination(@Nullable ScannerCommandCallback cb) {
+        default void toggleIllumination(ScannerCommandCallback cb) {
             toggleIllumination(new ScannerCommandCallbackProxy(cb));
+        }
+        /**
+         * See {@link #enableIllumination(ScannerCommandCallback)}
+         */
+        default void toggleIllumination() {
+            toggleIllumination(null);
         }
 
         /**
@@ -300,8 +364,14 @@ public interface Scanner {
         /**
          * Turns a LED color on.
          */
-        default void ledColorOn(ScannerLedColor color, @Nullable ScannerCommandCallback cb) {
+        default void ledColorOn(ScannerLedColor color, ScannerCommandCallback cb) {
             ledColorOn(color, new ScannerCommandCallbackProxy(cb));
+        }
+        /**
+         * Turns a LED color on.
+         */
+        default void ledColorOn(ScannerLedColor color) {
+            ledColorOn(color, null);
         }
 
         /**
@@ -311,8 +381,14 @@ public interface Scanner {
         /**
          * Turns a LED color off.
          */
-        default void ledColorOff(ScannerLedColor color, @Nullable ScannerCommandCallback cb) {
+        default void ledColorOff(ScannerLedColor color, ScannerCommandCallback cb) {
             ledColorOff(color, new ScannerCommandCallbackProxy(cb));
+        }
+        /**
+         * Turns a LED color off.
+         */
+        default void ledColorOff(ScannerLedColor color) {
+            ledColorOff(color, null);
         }
     }
 

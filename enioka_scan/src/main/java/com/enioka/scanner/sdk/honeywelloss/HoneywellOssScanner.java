@@ -185,7 +185,7 @@ class HoneywellOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanne
 
         //this.btScanner.runCommand(new Cleanup(), null);
 
-        resume(null);
+        resume();
         this.btScanner.runCommand(new EnableBarcodeMetadata(), null);
 
         // We are already connected if the scanner could be created...

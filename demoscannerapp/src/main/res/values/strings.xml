@@ -24,4 +24,5 @@
     <string name="zebraosssppscannerprovider">ZebraOssSppScannerProvider</string>
     <string name="zebraossattscannerprovider">ZebraOssAttScannerProvider</string>
     <string name="honeywellosssppscannerprovider">HoneywellOssSppScannerProvider</string>
+    <string name="honeywellossintegratedscannerprovider">HoneywellOssIntegratedScannerProvider</string>
 </resources>

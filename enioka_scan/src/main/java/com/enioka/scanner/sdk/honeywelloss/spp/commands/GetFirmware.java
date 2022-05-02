@@ -1,7 +1,7 @@
-package com.enioka.scanner.sdk.honeywelloss.commands;
+package com.enioka.scanner.sdk.honeywelloss.spp.commands;
 
 import com.enioka.scanner.bt.api.Command;
-import com.enioka.scanner.sdk.honeywelloss.data.FirmwareVersion;
+import com.enioka.scanner.sdk.honeywelloss.spp.data.FirmwareVersion;
 
 public class GetFirmware implements Command<FirmwareVersion> {
     @Override

@@ -1,12 +1,13 @@
-package com.enioka.scanner.sdk.honeywelloss.commands;
+package com.enioka.scanner.sdk.honeywelloss.spp.commands;
 
 import com.enioka.scanner.bt.api.Command;
 
-public class Beep implements Command<Void> {
+public class EnableAimer implements Command<Void> {
     @Override
     public byte[] getCommand() {
-        // SYN BELL CR
-        return new byte[]{0x16, 0x07, 0x0D};
+        // SCNAIM0 / 2
+        // SYN M CR ... 2 !
+        return new byte[]{22, 77, 13, 83, 67, 78, 65, 73, 77, 50, 33};
     }
 
     @Override

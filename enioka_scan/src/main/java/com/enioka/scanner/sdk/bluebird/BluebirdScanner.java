@@ -28,8 +28,8 @@ public class BluebirdScanner extends IntentScanner<Integer> {
     protected void configureProvider() {
         broadcastIntentFilters.add("kr.co.bluebird.android.bbapi.action.BARCODE_CALLBACK_DECODING_DATA");
 
-        disableTrigger = newIntent("kr.co.bluebird.android.bbapi.action.BARCODE_SET_TRIGGER", "EXTRA_INT_DATA2", 0);
-        enableTrigger = newIntent("kr.co.bluebird.android.bbapi.action.BARCODE_SET_TRIGGER", "EXTRA_INT_DATA2", 1);
+        disableScanner = newIntent("kr.co.bluebird.android.bbapi.action.BARCODE_SET_TRIGGER", "EXTRA_INT_DATA2", 0);
+        enableScanner = newIntent("kr.co.bluebird.android.bbapi.action.BARCODE_SET_TRIGGER", "EXTRA_INT_DATA2", 1);
 
         sdk2Api.put(5, BarcodeType.EAN13);
         sdk2Api.put(8, BarcodeType.CODE39);
@@ -40,7 +40,7 @@ public class BluebirdScanner extends IntentScanner<Integer> {
     @Override
     protected void configureAfterInit(Context ctx) {
         broadcastIntent("kr.co.bluebird.android.bbapi.action.BARCODE_OPEN", "EXTRA_INT_DATA3", 1); // last param is a request ID.
-        broadcastIntent(enableTrigger);
+        broadcastIntent(enableScanner);
     }
 
     // Not really needed for now. This registers a callback on action return.
@@ -70,7 +70,7 @@ public class BluebirdScanner extends IntentScanner<Integer> {
 
     @Override
     public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
-        broadcastIntent(disableTrigger);
+        broadcastIntent(disableScanner);
         broadcastIntent("kr.co.bluebird.android.bbapi.action.BARCODE_CLOSE", "EXTRA_INT_DATA3", 2);
         super.disconnect(cb);
     }

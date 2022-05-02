@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.honeywelloss.commands;
+package com.enioka.scanner.sdk.honeywelloss.spp.commands;
 
 import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.bt.api.Command;

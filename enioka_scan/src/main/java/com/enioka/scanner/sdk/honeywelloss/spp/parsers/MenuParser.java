@@ -1,10 +1,10 @@
-package com.enioka.scanner.sdk.honeywelloss.parsers;
+package com.enioka.scanner.sdk.honeywelloss.spp.parsers;
 
 import android.util.Log;
 
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.sdk.honeywelloss.data.FirmwareVersion;
+import com.enioka.scanner.sdk.honeywelloss.spp.data.FirmwareVersion;
 
 /**
  * Parser for one of the two main data structure: menu command answers.

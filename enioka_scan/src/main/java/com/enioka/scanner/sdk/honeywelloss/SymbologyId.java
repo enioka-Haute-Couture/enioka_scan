@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.honeywelloss.helpers;
+package com.enioka.scanner.sdk.honeywelloss;
 
 import com.enioka.scanner.data.BarcodeType;
 
@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Helper class to translate symbology IDs, common between Honeywell SDKs (bluetooth or integrated).
+ */
 public final class SymbologyId {
     /**
      * Map associating a honeywell ID (in ASCII hexadecimal value) to its corresponding symbology.
@@ -94,8 +97,8 @@ public final class SymbologyId {
      * @return The corresponding BarcodeType.
      */
     public static BarcodeType toBarcodeType(final String symbologyString) {
-        if (symbologyString == null)
-            throw new IllegalArgumentException("No symbology to convert");
+        //if (symbologyString == null)
+            //throw new IllegalArgumentException("No symbology to convert");
         if (symbologyString.equals("Code128"))
             return BarcodeType.CODE128;
         if (symbologyString.equals("Code39"))

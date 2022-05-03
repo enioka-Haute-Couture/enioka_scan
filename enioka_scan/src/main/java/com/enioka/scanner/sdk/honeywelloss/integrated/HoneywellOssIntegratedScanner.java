@@ -11,15 +11,12 @@ import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
 import com.enioka.scanner.sdk.honeywelloss.SymbologyId;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
-public class HoneywellOssIntegratedScanner extends IntentScanner<String> implements Scanner.WithTriggerSupport, Scanner.WithIlluminationSupport {
+public class HoneywellOssIntegratedScanner extends IntentScanner<String> implements Scanner.WithTriggerSupport {
     private static final String LOG_TAG = "HoneywellIntegratedScan";
-    private boolean isIlluminationOn = false;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // LIFE CYCLE
@@ -77,42 +74,6 @@ public class HoneywellOssIntegratedScanner extends IntentScanner<String> impleme
         if (dataCb != null) {
             dataCb.onData(this, barcodes);
         }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // FEATURE: ILLUMINATION
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public void enableIllumination() {
-        broadcastIntent(HoneywellIntents.ACTION_CONTROL_SCANNER, new HashMap<String, String>() {{
-            put(HoneywellIntents.EXTRA_SCAN, String.valueOf(false));
-            put(HoneywellIntents.EXTRA_LIGHT, String.valueOf(true));
-        }});
-        isIlluminationOn = true;
-    }
-
-    @Override
-    public void disableIllumination() {
-        broadcastIntent(HoneywellIntents.ACTION_CONTROL_SCANNER, new HashMap<String, String>() {{
-            put(HoneywellIntents.EXTRA_SCAN, String.valueOf(false));
-            put(HoneywellIntents.EXTRA_LIGHT, String.valueOf(false));
-        }});
-        isIlluminationOn = false;
-    }
-
-    @Override
-    public void toggleIllumination() {
-        if (isIlluminationOn) {
-            disableIllumination();
-        } else {
-            enableIllumination();
-        }
-    }
-
-    @Override
-    public boolean isIlluminationOn() {
-        return isIlluminationOn;
     }
 
 

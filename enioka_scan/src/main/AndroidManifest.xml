@@ -72,7 +72,18 @@
         <!-- Other scanner providers -->
 
         <service
-            android:name=".sdk.athesi.HHTProvider"
+            android:name=".sdk.athesi.SPA43LTE.AthesiHHTProvider"
+            android:description="@string/service_description"
+            android:exported="false"
+            tools:ignore="Instantiatable">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".sdk.athesi.RD50TE.AthesiE5LProvider"
             android:description="@string/service_description"
             android:exported="false"
             tools:ignore="Instantiatable">

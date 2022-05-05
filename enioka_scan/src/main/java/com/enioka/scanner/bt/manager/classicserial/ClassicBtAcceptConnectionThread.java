@@ -1,31 +1,35 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.classicserial;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.enioka.scanner.bt.manager.SerialBtScannerProvider;
+import com.enioka.scanner.bt.manager.common.OnConnectedCallback;
+import com.enioka.scanner.bt.manager.common.BtConstHelpers;
+
 import java.io.IOException;
 
 /**
  * A SPP service listener thread on a bluetooth adapter. Used by master BT devices to connect to the phone. Closes after the first connection (OK or not). No timeout.
  */
-class ClassicBtAcceptConnectionThread extends Thread {
+public class ClassicBtAcceptConnectionThread extends Thread {
     private static final String LOG_TAG = "BtSppSdk";
 
     private final BluetoothServerSocket serverSocket;
-    private final ClassicBtConnectToDeviceThread.OnConnectedCallback onConnectedCallback;
+    private final OnConnectedCallback onConnectedCallback;
     private final SerialBtScannerProvider parentProvider;
 
     private boolean done = false;
 
-    ClassicBtAcceptConnectionThread(BluetoothAdapter bluetoothAdapter, ClassicBtConnectToDeviceThread.OnConnectedCallback callback, SerialBtScannerProvider parentProvider) {
+    public ClassicBtAcceptConnectionThread(BluetoothAdapter bluetoothAdapter, OnConnectedCallback callback, SerialBtScannerProvider parentProvider) {
         this.onConnectedCallback = callback;
         this.parentProvider = parentProvider;
 
         BluetoothServerSocket serverSocket = null;
         try {
-            serverSocket = bluetoothAdapter.listenUsingRfcommWithServiceRecord("SPP", ClassicBtConnectToDeviceThread.SERVER_BT_SERVICE_UUID);
+            serverSocket = bluetoothAdapter.listenUsingRfcommWithServiceRecord("SPP", BtConstHelpers.SERVER_BT_SERVICE_UUID);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Socket's create() method failed", e);
         }
@@ -63,7 +67,7 @@ class ClassicBtAcceptConnectionThread extends Thread {
     }
 
     // Closes the client socket and causes the thread to finish.
-    void cancel() {
+    public void cancel() {
         try {
             this.serverSocket.close();
         } catch (IOException e) {
@@ -71,7 +75,7 @@ class ClassicBtAcceptConnectionThread extends Thread {
         }
     }
 
-    boolean isDone() {
+    public boolean isDone() {
         return this.done;
     }
 }

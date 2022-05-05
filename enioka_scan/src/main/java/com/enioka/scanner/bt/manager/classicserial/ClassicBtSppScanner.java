@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.classicserial;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -14,6 +14,11 @@ import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
+import com.enioka.scanner.bt.manager.SerialBtScannerProvider;
+import com.enioka.scanner.bt.manager.common.BluetoothScannerInternal;
+import com.enioka.scanner.bt.manager.common.DataSubscription;
+import com.enioka.scanner.bt.manager.common.OnConnectedCallback;
+import com.enioka.scanner.bt.manager.common.SerialBtScannerPassiveConnectionManager;
 import com.enioka.scanner.sdk.zebraoss.SsiOverSppParser;
 
 import java.io.Closeable;
@@ -27,14 +32,15 @@ import java.util.TimerTask;
 
 /**
  * Internal class used as the main interaction entry point for bluetooth devices.
+ * It handles all connection/reconnection boilerplate and delegates level 7 stuff to a {@link ScannerDataParser}.
  */
-class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal {
+public class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal {
     private static final String LOG_TAG = "BtSppSdk";
     private static final int RECONNECTION_MAX_ATTEMPTS = 5;
     private static final int RECONNECTION_INTERVAL_MS = 1000;
     private static final int RECONNECTION_TIMEOUT_MS = 5000;
 
-    private final SerialBtScannerProvider parentProvider;
+    private final SerialBtScannerPassiveConnectionManager parentProvider;
     private BtSppScannerProvider scannerDriver;
 
     private final BluetoothDevice rawDevice;
@@ -53,7 +59,7 @@ class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal {
     private ScannerDataParser inputHandler;
 
     private ScannerStatusCallbackProxy statusCallback;
-    private Handler uiHandler = new Handler(Looper.getMainLooper());
+    private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
     /**
      * All the callbacks which are registered to run on received data (post-parsing). Key is data class name.
@@ -62,12 +68,12 @@ class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal {
 
     /**
      * Create an <strong>unconnected</strong> device from a cached device definition.<br>
-     * Need to call {@link #connect(ClassicBtConnectToDeviceThread.OnConnectedCallback)} before any interaction with the device.<br>
+     * Need to call {@link #connect(OnConnectedCallback)} before any interaction with the device.<br>
      * Used for slave BT devices.
      *
      * @param device a device definition
      */
-    ClassicBtSppScanner(SerialBtScannerProvider parentProvider, BluetoothDevice device) {
+    public ClassicBtSppScanner(SerialBtScannerPassiveConnectionManager parentProvider, BluetoothDevice device) {
         this.rawDevice = device;
         this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
@@ -124,14 +130,16 @@ class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal {
         }, 0, 100);
     }
 
+    @Override
     public void setProvider(BtSppScannerProvider provider) {
         this.scannerDriver = provider;
         this.inputHandler = scannerDriver.getInputHandler();
     }
 
-    public void connect(final ClassicBtConnectToDeviceThread.OnConnectedCallback callback) {
+    @Override
+    public void connect(final OnConnectedCallback callback) {
         Log.i(LOG_TAG, "Starting connection to device " + ClassicBtSppScanner.this.name);
-        connectionThread = new ClassicBtConnectToDeviceThread(rawDevice, new ClassicBtConnectToDeviceThread.OnStreamConnectedCallback() {
+        connectionThread = new ClassicBtConnectToDeviceThread(rawDevice, new OnStreamConnectedCallback() {
             @Override
             public void connected(BluetoothSocket bluetoothSocket) {
                 ClassicBtSppScanner.this.connectionThread = null;
@@ -254,7 +262,7 @@ class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal {
             // Ignore.
         }
 
-        connectionThread = new ClassicBtConnectToDeviceThread(rawDevice, new ClassicBtConnectToDeviceThread.OnStreamConnectedCallback() {
+        connectionThread = new ClassicBtConnectToDeviceThread(rawDevice, new OnStreamConnectedCallback() {
             @Override
             public void connected(BluetoothSocket bluetoothSocket) {
                 ClassicBtSppScanner.this.connectionThread = null;

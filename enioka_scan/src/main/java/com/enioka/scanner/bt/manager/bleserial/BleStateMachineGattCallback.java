@@ -1,4 +1,4 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.bleserial;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;

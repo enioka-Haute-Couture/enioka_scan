@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
@@ -80,7 +82,7 @@ public class ProgloveScanner extends IntentScanner<String> implements Scanner.Wi
     }
 
     @Override
-    public void pause() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
         if (!connected) {
             return;
         }
@@ -94,18 +96,27 @@ public class ProgloveScanner extends IntentScanner<String> implements Scanner.Wi
                 }
             }, 0, 3000);
         }
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void resume() {
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         stopSchedule();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         stopSchedule();
         broadcastIntent("com.proglove.api.DISCONNECT");
-        super.disconnect();
+        super.disconnect(cb);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -232,7 +243,7 @@ public class ProgloveScanner extends IntentScanner<String> implements Scanner.Wi
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(ScannerLedColor color) {
+    public void ledColorOn(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         int c = 0;
         switch (color) {
             case GREEN:
@@ -243,11 +254,17 @@ public class ProgloveScanner extends IntentScanner<String> implements Scanner.Wi
                 break;
         }
         broadcastIntent("com.proglove.api.PLAY_FEEDBACK", "com.proglove.api.extra.FEEDBACK_SEQUENCE_ID", c);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void ledColorOff(ScannerLedColor color) {
+    public void ledColorOff(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         // FIXME
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 

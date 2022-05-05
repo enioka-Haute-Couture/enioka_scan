@@ -1,6 +1,7 @@
 package com.enioka.scanner.sdk.mock;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.ScannerLedColor;
@@ -8,6 +9,7 @@ import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerDataCallback;
 import com.enioka.scanner.api.callbacks.ScannerInitCallback;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -60,17 +62,25 @@ public class MockScanner implements Scanner, Scanner.WithTriggerSupport, Scanner
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void pressScanTrigger() {
+    public void pressScanTrigger(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Scanner trigger pressed");
         softTriggered = true;
         statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.SCANNING);
+
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void releaseScanTrigger() {
+    public void releaseScanTrigger(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Scanner trigger released");
         softTriggered = false;
         statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
+
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,24 +121,36 @@ public class MockScanner implements Scanner, Scanner.WithTriggerSupport, Scanner
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Scanner disconnected");
         disconnected = true;
         statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.DISCONNECTED);
+
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void pause() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Scanner paused");
         paused = true;
         statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.PAUSED);
+
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void resume() {
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Scanner resumed");
         paused = false;
         statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
+
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,18 +158,27 @@ public class MockScanner implements Scanner, Scanner.WithTriggerSupport, Scanner
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void beepScanSuccessful() {
+    public void beepScanSuccessful(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Success beep");
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepScanFailure() {
+    public void beepScanFailure(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Failure beep");
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepPairingCompleted() {
+    public void beepPairingCompleted(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Pairing beep");
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,21 +186,30 @@ public class MockScanner implements Scanner, Scanner.WithTriggerSupport, Scanner
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void enableIllumination() {
+    public void enableIllumination(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Illumination on");
         illuminated = true;
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void disableIllumination() {
+    public void disableIllumination(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Illumination off");
         illuminated = false;
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void toggleIllumination() {
+    public void toggleIllumination(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "Illumination switched");
         illuminated = !illuminated;
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
@@ -182,13 +222,19 @@ public class MockScanner implements Scanner, Scanner.WithTriggerSupport, Scanner
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(ScannerLedColor color) {
+    public void ledColorOn(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "LED color on with color " + color.name());
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void ledColorOff(ScannerLedColor color) {
+    public void ledColorOff(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         Log.d(LOG_TAG, "LED color off");
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

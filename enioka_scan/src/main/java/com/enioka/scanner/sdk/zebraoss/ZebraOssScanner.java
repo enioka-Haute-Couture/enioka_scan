@@ -2,10 +2,12 @@ package com.enioka.scanner.sdk.zebraoss;
 
 import android.content.Context;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -55,13 +57,19 @@ class ZebraOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.Wi
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void pressScanTrigger() {
+    public void pressScanTrigger(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new StartSession(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void releaseScanTrigger() {
+    public void releaseScanTrigger(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new StopSession(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -75,18 +83,27 @@ class ZebraOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.Wi
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.disconnect();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void pause() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new ScanDisable(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void resume() {
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new ScanEnable(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -95,18 +112,27 @@ class ZebraOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.Wi
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void beepScanSuccessful() {
+    public void beepScanSuccessful(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new Beep((byte) 0x01), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepScanFailure() {
+    public void beepScanFailure(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new Beep((byte) 0x12), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepPairingCompleted() {
+    public void beepPairingCompleted(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new Beep((byte) 0x14), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -115,13 +141,19 @@ class ZebraOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.Wi
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(ScannerLedColor color) {
+    public void ledColorOn(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new LedOn(color), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void ledColorOff(ScannerLedColor color) {
+    public void ledColorOff(ScannerLedColor color,@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new LedOff(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 

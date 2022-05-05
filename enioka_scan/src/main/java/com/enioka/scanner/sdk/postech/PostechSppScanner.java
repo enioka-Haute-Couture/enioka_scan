@@ -1,8 +1,10 @@
 package com.enioka.scanner.sdk.postech;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -76,18 +78,27 @@ class PostechSppScanner implements Scanner, Scanner.WithBeepSupport {
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.disconnect();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void pause() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
         // Not supported?
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void resume() {
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         // Not supported?
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -96,23 +107,32 @@ class PostechSppScanner implements Scanner, Scanner.WithBeepSupport {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void beepScanSuccessful() {
+    public void beepScanSuccessful(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new CloseRead(), null);
         this.btScanner.runCommand(new Bell(), null);
         this.btScanner.runCommand(new OpenRead(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepScanFailure() {
+    public void beepScanFailure(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new CloseRead(), null);
         this.btScanner.runCommand(new Bell(), null);
         this.btScanner.runCommand(new OpenRead(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepPairingCompleted() {
+    public void beepPairingCompleted(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new CloseRead(), null);
         this.btScanner.runCommand(new Bell(), null);
         this.btScanner.runCommand(new OpenRead(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 }

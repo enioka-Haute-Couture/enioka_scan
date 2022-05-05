@@ -1,13 +1,13 @@
-package com.enioka.scanner.sdk.honeywelloss.commands;
+package com.enioka.scanner.sdk.honeywelloss.spp.commands;
 
 import com.enioka.scanner.bt.api.Command;
 
-public class DisableIllumination implements Command<Void> {
+public class EnableBarcodeMetadata implements Command<Void> {
     @Override
     public byte[] getCommand() {
-        // SCNLED0 / 1
-        // SYN M CR S C N L E D 0 !
-        return new byte[]{22, 77, 13, 83, 67, 78, 76, 69, 68, 48, 33};
+        // DECHDR1 / 0
+        // SYN M CR ... 1 .
+        return new byte[]{22, 77, 13, 68, 69, 67, 72, 68, 82, 49, 46};
     }
 
     @Override

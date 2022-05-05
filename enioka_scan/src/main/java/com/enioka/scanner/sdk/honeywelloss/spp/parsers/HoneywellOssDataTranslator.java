@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.honeywelloss.parsers;
+package com.enioka.scanner.sdk.honeywelloss.spp.parsers;
 
 import com.enioka.scanner.data.BarcodeType;
 

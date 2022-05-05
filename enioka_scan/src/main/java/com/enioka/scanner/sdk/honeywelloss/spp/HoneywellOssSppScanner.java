@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.honeywelloss;
+package com.enioka.scanner.sdk.honeywelloss.spp;
 
 import android.content.Context;
 import android.os.Handler;
@@ -14,24 +14,24 @@ import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.data.Barcode;
-import com.enioka.scanner.sdk.honeywelloss.commands.ActivateTrigger;
-import com.enioka.scanner.sdk.honeywelloss.commands.Beep;
-import com.enioka.scanner.sdk.honeywelloss.commands.DeactivateTrigger;
-import com.enioka.scanner.sdk.honeywelloss.commands.DisableAimer;
-import com.enioka.scanner.sdk.honeywelloss.commands.DisableIllumination;
-import com.enioka.scanner.sdk.honeywelloss.commands.DisplayScreenColor;
-import com.enioka.scanner.sdk.honeywelloss.commands.EnableAimer;
-import com.enioka.scanner.sdk.honeywelloss.commands.EnableBarcodeMetadata;
-import com.enioka.scanner.sdk.honeywelloss.commands.EnableIllumination;
+import com.enioka.scanner.sdk.honeywelloss.spp.commands.ActivateTrigger;
+import com.enioka.scanner.sdk.honeywelloss.spp.commands.Beep;
+import com.enioka.scanner.sdk.honeywelloss.spp.commands.DeactivateTrigger;
+import com.enioka.scanner.sdk.honeywelloss.spp.commands.DisableAimer;
+import com.enioka.scanner.sdk.honeywelloss.spp.commands.DisableIllumination;
+import com.enioka.scanner.sdk.honeywelloss.spp.commands.DisplayScreenColor;
+import com.enioka.scanner.sdk.honeywelloss.spp.commands.EnableAimer;
+import com.enioka.scanner.sdk.honeywelloss.spp.commands.EnableBarcodeMetadata;
+import com.enioka.scanner.sdk.honeywelloss.spp.commands.EnableIllumination;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class HoneywellOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.WithBeepSupport, Scanner.WithLedSupport {
+class HoneywellOssSppScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.WithBeepSupport, Scanner.WithLedSupport {
     private ScannerDataCallbackProxy dataCallback = null;
     private final BluetoothScanner btScanner;
 
-    HoneywellOssScanner(BluetoothScanner btScanner) {
+    HoneywellOssSppScanner(BluetoothScanner btScanner) {
         this.btScanner = btScanner;
     }
 
@@ -169,7 +169,7 @@ class HoneywellOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanne
             public void onSuccess(final Barcode data) {
                 final List<Barcode> res = new ArrayList<>(1);
                 res.add(data);
-                HoneywellOssScanner.this.dataCallback.onData(HoneywellOssScanner.this, res);
+                HoneywellOssSppScanner.this.dataCallback.onData(HoneywellOssSppScanner.this, res);
             }
 
             @Override

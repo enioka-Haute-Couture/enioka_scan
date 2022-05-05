@@ -1,8 +1,8 @@
-package com.enioka.scanner.sdk.honeywelloss.parsers;
+package com.enioka.scanner.sdk.honeywelloss.spp.parsers;
 
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.data.Barcode;
-import com.enioka.scanner.sdk.honeywelloss.helpers.MessagePrinter;
+import com.enioka.scanner.sdk.honeywelloss.spp.helpers.MessagePrinter;
 
 import org.junit.Assert;
 import org.junit.Test;

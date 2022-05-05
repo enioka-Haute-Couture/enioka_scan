@@ -354,7 +354,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedZebraOssSppScannerProvider" />
 
-            <!-- Honeywell OSS -->
+            <!-- Honeywell OSS SPP -->
             <TextView
                 android:id="@+id/textViewAllowedHoneywellOssSppScannerProvider"
                 android:layout_width="fill_parent"
@@ -379,6 +379,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedZebraOssAttScannerProvider" />
 
+            <!-- Honeywell OSS INTEGRATED -->
+            <TextView
+                android:id="@+id/textViewAllowedHoneywellOssIntegratedScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/honeywellossintegratedscannerprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHoneywellOssSppScannerProvider" />
+
+            <CheckBox
+                android:id="@+id/checkAllowedHoneywellOssIntegratedScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedHoneywellOssIntegratedScannerProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHoneywellOssSppScannerProvider" />
+
             <!-- EXCLUDED PROVIDERS -->
 
             <TextView
@@ -391,7 +416,7 @@
                 android:text="@string/excluded_providers"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHoneywellOssSppScannerProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/checkAllowedHoneywellOssIntegratedScannerProvider" />
 
             <!-- Athesi -->
             <TextView
@@ -543,7 +568,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedZebraOssSppScannerProvider" />
 
-            <!-- Honeywell OSS -->
+            <!-- Honeywell OSS SPP -->
             <TextView
                 android:id="@+id/textViewExcludedHoneywellOssSppScannerProvider"
                 android:layout_width="fill_parent"
@@ -568,6 +593,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedZebraOssAttScannerProvider" />
 
+            <!-- Honeywell OSS INTEGRATED -->
+            <TextView
+                android:id="@+id/textViewExcludedHoneywellOssIntegratedScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/honeywellossintegratedscannerprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssSppScannerProvider" />
+
+            <CheckBox
+                android:id="@+id/checkExcludedHoneywellOssIntegratedScannerProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedHoneywellOssIntegratedScannerProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssSppScannerProvider" />
+
             <!-- SAVE -->
 
             <Button
@@ -580,7 +630,7 @@
                 android:text="@string/save"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssSppScannerProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssIntegratedScannerProvider" />
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>

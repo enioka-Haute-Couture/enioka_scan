@@ -1,13 +1,12 @@
-package com.enioka.scanner.sdk.honeywelloss.commands;
+package com.enioka.scanner.sdk.honeywelloss.spp.commands;
 
 import com.enioka.scanner.bt.api.Command;
 
-public class EnableBarcodeMetadata implements Command<Void> {
+public class DeactivateTrigger implements Command<Void> {
     @Override
     public byte[] getCommand() {
-        // DECHDR1 / 0
-        // SYN M CR ... 1 .
-        return new byte[]{22, 77, 13, 68, 69, 67, 72, 68, 82, 49, 46};
+        // SYN U CR
+        return new byte[]{0x16, 0x55, 0x0D};
     }
 
     @Override

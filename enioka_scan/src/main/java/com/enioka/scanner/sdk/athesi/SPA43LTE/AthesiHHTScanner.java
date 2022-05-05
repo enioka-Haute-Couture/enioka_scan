@@ -52,8 +52,8 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
     @Override
     protected void configureProvider() {
         broadcastIntentFilters.add("DATA_SCAN");
-        disableTrigger = newIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_PLUGIN);
-        enableTrigger = newIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.ENABLE_PLUGIN);
+        disableScanner = newIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.DISABLE_PLUGIN);
+        enableScanner = newIntent(DataWedge.SCANNERINPUTPLUGIN, DataWedge.EXTRA_PARAMETER, DataWedge.ENABLE_PLUGIN);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

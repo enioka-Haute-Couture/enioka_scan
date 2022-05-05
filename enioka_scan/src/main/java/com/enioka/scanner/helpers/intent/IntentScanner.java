@@ -45,8 +45,8 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
      */
     protected final Map<BarcodeTypeClass, BarcodeType> sdk2Api = new HashMap<>();
 
-    protected Intent disableTrigger = null;
-    protected Intent enableTrigger = null;
+    protected Intent disableScanner = null;
+    protected Intent enableScanner = null;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,9 +122,9 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
 
     @Override
     public void pause(@Nullable ScannerCommandCallbackProxy cb) {
-        if (disableTrigger != null) {
+        if (disableScanner != null) {
             Log.d(getProviderKey(), "Sending intent to scanner to disable the trigger");
-            ctx.sendBroadcast(disableTrigger);
+            ctx.sendBroadcast(disableScanner);
             if (cb != null) {
                 cb.onSuccess();
             }
@@ -135,9 +135,9 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
 
     @Override
     public void resume(@Nullable ScannerCommandCallbackProxy cb) {
-        if (enableTrigger != null) {
+        if (enableScanner != null) {
             Log.d(getProviderKey(), "Sending intent to scanner to enable the trigger");
-            ctx.sendBroadcast(enableTrigger);
+            ctx.sendBroadcast(enableScanner);
             if (cb != null) {
                 cb.onSuccess();
             }

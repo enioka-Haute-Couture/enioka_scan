@@ -12,7 +12,8 @@ import com.enioka.scanner.sdk.athesi.RD50TE.AthesiE5LProvider;
 import com.enioka.scanner.sdk.athesi.SPA43LTE.AthesiHHTProvider;
 import com.enioka.scanner.sdk.bluebird.BluebirdProvider;
 import com.enioka.scanner.sdk.generalscan.GsSppScannerProvider;
-import com.enioka.scanner.sdk.honeywelloss.HoneywellOssSppScannerProvider;
+import com.enioka.scanner.sdk.honeywelloss.integrated.HoneywellOssIntegratedScannerProvider;
+import com.enioka.scanner.sdk.honeywelloss.spp.HoneywellOssSppScannerProvider;
 import com.enioka.scanner.sdk.proglove.ProgloveProvider;
 import com.enioka.scanner.sdk.zebraoss.ZebraOssAttScannerProvider;
 import com.enioka.scanner.sdk.zebraoss.ZebraOssSppScannerProvider;
@@ -47,6 +48,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.checkAllowedZebraOssSppScannerProvider)).setChecked(allowedProviderKeys.contains(ZebraOssSppScannerProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkAllowedZebraOssAttScannerProvider)).setChecked(allowedProviderKeys.contains(ZebraOssAttScannerProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkAllowedHoneywellOssSppScannerProvider)).setChecked(allowedProviderKeys.contains(HoneywellOssSppScannerProvider.PROVIDER_KEY));
+        ((CheckBox) findViewById(R.id.checkAllowedHoneywellOssIntegratedScannerProvider)).setChecked(allowedProviderKeys.contains(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY));
 
         final Set<String> excludedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
         ((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).setChecked(excludedProviderKeys.contains(AthesiHHTProvider.PROVIDER_KEY));
@@ -57,6 +59,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.checkExcludedZebraOssSppScannerProvider)).setChecked(excludedProviderKeys.contains(ZebraOssSppScannerProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkExcludedZebraOssAttScannerProvider)).setChecked(excludedProviderKeys.contains(ZebraOssAttScannerProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkExcludedHoneywellOssSppScannerProvider)).setChecked(excludedProviderKeys.contains(HoneywellOssSppScannerProvider.PROVIDER_KEY));
+        ((CheckBox) findViewById(R.id.checkExcludedHoneywellOssIntegratedScannerProvider)).setChecked(excludedProviderKeys.contains(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY));
     }
 
     public void onClickSave(View v) {
@@ -78,6 +81,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (((CheckBox) findViewById(R.id.checkAllowedZebraOssSppScannerProvider)).isChecked()) { allowedProviderKeys.add(ZebraOssSppScannerProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkAllowedZebraOssAttScannerProvider)).isChecked()) { allowedProviderKeys.add(ZebraOssAttScannerProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkAllowedHoneywellOssSppScannerProvider)).isChecked()) { allowedProviderKeys.add(HoneywellOssSppScannerProvider.PROVIDER_KEY); }
+        if (((CheckBox) findViewById(R.id.checkAllowedHoneywellOssIntegratedScannerProvider)).isChecked()) { allowedProviderKeys.add(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY); }
         editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys);
 
         final Set<String> excludedProviderKeys = new HashSet<>();
@@ -89,6 +93,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (((CheckBox) findViewById(R.id.checkExcludedZebraOssSppScannerProvider)).isChecked()) { excludedProviderKeys.add(ZebraOssSppScannerProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkExcludedZebraOssAttScannerProvider)).isChecked()) { excludedProviderKeys.add(ZebraOssAttScannerProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkExcludedHoneywellOssSppScannerProvider)).isChecked()) { excludedProviderKeys.add(HoneywellOssSppScannerProvider.PROVIDER_KEY); }
+        if (((CheckBox) findViewById(R.id.checkExcludedHoneywellOssIntegratedScannerProvider)).isChecked()) { excludedProviderKeys.add(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY); }
         editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, excludedProviderKeys);
 
         editor.apply();

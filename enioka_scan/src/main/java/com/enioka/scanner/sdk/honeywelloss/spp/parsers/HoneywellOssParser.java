@@ -1,8 +1,8 @@
-package com.enioka.scanner.sdk.honeywelloss.parsers;
+package com.enioka.scanner.sdk.honeywelloss.spp.parsers;
 
 import com.enioka.scanner.bt.api.ParsingResult;
 import com.enioka.scanner.bt.api.ScannerDataParser;
-import com.enioka.scanner.sdk.honeywelloss.helpers.MessagePrinter;
+import com.enioka.scanner.sdk.honeywelloss.spp.helpers.MessagePrinter;
 
 /**
  * Honeywell scanners have two very different data structures. This parser simply routes to the correct sub parser.

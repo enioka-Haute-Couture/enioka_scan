@@ -47,7 +47,7 @@
         </service>
 
         <service
-            android:name=".sdk.honeywelloss.HoneywellOssSppScannerProvider"
+            android:name=".sdk.honeywelloss.spp.HoneywellOssSppScannerProvider"
             android:description="@string/service_description"
             android:exported="false"
             tools:ignore="Instantiatable">
@@ -95,6 +95,17 @@
 
         <service
             android:name=".sdk.bluebird.BluebirdProvider"
+            android:description="@string/service_description"
+            android:exported="false"
+            tools:ignore="Instantiatable">
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".sdk.honeywelloss.integrated.HoneywellOssIntegratedScannerProvider"
             android:description="@string/service_description"
             android:exported="false"
             tools:ignore="Instantiatable">
@@ -153,4 +164,6 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- needed for BLE -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- For API <= 28 -->
+
+    <uses-permission android:name="com.honeywell.decode.permission.DECODE" /> <!-- Needed by Honeywell OSS SDK for integrated scanners -->
 </manifest>

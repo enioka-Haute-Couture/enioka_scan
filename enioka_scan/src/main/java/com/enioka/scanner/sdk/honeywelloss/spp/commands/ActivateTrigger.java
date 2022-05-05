@@ -1,13 +1,12 @@
-package com.enioka.scanner.sdk.honeywelloss.commands;
+package com.enioka.scanner.sdk.honeywelloss.spp.commands;
 
 import com.enioka.scanner.bt.api.Command;
 
-public class DisableAimer implements Command<Void> {
+public class ActivateTrigger implements Command<Void> {
     @Override
     public byte[] getCommand() {
-        // SCNAIM0 / 2
-        // SYN M CR ... 0 !
-        return new byte[]{22, 77, 13, 83, 67, 78, 65, 73, 77, 48, 33};
+        // SYN T CR
+        return new byte[]{0x16, 0x54, 0x0D};
     }
 
     @Override

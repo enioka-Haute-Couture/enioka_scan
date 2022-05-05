@@ -1,12 +1,12 @@
-package com.enioka.scanner.sdk.honeywelloss.commands;
+package com.enioka.scanner.sdk.honeywelloss.spp.commands;
 
 import com.enioka.scanner.bt.api.Command;
 
-public class ActivateTrigger implements Command<Void> {
+public class Beep implements Command<Void> {
     @Override
     public byte[] getCommand() {
-        // SYN T CR
-        return new byte[]{0x16, 0x54, 0x0D};
+        // SYN BELL CR
+        return new byte[]{0x16, 0x07, 0x0D};
     }
 
     @Override

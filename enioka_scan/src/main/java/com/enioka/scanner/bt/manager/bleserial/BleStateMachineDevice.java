@@ -1,10 +1,10 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.bleserial;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 
 /**
- * Some devices can actually be seen as state machines, modified on specific stimuli. This interface factors his behaviour.
+ * Some devices can actually be seen as state machines, modified on specific stimuli. This interface factors this behaviour.
  */
 public interface BleStateMachineDevice {
 

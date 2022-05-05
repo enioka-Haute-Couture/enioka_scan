@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
+import com.enioka.scanner.bt.manager.common.BluetoothScannerInternal;
 
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -16,9 +17,9 @@ import java.util.concurrent.Semaphore;
 class ScannerProviderResolutionThread implements Runnable, BtSppScannerProvider.ManagementCallback {
     private static final String LOG_TAG = "BtSppSdk";
 
-    private BluetoothScannerInternal device;
-    private List<BtSppScannerProvider> scannerProviders;
-    private ScannerResolutionCallback callback;
+    private final BluetoothScannerInternal device;
+    private final List<BtSppScannerProvider> scannerProviders;
+    private final ScannerResolutionCallback callback;
     private final Semaphore providerLock = new Semaphore(0);
     private Scanner foundLibraryScanner;
 
@@ -43,6 +44,13 @@ class ScannerProviderResolutionThread implements Runnable, BtSppScannerProvider.
         void notCompatible(BluetoothScannerInternal device);
     }
 
+    /**
+     * Create a new resolver for a given BT device (Classic or BLE).
+     *
+     * @param device           a connected device, ready to run commands.
+     * @param scannerProviders the list of BT scanner providers against which to check the compatibility of device.
+     * @param callback         what to do when resolution is done or failed
+     */
     ScannerProviderResolutionThread(BluetoothScannerInternal device, List<BtSppScannerProvider> scannerProviders, ScannerResolutionCallback callback) {
         this.device = device;
         this.scannerProviders = scannerProviders;

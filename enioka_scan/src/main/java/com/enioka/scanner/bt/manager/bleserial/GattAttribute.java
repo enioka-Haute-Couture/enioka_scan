@@ -1,8 +1,7 @@
-package com.enioka.scanner.bt.manager;
+package com.enioka.scanner.bt.manager.bleserial;
 
 import java.util.UUID;
 
-@SuppressWarnings("unused")
 public enum GattAttribute {
     /////////////////////////////////////////////
     // Standardized attributes

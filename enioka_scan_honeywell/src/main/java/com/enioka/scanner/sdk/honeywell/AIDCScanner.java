@@ -17,6 +17,7 @@ import com.honeywell.aidc.AidcManager;
 import com.honeywell.aidc.BarcodeFailureEvent;
 import com.honeywell.aidc.BarcodeReadEvent;
 import com.honeywell.aidc.BarcodeReader;
+import com.honeywell.aidc.InvalidScannerNameException;
 import com.honeywell.aidc.ScannerUnavailableException;
 import com.honeywell.aidc.UnsupportedPropertyException;
 
@@ -58,7 +59,11 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
         this.dataCb = dataCallback;
         this.statusCb = statusCallback;
 
-        this.reader = mgr.createBarcodeReader();
+        try {
+            this.reader = mgr.createBarcodeReader();
+        } catch (InvalidScannerNameException e) {
+            initCallback.onConnectionFailure(this);
+        }
         this.reader.addBarcodeListener(this);
 
         try {

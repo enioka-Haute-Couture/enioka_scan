@@ -17,7 +17,8 @@
     <string name="excluded_providers">Excluded Providers (empty = none):</string>
     <string name="save">Save</string>
 
-    <string name="hhtprovider">HHTProvider</string>
+    <string name="hhtprovider">AthesiHHTProvider</string>
+    <string name="e5lprovider">AthesiE5LProvider</string>
     <string name="bluebirdprovider">BluebirdProvider</string>
     <string name="progloveprovider">ProgloveProvider</string>
     <string name="gssppscannerprovider">GsSppScannerProvider</string>

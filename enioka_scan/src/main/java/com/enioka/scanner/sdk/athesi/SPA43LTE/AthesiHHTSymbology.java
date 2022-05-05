@@ -1,11 +1,11 @@
-package com.enioka.scanner.sdk.athesi;
+package com.enioka.scanner.sdk.athesi.SPA43LTE;
 
 import com.enioka.scanner.data.BarcodeType;
 
 /**
  * Index for all HHT symbologies. Key name is the name returned by the scanner
  */
-enum HHTSymbology {
+enum AthesiHHTSymbology {
     // Items supported by the lib
     CODE39(DataWedge.ENABLE_CODE39, DataWedge.DISABLE_CODE39, BarcodeType.CODE39, 1),
     CODE128(DataWedge.ENABLE_CODE128, DataWedge.DISABLE_CODE128, BarcodeType.CODE128, 3),
@@ -82,11 +82,11 @@ enum HHTSymbology {
     public BarcodeType type;
     public Integer hhtTypeEnum;
 
-    HHTSymbology(String activationPrm, String deactivationPrm, BarcodeType type, Integer hhtTypeEnum) {
+    AthesiHHTSymbology(String activationPrm, String deactivationPrm, BarcodeType type, Integer hhtTypeEnum) {
         this(activationPrm, deactivationPrm, type, hhtTypeEnum, activationPrm.replace("ENABLE_", "Scanner_"));
     }
 
-    HHTSymbology(String activationPrm, String deactivationPrm, BarcodeType type, Integer hhtTypeEnum, String prmCode) {
+    AthesiHHTSymbology(String activationPrm, String deactivationPrm, BarcodeType type, Integer hhtTypeEnum, String prmCode) {
         this.activation = activationPrm;
         this.deactivation = deactivationPrm;
         this.type = type;
@@ -94,8 +94,8 @@ enum HHTSymbology {
         this.prmPropertyName = prmCode;
     }
 
-    public static HHTSymbology getSymbology(BarcodeType type) {
-        for (HHTSymbology s : HHTSymbology.values()) {
+    public static AthesiHHTSymbology getSymbology(BarcodeType type) {
+        for (AthesiHHTSymbology s : AthesiHHTSymbology.values()) {
             if (type.equals(s.type)) {
                 return s;
             }
@@ -103,8 +103,8 @@ enum HHTSymbology {
         return null;
     }
 
-    public static HHTSymbology getSymbology(Integer hhtTypeIndex) {
-        for (HHTSymbology s : HHTSymbology.values()) {
+    public static AthesiHHTSymbology getSymbology(Integer hhtTypeIndex) {
+        for (AthesiHHTSymbology s : AthesiHHTSymbology.values()) {
             if (hhtTypeIndex.equals(s.hhtTypeEnum)) {
                 return s;
             }
@@ -118,8 +118,8 @@ enum HHTSymbology {
      * @param prmPropertyName name from the HHT configuration.
      * @return the symbology or null if not found.
      */
-    public static HHTSymbology getSymbology(String prmPropertyName) {
-        for (HHTSymbology s : HHTSymbology.values()) {
+    public static AthesiHHTSymbology getSymbology(String prmPropertyName) {
+        for (AthesiHHTSymbology s : AthesiHHTSymbology.values()) {
             if (prmPropertyName.equals(s.prmPropertyName)) {
                 return s;
             }

@@ -204,7 +204,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewPairingFlow" />
 
-            <!-- Athesi -->
+            <!-- Athesi HTT -->
             <TextView
                 android:id="@+id/textViewAllowedHHTProvider"
                 android:layout_width="fill_parent"
@@ -229,6 +229,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProviders" />
 
+            <!-- Athesi E5L -->
+            <TextView
+                android:id="@+id/textViewAllowedE5LProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/e5lprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHHTProvider" />
+
+            <CheckBox
+                android:id="@+id/checkAllowedE5LProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedE5LProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHHTProvider" />
+
             <!-- Bluebird -->
             <TextView
                 android:id="@+id/textViewAllowedBluebirdProvider"
@@ -240,7 +265,7 @@
                 android:text="@string/bluebirdprovider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHHTProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedE5LProvider" />
 
             <CheckBox
                 android:id="@+id/checkAllowedBluebirdProvider"
@@ -252,7 +277,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/textViewAllowedBluebirdProvider"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHHTProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedE5LProvider" />
 
             <!-- Proglove -->
             <TextView
@@ -418,7 +443,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/checkAllowedHoneywellOssIntegratedScannerProvider" />
 
-            <!-- Athesi -->
+            <!-- Athesi HTT-->
             <TextView
                 android:id="@+id/textViewExcludedHHTProvider"
                 android:layout_width="fill_parent"
@@ -443,6 +468,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedProviders" />
 
+            <!-- Athesi E5L -->
+            <TextView
+                android:id="@+id/textViewExcludedE5LProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/e5lprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHHTProvider" />
+
+            <CheckBox
+                android:id="@+id/checkExcludedE5LProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedE5LProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHHTProvider" />
+
             <!-- Bluebird -->
             <TextView
                 android:id="@+id/textViewExcludedBluebirdProvider"
@@ -454,7 +504,7 @@
                 android:text="@string/bluebirdprovider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHHTProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedE5LProvider" />
 
             <CheckBox
                 android:id="@+id/checkExcludedBluebirdProvider"
@@ -466,7 +516,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/textViewExcludedBluebirdProvider"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHHTProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedE5LProvider" />
 
             <!-- Proglove -->
             <TextView

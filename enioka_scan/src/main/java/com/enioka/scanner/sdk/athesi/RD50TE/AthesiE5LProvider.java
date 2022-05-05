@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.athesi;
+package com.enioka.scanner.sdk.athesi.RD50TE;
 
 import android.content.Context;
 
@@ -7,14 +7,15 @@ import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.intent.IntentScannerProvider;
 
 /**
- * Provider for the HHT Wrapper Layer
+ * Provider for Athesi E5L scanners.
+ * May use similar intents as other modern Athesi scanners but only the E5L is accepted as it is the only one that could be tested.
  */
-public class HHTProvider extends IntentScannerProvider {
-    public static final String PROVIDER_KEY = "AthesiHHTProvider";
+public class AthesiE5LProvider extends IntentScannerProvider {
+    public static final String PROVIDER_KEY = "AthesiE5LProvider";
 
     @Override
     protected void configureProvider() {
-        specificDevices.add("SPA43LTE");
+        specificDevices.add("RD50TE");
     }
 
     @Override
@@ -24,6 +25,6 @@ public class HHTProvider extends IntentScannerProvider {
 
     @Override
     protected Scanner createNewScanner(Context ctx, ScannerSearchOptions options) {
-        return new HHTScanner();
+        return new AthesiE5LScanner();
     }
 }

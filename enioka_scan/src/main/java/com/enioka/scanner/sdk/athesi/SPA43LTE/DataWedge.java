@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.athesi;
+package com.enioka.scanner.sdk.athesi.SPA43LTE;
 
 /**
  * HHT wrapper layer constants

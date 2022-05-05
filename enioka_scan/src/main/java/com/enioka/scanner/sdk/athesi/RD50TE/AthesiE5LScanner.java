@@ -41,8 +41,8 @@ public class AthesiE5LScanner extends IntentScanner<String> implements Scanner.W
     @Override
     protected void configureProvider() {
         broadcastIntentFilters.add(AthesiE5LIntents.BARCODE_EVENT);
-        disableTrigger = null; // FIXME
-        enableTrigger = null; // FIXME
+        disableScanner = null; // FIXME
+        enableScanner = null; // FIXME
     }
 
 

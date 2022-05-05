@@ -2,10 +2,12 @@ package com.enioka.scanner.sdk.honeywell;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -108,21 +110,30 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         if (reader != null) {
             reader.removeBarcodeListener(this);
             reader.close();
+            if (cb != null) {
+                cb.onSuccess();
+            }
+        } else if (cb != null) {
+            cb.onSuccess();
         }
     }
 
     @Override
-    public void pause() {
-
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void resume() {
-
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     private class AsyncResultHandler extends AsyncTask<BarcodeReadEvent, Void, Barcode> {

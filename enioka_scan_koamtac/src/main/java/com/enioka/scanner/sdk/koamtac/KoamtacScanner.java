@@ -2,11 +2,13 @@ package com.enioka.scanner.sdk.koamtac;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -162,23 +164,34 @@ class KoamtacScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithLe
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         if (this.scanner != null && this.scanner.IsConnected()) {
             this.scanner.Disconnect();
         }
         if (this.scanner != null) {
             this.scanner.Dispose();
+            if (cb != null) {
+                cb.onSuccess();
+            }
+        } else if (cb != null) {
+            cb.onFailure();
         }
     }
 
     @Override
-    public void pause() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
         this.scanner.LockButtons(KDCConstants.ButtonLockType.SCAN_BUTTON_ONLY);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void resume() {
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         this.scanner.UnlockButtons(KDCConstants.ButtonLockType.SCAN_BUTTON_ONLY);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -187,18 +200,27 @@ class KoamtacScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithLe
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void beepScanSuccessful() {
+    public void beepScanSuccessful(@Nullable ScannerCommandCallbackProxy cb) {
         this.scanner.SetSuccessAlertBeep();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepScanFailure() {
+    public void beepScanFailure(@Nullable ScannerCommandCallbackProxy cb) {
         this.scanner.SetFailureAlertBeep();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepPairingCompleted() {
+    public void beepPairingCompleted(@Nullable ScannerCommandCallbackProxy cb) {
         this.scanner.SetSuccessAlertBeep();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -207,13 +229,19 @@ class KoamtacScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithLe
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(ScannerLedColor color) {
+    public void ledColorOn(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         this.scanner.SetDisplayMessage(color.toString());
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void ledColorOff(ScannerLedColor color) {
+    public void ledColorOff(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         this.scanner.SetDisplayMessage("");
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override

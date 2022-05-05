@@ -1,9 +1,7 @@
 package com.enioka.scanner.service;
 
-import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerSearchOptions;
-import com.enioka.scanner.api.callbacks.ProviderDiscoveredCallback;
 
 import java.util.List;
 

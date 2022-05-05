@@ -2,9 +2,12 @@ package com.enioka.scanner.sdk.honeywelloss;
 
 import android.content.Context;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 
 import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.callbacks.ScannerCommandCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -38,13 +41,19 @@ class HoneywellOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanne
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void pressScanTrigger() {
-        this.btScanner.runCommand(new ActivateTrigger(), null);
+    public void pressScanTrigger(@Nullable ScannerCommandCallbackProxy cb) {
+        btScanner.runCommand(new ActivateTrigger(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void releaseScanTrigger() {
-        this.btScanner.runCommand(new DeactivateTrigger(), null);
+    public void releaseScanTrigger(@Nullable ScannerCommandCallbackProxy cb) {
+        btScanner.runCommand(new DeactivateTrigger(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -58,22 +67,31 @@ class HoneywellOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanne
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.disconnect();
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void pause() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new DisableAimer(), null);
         this.btScanner.runCommand(new DisableIllumination(), null);
         this.btScanner.runCommand(new DisplayScreenColor(ScannerLedColor.RED), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void resume() {
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new EnableAimer(), null);
         this.btScanner.runCommand(new EnableIllumination(), null);
         this.btScanner.runCommand(new DisplayScreenColor(null), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -82,18 +100,27 @@ class HoneywellOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanne
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void beepScanSuccessful() {
+    public void beepScanSuccessful(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new Beep(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepScanFailure() {
+    public void beepScanFailure(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new Beep(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void beepPairingCompleted() {
+    public void beepPairingCompleted(@Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new Beep(), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 
@@ -102,16 +129,23 @@ class HoneywellOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanne
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void ledColorOn(ScannerLedColor color) {
+    public void ledColorOn(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new DisplayScreenColor(color), null);
 
         // This is needed otherwise the color is reused for every default action afterwards!
         new Handler().postDelayed(() -> btScanner.runCommand(new DisplayScreenColor(null), null), 5000);
+
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void ledColorOff(ScannerLedColor color) {
+    public void ledColorOff(ScannerLedColor color, @Nullable ScannerCommandCallbackProxy cb) {
         this.btScanner.runCommand(new DisplayScreenColor(null), null);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
 

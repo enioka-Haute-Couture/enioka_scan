@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
@@ -104,22 +105,33 @@ class M3RingScanner implements Scanner {
     }
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         if (this.scanner != null) {
             this.scanner.unbindService();
+            if (cb != null) {
+                cb.onSuccess();
+            }
+        } else if (cb != null) {
+            cb.onFailure();
         }
     }
 
     @Override
-    public void pause() {
+    public void pause(@Nullable ScannerCommandCallbackProxy cb) {
         statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.DISABLED);
         this.scanner.setReadable(false);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override
-    public void resume() {
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
         statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
         this.scanner.setReadable(true);
+        if (cb != null) {
+            cb.onSuccess();
+        }
     }
 
     @Override

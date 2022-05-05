@@ -5,8 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.enioka.scanner.api.callbacks.ScannerCommandCallback;
+import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
@@ -66,10 +69,10 @@ public class BluebirdScanner extends IntentScanner<Integer> {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void disconnect() {
+    public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         broadcastIntent(disableTrigger);
         broadcastIntent("kr.co.bluebird.android.bbapi.action.BARCODE_CLOSE", "EXTRA_INT_DATA3", 2);
-        super.disconnect();
+        super.disconnect(cb);
     }
 
 

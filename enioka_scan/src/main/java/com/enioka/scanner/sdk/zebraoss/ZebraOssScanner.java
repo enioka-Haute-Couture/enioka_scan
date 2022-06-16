@@ -14,6 +14,7 @@ import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.sdk.zebraoss.commands.ActivateAllSymbologies;
 import com.enioka.scanner.sdk.zebraoss.commands.Beep;
 import com.enioka.scanner.sdk.zebraoss.commands.InitCommand;
 import com.enioka.scanner.sdk.zebraoss.commands.LedOff;
@@ -242,6 +243,7 @@ class ZebraOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.Wi
 
         this.btScanner.runCommand(new InitCommand(), null);
         this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
+        this.btScanner.runCommand(new ActivateAllSymbologies(), null);
         this.btScanner.runCommand(new ScanEnable(), null);
 
         // We are already connected if the scanner could be created...

@@ -25,7 +25,7 @@ public enum SsiCommand {
     SSI_MGMT_COMMAND(0x80, SsiSource.BOTH, true, new RsmResponseParser()),
     SCANNER_INIT_COMMAND(0x90, SsiSource.HOST),
     SCANNER_INIT(0x91, SsiSource.DECODER, new ScannerInitParser()),
-    TEMP_COMMAND(0x93, SsiSource.HOST),
+    TEMP_COMMAND(0x93, SsiSource.BOTH, true, new GenericParser()), // Not documented, source of problems
     REQUEST_REVISION(0xA3, SsiSource.HOST),
     REPLY_REVISION(0xA4, SsiSource.DECODER, false, new ReplyRevisionParser()),
     IMAGE_DATA(0xB1, SsiSource.DECODER, true, new GenericParser()),

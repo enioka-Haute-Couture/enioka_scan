@@ -67,7 +67,7 @@ enum AthesiHHTSymbology {
     MAXICODE(DataWedge.ENABLE_MAXICODE, DataWedge.DISABLE_MAXICODE, null, null),
     QRCODE(DataWedge.ENABLE_QRCODE, DataWedge.DISABLE_QRCODE, BarcodeType.QRCODE, 28),
     MICROQR(DataWedge.ENABLE_MICROQR, DataWedge.DISABLE_MICROQR, null, null),
-    AZTEC(DataWedge.ENABLE_AZTEC, DataWedge.DISABLE_AZTEC, null, null),
+    AZTEC(DataWedge.ENABLE_AZTEC, DataWedge.DISABLE_AZTEC, BarcodeType.AZTEC, 45),
     HAN_XIN(DataWedge.ENABLE_HAN_XIN, DataWedge.DISABLE_HAN_XIN, null, null),
 
     JAPAN(DataWedge.ENABLE_JAPAN, DataWedge.DISABLE_JAPAN, null, null),

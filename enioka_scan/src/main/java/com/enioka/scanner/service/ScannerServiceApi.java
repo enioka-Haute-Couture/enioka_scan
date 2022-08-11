@@ -72,6 +72,14 @@ public interface ScannerServiceApi {
      */
     String EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY = "excludedProviderKeys";
 
+    ////////////////////////////////////////////////////////////////////////////
+    // SYMBOLOGY INTENT EXTRA
+    ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * An array of {@link com.enioka.scanner.data.BarcodeType BarcodeType} to activate.
+     */
+    String EXTRA_SYMBOLOGY_SELECTION = "symbologySelection";
 
     ////////////////////////////////////////////////////////////////////////////
     // CLIENT HOOKS

@@ -21,8 +21,10 @@ import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,6 +72,11 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
      */
     private ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions();
 
+    /**
+     * Option to set wanted symbology. By default EAN13 and CODE128 is set
+     */
+    public Set<BarcodeType> symbologySelection = new HashSet<>(Arrays.asList(BarcodeType.EAN13, BarcodeType.CODE128));
+
     private interface EndOfInitCallback {
         void run();
     }
@@ -97,6 +104,14 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         final Bundle extras = intent.getExtras();
         if (extras != null) {
             startScannerSearchOnFirstBind = extras.getBoolean(EXTRA_START_SEARCH_ON_SERVICE_BIND, startScannerSearchOnFirstBind);
+
+            String[] symbologySelectionArray = extras.getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION);
+            if (symbologySelectionArray != null && symbologySelectionArray.length > 0) {
+                symbologySelection = new HashSet<>();
+                for (String symbology : symbologySelectionArray) {
+                    symbologySelection.add(BarcodeType.valueOf(symbology));
+                }
+            }
         }
 
         this.initProviderDiscovery();

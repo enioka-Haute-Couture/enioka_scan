@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.callbacks.ScannerCommandCallback;
 import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -17,6 +16,7 @@ import com.enioka.scanner.helpers.Common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -31,11 +31,6 @@ public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSu
         this.dataDb = mHandler;
 
         this.scanner = cameraBarcodeScanView;
-
-        scanner.addSymbology(BarcodeType.CODE128);
-        scanner.addSymbology(BarcodeType.CODE39);
-        scanner.addSymbology(BarcodeType.EAN13);
-        scanner.addSymbology(BarcodeType.INT25);
 
         scanner.setResultHandler(this);
         scanner.setTorch(false);
@@ -58,8 +53,11 @@ public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSu
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         // Do nothing. The camera view implementation is special, as it is built directly and not through the LaserScanner.
+        for(BarcodeType symbology: symbologySelection) {
+            scanner.addSymbology(symbology);
+        }
         initCallback.onConnectionSuccessful(this);
     }
 

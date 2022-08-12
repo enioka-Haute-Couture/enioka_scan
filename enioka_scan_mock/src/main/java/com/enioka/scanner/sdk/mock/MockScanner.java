@@ -14,11 +14,13 @@ import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Mock scanner used to test callbacks and basic scanner interactions.
@@ -34,6 +36,7 @@ public class MockScanner implements Scanner, Scanner.WithTriggerSupport, Scanner
     private ScannerDataCallback dataCallback;
     private ScannerStatusCallback statusCallback;
     private Mode mode;
+    private Set<BarcodeType> symbologies;
 
     @Override
     public String getProviderKey() {
@@ -52,7 +55,9 @@ public class MockScanner implements Scanner, Scanner.WithTriggerSupport, Scanner
         }
         Log.d(LOG_TAG, "Received barcode of type " + barcode.getBarcodeType() + ": " + barcode.getBarcode());
         final List<Barcode> barcodeList = new ArrayList<>();
-        barcodeList.add(barcode);
+        if (symbologies.contains(barcode.getBarcodeType())) {
+            barcodeList.add(barcode);
+        }
         dataCallback.onData(this, barcodeList);
     }
 
@@ -91,11 +96,12 @@ public class MockScanner implements Scanner, Scanner.WithTriggerSupport, Scanner
      * Finishes the initialization of the Mock. This version of the method is best suited for unit tests as it will not require callback proxies (the context may be null).
      */
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         Log.w(LOG_TAG, "The Mock was initialized with non-proxy callbacks, UI-thread won't be used (best suitable for unit tests)");
         this.dataCallback = dataCallback;
         this.statusCallback = statusCallback;
         this.mode = mode;
+        this.symbologies = symbologySelection;
 
         statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
         initCallback.onConnectionSuccessful(this);
@@ -105,11 +111,12 @@ public class MockScanner implements Scanner, Scanner.WithTriggerSupport, Scanner
      * Finishes the initialization of the Mock. This version of the method is best suited for integrated tests as proxy callbacks are used, meaning jumps to UI-thread which are not mocked.
      */
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         Log.w(LOG_TAG, "The Mock was initialized with proxy callbacks, UI-thread will be used (only suitable for android integrated tests)");
         this.dataCallback = dataCallback;
         this.statusCallback = statusCallback;
         this.mode = mode;
+        this.symbologies = symbologySelection;
 
         statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.READY);
         initCallback.onConnectionSuccessful(this);

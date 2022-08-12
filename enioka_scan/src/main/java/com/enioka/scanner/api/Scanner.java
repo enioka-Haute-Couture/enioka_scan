@@ -11,8 +11,10 @@ import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
+import com.enioka.scanner.data.BarcodeType;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The interface to implement by a laser scanner provider.
@@ -41,17 +43,17 @@ public interface Scanner {
     /**
      * Called once per application launch.
      */
-    void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode);
+    void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection);
 
     /**
      * Called once per application launch, implicit wrapping with callback proxies.
      */
-    default void initialize(final Context applicationContext, final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, final Mode mode) {
+    default void initialize(final Context applicationContext, final ScannerInitCallback initCallback, final ScannerDataCallback dataCallback, final ScannerStatusCallback statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         initialize(applicationContext,
                 new ScannerInitCallbackProxy(initCallback),
                 new ScannerDataCallbackProxy(dataCallback),
                 new ScannerStatusCallbackProxy(statusCallback),
-                mode);
+                mode, symbologySelection);
     }
 
     /**

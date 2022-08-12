@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Many devices actually only allow to communicate with a scanner through an Android service
@@ -56,14 +57,16 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     protected ScannerDataCallbackProxy dataCb = null;
     protected ScannerStatusCallbackProxy statusCb = null;
     protected Scanner.Mode mode;
+    protected Set<BarcodeType> symbologies;
 
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         this.dataCb = dataCallback;
         this.statusCb = statusCallback;
         this.mode = mode;
         this.ctx = applicationContext;
+        this.symbologies = symbologySelection;
 
         // Let the child provider set all the configuration values if needed.
         configureProvider();

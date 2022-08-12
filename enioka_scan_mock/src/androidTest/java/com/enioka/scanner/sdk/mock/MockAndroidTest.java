@@ -21,6 +21,7 @@ import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.service.ScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
@@ -29,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -137,7 +139,7 @@ public class MockAndroidTest {
         public void scannerCreated(String providerKey, String scannerKey, Scanner s) {
             if (s instanceof MockScanner) {
                 mock = ((MockScanner) s);
-                mock.initialize(ctx, new ScannerInitCallbackProxy(initCallback), new ScannerDataCallbackProxy(dataCallback), new ScannerStatusCallbackProxy(statusCallback), null);
+                mock.initialize(ctx, new ScannerInitCallbackProxy(initCallback), new ScannerDataCallbackProxy(dataCallback), new ScannerStatusCallbackProxy(statusCallback), null, new HashSet<>(Arrays.asList(BarcodeType.CODE128, BarcodeType.EAN13)));
             } else {
                 Assert.fail("Wrong scanner was detected");
             }

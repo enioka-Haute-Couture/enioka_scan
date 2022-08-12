@@ -8,7 +8,7 @@ import java.util.Map;
 import koamtac.kdc.sdk.KDCConstants;
 
 class KoamtacDataTranslator {
-    private final static Map<KDCConstants.Symbology, BarcodeType> sdk2Api = new HashMap<>();
+    final static Map<KDCConstants.Symbology, BarcodeType> sdk2Api = new HashMap<KDCConstants.Symbology, BarcodeType>();
 
     static {
         sdk2Api.put(KDCConstants.Symbology.CODE128, BarcodeType.CODE128);

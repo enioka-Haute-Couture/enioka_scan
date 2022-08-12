@@ -21,6 +21,10 @@ class BtZebraDataTranslator {
         barcodeTypesMapping.put(4, BarcodeType.DIS25);
         barcodeTypesMapping.put(6, BarcodeType.INT25);
         barcodeTypesMapping.put(11, BarcodeType.EAN13);
+        //TODO add good Integer
+//        barcodeTypesMapping.put(0, BarcodeType.QRCODE);
+//        barcodeTypesMapping.put(0, BarcodeType.AZTEC);
+
     }
 
     static BarcodeType sdk2Api(int symbology) {
@@ -45,6 +49,8 @@ class BtZebraDataTranslator {
         authorizedSymbologies.add(RMDAttributes.RMD_ATTR_SYM_DISCRETE_2_OF_5);
         authorizedSymbologies.add(RMDAttributes.RMD_ATTR_SYM_INTERLEAVED_2_OF_5);
         authorizedSymbologies.add(RMDAttributes.RMD_ATTR_SYM_EAN_13_JAN_13);
+        authorizedSymbologies.add(RMDAttributes.RMD_ATTR_SYM_QR_CODE);
+        authorizedSymbologies.add(RMDAttributes.RMD_ATTR_SYM_AZTEC);
     }
 
     static final ArrayList<Integer> unauthorizedSymbologies;

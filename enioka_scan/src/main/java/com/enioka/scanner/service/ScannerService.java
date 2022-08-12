@@ -250,7 +250,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
                 new ScannerInitCallbackProxy(this),
                 new ScannerDataCallbackProxy(this),
                 new ScannerStatusCallbackProxy(this),
-                Scanner.Mode.BATCH);
+                Scanner.Mode.BATCH, symbologySelection);
     }
 
     @Override

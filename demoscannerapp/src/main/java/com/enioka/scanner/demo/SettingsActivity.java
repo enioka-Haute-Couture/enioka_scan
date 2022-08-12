@@ -8,6 +8,7 @@ import android.widget.CheckBox;
 import android.widget.Switch;
 
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.sdk.athesi.RD50TE.AthesiE5LProvider;
 import com.enioka.scanner.sdk.athesi.SPA43LTE.AthesiHHTProvider;
 import com.enioka.scanner.sdk.bluebird.BluebirdProvider;
@@ -60,6 +61,18 @@ public class SettingsActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.checkExcludedZebraOssAttScannerProvider)).setChecked(excludedProviderKeys.contains(ZebraOssAttScannerProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkExcludedHoneywellOssSppScannerProvider)).setChecked(excludedProviderKeys.contains(HoneywellOssSppScannerProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkExcludedHoneywellOssIntegratedScannerProvider)).setChecked(excludedProviderKeys.contains(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY));
+
+        final Set<BarcodeType> symbologySelection = new HashSet<>();
+        for(String symbology: preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, Collections.emptySet())) {
+           symbologySelection.add(BarcodeType.valueOf(symbology));
+        }
+        ((CheckBox) findViewById(R.id.checkSelectCode128)).setChecked(symbologySelection.contains(BarcodeType.CODE128));
+        ((CheckBox) findViewById(R.id.checkSelectCode39)).setChecked(symbologySelection.contains(BarcodeType.CODE39));
+        ((CheckBox) findViewById(R.id.checkSelectDis25)).setChecked(symbologySelection.contains(BarcodeType.DIS25));
+        ((CheckBox) findViewById(R.id.checkSelectInt25)).setChecked(symbologySelection.contains(BarcodeType.INT25));
+        ((CheckBox) findViewById(R.id.checkSelectEan13)).setChecked(symbologySelection.contains(BarcodeType.EAN13));
+        ((CheckBox) findViewById(R.id.checkSelectQrCode)).setChecked(symbologySelection.contains(BarcodeType.QRCODE));
+        ((CheckBox) findViewById(R.id.checkSelectAztec)).setChecked(symbologySelection.contains(BarcodeType.AZTEC));
     }
 
     public void onClickSave(View v) {
@@ -95,6 +108,16 @@ public class SettingsActivity extends AppCompatActivity {
         if (((CheckBox) findViewById(R.id.checkExcludedHoneywellOssSppScannerProvider)).isChecked()) { excludedProviderKeys.add(HoneywellOssSppScannerProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkExcludedHoneywellOssIntegratedScannerProvider)).isChecked()) { excludedProviderKeys.add(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY); }
         editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, excludedProviderKeys);
+
+        final Set<String> symbologySelection = new HashSet<>();
+        if (((CheckBox) findViewById(R.id.checkSelectCode128)).isChecked()) { symbologySelection.add(BarcodeType.CODE128.name()); }
+        if (((CheckBox) findViewById(R.id.checkSelectCode39)).isChecked()) { symbologySelection.add(BarcodeType.CODE39.name()); }
+        if (((CheckBox) findViewById(R.id.checkSelectDis25)).isChecked()) { symbologySelection.add(BarcodeType.DIS25.name()); }
+        if (((CheckBox) findViewById(R.id.checkSelectInt25)).isChecked()) { symbologySelection.add(BarcodeType.INT25.name()); }
+        if (((CheckBox) findViewById(R.id.checkSelectEan13)).isChecked()) { symbologySelection.add(BarcodeType.EAN13.name()); }
+        if (((CheckBox) findViewById(R.id.checkSelectQrCode)).isChecked()) { symbologySelection.add(BarcodeType.QRCODE.name()); }
+        if (((CheckBox) findViewById(R.id.checkSelectAztec)).isChecked()) { symbologySelection.add(BarcodeType.AZTEC.name()); }
+        editor.putStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, symbologySelection);
 
         editor.apply();
         finish();

@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.callbacks.ProviderDiscoveredCallback;
 import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.api.callbacks.ScannerDataCallback;
@@ -75,7 +74,15 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     /**
      * Option to set wanted symbology. By default EAN13 and CODE128 is set
      */
-    public Set<BarcodeType> symbologySelection = new HashSet<>(Arrays.asList(BarcodeType.EAN13, BarcodeType.CODE128));
+    public static Set<BarcodeType> symbologySelection = defaultSymbology();
+
+    public static Set<BarcodeType> defaultSymbology() {
+        return new HashSet<>(Arrays.asList(BarcodeType.EAN13, BarcodeType.CODE128));
+    }
+
+    public static Set<String> defaultSymbologyByName() {
+        return new HashSet<>(Arrays.asList(BarcodeType.EAN13.name(), BarcodeType.CODE128.name()));
+    }
 
     private interface EndOfInitCallback {
         void run();

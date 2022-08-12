@@ -29,7 +29,6 @@ import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
-import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.camera.CameraReader;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
@@ -184,7 +183,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         // Bind to ScannerService service
         Intent intent = new Intent(this, ScannerService.class);
-        ScannerSearchOptions.defaultOptions().fromIntentExtras(getIntent()).toIntentExtras(intent);
+        intent.putExtras(getIntent().getExtras());
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 

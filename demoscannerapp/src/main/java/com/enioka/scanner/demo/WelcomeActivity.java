@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 
 public class WelcomeActivity extends AppCompatActivity {

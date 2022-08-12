@@ -18,6 +18,7 @@ import com.enioka.scanner.sdk.honeywelloss.spp.HoneywellOssSppScannerProvider;
 import com.enioka.scanner.sdk.proglove.ProgloveProvider;
 import com.enioka.scanner.sdk.zebraoss.ZebraOssAttScannerProvider;
 import com.enioka.scanner.sdk.zebraoss.ZebraOssSppScannerProvider;
+import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 
 import java.util.Collections;
@@ -63,7 +64,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.checkExcludedHoneywellOssIntegratedScannerProvider)).setChecked(excludedProviderKeys.contains(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY));
 
         final Set<BarcodeType> symbologySelection = new HashSet<>();
-        for(String symbology: preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, Collections.emptySet())) {
+        for(String symbology: preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName())) {
            symbologySelection.add(BarcodeType.valueOf(symbology));
         }
         ((CheckBox) findViewById(R.id.checkSelectCode128)).setChecked(symbologySelection.contains(BarcodeType.CODE128));

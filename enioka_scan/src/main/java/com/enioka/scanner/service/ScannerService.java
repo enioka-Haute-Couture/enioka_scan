@@ -74,14 +74,18 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     /**
      * Option to set wanted symbology. By default EAN13 and CODE128 is set
      */
-    public static Set<BarcodeType> symbologySelection = defaultSymbology();
+    private Set<BarcodeType> symbologySelection = defaultSymbology();
 
     public static Set<BarcodeType> defaultSymbology() {
         return new HashSet<>(Arrays.asList(BarcodeType.EAN13, BarcodeType.CODE128));
     }
 
     public static Set<String> defaultSymbologyByName() {
-        return new HashSet<>(Arrays.asList(BarcodeType.EAN13.name(), BarcodeType.CODE128.name()));
+        HashSet<String> defaultSymbologyByName = new HashSet();
+        for (BarcodeType barcode : defaultSymbology()) {
+            defaultSymbologyByName.add(barcode.name());
+        }
+        return defaultSymbologyByName;
     }
 
     private interface EndOfInitCallback {
@@ -112,6 +116,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         if (extras != null) {
             startScannerSearchOnFirstBind = extras.getBoolean(EXTRA_START_SEARCH_ON_SERVICE_BIND, startScannerSearchOnFirstBind);
 
+            // FIXME enable all symbology if null ?
             String[] symbologySelectionArray = extras.getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION);
             if (symbologySelectionArray != null && symbologySelectionArray.length > 0) {
                 symbologySelection = new HashSet<>();

@@ -45,6 +45,7 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
         activeSymbologies.add(AthesiHHTSymbology.INT25);
         activeSymbologies.add(AthesiHHTSymbology.EAN13);
         activeSymbologies.add(AthesiHHTSymbology.QRCODE);
+        activeSymbologies.add(AthesiHHTSymbology.AZTEC);
     }
 
     private static final Uri scannerSettingsUri = Uri.parse("content://com.oem.startup.ScannerParaProvider/settings");

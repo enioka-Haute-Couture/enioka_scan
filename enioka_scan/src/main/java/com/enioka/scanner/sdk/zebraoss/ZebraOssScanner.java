@@ -243,7 +243,6 @@ class ZebraOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.Wi
 
         this.btScanner.runCommand(new InitCommand(), null);
         this.btScanner.runCommand(new SetPickListMode((byte) 2), null);
-        //this.btScanner.runCommand(new ActivateAllSymbologies(), null); // It's there if needed but not enabled by default
         this.btScanner.runCommand(new ScanEnable(), null);
 
         // We are already connected if the scanner could be created...

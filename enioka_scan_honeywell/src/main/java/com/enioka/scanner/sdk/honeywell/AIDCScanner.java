@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Scanner implementation for Honeywell/Intermec AIDC SDK.
@@ -41,12 +42,25 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
     // Source is https://www.barcodesinc.com/news/?p=12768
     private final static Map<String, BarcodeType> aidc2Api = new HashMap<>();
 
+    private final static Map<BarcodeType, String> api2aidc = new HashMap<>();
+
     static {
         aidc2Api.put("j", BarcodeType.CODE128);
         aidc2Api.put("b", BarcodeType.CODE39);
         aidc2Api.put("f", BarcodeType.DIS25);
         aidc2Api.put("e", BarcodeType.INT25);
         aidc2Api.put("d", BarcodeType.EAN13);
+        aidc2Api.put("s", BarcodeType.QRCODE);
+        aidc2Api.put("z", BarcodeType.AZTEC);
+
+        api2aidc.put(BarcodeType.CODE128, BarcodeReader.PROPERTY_CODE_128_ENABLED);
+        api2aidc.put(BarcodeType.INT25, BarcodeReader.PROPERTY_INTERLEAVED_25_ENABLED);
+        api2aidc.put(BarcodeType.DIS25, BarcodeReader.PROPERTY_STANDARD_25_ENABLED);
+        api2aidc.put(BarcodeType.CODE39, BarcodeReader.PROPERTY_CODE_39_ENABLED);
+        api2aidc.put(BarcodeType.EAN13, BarcodeReader.PROPERTY_EAN_13_ENABLED);
+//        api2aidc.put(BarcodeType.QRCODE, BarcodeReader.?);
+//        api2aidc.put(BarcodeType.AZTEC, BarcodeReader.?);
+
     }
 
     AIDCScanner(AidcManager manager) {
@@ -55,7 +69,7 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
 
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         this.dataCb = dataCallback;
         this.statusCb = statusCallback;
 
@@ -76,12 +90,9 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
 
         Map<String, Object> properties = new HashMap<String, Object>();
         // Set Symbologies On/Off
-        properties.put(BarcodeReader.PROPERTY_CODE_128_ENABLED, true);
-        properties.put(BarcodeReader.PROPERTY_GS1_128_ENABLED, true);
-        properties.put(BarcodeReader.PROPERTY_INTERLEAVED_25_ENABLED, true);
-        properties.put(BarcodeReader.PROPERTY_STANDARD_25_ENABLED, true);
-        properties.put(BarcodeReader.PROPERTY_CODE_39_ENABLED, true);
-        properties.put(BarcodeReader.PROPERTY_EAN_13_ENABLED, true);
+        for(Map.Entry<BarcodeType, String> entry: api2aidc.entrySet()) {
+            properties.put(entry.getValue(), symbologySelection.contains(entry.getKey()));
+        }
 
         // Set Max Code 39 barcode length
         properties.put(BarcodeReader.PROPERTY_CODE_39_MAXIMUM_LENGTH, 50);

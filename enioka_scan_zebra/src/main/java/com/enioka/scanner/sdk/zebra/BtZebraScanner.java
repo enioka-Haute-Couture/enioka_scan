@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Scanner provider for external BT Zebra (Symbol, Motorola...) devices.
@@ -52,7 +53,7 @@ class BtZebraScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIl
     }
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologeSelection) {
         this.dataCb = dataCallback;
         this.statusCb = statusCallback;
 

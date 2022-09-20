@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Zebra implementation for internal SYMBOL (not real Zebra) scanners.
@@ -43,10 +44,12 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
     private ScannerStatusCallback statusCb = null;
     private ScannerInitCallbackProxy initCb = null;
     private Scanner.Mode mode;
+    private Set<BarcodeType> symbologies;
 
     private Context ctx;
 
     private final static Map<ScanDataCollection.LabelType, BarcodeType> symbol2Api = new HashMap<>();
+
 
     static {
         symbol2Api.put(ScanDataCollection.LabelType.CODE128, BarcodeType.CODE128);
@@ -54,6 +57,8 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
         symbol2Api.put(ScanDataCollection.LabelType.D2OF5, BarcodeType.DIS25);
         symbol2Api.put(ScanDataCollection.LabelType.I2OF5, BarcodeType.INT25);
         symbol2Api.put(ScanDataCollection.LabelType.EAN13, BarcodeType.EAN13);
+        symbol2Api.put(ScanDataCollection.LabelType.QRCODE, BarcodeType.QRCODE);
+        symbol2Api.put(ScanDataCollection.LabelType.AZTEC, BarcodeType.AZTEC);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,50 +162,31 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
 
             // Parameters - symbologies
             ScannerConfig cfg = scanner.getConfig();
-            cfg.decoderParams.canadianPostal.enabled = false;
-            cfg.decoderParams.australianPostal.enabled = false;
-            cfg.decoderParams.aztec.enabled = false;
-            cfg.decoderParams.chinese2of5.enabled = false;
-            cfg.decoderParams.codaBar.enabled = false;
-            cfg.decoderParams.code11.enabled = true;
-            cfg.decoderParams.code39.enabled = true;
-            cfg.decoderParams.code93.enabled = false;
-            cfg.decoderParams.code128.enabled = true;
-            cfg.decoderParams.compositeAB.enabled = false;
-            cfg.decoderParams.compositeC.enabled = false;
-            cfg.decoderParams.d2of5.enabled = false;
-            cfg.decoderParams.dataMatrix.enabled = false;
-            cfg.decoderParams.dutchPostal.enabled = false;
-            cfg.decoderParams.ean8.enabled = false;
-            cfg.decoderParams.ean13.enabled = false;
-            cfg.decoderParams.gs1Databar.enabled = true;
-            cfg.decoderParams.gs1DatabarExp.enabled = false;
-            cfg.decoderParams.gs1DatabarLim.enabled = false;
-            cfg.decoderParams.hanXin.enabled = false;
-            cfg.decoderParams.i2of5.enabled = true;
-            cfg.decoderParams.japanesePostal.enabled = false;
-            cfg.decoderParams.korean3of5.enabled = false;
-            cfg.decoderParams.mailMark.enabled = false;
-            cfg.decoderParams.matrix2of5.enabled = false;
-            cfg.decoderParams.maxiCode.enabled = false;
-            cfg.decoderParams.microPDF.enabled = false;
-            cfg.decoderParams.microQR.enabled = false;
-            cfg.decoderParams.msi.enabled = false;
-            cfg.decoderParams.pdf417.enabled = false;
-            cfg.decoderParams.qrCode.enabled = false;
-            cfg.decoderParams.signature.enabled = false;
-            cfg.decoderParams.tlc39.enabled = false;
-            cfg.decoderParams.triOptic39.enabled = false;
-            cfg.decoderParams.ukPostal.enabled = false;
-            cfg.decoderParams.upca.enabled = false;
-            cfg.decoderParams.upce0.enabled = false;
-            cfg.decoderParams.upce1.enabled = false;
-            cfg.decoderParams.us4State.enabled = false;
-            cfg.decoderParams.us4StateFics.enabled = false;
-            cfg.decoderParams.usPlanet.enabled = false;
-            cfg.decoderParams.usPostNet.enabled = false;
-            cfg.decoderParams.webCode.enabled = false;
-
+            for(BarcodeType symbology: symbologies) {
+                switch (symbology) {
+                    case DIS25:
+                        cfg.decoderParams.d2of5.enabled = true;
+                        break;
+                    case CODE128:
+                        cfg.decoderParams.code128.enabled = true;
+                        break;
+                    case CODE39:
+                        cfg.decoderParams.code39.enabled = true;
+                        break;
+                    case QRCODE:
+                        cfg.decoderParams.qrCode.enabled = true;
+                        break;
+                    case INT25:
+                        cfg.decoderParams.i2of5.enabled = true;
+                        break;
+                    case EAN13:
+                        cfg.decoderParams.ean13.enabled = true;
+                        break;
+                    case AZTEC:
+                        cfg.decoderParams.aztec.enabled = true;
+                        break;
+                }
+            }
             scanner.setConfig(cfg);
 
             // First read - ready to scan after these calls.
@@ -397,11 +383,12 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         this.initCb = initCallback;
         this.dataCb = dataCallback;
         this.statusCb = statusCallback;
         this.mode = mode;
+        this.symbologies = symbologySelection;
         initEMDK(ctx);
     }
 

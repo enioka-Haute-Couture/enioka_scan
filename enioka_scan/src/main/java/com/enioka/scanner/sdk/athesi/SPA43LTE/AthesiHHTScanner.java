@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.callbacks.ScannerCommandCallback;
 import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
@@ -38,15 +37,6 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
 
     // Initial symbology parameters.
     private static final List<AthesiHHTSymbology> activeSymbologies = new ArrayList<>();
-
-    static {
-        activeSymbologies.add(AthesiHHTSymbology.CODE39);
-        activeSymbologies.add(AthesiHHTSymbology.CODE128);
-        activeSymbologies.add(AthesiHHTSymbology.INT25);
-        activeSymbologies.add(AthesiHHTSymbology.EAN13);
-        activeSymbologies.add(AthesiHHTSymbology.QRCODE);
-        activeSymbologies.add(AthesiHHTSymbology.AZTEC);
-    }
 
     private static final Uri scannerSettingsUri = Uri.parse("content://com.oem.startup.ScannerParaProvider/settings");
 
@@ -93,6 +83,10 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
         }
 
         // Set symbologies
+        for(BarcodeType symbology:this.symbologies) {
+            activeSymbologies.add(AthesiHHTSymbology.getSymbology(symbology));
+        }
+
         syncConfig(ctx);
     }
 

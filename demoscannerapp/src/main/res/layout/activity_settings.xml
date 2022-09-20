@@ -317,6 +317,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProgloveProvider" />
 
+            <!-- Zebra OSS SPP -->
             <CheckBox
                 android:id="@+id/checkAllowedGsSppScannerProvider"
                 android:layout_width="fill_parent"
@@ -325,11 +326,11 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintRight_toLeftOf="@+id/textViewAllowedGsSppScannerProvider"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProgloveProvider" />
 
-            <!-- Zebra OSS SPP -->
             <TextView
                 android:id="@+id/textViewAllowedZebraOssSppScannerProvider"
                 android:layout_width="fill_parent"
@@ -556,6 +557,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedProgloveProvider" />
 
+            <!-- Zebra OSS SPP -->
             <CheckBox
                 android:id="@+id/checkExcludedGsSppScannerProvider"
                 android:layout_width="fill_parent"
@@ -564,11 +566,11 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintRight_toLeftOf="@+id/textViewExcludedGsSppScannerProvider"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedProgloveProvider" />
 
-            <!-- Zebra OSS SPP -->
             <TextView
                 android:id="@+id/textViewExcludedZebraOssSppScannerProvider"
                 android:layout_width="fill_parent"
@@ -668,6 +670,195 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssSppScannerProvider" />
 
+
+            <!-- Symbology selection-->
+            <TextView
+                android:id="@+id/textSymbologySelection"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/symbology_selection"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssIntegratedScannerProvider" />
+
+            <!-- CODE 128 -->
+            <TextView
+                android:id="@+id/textViewSelectCode128"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/barcodeCode128"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textSymbologySelection" />
+
+            <CheckBox
+                android:id="@+id/checkSelectCode128"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewSelectCode128"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textSymbologySelection" />
+
+            <!-- CODE 39 -->
+            <TextView
+                android:id="@+id/textViewSelectCode39"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/barcodeCode39"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectCode128" />
+
+            <CheckBox
+                android:id="@+id/checkSelectCode39"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewSelectCode39"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectCode128" />
+
+            <!-- CODE DIS25 -->
+            <TextView
+                android:id="@+id/textViewSelectDis25"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/barcodeDis25"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectCode39" />
+
+            <CheckBox
+                android:id="@+id/checkSelectDis25"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewSelectDis25"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectCode39" />
+
+            <!-- CODE INT 25 -->
+            <TextView
+                android:id="@+id/textViewSelectInt25"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/barcodeInt25"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectDis25" />
+
+            <CheckBox
+                android:id="@+id/checkSelectInt25"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewSelectInt25"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectDis25" />
+
+            <!-- CODE EAN13 -->
+            <TextView
+                android:id="@+id/textViewSelectEan13"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/barcodeEan13"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectInt25" />
+
+            <CheckBox
+                android:id="@+id/checkSelectEan13"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewSelectEan13"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectInt25" />
+
+            <!-- CODE QrCode -->
+            <TextView
+                android:id="@+id/textViewSelectQrCode"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/barcodeQrCode"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectEan13" />
+
+            <CheckBox
+                android:id="@+id/checkSelectQrCode"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewSelectQrCode"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectEan13" />
+
+            <!-- CODE AZTEC -->
+            <TextView
+                android:id="@+id/textViewSelectAztec"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/barcodeAztec"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectQrCode" />
+
+            <CheckBox
+                android:id="@+id/checkSelectAztec"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewSelectAztec"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectQrCode" />
+
             <!-- SAVE -->
 
             <Button
@@ -680,7 +871,7 @@
                 android:text="@string/save"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssIntegratedScannerProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewSelectAztec" />
 
         </android.support.constraint.ConstraintLayout>
     </ScrollView>

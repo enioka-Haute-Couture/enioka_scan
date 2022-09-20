@@ -14,6 +14,7 @@ import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.sdk.honeywelloss.spp.commands.ActivateTrigger;
 import com.enioka.scanner.sdk.honeywelloss.spp.commands.Beep;
 import com.enioka.scanner.sdk.honeywelloss.spp.commands.DeactivateTrigger;
@@ -26,6 +27,7 @@ import com.enioka.scanner.sdk.honeywelloss.spp.commands.EnableIllumination;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 class HoneywellOssSppScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.WithBeepSupport, Scanner.WithLedSupport {
     private ScannerDataCallbackProxy dataCallback = null;
@@ -159,7 +161,7 @@ class HoneywellOssSppScanner implements Scanner, Scanner.WithTriggerSupport, Sca
     }
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         this.dataCallback = dataCallback;
 
         this.btScanner.registerStatusCallback(statusCallback);

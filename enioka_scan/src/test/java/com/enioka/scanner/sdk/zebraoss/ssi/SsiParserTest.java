@@ -23,6 +23,7 @@ public class SsiParserTest {
 
         final byte[] packet1of3 = new byte[257];
         System.arraycopy(new byte[]{(byte)0xFF, 0x73, 0x02, 0x00, 0x00, (byte)0xF3, 0x00, 0x00, 0x01, (byte)0xF7, 0x1C, 0x01, 0x01, (byte)0xF4}, 0, packet1of3, 0, 14);
+        //                                                                                                        ^^^^ QR Code Symbology ID
         for (int i = 14; i < 255; i++)
             packet1of3[i] = 0x5A;
         packet1of3[255] = (byte)0xA6;
@@ -51,7 +52,7 @@ public class SsiParserTest {
         res = parser.parse(packet3of3, 0, packet3of3.length);
         Assert.assertFalse("Not expecting more data after third packet", res.expectingMoreData);
         Assert.assertTrue("Expecting result data to be a barcode", res.data instanceof Barcode);
-        Assert.assertEquals(BarcodeType.UNKNOWN, ((Barcode) res.data).getBarcodeType());
+        Assert.assertEquals(BarcodeType.QRCODE, ((Barcode) res.data).getBarcodeType());
         Assert.assertEquals(barcodeData.toString(), ((Barcode) res.data).getBarcode());
     }
 

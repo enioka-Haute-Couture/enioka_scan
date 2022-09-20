@@ -12,6 +12,7 @@ import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.sdk.generalscan.commands.Bell;
 import com.enioka.scanner.sdk.generalscan.commands.CloseRead;
 import com.enioka.scanner.sdk.generalscan.commands.EnableBarcodeSuffix;
@@ -20,6 +21,7 @@ import com.enioka.scanner.sdk.generalscan.commands.SetBeepLevel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 class GsSppScanner implements Scanner, Scanner.WithBeepSupport {
     private ScannerDataCallbackProxy dataCallback = null;
@@ -40,7 +42,7 @@ class GsSppScanner implements Scanner, Scanner.WithBeepSupport {
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         this.dataCallback = dataCallback;
         this.btScanner.registerStatusCallback(statusCallback);
 

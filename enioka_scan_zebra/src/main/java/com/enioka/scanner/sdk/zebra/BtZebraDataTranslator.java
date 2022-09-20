@@ -15,12 +15,16 @@ class BtZebraDataTranslator {
     private static final Map<Integer, BarcodeType> barcodeTypesMapping;
 
     static {
+        // Codes are the SSI ID, found in the SSI Manual in the "DECODE_DATA" packet section
         barcodeTypesMapping = new HashMap<>();
         barcodeTypesMapping.put(1, BarcodeType.CODE39);
         barcodeTypesMapping.put(3, BarcodeType.CODE128);
         barcodeTypesMapping.put(4, BarcodeType.DIS25);
         barcodeTypesMapping.put(6, BarcodeType.INT25);
         barcodeTypesMapping.put(11, BarcodeType.EAN13);
+        barcodeTypesMapping.put(28, BarcodeType.QRCODE);
+        barcodeTypesMapping.put(45, BarcodeType.AZTEC);
+
     }
 
     static BarcodeType sdk2Api(int symbology) {
@@ -45,6 +49,8 @@ class BtZebraDataTranslator {
         authorizedSymbologies.add(RMDAttributes.RMD_ATTR_SYM_DISCRETE_2_OF_5);
         authorizedSymbologies.add(RMDAttributes.RMD_ATTR_SYM_INTERLEAVED_2_OF_5);
         authorizedSymbologies.add(RMDAttributes.RMD_ATTR_SYM_EAN_13_JAN_13);
+        authorizedSymbologies.add(RMDAttributes.RMD_ATTR_SYM_QR_CODE);
+        authorizedSymbologies.add(RMDAttributes.RMD_ATTR_SYM_AZTEC);
     }
 
     static final ArrayList<Integer> unauthorizedSymbologies;

@@ -13,9 +13,12 @@ import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import koamtac.kdc.sdk.KDCBarcodeDataReceivedListener;
 import koamtac.kdc.sdk.KDCConnectionListener;
@@ -35,17 +38,19 @@ class KoamtacScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithLe
     private ScannerStatusCallbackProxy statusCallback;
     private ScannerInitCallbackProxy initCallback;
     private Context ctx;
+    private Set<BarcodeType> symbologies;
 
     KoamtacScanner(BluetoothDevice device) {
         this.btDevice = device;
     }
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         this.ctx = applicationContext;
         this.dataCallback = dataCallback;
         this.statusCallback = statusCallback;
         this.initCallback = initCallback;
+        this.symbologies = symbologySelection;
 
         Log.i(LOG_TAG, "Start of initialization of Koamtac scanner " + btDevice.getName() + ". SDK version " + KDCReader.GetKDCReaderVersion());
 
@@ -142,9 +147,9 @@ class KoamtacScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithLe
     private void configureScanner() {
         this.scanner.DisableAllSymbologies();
         KDCSymbology s = this.scanner.GetSymbology();
-        s.Enable(KDCConstants.Symbology.CODE128, true);
-        s.Enable(KDCConstants.Symbology.I2OF5, true);
-        s.Enable(KDCConstants.Symbology.CODE35, true);
+        for(Map.Entry<KDCConstants.Symbology, BarcodeType> entry: KoamtacDataTranslator.sdk2Api.entrySet()) {
+            s.Enable(entry.getKey(), symbologies.contains(entry.getValue()));
+        }
         this.scanner.SetSymbology(s, scanner.GetKDCDeviceInfo());
     }
 

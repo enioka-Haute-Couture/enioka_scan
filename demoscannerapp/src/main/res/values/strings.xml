@@ -15,6 +15,7 @@
     <string name="allow_pairing_flow">Allow Pairing Flow:</string>
     <string name="allowed_providers">Allowed Providers (empty = all):</string>
     <string name="excluded_providers">Excluded Providers (empty = none):</string>
+    <string name="symbology_selection">Allowed Symbology (empty = EAN,128):</string>
     <string name="save">Save</string>
 
     <string name="hhtprovider">AthesiHHTProvider</string>
@@ -26,4 +27,13 @@
     <string name="zebraossattscannerprovider">ZebraOssAttScannerProvider</string>
     <string name="honeywellosssppscannerprovider">HoneywellOssSppScannerProvider</string>
     <string name="honeywellossintegratedscannerprovider">HoneywellOssIntegratedScannerProvider</string>
+
+    <string name="barcodeCode128">Code-128</string>
+    <string name="barcodeCode39">Code-39</string>
+    <string name="barcodeDis25">Discrete 2 of 5</string>
+    <string name="barcodeInt25">interleaved 2 of 5</string>
+    <string name="barcodeEan13">EAN13</string>
+    <string name="barcodeQrCode">QRCode</string>
+    <string name="barcodeAztec">Aztec</string>
+
 </resources>

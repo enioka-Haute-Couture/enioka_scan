@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.Scanner;
-import com.enioka.scanner.api.callbacks.ProviderDiscoveredCallback;
 import com.enioka.scanner.api.callbacks.ScannerConnectionHandler;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.api.callbacks.ScannerDataCallback;
@@ -21,8 +20,10 @@ import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,6 +71,23 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
      */
     private ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions();
 
+    /**
+     * Option to set wanted symbology. By default EAN13 and CODE128 is set
+     */
+    private Set<BarcodeType> symbologySelection = defaultSymbology();
+
+    public static Set<BarcodeType> defaultSymbology() {
+        return new HashSet<>(Arrays.asList(BarcodeType.EAN13, BarcodeType.CODE128));
+    }
+
+    public static Set<String> defaultSymbologyByName() {
+        HashSet<String> defaultSymbologyByName = new HashSet();
+        for (BarcodeType barcode : defaultSymbology()) {
+            defaultSymbologyByName.add(barcode.name());
+        }
+        return defaultSymbologyByName;
+    }
+
     private interface EndOfInitCallback {
         void run();
     }
@@ -97,6 +115,15 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         final Bundle extras = intent.getExtras();
         if (extras != null) {
             startScannerSearchOnFirstBind = extras.getBoolean(EXTRA_START_SEARCH_ON_SERVICE_BIND, startScannerSearchOnFirstBind);
+
+            // FIXME enable all symbology if null ?
+            String[] symbologySelectionArray = extras.getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION);
+            if (symbologySelectionArray != null && symbologySelectionArray.length > 0) {
+                symbologySelection = new HashSet<>();
+                for (String symbology : symbologySelectionArray) {
+                    symbologySelection.add(BarcodeType.valueOf(symbology));
+                }
+            }
         }
 
         this.initProviderDiscovery();
@@ -235,7 +262,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
                 new ScannerInitCallbackProxy(this),
                 new ScannerDataCallbackProxy(this),
                 new ScannerStatusCallbackProxy(this),
-                Scanner.Mode.BATCH);
+                Scanner.Mode.BATCH, symbologySelection);
     }
 
     @Override

@@ -15,15 +15,15 @@ class BtZebraDataTranslator {
     private static final Map<Integer, BarcodeType> barcodeTypesMapping;
 
     static {
+        // Codes are the SSI ID, found in the SSI Manual in the "DECODE_DATA" packet section
         barcodeTypesMapping = new HashMap<>();
         barcodeTypesMapping.put(1, BarcodeType.CODE39);
         barcodeTypesMapping.put(3, BarcodeType.CODE128);
         barcodeTypesMapping.put(4, BarcodeType.DIS25);
         barcodeTypesMapping.put(6, BarcodeType.INT25);
         barcodeTypesMapping.put(11, BarcodeType.EAN13);
-        //TODO add good Integer
-//        barcodeTypesMapping.put(0, BarcodeType.QRCODE);
-//        barcodeTypesMapping.put(0, BarcodeType.AZTEC);
+        barcodeTypesMapping.put(28, BarcodeType.QRCODE);
+        barcodeTypesMapping.put(45, BarcodeType.AZTEC);
 
     }
 

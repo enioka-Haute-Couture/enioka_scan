@@ -136,7 +136,7 @@ public final class SymbologyId {
             return BarcodeType.EAN13;
         if (symbologyString.equals("QRCODE"))
             return BarcodeType.QRCODE;
-        if (symbologyString.equals("AZTEC"))
+        if (symbologyString.equals("AZTEC_CODE"))
             return BarcodeType.AZTEC;
         return BarcodeType.UNKNOWN;
     }

@@ -5,9 +5,15 @@ package com.enioka.scanner.data;
  */
 public class Barcode {
     private String barcode;
+    /**
+     * rawBarcode without trim, useful for 2D barcode who can have a structure based on some white space.
+     */
+    private String rawBarcode;
     private BarcodeType barcodeType = BarcodeType.UNKNOWN;
 
     public Barcode(String barcode, BarcodeType barcodeType) {
+        this.rawBarcode = barcode;
+
         this.barcode = barcode.trim();
         this.barcodeType = barcodeType;
     }
@@ -19,6 +25,8 @@ public class Barcode {
     public BarcodeType getBarcodeType() {
         return barcodeType;
     }
+
+    public String getRawBarcode() {return rawBarcode;}
 
     @Override
     public String toString() {

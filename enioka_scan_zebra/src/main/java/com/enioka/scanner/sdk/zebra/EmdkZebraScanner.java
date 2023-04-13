@@ -389,7 +389,7 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
         this.statusCb = statusCallback;
         this.mode = mode;
         this.symbologies = symbologySelection;
-        initEMDK(ctx);
+        initEMDK(applicationContext);
     }
 
     @Override

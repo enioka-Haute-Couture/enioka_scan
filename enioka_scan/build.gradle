@@ -100,12 +100,12 @@ dependencies {
 
     // ZBAR & ZXING (Zebra Crossing) = camera. From Maven Central.
     api 'me.dm7.barcodescanner:zbar:1.9.13'
-    api 'com.google.zxing:core:3.4.0'
+    api 'com.google.zxing:core:3.5.1'
 
     // Test things (useless for now)
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     androidTestImplementation project(path: ':enioka_scan_mock')
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 }

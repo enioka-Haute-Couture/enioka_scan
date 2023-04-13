@@ -2,9 +2,6 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 28
-    lintOptions {
-        disable 'ExpiredTargetSdkVersion'
-    }
     defaultConfig {
         minSdkVersion 19
         //noinspection ExpiredTargetSdkVersion
@@ -17,6 +14,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    lint {
+        disable 'ExpiredTargetSdkVersion'
+    }
+    namespace 'com.enioka.scanner.sdk.m3'
 }
 
 allprojects {

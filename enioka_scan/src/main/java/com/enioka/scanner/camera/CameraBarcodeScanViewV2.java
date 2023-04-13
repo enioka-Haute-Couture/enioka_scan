@@ -36,8 +36,6 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-import com.enioka.scanner.data.BarcodeType;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +46,7 @@ import me.dm7.barcodescanner.core.DisplayUtils;
  * Experimental. Should NOT be used.
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, ScannerCallback {
+public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements SurfaceHolder.Callback {
     private static final String TAG = "BARCODE";
 
     protected static final int RECT_HEIGHT = 10;
@@ -68,10 +66,9 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
     private Integer controlModeScene = null;
     private Integer controlModeAf = null;
 
-    private Resolution resolution;
     private Range<Integer> previewFpsRange;
 
-    private FrameAnalyserManager scanner;
+    private CameraReader readerMode = CameraReader.ZBAR;
 
     /**
      * A {@link Handler} for running technical tasks in the background.
@@ -80,13 +77,16 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
     private HandlerThread backgroundThread;
 
 
-    public ZCamera2(@NonNull Context context) {
+    public CameraBarcodeScanViewV2(@NonNull Context context) {
         super(context);
         init();
     }
 
-    public ZCamera2(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public CameraBarcodeScanViewV2(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        if (attrs.getAttributeValue(null, "readerMode") != null) {
+            readerMode = CameraReader.valueOf(attrs.getAttributeValue(null, "readerMode"));
+        }
         init();
     }
 
@@ -99,13 +99,25 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
         resolution.useAdaptiveResolution = false; // TODO.
 
         // The real scanner
-        scanner = new FrameAnalyserManager(this, resolution, CameraReader.ZBAR);
+        reinitialiseFrameAnalyser();
 
         // A thread for dealing with camera technical operations.
         startBackgroundThread();
 
         // This will add the preview view. Its completion callback calls selectCameraParameters, then openCamera (and initOverlay), which has a completion callback which starts the preview.
         initLayout();
+    }
+
+    private void reinitialiseFrameAnalyser() {
+        if (this.frameAnalyser != null) {
+            this.frameAnalyser.close();
+        }
+
+        this.frameAnalyser = new FrameAnalyserManager(this, resolution, readerMode);
+
+        /*for (BarcodeType symbology : this.symbologies) {
+            this.scanner.addSymbology(symbology);
+        }*/
     }
 
     private void initLayout() {
@@ -321,11 +333,33 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
             imageReader.close();
             imageReader = null;
         }
-        if (null != scanner) {
-            scanner.close();
-            scanner = null;
+        if (null != frameAnalyser) {
+            frameAnalyser.close();
+            frameAnalyser = null;
         }
         stopBackgroundThread();
+    }
+
+    public void cleanUp() {
+// TODO
+    }
+
+    public void pauseCamera() {
+        // TODO
+    }
+
+    public void resumeCamera() {
+        // TODO
+    }
+
+    public boolean getSupportTorch() {
+        // TODO
+        return true;
+    }
+
+    public boolean getTorchOn() {
+        // TODO
+        return false;
     }
 
 
@@ -398,20 +432,20 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
             // Start preview when camera is actually opened
-            ZCamera2.this.cameraDevice = cameraDevice;
+            CameraBarcodeScanViewV2.this.cameraDevice = cameraDevice;
             startPreview();
         }
 
         @Override
         public void onDisconnected(@NonNull CameraDevice cameraDevice) {
             cameraDevice.close();
-            ZCamera2.this.cameraDevice = null;
+            CameraBarcodeScanViewV2.this.cameraDevice = null;
         }
 
         @Override
         public void onError(@NonNull CameraDevice cameraDevice, int i) {
             cameraDevice.close();
-            ZCamera2.this.cameraDevice = null;
+            CameraBarcodeScanViewV2.this.cameraDevice = null;
             Toast toast = Toast.makeText(getContext(), "camera error " + i, Toast.LENGTH_LONG);
             toast.show();
         }
@@ -428,50 +462,49 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
             captureRequestBuilder.addTarget(surface);
             captureRequestBuilder.addTarget(imageReader.getSurface());
 
-            this.cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader.getSurface()),
-                    new CameraCaptureSession.StateCallback() {
-                        @Override
-                        public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
-                            if (null == cameraDevice) {
-                                return;
-                            }
+            this.cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader.getSurface()), new CameraCaptureSession.StateCallback() {
+                @Override
+                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    if (null == cameraDevice) {
+                        return;
+                    }
 
-                            // If here, preview session is open and we can start the actual preview.
-                            captureSession = cameraCaptureSession;
+                    // If here, preview session is open and we can start the actual preview.
+                    captureSession = cameraCaptureSession;
 
-                            if (controlModeScene != null) {
-                                captureRequestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, controlModeScene);
-                                captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
-                            } else {
-                                captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
-                            }
+                    if (controlModeScene != null) {
+                        captureRequestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, controlModeScene);
+                        captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
+                    } else {
+                        captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+                    }
 
-                            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
-                            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-                            //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CmmmmmmmmmmmaptureRequest.CONTROL_AWB_MODE_AUTO);
+                    //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
+                    //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+                    //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CmmmmmmmmmmmaptureRequest.CONTROL_AWB_MODE_AUTO);
 
-                            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
-                            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
+                    captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
+                    //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
 
 
-                            //captureRequestBuilder.set(CaptureRequest., CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+                    //captureRequestBuilder.set(CaptureRequest., CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
-                            // GO for preview
-                            captureRequest = captureRequestBuilder.build();
+                    // GO for preview
+                    captureRequest = captureRequestBuilder.build();
 
-                            try {
-                                captureSession.setRepeatingRequest(captureRequest, null, backgroundHandler);
-                            } catch (CameraAccessException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                    try {
+                        captureSession.setRepeatingRequest(captureRequest, null, backgroundHandler);
+                    } catch (CameraAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
 
-                        @Override
-                        public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
-                            Toast toast = Toast.makeText(getContext(), "camera error - could not set preview", Toast.LENGTH_LONG);
-                            toast.show();
-                        }
-                    }, null);
+                @Override
+                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    Toast toast = Toast.makeText(getContext(), "camera error - could not set preview", Toast.LENGTH_LONG);
+                    toast.show();
+                }
+            }, null);
         } catch (CameraAccessException e) {
             throw new RuntimeException(e);
         }
@@ -485,7 +518,7 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
     ImageReader.OnImageAvailableListener imageCallback = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader reader) {
-            Image image = reader.acquireNextImage();
+            Image image = reader.acquireLatestImage();
             if (image == null) {
                 return;
             }
@@ -510,7 +543,7 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
             ctx.y3 = cropRect.bottom;
             ctx.y4 = ctx.y3;
 
-            scanner.handleFrame(ctx);
+            frameAnalyser.handleFrame(ctx);
 
             image.close();
         }
@@ -522,11 +555,6 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void analyserCallback(String result, BarcodeType type, byte[] previewData) {
-
-    }
-
-    @Override
     public void giveBufferBack(FrameAnalysisContext analysisContext) {
 
     }
@@ -534,6 +562,16 @@ public class ZCamera2 extends FrameLayout implements SurfaceHolder.Callback, Sca
     @Override
     public void setPreviewResolution(Point newResolution) {
 
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Public API, various setters
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void setReaderMode(CameraReader readerMode) {
+        this.readerMode = readerMode;
+        reinitialiseFrameAnalyser();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

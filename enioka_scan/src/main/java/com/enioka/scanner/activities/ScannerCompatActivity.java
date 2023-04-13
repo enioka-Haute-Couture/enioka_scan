@@ -29,7 +29,7 @@ import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
-import com.enioka.scanner.camera.CameraReader;
+import com.enioka.scanner.camera.CameraBarcodeScanViewBase;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.helpers.Common;
@@ -329,7 +329,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void actuallyOpenCamera() {
-        CameraBarcodeScanView cameraView = findViewById(cameraViewId);
+        // TODO: should be in camera constructor, not here...
+        CameraBarcodeScanViewBase cameraView = ((CameraBarcodeScanView) findViewById(cameraViewId)).getProxiedView();
         if (cameraView == null) {
             Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();
             return;
@@ -561,8 +562,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.i(LOG_TAG, "Changing reader mode");
-            CameraBarcodeScanView cameraView = findViewById(cameraViewId);
-            cameraView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
+            CameraBarcodeScanViewBase cameraView = ((CameraBarcodeScanView) findViewById(cameraViewId)).getProxiedView();
+            //cameraView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
         });
     }
 

@@ -9,7 +9,8 @@ import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
-import com.enioka.scanner.camera.CameraBarcodeScanView;
+import com.enioka.scanner.camera.CameraBarcodeScanViewV1;
+import com.enioka.scanner.camera.CameraBarcodeScanViewBase;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
@@ -21,13 +22,13 @@ import java.util.Set;
 /**
  *
  */
-public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIlluminationSupport, CameraBarcodeScanView.ResultHandler {
+public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIlluminationSupport, CameraBarcodeScanViewBase.ResultHandler {
     private static final String LOG_TAG = "CamBarcodeScanVScanner";
 
-    private CameraBarcodeScanView scanner;
+    private CameraBarcodeScanViewBase scanner;
     private ScannerDataCallbackProxy dataDb;
 
-    public CameraBarcodeScanViewScanner(CameraBarcodeScanView cameraBarcodeScanView, ScannerDataCallbackProxy mHandler) {
+    public CameraBarcodeScanViewScanner(CameraBarcodeScanViewBase cameraBarcodeScanView, ScannerDataCallbackProxy mHandler) {
         this.dataDb = mHandler;
 
         this.scanner = cameraBarcodeScanView;
@@ -55,7 +56,7 @@ public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSu
     @Override
     public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         // Do nothing. The camera view implementation is special, as it is built directly and not through the LaserScanner.
-        for(BarcodeType symbology: symbologySelection) {
+        for (BarcodeType symbology : symbologySelection) {
             scanner.addSymbology(symbology);
         }
         initCallback.onConnectionSuccessful(this);
@@ -131,7 +132,7 @@ public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSu
 
     @Override
     public WithIlluminationSupport getIlluminationSupport() {
-        if(scanner.getSupportTorch())
+        if (scanner.getSupportTorch())
             return this;
         return null;
     }

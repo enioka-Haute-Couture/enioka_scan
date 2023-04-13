@@ -4,10 +4,10 @@ import android.content.Context;
 import android.util.AttributeSet;
 
 /**
- * Please use {@link CameraBarcodeScanView} instead which is identical. Only here for compatibility.
+ * Please use {@link CameraBarcodeScanViewV1} instead which is identical. Only here for compatibility.
  */
 @Deprecated
-public class ZBarScanView extends CameraBarcodeScanView {
+public class ZBarScanView extends CameraBarcodeScanViewV1 {
     public ZBarScanView(Context context) {
         super(context);
     }

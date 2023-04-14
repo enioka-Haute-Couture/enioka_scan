@@ -31,6 +31,7 @@ import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.camera.CameraBarcodeScanViewBase;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
+import com.enioka.scanner.camera.CameraReader;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.helpers.Common;
 import com.enioka.scanner.sdk.camera.CameraBarcodeScanViewScanner;
@@ -563,7 +564,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.i(LOG_TAG, "Changing reader mode");
             CameraBarcodeScanViewBase cameraView = ((CameraBarcodeScanView) findViewById(cameraViewId)).getProxiedView();
-            //cameraView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
+            cameraView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
         });
     }
 

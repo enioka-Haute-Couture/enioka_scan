@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 /**
  * Convert Yuv Image format used in preview to Jpeg
  */
-public class ConvertPreviewAsync extends AsyncTask<Void, Void, Void> {
+class ConvertPreviewAsync extends AsyncTask<Void, Void, Void> {
 
     byte[] previewData;
     Point previewSize;

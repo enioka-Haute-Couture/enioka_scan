@@ -10,7 +10,6 @@
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity" />
         <activity android:name=".ScannerTesterActivity" />
-        <activity android:name=".Scan2Activity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".WelcomeActivity">
             <intent-filter>

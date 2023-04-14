@@ -3,7 +3,6 @@
 
     <string name="scanner_tester">Scanner tester</string>
     <string name="test_scan">Test scanner library</string>
-    <string name="test_camera2">Test camera2 scanner (WIP)</string>
     <string name="settings">Scanner settings</string>
 
     <string name="scanner_search_settings">Settings</string>

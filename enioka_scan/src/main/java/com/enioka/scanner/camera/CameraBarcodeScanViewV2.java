@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -46,7 +45,7 @@ import me.dm7.barcodescanner.core.DisplayUtils;
  * Experimental. Should NOT be used.
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements SurfaceHolder.Callback {
+class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements SurfaceHolder.Callback {
     private String cameraId;
 
     private CameraCaptureSession captureSession;

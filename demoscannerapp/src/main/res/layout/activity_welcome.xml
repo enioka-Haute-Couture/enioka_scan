@@ -18,18 +18,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/bt_camera2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:onClick="onClickBt3"
-        android:text="@string/test_camera2"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/bt_scanner"
-        tools:layout_editor_absoluteY="136dp" />
-
-    <Button
         android:id="@+id/bt_tester"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -38,7 +26,7 @@
         android:text="@string/scanner_tester"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/bt_camera2" />
+        app:layout_constraintTop_toBottomOf="@id/bt_scanner" />
 
     <Button
         android:id="@+id/bt_settings"

@@ -14,7 +14,7 @@ import android.view.View;
 /**
  * The "target visor" view to be drawn on top of the scanner view.
  */
-public class TargetView extends View {
+class TargetView extends View {
     protected static final String TAG = "BARCODE";
 
     protected Paint targetRectPaint, guideLinePaint;

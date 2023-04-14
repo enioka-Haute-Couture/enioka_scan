@@ -41,12 +41,6 @@ public class WelcomeActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // Scan2 activity, WIP
-    public void onClickBt3(View v) {
-        Intent intent = new Intent(this, Scan2Activity.class);
-        startActivity(intent);
-    }
-
     // Scanner Test activity
     public void onClickBt4(View v) {
         Intent intent = new Intent(this, ScannerTesterActivity.class);

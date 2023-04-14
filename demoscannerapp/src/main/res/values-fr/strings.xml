@@ -4,7 +4,6 @@
 
     <string name="scanner_tester">Testeur de scanner</string>
     <string name="test_scan">Tester la librairie de scan</string>
-    <string name="test_camera2">Tester le scan via camera2 (WIP)</string>
     <string name="settings">Paramètres du scanner</string>
 
     <string name="scanner_search_settings">Paramètres</string>

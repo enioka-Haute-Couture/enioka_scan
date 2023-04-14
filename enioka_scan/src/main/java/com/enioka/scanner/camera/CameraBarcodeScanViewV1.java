@@ -33,7 +33,7 @@ import me.dm7.barcodescanner.core.DisplayUtils;
  */
 @SuppressWarnings({"unused"})
 // Deprecation: using CameraV1. Unused: some methods only used in clients.
-public class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camera.PreviewCallback, SurfaceHolder.Callback {
+class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camera.PreviewCallback, SurfaceHolder.Callback {
     private Camera cam;
 
     private boolean hasExposureCompensation = false;

@@ -9,7 +9,6 @@ import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
-import com.enioka.scanner.camera.CameraBarcodeScanViewV1;
 import com.enioka.scanner.camera.CameraBarcodeScanViewBase;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;

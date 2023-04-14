@@ -16,26 +16,21 @@ import android.widget.FrameLayout;
 public class CameraBarcodeScanView extends FrameLayout {
     protected final static String LOG_TAG = "ScannerActivity";
 
-    private final AttributeSet attrs;
     private final CameraApiLevel api;
-    private CameraBarcodeScanViewV1 api1View;
-    private CameraBarcodeScanViewV2 api2View;
     private CameraBarcodeScanViewBase proxiedView;
 
     public CameraBarcodeScanView(@NonNull Context context) {
         super(context);
         api = guessBestApiLevel();
-        attrs = null;
 
-        setLayout();
+        setLayout(null);
     }
 
     public CameraBarcodeScanView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         api = guessBestApiLevel();
-        this.attrs = attrs;
 
-        setLayout();
+        setLayout(attrs);
     }
 
     private CameraApiLevel guessBestApiLevel() {
@@ -47,7 +42,7 @@ public class CameraBarcodeScanView extends FrameLayout {
         return res;
     }
 
-    private void setLayout() {
+    private void setLayout(AttributeSet attrs) {
         switch (api) {
             case Camera1:
                 proxiedView = new CameraBarcodeScanViewV1(getContext(), attrs);

@@ -47,15 +47,8 @@ import me.dm7.barcodescanner.core.DisplayUtils;
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements SurfaceHolder.Callback {
-    private static final String TAG = "BARCODE";
-
-    protected static final int RECT_HEIGHT = 10;
-    protected static final float MM_INSIDE_INCH = 25.4f;
-
-    protected SurfaceView surfaceView = null;
-    private Rect cropRect = new Rect();
-
     private String cameraId;
+
     private CameraCaptureSession captureSession;
     private CaptureRequest captureRequest;
     private CameraDevice cameraDevice;
@@ -68,7 +61,6 @@ public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implement
 
     private Range<Integer> previewFpsRange;
 
-    private CameraReader readerMode = CameraReader.ZBAR;
 
     /**
      * A {@link Handler} for running technical tasks in the background.
@@ -84,16 +76,10 @@ public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implement
 
     public CameraBarcodeScanViewV2(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        if (attrs.getAttributeValue(null, "readerMode") != null) {
-            readerMode = CameraReader.valueOf(attrs.getAttributeValue(null, "readerMode"));
-        }
         init();
     }
 
     private void init() {
-        //initOverlay();
-        //return;
-
         // Create resolution manager.
         resolution = new Resolution(getContext());
         resolution.useAdaptiveResolution = false; // TODO.
@@ -108,26 +94,14 @@ public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implement
         initLayout();
     }
 
-    private void reinitialiseFrameAnalyser() {
-        if (this.frameAnalyser != null) {
-            this.frameAnalyser.close();
-        }
-
-        this.frameAnalyser = new FrameAnalyserManager(this, resolution, readerMode);
-
-        /*for (BarcodeType symbology : this.symbologies) {
-            this.scanner.addSymbology(symbology);
-        }*/
-    }
-
     private void initLayout() {
-        if (this.surfaceView != null) {
+        if (this.camPreviewSurfaceView != null) {
             return;
         }
 
-        surfaceView = new SurfaceView(getContext());
-        this.addView(surfaceView);
-        surfaceView.getHolder().addCallback(this); // this calls callback when ready.
+        camPreviewSurfaceView = new SurfaceView(getContext());
+        this.addView(camPreviewSurfaceView);
+        camPreviewSurfaceView.getHolder().addCallback(this); // this calls callback when ready.
     }
 
     // called by the surface created callback.
@@ -142,8 +116,8 @@ public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implement
             actualLayoutWidth = this.getMeasuredWidth();
             actualLayoutHeight = this.getMeasuredHeight();
         } else {
-            actualLayoutWidth = this.surfaceView.getMeasuredWidth();
-            actualLayoutHeight = this.surfaceView.getMeasuredHeight();
+            actualLayoutWidth = this.camPreviewSurfaceView.getMeasuredWidth();
+            actualLayoutHeight = this.camPreviewSurfaceView.getMeasuredHeight();
         }
 
         int y1 = (int) (actualLayoutHeight / 2 - RECT_HEIGHT / 2 / MM_INSIDE_INCH * ydpi);
@@ -283,7 +257,7 @@ public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implement
         for (Size s : choices) {
             resolution.supportedPreviewResolutions.add(new Point(s.getWidth(), s.getHeight()));
         }
-        ViewHelpersResolution.setPreviewResolution(getContext(), resolution, this.surfaceView);
+        ViewHelpersResolution.setPreviewResolution(getContext(), resolution, this.camPreviewSurfaceView);
     }
 
     private Range<Integer> selectFpsRange(CameraCharacteristics characteristics) {
@@ -452,7 +426,7 @@ public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implement
     };
 
     private void startPreview() {
-        Surface surface = this.surfaceView.getHolder().getSurface();
+        Surface surface = this.camPreviewSurfaceView.getHolder().getSurface();
 
         try {
             imageReader = ImageReader.newInstance(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y, ImageFormat.YUV_420_888, Runtime.getRuntime().availableProcessors() * 2);
@@ -529,8 +503,8 @@ public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implement
 
             FrameAnalysisContext ctx = new FrameAnalysisContext();
             ctx.frame = bytes;
-            ctx.camViewMeasuredWidth = surfaceView.getMeasuredWidth();
-            ctx.camViewMeasuredHeight = surfaceView.getMeasuredHeight();
+            ctx.camViewMeasuredWidth = camPreviewSurfaceView.getMeasuredWidth();
+            ctx.camViewMeasuredHeight = camPreviewSurfaceView.getMeasuredHeight();
             ctx.vertical = DisplayUtils.getScreenOrientation(getContext()) == 1;
             ctx.cameraHeight = resolution.currentPreviewResolution.y;
             ctx.cameraWidth = resolution.currentPreviewResolution.x;
@@ -564,15 +538,6 @@ public class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implement
 
     }
 
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Public API, various setters
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public void setReaderMode(CameraReader readerMode) {
-        this.readerMode = readerMode;
-        reinitialiseFrameAnalyser();
-    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Helpers

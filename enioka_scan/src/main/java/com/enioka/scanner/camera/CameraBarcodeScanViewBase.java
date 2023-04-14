@@ -1,26 +1,59 @@
 package com.enioka.scanner.camera;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.SurfaceView;
+import android.view.View;
 import android.widget.FrameLayout;
 
+import com.enioka.scanner.R;
 import com.enioka.scanner.data.BarcodeType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class CameraBarcodeScanViewBase extends FrameLayout implements ScannerCallback {
-    protected List<BarcodeType> symbologies = new ArrayList<BarcodeType>();
+    protected static final String TAG = "BARCODE";
+
+    /////////////////////////////////
+    // User-defined configuration
+    protected List<BarcodeType> symbologies = new ArrayList<>();
     protected ResultHandler handler;
+    protected boolean allowTargetDrag = true;
+    protected CameraReader readerMode = CameraReader.ZBAR;
+
+    ////////////////////////////////
+    // State
     protected boolean torchOn = false;
     protected boolean failed = false;
 
     protected Resolution resolution = new Resolution(getContext());
     protected byte[] lastPreviewData;
 
+    ///////////////////////////////
+    // Actual analyser
     protected FrameAnalyserManager frameAnalyser;
+
+    //////////////////////////////
+    // Target view data
+    protected static final int RECT_HEIGHT = 10;
+    protected static final float MM_INSIDE_INCH = 25.4f;
+    protected float ydpi;
+    protected float dragStartY, dragCropTop, dragCropBottom;
+    protected Rect cropRect = new Rect(); // The "targeting" rectangle.
+
+
+    protected SurfaceView camPreviewSurfaceView;
+    protected View targetView;
+
 
     public CameraBarcodeScanViewBase(@NonNull Context context) {
         super(context);
@@ -28,6 +61,9 @@ public abstract class CameraBarcodeScanViewBase extends FrameLayout implements S
 
     public CameraBarcodeScanViewBase(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        if (attrs != null && attrs.getAttributeValue(null, "readerMode") != null) {
+            readerMode = CameraReader.valueOf(attrs.getAttributeValue(null, "readerMode"));
+        }
     }
 
     /**
@@ -41,6 +77,28 @@ public abstract class CameraBarcodeScanViewBase extends FrameLayout implements S
             frameAnalyser.addSymbology(barcodeType);
         }
     }
+
+    protected void reinitialiseFrameAnalyser() {
+        if (this.frameAnalyser != null) {
+            this.frameAnalyser.close();
+        }
+
+        this.frameAnalyser = new FrameAnalyserManager(this, resolution, readerMode);
+
+        for (BarcodeType symbology : this.symbologies) {
+            this.frameAnalyser.addSymbology(symbology);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Public API, various setters
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void setReaderMode(CameraReader readerMode) {
+        this.readerMode = readerMode;
+        reinitialiseFrameAnalyser();
+    }
+
 
     public void setResultHandler(ResultHandler handler) {
         this.handler = handler;
@@ -94,4 +152,118 @@ public abstract class CameraBarcodeScanViewBase extends FrameLayout implements S
             }
         });
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Target area handling
+
+    /**
+     * Sets up the central targeting rectangle. Must be called after surface init.
+     */
+    protected void computeCropRectangle() {
+        // First, top may be a user preference
+        Activity a = ViewHelpersPreferences.getActivity(getContext());
+        int top = -1;
+        if (a != null && allowTargetDrag) {
+            try {
+                SharedPreferences p = a.getPreferences(Context.MODE_PRIVATE);
+                top = p.getInt("y" + getCameraDisplayOrientation(), 0);
+            } catch (Exception e) {
+                Log.w(TAG, "Could not retrieve preferences");
+            }
+        }
+
+        // Target rectangle dimensions
+        DisplayMetrics metrics = this.getContext().getResources().getDisplayMetrics();
+        //float xdpi = metrics.xdpi;
+        ydpi = metrics.ydpi;
+
+        int actualLayoutWidth, actualLayoutHeight;
+        if (this.isInEditMode()) {
+            actualLayoutWidth = this.getMeasuredWidth();
+            actualLayoutHeight = this.getMeasuredHeight();
+        } else {
+            actualLayoutWidth = this.camPreviewSurfaceView.getMeasuredWidth();
+            actualLayoutHeight = this.camPreviewSurfaceView.getMeasuredHeight();
+        }
+
+        int y1, y3;
+        if (top != -1) {
+            y1 = top;
+            y3 = (int) (top + RECT_HEIGHT / MM_INSIDE_INCH * ydpi);
+        } else {
+            y1 = (int) (actualLayoutHeight / 2 - RECT_HEIGHT / 2 / MM_INSIDE_INCH * ydpi);
+            y3 = (int) (actualLayoutHeight / 2 + RECT_HEIGHT / 2 / MM_INSIDE_INCH * ydpi);
+        }
+
+        cropRect.top = y1;
+        cropRect.bottom = y3;
+        cropRect.left = (int) (actualLayoutWidth * 0.1);
+        cropRect.right = (int) (actualLayoutWidth * 0.9);
+
+        Log.i(TAG, "Setting targeting rect at " + cropRect);
+    }
+
+    /**
+     * Adds the targeting view to layout. Must be called after computeCropRectangle was called. Separate from computeCropRectangle
+     * because: we want to add this view last, in order to put it on top. (and we need to calculate the crop rectangle early).
+     */
+    protected void addTargetView() {
+        final View targetView = new TargetView(this.getContext());
+        targetView.setId(R.id.barcode_scanner_camera_view);
+        final FrameLayout.LayoutParams prms = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, (int) (RECT_HEIGHT / MM_INSIDE_INCH * ydpi));
+        prms.setMargins(0, cropRect.top, 0, 0);
+
+        Log.i(TAG, "Targeting overlay added");
+        this.addView(targetView, prms);
+        this.targetView = targetView;
+
+        if (allowTargetDrag) {
+            targetView.setOnTouchListener(new OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            dragStartY = event.getY();
+                            dragCropTop = cropRect.top;
+                            dragCropBottom = cropRect.bottom;
+                            return true;
+                        case MotionEvent.ACTION_MOVE:
+                            final float dy = event.getY() - dragStartY;
+                            float newTop = dragCropTop + (int) dy;
+                            float newBottom = dragCropBottom + (int) dy;
+                            if (newTop > 0 && newBottom < CameraBarcodeScanViewBase.this.camPreviewSurfaceView.getHeight()) {
+                                cropRect.top = (int) newTop;
+                                cropRect.bottom = (int) newBottom;
+
+                                dragCropTop = newTop;
+                                dragCropBottom = newBottom;
+
+                                prms.topMargin = cropRect.top;
+                                targetView.setLayoutParams(prms);
+                            }
+
+                            return true;
+
+                        case MotionEvent.ACTION_UP:
+                            dragStartY = 0;
+                            v.performClick();
+                            ViewHelpersPreferences.storePreferences(getContext(), "y" + getCameraDisplayOrientation(), cropRect.top);
+                            break;
+                    }
+
+                    return false;
+                }
+            });
+        }
+    }
+
+    public void setAllowTargetDrag(boolean allowTargetDrag) {
+        this.allowTargetDrag = allowTargetDrag;
+    }
+
+    public abstract int getCameraDisplayOrientation();
+
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
 }

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
+import android.hardware.Camera;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -32,7 +33,8 @@ public abstract class CameraBarcodeScanViewBase extends FrameLayout implements S
 
     ////////////////////////////////
     // State
-    protected boolean torchOn = false;
+    protected boolean isTorchSupported = false;
+    protected boolean isTorchOn = false;
     protected boolean failed = false;
 
     protected Resolution resolution = new Resolution(getContext());
@@ -115,12 +117,15 @@ public abstract class CameraBarcodeScanViewBase extends FrameLayout implements S
             return;
         }
 
-        //Camera.Parameters prms = this.cam.getParameters();
-        //setTorch(prms, value);
-        //setCameraParameters(prms);
+        boolean support = getSupportTorch();
+        if (support && value) {
+            setTorchInternal(true);
+        } else if (support) {
+            setTorchInternal(false);
+        }
     }
 
-    // abstract void setTorchInternal(boolean value);
+    abstract void setTorchInternal(boolean value);
 
     public interface ResultHandler {
         void handleScanResult(String result, BarcodeType type);
@@ -132,9 +137,27 @@ public abstract class CameraBarcodeScanViewBase extends FrameLayout implements S
 
     public abstract void resumeCamera();
 
-    public abstract boolean getSupportTorch();
+    /**
+     * Indicate if the torch mode is handled or not
+     *
+     * @return A true value if the torch mode supported, false otherwise
+     */
+    public boolean getSupportTorch() {
+        if (failed) {
+            return false;
+        }
+        if (this.isInEditMode()) {
+            return true;
+        }
+        return isTorchSupported;
+    }
 
-    public abstract boolean getTorchOn();
+    /**
+     * @return true if torch is on
+     */
+    public boolean getTorchOn() {
+        return isTorchOn;
+    }
 
     public void analyserCallback(final String result, final BarcodeType type, byte[] previewData) {
         if (resolution.usePreviewForPhoto) {
@@ -261,7 +284,7 @@ public abstract class CameraBarcodeScanViewBase extends FrameLayout implements S
         this.allowTargetDrag = allowTargetDrag;
     }
 
-    public abstract int getCameraDisplayOrientation();
+    protected abstract int getCameraDisplayOrientation();
 
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////

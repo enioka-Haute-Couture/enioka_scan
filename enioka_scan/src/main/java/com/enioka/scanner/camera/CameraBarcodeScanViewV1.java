@@ -131,6 +131,12 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camer
 
         Camera.Parameters prms = this.cam.getParameters();
 
+        // Torch mode supported?
+        isTorchSupported = getSupportTorch(prms);
+        if (isTorchSupported) {
+            isTorchOn = getTorchOn();
+        }
+
         // Scene mode. Try to select a mode which will ensure a high FPS rate.
         // Currently disabled, as on many devices, this disables autofocus without any way to detect it.
         List<String> supportedSceneModes = prms.getSupportedSceneModes();
@@ -214,7 +220,11 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camer
         }
 
         // Set flash mode to torch if supported
-        setTorch(prms, torchOn);
+        if (isTorchOn) {
+            prms.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        } else {
+            prms.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        }
 
         //////////////////////////////////////
         // Preview Resolution
@@ -379,25 +389,11 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camer
         return false;
     }
 
-    /**
-     * Indicate if the torch mode is handled or not
-     *
-     * @return A true value if the torch mode supported, false otherwise
-     */
-    public boolean getSupportTorch() {
-        if (failed) {
-            return false;
-        }
-        if (this.cam == null || this.isInEditMode()) {
-            return true;
-        }
-        Camera.Parameters prms = this.cam.getParameters();
-        return getSupportTorch(prms);
-    }
 
     /**
      * @return true if torch is on
      */
+    @Override
     public boolean getTorchOn() {
         if (failed) {
             return false;
@@ -409,28 +405,17 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camer
         return prms.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH);
     }
 
-    /**
-     * Switch on or switch off the torch mode, but parameters are not applied
-     *
-     * @param prms  Instance of camera configuration
-     * @param value indicate if the torch mode must be switched on (true) or off (false)
-     */
-    protected void setTorch(Camera.Parameters prms, boolean value) {
-        this.torchOn = value;
-        boolean support = getSupportTorch(prms);
-        if (support && value) {
-            prms.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-            if (this.hasExposureCompensation) {
-                // prms.setExposureCompensation(prms.getMinExposureCompensation() + 1);
-            }
-        } else if (support) {
-            prms.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-            if (this.hasExposureCompensation) {
-                //prms.setExposureCompensation((prms.getMaxExposureCompensation() + prms.getMinExposureCompensation()) / 2 - 1);
-            }
-        }
-    }
 
+    @Override
+    void setTorchInternal(boolean value) {
+        Camera.Parameters prms = this.cam.getParameters();
+        if (value) {
+            prms.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        } else {
+            prms.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        }
+        setCameraParameters(prms);
+    }
 
     // torch
     ////////////////////////////////////////////////////////////////////////////////////////////////

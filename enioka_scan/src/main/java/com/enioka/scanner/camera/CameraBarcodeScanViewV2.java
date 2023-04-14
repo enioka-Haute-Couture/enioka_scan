@@ -22,17 +22,12 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
-import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import java.nio.ByteBuffer;
@@ -47,14 +42,15 @@ import me.dm7.barcodescanner.core.DisplayUtils;
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements SurfaceHolder.Callback {
     private String cameraId;
+    private CameraManager cameraManager;
+
 
     private CameraCaptureSession captureSession;
+    private CaptureRequest.Builder captureRequestBuilder;
     private CaptureRequest captureRequest;
     private CameraDevice cameraDevice;
     private ImageReader imageReader;
-    private int cameraNativeOrientation;
 
-    private boolean isTorchSupported = false;
     private Integer controlModeScene = null;
     private Integer controlModeAf = null;
 
@@ -66,7 +62,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
      */
     private Handler backgroundHandler;
     private HandlerThread backgroundThread;
-
 
     public CameraBarcodeScanViewV2(@NonNull Context context) {
         super(context);
@@ -99,40 +94,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         }
 
         camPreviewSurfaceView = new SurfaceView(getContext());
-        this.addView(camPreviewSurfaceView);
         camPreviewSurfaceView.getHolder().addCallback(this); // this calls callback when ready.
-    }
-
-    // called by the surface created callback.
-    private void initOverlay() {
-        // Place the target rectangle in the center of the screen.
-        DisplayMetrics metrics = this.getContext().getResources().getDisplayMetrics();
-        //float xdpi = metrics.xdpi;
-        float ydpi = metrics.ydpi;
-        int actualLayoutWidth, actualLayoutHeight;
-
-        if (this.isInEditMode()) {
-            actualLayoutWidth = this.getMeasuredWidth();
-            actualLayoutHeight = this.getMeasuredHeight();
-        } else {
-            actualLayoutWidth = this.camPreviewSurfaceView.getMeasuredWidth();
-            actualLayoutHeight = this.camPreviewSurfaceView.getMeasuredHeight();
-        }
-
-        int y1 = (int) (actualLayoutHeight / 2 - RECT_HEIGHT / 2 / MM_INSIDE_INCH * ydpi);
-        int y3 = (int) (actualLayoutHeight / 2 + RECT_HEIGHT / 2 / MM_INSIDE_INCH * ydpi);
-
-        View targetView = new TargetView(this.getContext());
-        FrameLayout.LayoutParams prms = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, (int) (RECT_HEIGHT / MM_INSIDE_INCH * ydpi));
-        prms.setMargins(0, y1, 0, 0);
-
-        cropRect.top = y1;
-        cropRect.bottom = y3;
-        cropRect.left = (int) (actualLayoutWidth * 0.1);
-        cropRect.right = (int) (actualLayoutWidth * 0.9);
-
-        Log.i(TAG, "Setting targeting rect at " + cropRect);
-        this.addView(targetView, prms);
+        this.addView(camPreviewSurfaceView);
     }
 
     private void selectCameraParameters() {
@@ -140,8 +103,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             throw new RuntimeException("cannot use Camera2 API on a pre-Lollipop device");
         }
-        CameraManager manager = (CameraManager) getContext().getSystemService(android.content.Context.CAMERA_SERVICE);
-        if (manager == null) {
+        cameraManager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
+        if (cameraManager == null) {
             throw new RuntimeException("cannot use Camera2 API on this device - null CameraManager");
         }
 
@@ -150,8 +113,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         StreamConfigurationMap map = null;
         try {
             // Iterate all cameras and select the best one for barcode scanning purposes.
-            for (String cameraId : manager.getCameraIdList()) {
-                characteristics = manager.getCameraCharacteristics(cameraId);
+            for (String cameraId : cameraManager.getCameraIdList()) {
+                characteristics = cameraManager.getCameraCharacteristics(cameraId);
 
                 // We only want back cameras.
                 Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
@@ -186,7 +149,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
                 // tweak it.
                 Boolean hasFlash = characteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
-                isTorchSupported = hasFlash == null ? false : hasFlash;
+                isTorchSupported = hasFlash != null && hasFlash;
                 Log.i(TAG, "Camera supports flash: " + isTorchSupported);
                 selectResolution(map.getOutputSizes(ImageFormat.YUV_420_888));
                 Log.i(TAG, "Camera uses preview resolution: " + resolution.currentPreviewResolution.x + "*" + resolution.currentPreviewResolution.y);
@@ -213,6 +176,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
                     } else {
                         Log.i(TAG, "Using scene mode: none");
                     }
+                } else {
+                    Log.i(TAG, "No scenes modes supported on this device");
                 }
 
                 // AutoFocus (AF)
@@ -225,20 +190,19 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
                     if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_PICTURE)) {
                         controlModeAf = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
-                        Log.i(TAG, "Usig AF mode: CONTROL_AF_MODE_CONTINUOUS_PICTURE");
+                        Log.i(TAG, "Using AF mode: CONTROL_AF_MODE_CONTINUOUS_PICTURE");
                     } else if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_MACRO)) {
                         controlModeAf = CaptureRequest.CONTROL_AF_MODE_MACRO;
-                        Log.i(TAG, "Usig AF mode: CONTROL_AF_MODE_MACRO");
+                        Log.i(TAG, "Using AF mode: CONTROL_AF_MODE_MACRO");
                     } else if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_AUTO)) {
                         controlModeAf = CaptureRequest.CONTROL_AF_MODE_AUTO;
-                        Log.i(TAG, "Usig AF mode: CONTROL_AF_MODE_AUTO");
+                        Log.i(TAG, "Using AF mode: CONTROL_AF_MODE_AUTO");
                     } else {
-                        Log.i(TAG, "Usig AF mode: none");
+                        Log.i(TAG, "Using AF mode: none");
                     }
+                } else {
+                    Log.i(TAG, "No AF mode available");
                 }
-
-                // Misc
-                cameraNativeOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
 
                 // GO
                 break;
@@ -249,6 +213,20 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
         if (characteristics == null) {
             throw new RuntimeException("no suitable camera found on device");
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            cameraManager.registerTorchCallback(new CameraManager.TorchCallback() {
+                @Override
+                public void onTorchModeChanged(@NonNull String cameraId, boolean enabled) {
+                    if (cameraId.equals(CameraBarcodeScanViewV2.this.cameraId)) {
+                        Log.d(TAG, "Torch status has changed to: " + enabled);
+                        CameraBarcodeScanViewV2.this.isTorchOn = enabled;
+                    }
+                }
+            }, null);
+        } else {
+            Log.w(TAG, "API version is too low to detect if the torch is on or not");
         }
     }
 
@@ -313,28 +291,37 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         stopBackgroundThread();
     }
 
+    @Override
     public void cleanUp() {
-// TODO
+        // TODO
     }
 
     public void pauseCamera() {
         // TODO
     }
 
+    @Override
     public void resumeCamera() {
         // TODO
     }
 
-    public boolean getSupportTorch() {
-        // TODO
-        return true;
+    @Override
+    void setTorchInternal(boolean value) {
+        try {
+            if (value) {
+                captureRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH);
+            } else {
+                captureRequestBuilder.set(CaptureRequest.FLASH_MODE, null);
+            }
+            captureSession.stopRepeating();
+            captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, backgroundHandler);
+            isTorchOn = value;
+        } catch (CameraAccessException e) {
+            isTorchOn = false;
+            failed = true;
+            throw new RuntimeException(e);
+        }
     }
-
-    public boolean getTorchOn() {
-        // TODO
-        return false;
-    }
-
 
     ///////////////////////////////////////////////////////////////////////////
     // Background thread for handling camera-related events
@@ -382,7 +369,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         }
 
         // Add targeting rectangle (must be done after everything is drawn and dimensions are known)
-        initOverlay();
+        computeCropRectangle();
+        addTargetView();
     }
 
     @Override
@@ -431,7 +419,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             imageReader = ImageReader.newInstance(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y, ImageFormat.YUV_420_888, Runtime.getRuntime().availableProcessors() * 2);
             imageReader.setOnImageAvailableListener(imageCallback, backgroundHandler);
 
-            final CaptureRequest.Builder captureRequestBuilder = this.cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            captureRequestBuilder = this.cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.addTarget(surface);
             captureRequestBuilder.addTarget(imageReader.getSurface());
 
@@ -454,7 +442,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
                     //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
                     //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-                    //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CmmmmmmmmmmmaptureRequest.CONTROL_AWB_MODE_AUTO);
+                    //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
 
                     captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
                     //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
@@ -542,30 +530,20 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     // Helpers
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public int getCameraDisplayOrientation() {
-        WindowManager wm = (WindowManager) this.getContext().getSystemService(Context.WINDOW_SERVICE);
-        if (wm == null) {
-            Log.w(TAG, "could not get the window manager");
-            return 0;
+    private CameraCharacteristics getCharacteristics() {
+        if (this.cameraId == null || this.cameraManager == null) {
+            throw new IllegalStateException("camera not yet initialized, cannot get its characteristics");
         }
-        Display display = wm.getDefaultDisplay();
-        int rotation = display.getRotation();
-        short degrees = 0;
-        switch (rotation) {
-            case Surface.ROTATION_0:
-                degrees = 0;
-                break;
-            case Surface.ROTATION_90:
-                degrees = 90;
-                break;
-            case Surface.ROTATION_180:
-                degrees = 180;
-                break;
-            case Surface.ROTATION_270:
-                degrees = 270;
-                break;
+        try {
+            return this.cameraManager.getCameraCharacteristics(this.cameraId);
+        } catch (CameraAccessException e) {
+            throw new RuntimeException(e);
         }
+    }
 
-        return (cameraNativeOrientation - degrees + 360) % 360;
+    @Override
+    public int getCameraDisplayOrientation() {
+        Integer o = getCharacteristics().get(CameraCharacteristics.SENSOR_ORIENTATION);
+        return o != null ? o : 0;
     }
 }

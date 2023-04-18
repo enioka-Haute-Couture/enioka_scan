@@ -110,6 +110,6 @@ class ZBarFrameAnalyser extends FrameAnalyser {
         int luma = (int) ((double) barcodeData.lumaSum / (barcodeData.croppedDataWidth * barcodeData.croppedDataHeight));
         parent.fpsCounter(luma);
         parent.endOfFrame(ctx);
-        Log.v(TAG, "Took ms: " + (System.nanoTime() - start) / 1000000);
+        //Log.v(TAG, "Took ms: " + (System.nanoTime() - start) / 1000000);
     }
 }

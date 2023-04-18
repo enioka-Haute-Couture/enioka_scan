@@ -11,6 +11,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
@@ -53,6 +54,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
     private Integer controlModeScene = null;
     private Integer controlModeAf = null;
+    private int afZones = 0;
 
     private Range<Integer> previewFpsRange;
 
@@ -203,6 +205,17 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
                 } else {
                     Log.i(TAG, "No AF mode available");
                 }
+
+                // Zones
+                if (controlModeAf != null) {
+                    Integer zones = characteristics.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF);
+                    if (zones != null) {
+                        afZones = zones;
+                    } else {
+                        afZones = 0;
+                    }
+                }
+                Log.i(TAG, "Supported autofocus zones: " + afZones);
 
                 // GO
                 break;
@@ -445,6 +458,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
                     //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
 
                     captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
+                    if (afZones > 0) {
+                        captureRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, new MeteringRectangle[]{new MeteringRectangle(CameraBarcodeScanViewV2.this.cropRect, 500)});
+                    }
+
                     //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
 
 

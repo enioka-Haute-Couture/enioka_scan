@@ -516,7 +516,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
             try {
                 captureSession.setRepeatingRequest(CameraBarcodeScanViewV2.this.captureRequest, null, backgroundHandler);
-            } catch (CameraAccessException e) {
+            } catch (CameraAccessException | IllegalStateException e) {
+                Log.w(TAG, "Camera loop start has failed, this is usually due to changing resolution too fast. Error was: " + e.getMessage());
                 e.printStackTrace();
             }
         }

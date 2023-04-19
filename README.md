@@ -157,6 +157,12 @@ Please remember to unbind the service when it is not needed anymore, as for any 
 Finally, there are a few Intent extra properties which can be set to control the behaviour of the service such as filters used in the scanner search.
 These can be found as static strings inside the [`ScannerServiceApi`][scanner-service-api] interface, and methods in the [`ScannerSearchOptions`][scanner-search-options] class help converting search parameters to and from those intent extras.
 
+## Using the camera
+
+When there is no laser scanner available, or when a button is clicked, the `ScannerCompatActivity` activity will fallback to using the device camera (if any) to scan barcodes. This leverages two different barcode scanning libraries, ZBar and ZXing in recent versions. It is compatible both with very old Camera APIs as well as more recent Camera 2 APIs.
+
+The camera scanner can actually be used easily inside your own activities without any links with the rest of the library (no need to use the scanner service, etc) by just adding the `CameraBarcodeScanView` to your layouts, and then registering a callback on this view using `CameraBarcodeScanView.setResultHandler`. Other APIs are available to enable the torch or pause scanning.
+
 # Developer quick start (modifying this library)
 
 ## Developing for Android

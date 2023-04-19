@@ -19,19 +19,19 @@ import java.util.concurrent.TimeUnit;
  * Holder for analyser thread pool.
  */
 class FrameAnalyserManager {
-    private static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors(); // Wrong on old devices, not an issue for us.
+    private static final int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors(); // Wrong on old devices, not an issue for us.
     private static final String TAG = "BARCODE";
 
     private static final int BEGIN_FPS_ANALYSIS_DELAY_SECONDS = 1;
     private static final int INBETWEEN_ANALYSIS_DELAY_SECONDS = 3;
     private static final int LOWER_FPS_THRESHOLD = 10;
-    private static final int LOWER_COMFORTABLE_FPS_THRESHOLD = 15;
-    private static final int UPPER_FPS_THRESHOLD = 20;
+    private static final int LOWER_COMFORTABLE_FPS_THRESHOLD = 12;
+    private static final int UPPER_FPS_THRESHOLD = 15;
     private static final int SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD = 2;
 
     // Success callback
-    private ScannerCallback parent;
-    private Resolution resolution;
+    private final ScannerCallback parent;
+    private final Resolution resolution;
 
     // FPS counter variables
     private long latestIntervalStart = 0;
@@ -39,7 +39,7 @@ class FrameAnalyserManager {
     private int countLatestSecond = 0;
 
     // Seconds in the different resolutions
-    private Map<Point, Long> resolutionUsage = new HashMap<>(20);
+    private final Map<Point, Long> resolutionUsage = new HashMap<>(20);
     private Point mostUsedResolution;
 
     // FPS callback. Note: all thresholds are used with "greater than", not "greater or equal to".
@@ -53,8 +53,8 @@ class FrameAnalyserManager {
     private static final int DOUBLE_READ_THRESHOLD_MS = 500;
 
     // Analyser pool
-    private Queue<FrameAnalyser> analysers = new ArrayDeque<>(NUMBER_OF_CORES);
-    private BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(2 * NUMBER_OF_CORES, false);
+    private final Queue<FrameAnalyser> analysers = new ArrayDeque<>(NUMBER_OF_CORES);
+    private final BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(2 * NUMBER_OF_CORES, false);
 
     FrameAnalyserManager(ScannerCallback parent, Resolution bag, CameraReader readerToUse) {
         this.parent = parent;
@@ -118,7 +118,9 @@ class FrameAnalyserManager {
 
         if (latestLog > latestIntervalStart + 1000000000) {
             float fps = 1000000000 * (float) countLatestSecond / (currentTime - latestIntervalStart);
-            Log.d(TAG, "FPS: " + fps + " - Pool size: " + analysers.size() + ". Current analysis queue depth: " + queue.size() + ". Statistics are: " + resolutionUsage);
+            Log.d(TAG, "FPS: " + fps + " - Pool size: " + analysers.size() + ". Current analysis queue depth: "
+                    + queue.size() + ". Current res: " + resolution.currentPreviewResolution.x + "*" + resolution.currentPreviewResolution.y
+                    + ". Statistics are: " + resolutionUsage);
             latestIntervalStart = currentTime;
             countLatestSecond = 0;
 

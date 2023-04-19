@@ -11,6 +11,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
@@ -78,7 +79,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     private void init() {
         // Create resolution manager.
         resolution = new Resolution(getContext());
-        resolution.useAdaptiveResolution = false; // TODO.
 
         // The real scanner
         reinitialiseFrameAnalyser();
@@ -265,7 +265,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             if (upper > result.getUpper() && range.getLower() >= 8) {
                 result = range;
             }
-
         }
 
         return result;
@@ -381,17 +380,21 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
         // Go for camera
         if (!isInEditMode()) {
-            openCamera(); // will in turn start the preview.
+            openCamera();
         }
 
         // Add targeting rectangle (must be done after everything is drawn and dimensions are known)
         computeCropRectangle();
         addTargetView();
+
+        // Preview is started in onChange, after camera is plugged in.
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
         Log.i(TAG, "surface changed");
+        surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
+        startPreview();
     }
 
     @Override
@@ -410,7 +413,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         public void onOpened(@NonNull CameraDevice cameraDevice) {
             // Start preview when camera is actually opened
             CameraBarcodeScanViewV2.this.cameraDevice = cameraDevice;
-            startPreview();
         }
 
         @Override
@@ -429,105 +431,153 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     };
 
     private void startPreview() {
-        Surface surface = this.camPreviewSurfaceView.getHolder().getSurface();
+        Log.i(TAG, "Initializing or reinitializing preview analysis loop");
+
+        //this.camPreviewSurfaceView.getHolder().setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
+        Surface previewSurface = this.camPreviewSurfaceView.getHolder().getSurface();
 
         try {
             imageReader = ImageReader.newInstance(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y, ImageFormat.YUV_420_888, Runtime.getRuntime().availableProcessors() * 2);
             imageReader.setOnImageAvailableListener(imageCallback, backgroundHandler);
 
-            captureRequestBuilder = this.cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            captureRequestBuilder.addTarget(surface);
-            captureRequestBuilder.addTarget(imageReader.getSurface());
+            Log.d(TAG, "Capture session creation begins");
+            this.cameraDevice.createCaptureSession(
+                    Arrays.asList(previewSurface, imageReader.getSurface())
+                    , cameraCaptureSessionStateCallback
+                    , backgroundHandler);
 
-            this.cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader.getSurface()), new CameraCaptureSession.StateCallback() {
-                @Override
-                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
-                    if (null == cameraDevice) {
-                        return;
-                    }
-
-                    // If here, preview session is open and we can start the actual preview.
-                    captureSession = cameraCaptureSession;
-
-                    if (controlModeScene != null) {
-                        captureRequestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, controlModeScene);
-                        captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
-                    } else {
-                        captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
-                    }
-
-                    //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
-                    //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-                    //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
-
-                    captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
-                    if (afZones > 0) {
-                        captureRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, new MeteringRectangle[]{new MeteringRectangle(CameraBarcodeScanViewV2.this.cropRect, 500)});
-                    }
-
-                    //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
-
-
-                    //captureRequestBuilder.set(CaptureRequest., CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-
-                    // GO for preview
-                    captureRequest = captureRequestBuilder.build();
-
-                    try {
-                        captureSession.setRepeatingRequest(captureRequest, null, backgroundHandler);
-                    } catch (CameraAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
-                    Toast toast = Toast.makeText(getContext(), "camera error - could not set preview", Toast.LENGTH_LONG);
-                    toast.show();
-                }
-            }, null);
+            Log.d(TAG, "Configuration request sent");
         } catch (CameraAccessException e) {
+            Log.e(TAG, "Configuration request could not be created " + e.getMessage());
             throw new RuntimeException(e);
         }
+
+        Log.d(TAG, "Preview analysis loop start method done");
     }
+
+    private final CameraCaptureSession.StateCallback cameraCaptureSessionStateCallback = new CameraCaptureSession.StateCallback() {
+        @Override
+        public void onConfigured(@NonNull final CameraCaptureSession cameraCaptureSession) {
+            Log.i(TAG, "Capture session is now configured and will start the capture request loop " + cameraCaptureSession.hashCode());
+
+            // Sanity check
+            if (null == cameraDevice) {
+                Log.e(TAG, "cannot start a session - camera not initialized");
+                return;
+            }
+
+            // Only now redraw surface (otherwise deadlock)
+            //CameraBarcodeScanViewV2.this.camPreviewSurfaceView.getHolder().setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
+
+            // If here, preview session is open and we can start the actual preview.
+            CameraBarcodeScanViewV2.this.captureSession = cameraCaptureSession;
+
+            // Create builder
+            try {
+                captureRequestBuilder = CameraBarcodeScanViewV2.this.cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+            } catch (CameraAccessException e) {
+                Log.e(TAG, "cannot use createCaptureRequest " + e);
+                cameraCaptureSession.close();
+                return;
+            }
+
+            // Capture targets
+            captureRequestBuilder.addTarget(CameraBarcodeScanViewV2.this.camPreviewSurfaceView.getHolder().getSurface());
+            captureRequestBuilder.addTarget(imageReader.getSurface());
+
+            // Scene
+            if (controlModeScene != null) {
+                captureRequestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, controlModeScene);
+                captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
+            } else {
+                captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+            }
+
+            // AF & AE
+            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
+            if (afZones > 0) {
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, new MeteringRectangle[]{new MeteringRectangle(CameraBarcodeScanViewV2.this.cropRect, 500)});
+            }
+
+            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
+            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+            //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
+
+            // TODO: FPS
+            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
+
+            // GO for preview
+            CameraBarcodeScanViewV2.this.captureRequest = captureRequestBuilder.build();
+
+            try {
+                captureSession.setRepeatingRequest(CameraBarcodeScanViewV2.this.captureRequest, null, backgroundHandler);
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+            Log.e(TAG, "Capture session configuration failed " + session.hashCode());
+            Toast toast = Toast.makeText(getContext(), "camera error - could not set preview", Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        @Override
+        public void onActive(@NonNull CameraCaptureSession session) {
+            Log.d(TAG, "Capture session is getting active " + session.hashCode());
+        }
+
+        @Override
+        public void onReady(@NonNull CameraCaptureSession session) {
+            Log.d(TAG, "Capture session is ready " + session.hashCode());
+        }
+
+        @Override
+        public void onClosed(@NonNull CameraCaptureSession session) {
+            Log.i(TAG, "Capture session has closed " + session.hashCode());
+        }
+    };
 
 
     ///////////////////////////////////////////////////////////////////////////
     // Image reader
     ///////////////////////////////////////////////////////////////////////////
 
-    ImageReader.OnImageAvailableListener imageCallback = new ImageReader.OnImageAvailableListener() {
-        @Override
-        public void onImageAvailable(ImageReader reader) {
-            Image image = reader.acquireLatestImage();
-            if (image == null) {
-                return;
-            }
-
-            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-            byte[] bytes = new byte[buffer.remaining()];
-            buffer.get(bytes);
-
-            FrameAnalysisContext ctx = new FrameAnalysisContext();
-            ctx.frame = bytes;
-            ctx.camViewMeasuredWidth = camPreviewSurfaceView.getMeasuredWidth();
-            ctx.camViewMeasuredHeight = camPreviewSurfaceView.getMeasuredHeight();
-            ctx.vertical = DisplayUtils.getScreenOrientation(getContext()) == 1;
-            ctx.cameraHeight = resolution.currentPreviewResolution.y;
-            ctx.cameraWidth = resolution.currentPreviewResolution.x;
-            ctx.x1 = cropRect.left;
-            ctx.x2 = cropRect.right;
-            ctx.x3 = ctx.x2;
-            ctx.x4 = ctx.x1;
-            ctx.y1 = cropRect.top;
-            ctx.y2 = ctx.y1;
-            ctx.y3 = cropRect.bottom;
-            ctx.y4 = ctx.y3;
-
-            frameAnalyser.handleFrame(ctx);
-
-            image.close();
+    final ImageReader.OnImageAvailableListener imageCallback = reader -> {
+        Image image = reader.acquireLatestImage();
+        if (image == null) {
+            return;
         }
+
+        // Sanity check
+        assert (image.getPlanes().length == 3);
+        //Log.d(TAG, image.getWidth() + " - " + image.getHeight());
+
+        // Get luminance buffer.
+        ByteBuffer buffer = image.getPlanes()[0].getBuffer(); // Y.
+        byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+
+        FrameAnalysisContext ctx = new FrameAnalysisContext();
+        ctx.frame = bytes;
+        ctx.camViewMeasuredWidth = camPreviewSurfaceView.getMeasuredWidth();
+        ctx.camViewMeasuredHeight = camPreviewSurfaceView.getMeasuredHeight();
+        ctx.vertical = DisplayUtils.getScreenOrientation(getContext()) == 1;
+        ctx.cameraHeight = resolution.currentPreviewResolution.y;
+        ctx.cameraWidth = resolution.currentPreviewResolution.x;
+        ctx.x1 = cropRect.left;
+        ctx.x2 = cropRect.right;
+        ctx.x3 = ctx.x2;
+        ctx.x4 = ctx.x1;
+        ctx.y1 = cropRect.top;
+        ctx.y2 = ctx.y1;
+        ctx.y3 = cropRect.bottom;
+        ctx.y4 = ctx.y3;
+
+        frameAnalyser.handleFrame(ctx);
+
+        image.close();
     };
 
 
@@ -542,7 +592,9 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
     @Override
     public void setPreviewResolution(Point newResolution) {
-
+        Log.d(TAG, "New preview resolution set");
+        resolution.currentPreviewResolution = newResolution;
+        this.startPreview();
     }
 
 

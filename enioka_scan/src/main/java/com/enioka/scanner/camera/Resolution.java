@@ -38,6 +38,7 @@ class Resolution {
     float bytesPerPixel;
 
     void persistDefaultPreviewResolution(Point resolution) {
+        Log.i(TAG, "Persisting default preview resolution: " + resolution.x + "*" + resolution.y);
         ViewHelpersPreferences.persistDefaultPreviewResolution(context, resolution);
     }
 

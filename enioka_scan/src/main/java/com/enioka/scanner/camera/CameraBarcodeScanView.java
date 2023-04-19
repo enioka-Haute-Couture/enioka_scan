@@ -1,6 +1,10 @@
 package com.enioka.scanner.camera;
 
 import android.content.Context;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -36,10 +40,39 @@ public class CameraBarcodeScanView extends FrameLayout {
     private CameraApiLevel guessBestApiLevel() {
         CameraApiLevel res = CameraApiLevel.Camera1;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            res = CameraApiLevel.Camera2;
+
+            CameraManager cameraManager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
+            if (cameraManager == null) {
+                Log.i(LOG_TAG, "Device supposedly supports camera V2 but cannot open camera manager - not using it");
+                return CameraApiLevel.Camera1;
+            }
+
+            CameraCharacteristics characteristics = null;
+            StreamConfigurationMap map = null;
+            try {
+                for (String cameraId : cameraManager.getCameraIdList()) {
+                    characteristics = cameraManager.getCameraCharacteristics(cameraId);
+
+                    // We only want back cameras.
+                    Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
+                    if (facing == null || facing != CameraCharacteristics.LENS_FACING_BACK) {
+                        continue;
+                    }
+
+                    // Do not try V2 if this is only a legacy device, support is usually subpar.
+                    if (characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL) == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+                        Log.i(LOG_TAG, "Device supports camera V2 but only in legacy mode - not using it");
+                        return CameraApiLevel.Camera1;
+                    }
+                }
+            } catch (CameraAccessException e) {
+                throw new RuntimeException(e);
+            }
+
+            return CameraApiLevel.Camera2;
         }
 
-        return res;
+        return CameraApiLevel.Camera1;
     }
 
     private void setLayout(AttributeSet attrs) {

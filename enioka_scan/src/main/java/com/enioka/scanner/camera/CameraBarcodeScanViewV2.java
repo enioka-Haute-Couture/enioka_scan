@@ -193,6 +193,9 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
                     if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_PICTURE)) {
                         controlModeAf = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE;
                         Log.i(TAG, "Using AF mode: CONTROL_AF_MODE_CONTINUOUS_PICTURE");
+                    } else if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_CONTINUOUS_VIDEO)) {
+                        controlModeAf = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
+                        Log.i(TAG, "Using AF mode: CONTROL_AF_MODE_CONTINUOUS_VIDEO");
                     } else if (modes.contains(CameraCharacteristics.CONTROL_AF_MODE_MACRO)) {
                         controlModeAf = CaptureRequest.CONTROL_AF_MODE_MACRO;
                         Log.i(TAG, "Using AF mode: CONTROL_AF_MODE_MACRO");

@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
@@ -24,16 +25,20 @@ import java.util.Set;
 public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIlluminationSupport, CameraBarcodeScanViewBase.ResultHandler {
     private static final String LOG_TAG = "CamBarcodeScanVScanner";
 
-    private CameraBarcodeScanViewBase scanner;
+    private final CameraBarcodeScanViewBase scanner;
     private ScannerDataCallbackProxy dataDb;
+    private final ScannerStatusCallback statusCallback;
 
-    public CameraBarcodeScanViewScanner(CameraBarcodeScanViewBase cameraBarcodeScanView, ScannerDataCallbackProxy mHandler) {
+    public CameraBarcodeScanViewScanner(CameraBarcodeScanViewBase cameraBarcodeScanView, ScannerDataCallbackProxy mHandler, final ScannerStatusCallbackProxy statusCallback) {
         this.dataDb = mHandler;
 
         this.scanner = cameraBarcodeScanView;
 
         scanner.setResultHandler(this);
         scanner.setTorch(false);
+
+        this.statusCallback = statusCallback;
+        this.statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.CONNECTED);
     }
 
     @Override

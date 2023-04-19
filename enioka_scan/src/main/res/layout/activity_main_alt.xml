@@ -30,7 +30,7 @@
 
 
     <TextView
-        android:id="@+id/scanner_text_instructions"
+        android:id="@+id/scanner_text_scanner_status"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:background="#59ffffff"

@@ -29,6 +29,7 @@ import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
+import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.camera.CameraBarcodeScanViewBase;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.camera.CameraReader;
@@ -324,6 +325,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 setContentView(layoutIdCamera);
             }
             actuallyOpenCamera();
+
+            // Reinit text
+            if (findViewById(R.id.scanner_text_scanner_status) != null) {
+                TextView tv = findViewById(R.id.scanner_text_scanner_status);
+                tv.setText("");
+            }
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_ID_CAMERA);
         }
@@ -337,7 +344,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
-        cameraScanner = new CameraBarcodeScanViewScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)));
+        cameraScanner = new CameraBarcodeScanViewScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)), new ScannerStatusCallbackProxy(this));
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);

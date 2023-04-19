@@ -159,7 +159,7 @@ These can be found as static strings inside the [`ScannerServiceApi`][scanner-se
 
 ## Using the camera
 
-When there is no laser scanner available, or when a button is clicked, the `ScannerCompatActivity` activity will fallback to using the device camera (if any) to scan barcodes. This leverages two different barcode scanning libraries, ZBar and ZXing in recent versions. It is compatible both with very old Camera APIs as well as more recent Camera 2 APIs.
+When there is no laser scanner available, or when a button is clicked, the `ScannerCompatActivity` activity will fallback to using the device camera (if any) to scan barcodes. This leverages two different barcode scanning libraries, ZBar and ZXing in recent versions. It is compatible both with very old Camera APIs as well as more recent Camera 2 APIs. It tries to set the best camera parameters for barcode scanning, including dynamically setting the camera resolution according to the processing speed of the device. As a result, it may take a few dozen seconds to reach the most suitable settings on first startup - the resolution is then stored and reused on subsequent initialisations.
 
 The camera scanner can actually be used easily inside your own activities without any links with the rest of the library (no need to use the scanner service, etc) by just adding the `CameraBarcodeScanView` to your layouts, and then registering a callback on this view using `CameraBarcodeScanView.setResultHandler`. Other APIs are available to enable the torch or pause scanning.
 

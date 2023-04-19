@@ -365,6 +365,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     goToCamera = true; // in case the activity was paused by the permission request dialog
+                    setViewContent();
                     actuallyOpenCamera(); // for other cases. May result in double camera init, not an issue as it only happens the first time
                 } else {
                     Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();

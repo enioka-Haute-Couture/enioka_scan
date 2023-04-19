@@ -551,7 +551,13 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     ///////////////////////////////////////////////////////////////////////////
 
     final ImageReader.OnImageAvailableListener imageCallback = reader -> {
-        Image image = reader.acquireLatestImage();
+        Image image = null;
+        try {
+            image = reader.acquireLatestImage();
+        } catch (IllegalStateException e) {
+            Log.w(TAG, "Discarding image as all analysers are busy");
+            return;
+        }
         if (image == null) {
             return;
         }

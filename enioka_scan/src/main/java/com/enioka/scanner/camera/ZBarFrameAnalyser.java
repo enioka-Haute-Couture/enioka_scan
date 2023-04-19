@@ -86,6 +86,7 @@ class ZBarFrameAnalyser extends FrameAnalyser {
         BarcodeRectangleData barcodeData = extractBarcodeRectangle(ctx);
 
         // Analysis
+        //TODO: reuse image if present.
         Image pic = new Image(barcodeData.croppedDataWidth, barcodeData.croppedDataHeight, "Y800");
         pic.setData(barcodeData.barcode);
 

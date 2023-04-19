@@ -66,13 +66,13 @@ class ViewHelpersResolution {
         Collections.sort(bag.allowedPreviewResolutions, new Comparator<Point>() {
             @Override
             public int compare(Point o1, Point o2) {
-                return o1.x < o2.x ? -1 : o1.x == o2.x ? 0 : 1;
+                return o1.x * o1.y < o2.x * o2.y ? -1 : o1.x * o1.y == o2.x * o2.y ? 0 : 1;
             }
         });
         Collections.sort(allRatioPreviewResolutions, new Comparator<Point>() {
             @Override
             public int compare(Point o1, Point o2) {
-                return o1.x < o2.x ? -1 : o1.x == o2.x ? 0 : 1;
+                return o1.x * o1.y < o2.x * o2.y ? -1 : o1.x * o1.y == o2.x * o2.y ? 0 : 1;
             }
         });
         Log.v(TAG, "Allowed preview sizes (acceptable ratio): ");

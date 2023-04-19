@@ -236,45 +236,44 @@ abstract class CameraBarcodeScanViewBase extends FrameLayout implements ScannerC
         this.targetView = targetView;
 
         if (allowTargetDrag) {
-            targetView.setOnTouchListener(new OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            dragStartY = event.getY();
-                            dragCropTop = cropRect.top;
-                            dragCropBottom = cropRect.bottom;
-                            return true;
-                        case MotionEvent.ACTION_MOVE:
-                            final float dy = event.getY() - dragStartY;
-                            float newTop = dragCropTop + (int) dy;
-                            float newBottom = dragCropBottom + (int) dy;
-                            if (newTop > 0 && newBottom < CameraBarcodeScanViewBase.this.camPreviewSurfaceView.getHeight()) {
-                                cropRect.top = (int) newTop;
-                                cropRect.bottom = (int) newBottom;
+            targetView.setOnTouchListener((v, event) -> {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        dragStartY = event.getY();
+                        dragCropTop = cropRect.top;
+                        dragCropBottom = cropRect.bottom;
+                        return true;
+                    case MotionEvent.ACTION_MOVE:
+                        final float dy = event.getY() - dragStartY;
+                        float newTop = dragCropTop + (int) dy;
+                        float newBottom = dragCropBottom + (int) dy;
+                        if (newTop > 0 && newBottom < CameraBarcodeScanViewBase.this.camPreviewSurfaceView.getHeight()) {
+                            cropRect.top = (int) newTop;
+                            cropRect.bottom = (int) newBottom;
 
-                                dragCropTop = newTop;
-                                dragCropBottom = newBottom;
+                            dragCropTop = newTop;
+                            dragCropBottom = newBottom;
 
-                                prms.topMargin = cropRect.top;
-                                targetView.setLayoutParams(prms);
-                            }
+                            prms.topMargin = cropRect.top;
+                            targetView.setLayoutParams(prms);
+                        }
 
-                            return true;
+                        return true;
 
-                        case MotionEvent.ACTION_UP:
-                            dragStartY = 0;
-                            v.performClick();
-                            ViewHelpersPreferences.storePreferences(getContext(), "y" + getCameraDisplayOrientation(), cropRect.top);
-                            break;
-                    }
-
-                    return false;
+                    case MotionEvent.ACTION_UP:
+                        dragStartY = 0;
+                        v.performClick();
+                        ViewHelpersPreferences.storePreferences(getContext(), "y" + getCameraDisplayOrientation(), cropRect.top);
+                        break;
                 }
+
+                return false;
             });
         }
     }
 
+    @SuppressWarnings("unused")
+    // TODO: expose as view property.
     public void setAllowTargetDrag(boolean allowTargetDrag) {
         this.allowTargetDrag = allowTargetDrag;
     }

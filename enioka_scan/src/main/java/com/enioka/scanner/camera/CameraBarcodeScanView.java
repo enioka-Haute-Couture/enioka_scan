@@ -4,7 +4,6 @@ import android.content.Context;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -40,7 +39,6 @@ public class CameraBarcodeScanView extends FrameLayout {
     }
 
     private CameraApiLevel guessBestApiLevel() {
-        CameraApiLevel res = CameraApiLevel.Camera1;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
             CameraManager cameraManager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);
@@ -49,8 +47,7 @@ public class CameraBarcodeScanView extends FrameLayout {
                 return CameraApiLevel.Camera1;
             }
 
-            CameraCharacteristics characteristics = null;
-            StreamConfigurationMap map = null;
+            CameraCharacteristics characteristics;
             try {
                 for (String cameraId : cameraManager.getCameraIdList()) {
                     characteristics = cameraManager.getCameraCharacteristics(cameraId);
@@ -62,7 +59,8 @@ public class CameraBarcodeScanView extends FrameLayout {
                     }
 
                     // Do not try V2 if this is only a legacy device, support is usually subpar.
-                    if (characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL) == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+                    Integer level = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+                    if (level == null || level == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
                         Log.i(LOG_TAG, "Device supports camera V2 but only in legacy mode - not using it");
                         return CameraApiLevel.Camera1;
                     }

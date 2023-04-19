@@ -37,7 +37,6 @@ class ConvertPreviewAsync extends AsyncTask<Void, Void, Void> {
         if (cb != null) {
             cb.onDone(buffer.toByteArray());
         }
-        return;
     }
 
     public interface Callback {

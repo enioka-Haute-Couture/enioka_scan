@@ -16,7 +16,7 @@ abstract class FrameAnalyser implements Runnable {
     protected static final String TAG = "BARCODE";
 
     BlockingQueue<FrameAnalysisContext> queue;
-    private Semaphore end = new Semaphore(0);
+    private final Semaphore end = new Semaphore(0);
 
     @Override
     public void run() {
@@ -44,11 +44,19 @@ abstract class FrameAnalyser implements Runnable {
         end.release();
     }
 
-    void awaitTermination(int units, TimeUnit unit) throws InterruptedException {
-        end.tryAcquire(units, unit);
+    /**
+     * Wait for the analyzer to die gracefully.
+     *
+     * @param units time to wait
+     * @param unit  unit of time
+     * @return false if ended in timeout, true otherwise
+     * @throws InterruptedException if wait was interrupted
+     */
+    boolean awaitTermination(int units, TimeUnit unit) throws InterruptedException {
+        return end.tryAcquire(units, unit);
     }
 
-    class BarcodeRectangleData {
+    static class BarcodeRectangleData {
         byte[] barcode;
         int croppedDataWidth, croppedDataHeight;
         long lumaSum = 0L;

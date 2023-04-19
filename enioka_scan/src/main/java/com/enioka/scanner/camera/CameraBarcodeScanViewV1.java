@@ -36,8 +36,6 @@ import me.dm7.barcodescanner.core.DisplayUtils;
 class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camera.PreviewCallback, SurfaceHolder.Callback {
     private Camera cam;
 
-    private boolean hasExposureCompensation = false;
-
     protected boolean scanningStarted = true;
 
     private int previewBufferSize;
@@ -171,7 +169,6 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camer
         }
         if (prms.getMaxExposureCompensation() > 0 && prms.getMinExposureCompensation() < 0) {
             Log.i(TAG, "Exposure compensation is supported with limits [" + prms.getMinExposureCompensation() + ";" + prms.getMaxExposureCompensation() + "]");
-            hasExposureCompensation = true;
             //prms.setExposureCompensation((prms.getMaxExposureCompensation() + prms.getMinExposureCompensation()) / 2 - 1);
             Log.i(TAG, "Exposure compensation set to " + prms.getExposureCompensation());
         } else {
@@ -304,7 +301,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camer
             default:
                 Log.i(TAG, "Using preview resolution " + resolution.currentPreviewResolution.x + "*" +
                         resolution.currentPreviewResolution.y + ". Ratio is " +
-                        ((float) resolution.currentPreviewResolution.x / ((float) resolution.currentPreviewResolution.x)));
+                        ((float) resolution.currentPreviewResolution.x / ((float) resolution.currentPreviewResolution.y)));
                 resolution.usePreviewForPhoto = resolution.currentPreviewResolution.y >= 1080;
         }
 

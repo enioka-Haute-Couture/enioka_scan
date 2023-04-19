@@ -21,7 +21,7 @@ class Resolution {
         this.context = context;
     }
 
-    private Context context;
+    private final Context context;
 
     List<Point> supportedPreviewResolutions = new ArrayList<>(20);
     List<Point> allowedPreviewResolutions = new ArrayList<>(20);
@@ -98,7 +98,7 @@ class Resolution {
                 Log.d(TAG, "High analysis FPS but already on the highest possible resolution");
                 return null;
             }
-            indexShift = +1;
+            indexShift = 1;
         }
 
         // We have a correct new preview resolution!

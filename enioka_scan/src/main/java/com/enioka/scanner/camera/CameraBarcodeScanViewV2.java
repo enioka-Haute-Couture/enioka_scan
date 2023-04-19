@@ -11,8 +11,6 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
@@ -113,7 +111,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
         // Select camera
         CameraCharacteristics characteristics = null;
-        StreamConfigurationMap map = null;
+        StreamConfigurationMap map;
         try {
             // Iterate all cameras and select the best one for barcode scanning purposes.
             for (String cameraId : cameraManager.getCameraIdList()) {
@@ -310,7 +308,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
     @Override
     public void cleanUp() {
-        // TODO
+        if (cameraDevice != null) {
+            pauseCamera();
+            cameraDevice.close();
+        }
     }
 
     public void pauseCamera() {
@@ -554,7 +555,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     ///////////////////////////////////////////////////////////////////////////
 
     final ImageReader.OnImageAvailableListener imageCallback = reader -> {
-        Image image = null;
+        Image image;
         try {
             image = reader.acquireLatestImage();
         } catch (IllegalStateException e) {
@@ -631,6 +632,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     @Override
     public int getCameraDisplayOrientation() {
         Integer o = getCharacteristics().get(CameraCharacteristics.SENSOR_ORIENTATION);
-        return o != null ? o : 0;
+        return o != null ? (180 - o % 360) : 0;
     }
 }

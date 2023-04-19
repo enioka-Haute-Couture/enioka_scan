@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
-import android.hardware.Camera;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -21,13 +20,13 @@ import com.enioka.scanner.data.BarcodeType;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class CameraBarcodeScanViewBase extends FrameLayout implements ScannerCallback {
+abstract class CameraBarcodeScanViewBase extends FrameLayout implements ScannerCallback {
     protected static final String TAG = "BARCODE";
 
     /////////////////////////////////
     // User-defined configuration
     protected List<BarcodeType> symbologies = new ArrayList<>();
-    protected ResultHandler handler;
+    protected CameraBarcodeScanView.ResultHandler handler;
     protected boolean allowTargetDrag = true;
     protected CameraReader readerMode = CameraReader.ZBAR;
 
@@ -102,7 +101,7 @@ public abstract class CameraBarcodeScanViewBase extends FrameLayout implements S
     }
 
 
-    public void setResultHandler(ResultHandler handler) {
+    public void setResultHandler(CameraBarcodeScanView.ResultHandler handler) {
         this.handler = handler;
     }
 
@@ -126,10 +125,6 @@ public abstract class CameraBarcodeScanViewBase extends FrameLayout implements S
     }
 
     abstract void setTorchInternal(boolean value);
-
-    public interface ResultHandler {
-        void handleScanResult(String result, BarcodeType type);
-    }
 
     public abstract void cleanUp();
 

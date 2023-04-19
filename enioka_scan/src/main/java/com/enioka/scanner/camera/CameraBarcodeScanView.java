@@ -12,6 +12,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.FrameLayout;
 
+import com.enioka.scanner.data.BarcodeType;
+
 /**
  * Helper view that encapsulates the ZBar (default) and ZXing (option) barcode analysis engines.
  * To be directly reused in layouts.
@@ -90,7 +92,66 @@ public class CameraBarcodeScanView extends FrameLayout {
         this.addView(proxiedView);
     }
 
-    public CameraBarcodeScanViewBase getProxiedView() {
-        return proxiedView;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Proxied view public API
+    ////////////////////////////////////////////////////////////////////////////
+
+    public interface ResultHandler {
+        void handleScanResult(String result, BarcodeType type);
+    }
+
+    public void setReaderMode(CameraReader readerMode) {
+        this.proxiedView.setReaderMode(readerMode);
+    }
+
+    /**
+     * Default is simply CODE_128. Use the Symbol static fields to specify a symbology.
+     *
+     * @param barcodeType the symbology
+     */
+    public void addSymbology(BarcodeType barcodeType) {
+        this.proxiedView.addSymbology(barcodeType);
+    }
+
+    public void setResultHandler(ResultHandler handler) {
+        this.proxiedView.setResultHandler(handler);
+    }
+
+    /**
+     * Switch on or switch off the torch mode
+     *
+     * @param value indicate if the torch mode must be switched on (true) or off (false)
+     */
+    public void setTorch(boolean value) {
+        this.proxiedView.setTorch(value);
+    }
+
+    /**
+     * Indicate if the torch mode is handled or not
+     *
+     * @return A true value if the torch mode supported, false otherwise
+     */
+    public boolean getSupportTorch() {
+        return this.proxiedView.getSupportTorch();
+    }
+
+    /**
+     * @return true if torch is on
+     */
+    public boolean getTorchOn() {
+        return this.proxiedView.getTorchOn();
+    }
+
+    public void cleanUp() {
+        this.proxiedView.cleanUp();
+    }
+
+    public void pauseCamera() {
+        this.proxiedView.pauseCamera();
+    }
+
+    public void resumeCamera() {
+        this.proxiedView.resumeCamera();
     }
 }

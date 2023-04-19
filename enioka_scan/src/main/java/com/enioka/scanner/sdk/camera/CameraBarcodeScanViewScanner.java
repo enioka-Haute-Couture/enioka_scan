@@ -10,7 +10,7 @@ import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
-import com.enioka.scanner.camera.CameraBarcodeScanViewBase;
+import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
@@ -22,14 +22,14 @@ import java.util.Set;
 /**
  *
  */
-public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIlluminationSupport, CameraBarcodeScanViewBase.ResultHandler {
+public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIlluminationSupport, CameraBarcodeScanView.ResultHandler {
     private static final String LOG_TAG = "CamBarcodeScanVScanner";
 
-    private final CameraBarcodeScanViewBase scanner;
+    private final CameraBarcodeScanView scanner;
     private ScannerDataCallbackProxy dataDb;
-    private final ScannerStatusCallback statusCallback;
+    private final ScannerStatusCallback  statusCallback;
 
-    public CameraBarcodeScanViewScanner(CameraBarcodeScanViewBase cameraBarcodeScanView, ScannerDataCallbackProxy mHandler, final ScannerStatusCallbackProxy statusCallback) {
+    public CameraBarcodeScanViewScanner(CameraBarcodeScanView cameraBarcodeScanView, ScannerDataCallbackProxy mHandler, final ScannerStatusCallbackProxy statusCallback) {
         this.dataDb = mHandler;
 
         this.scanner = cameraBarcodeScanView;

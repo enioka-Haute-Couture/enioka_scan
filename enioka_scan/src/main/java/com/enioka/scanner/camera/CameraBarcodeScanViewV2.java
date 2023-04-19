@@ -11,7 +11,8 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.params.InputConfiguration;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
@@ -53,7 +54,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     private CameraDevice cameraDevice;
     private ImageReader imageReader;
 
-    private Integer controlModeScene = null;
     private Integer controlModeAf = null;
     private Integer controlModeAb = null;
     private int afZones = 0;
@@ -158,30 +158,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
                 Log.i(TAG, "Camera uses preview resolution: " + resolution.currentPreviewResolution.x + "*" + resolution.currentPreviewResolution.y);
                 previewFpsRange = selectFpsRange(characteristics);
                 Log.i(TAG, "Camera uses FPS range: " + previewFpsRange);
-
-                // Scene. This controls many things, including FPS.
-                int[] sceneModes = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES);
-                if (sceneModes != null && sceneModes.length > 0 && (sceneModes[0] != CameraCharacteristics.CONTROL_SCENE_MODE_DISABLED)) {
-                    ArrayList<Integer> sceneModesList = new ArrayList<>(sceneModes.length);
-                    for (int i : sceneModes) {
-                        sceneModesList.add(i);
-                    }
-
-                    if (sceneModesList.contains(CameraCharacteristics.CONTROL_SCENE_MODE_SPORTS)) {
-                        controlModeScene = CaptureRequest.CONTROL_SCENE_MODE_SPORTS;
-                        Log.i(TAG, "Using scene mode: CONTROL_SCENE_MODE_SPORTS");
-                    } else if (sceneModesList.contains(CameraCharacteristics.CONTROL_SCENE_MODE_ACTION)) {
-                        controlModeScene = CaptureRequest.CONTROL_SCENE_MODE_ACTION;
-                        Log.i(TAG, "Using scene mode: CONTROL_SCENE_MODE_ACTION");
-                    } else if (sceneModesList.contains(CameraCharacteristics.CONTROL_SCENE_MODE_STEADYPHOTO)) {
-                        controlModeScene = CaptureRequest.CONTROL_SCENE_MODE_STEADYPHOTO;
-                        Log.i(TAG, "Using scene mode: CONTROL_SCENE_MODE_STEADYPHOTO");
-                    } else {
-                        Log.i(TAG, "Using scene mode: none");
-                    }
-                } else {
-                    Log.i(TAG, "No scenes modes supported on this device");
-                }
 
                 // AutoFocus (AF)
                 int[] afModesArray = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
@@ -292,6 +268,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         int y0 = this.resolution.currentPreviewResolution.y / 2 - 50;
         int x1 = this.resolution.currentPreviewResolution.x / 2 + 50;
         int y1 = this.resolution.currentPreviewResolution.y / 2 + 50;
+        Log.d(TAG, "Using metering zone (" + x0 + "," + y0 + ") (" + x1 + "," + y1 + ")");
         return new MeteringRectangle(x0, y0, x1 - x0, y1 - y0, 1000);
     }
 
@@ -510,28 +487,26 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             captureRequestBuilder.addTarget(CameraBarcodeScanViewV2.this.camPreviewSurfaceView.getHolder().getSurface());
             captureRequestBuilder.addTarget(imageReader.getSurface());
 
-            // Scene
-            if (controlModeScene != null) {
-                captureRequestBuilder.set(CaptureRequest.CONTROL_SCENE_MODE, controlModeScene);
-                captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_USE_SCENE_MODE);
-            } else {
-                captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
-            }
-
-            // AF & AE
-            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
-            if (afZones > 0) {
-                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, new MeteringRectangle[]{getMeteringZone()});
-            }
-
-            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
-            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-            //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
+            // Full auto (without this AF & AE are mostly disabled)
+            captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
 
             // AB
             if (controlModeAb != null) {
                 captureRequestBuilder.set(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE, controlModeAb);
             }
+
+            // AF & AE
+            if (afZones > 0) {
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, new MeteringRectangle[]{getMeteringZone()});
+            }
+            if (controlModeAf != null) {
+                Log.d(TAG, "Setting AF mode to " + controlModeAf);
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
+            }
+
+            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
+            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+            //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
 
             // TODO: FPS
             //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);

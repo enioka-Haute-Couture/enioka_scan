@@ -314,12 +314,15 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     }
 
     public void pauseCamera() {
-        // TODO
+        if (this.captureSession != null) {
+            this.captureSession.close();
+            this.captureSession = null;
+        }
     }
 
     @Override
     public void resumeCamera() {
-        // TODO
+        startPreview();
     }
 
     @Override

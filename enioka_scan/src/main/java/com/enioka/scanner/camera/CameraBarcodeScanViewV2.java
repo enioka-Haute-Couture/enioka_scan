@@ -55,6 +55,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
     private Integer controlModeScene = null;
     private Integer controlModeAf = null;
+    private Integer controlModeAb = null;
     private int afZones = 0;
 
     private Range<Integer> previewFpsRange;
@@ -220,6 +221,20 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
                 }
                 Log.i(TAG, "Supported autofocus zones: " + afZones);
 
+                // Anti-banding - just look for auto.
+                int[] abModesArray = characteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_ANTIBANDING_MODES);
+                if (abModesArray != null && abModesArray.length > 0) {
+                    ArrayList<Integer> modes = new ArrayList<>(abModesArray.length);
+                    for (int i : abModesArray) {
+                        modes.add(i);
+                    }
+
+                    if (modes.contains(CameraCharacteristics.CONTROL_AE_ANTIBANDING_MODE_AUTO)) {
+                        controlModeAb = CaptureRequest.CONTROL_AE_ANTIBANDING_MODE_AUTO;
+                        Log.i(TAG, "Using AB mode: CONTROL_AE_ANTIBANDING_MODE_AUTO");
+                    }
+                }
+
                 // GO
                 break;
             }
@@ -268,6 +283,16 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         }
 
         return result;
+    }
+
+    private MeteringRectangle getMeteringZone() {
+        // TODO: use cropRect
+        // Coordinate system is 0 topleft/bottomright
+        int x0 = this.resolution.currentPreviewResolution.x / 2 - 50;
+        int y0 = this.resolution.currentPreviewResolution.y / 2 - 50;
+        int x1 = this.resolution.currentPreviewResolution.x / 2 + 50;
+        int y1 = this.resolution.currentPreviewResolution.y / 2 + 50;
+        return new MeteringRectangle(x0, y0, x1 - x0, y1 - y0, 1000);
     }
 
     private void openCamera() {
@@ -496,12 +521,17 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             // AF & AE
             captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
             if (afZones > 0) {
-                captureRequestBuilder.set(CaptureRequest.CONTROL_AE_REGIONS, new MeteringRectangle[]{new MeteringRectangle(CameraBarcodeScanViewV2.this.cropRect, 500)});
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, new MeteringRectangle[]{getMeteringZone()});
             }
 
             //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
             //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
             //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
+
+            // AB
+            if (controlModeAb != null) {
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE, controlModeAb);
+            }
 
             // TODO: FPS
             //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
@@ -555,6 +585,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         //Log.d(TAG, image.getWidth() + " - " + image.getHeight());
 
         // Get luminance buffer.
+        // TODO: reuse buffers.
         ByteBuffer buffer = image.getPlanes()[0].getBuffer(); // Y.
         byte[] bytes = new byte[buffer.remaining()];
         buffer.get(bytes);
@@ -574,10 +605,9 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         ctx.y2 = ctx.y1;
         ctx.y3 = cropRect.bottom;
         ctx.y4 = ctx.y3;
+        ctx.image = image;
 
         frameAnalyser.handleFrame(ctx);
-
-        image.close();
     };
 
 
@@ -587,7 +617,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
     @Override
     public void giveBufferBack(FrameAnalysisContext analysisContext) {
-
+        analysisContext.image.close();
     }
 
     @Override

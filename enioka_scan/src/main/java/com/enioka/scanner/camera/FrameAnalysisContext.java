@@ -1,10 +1,14 @@
 package com.enioka.scanner.camera;
 
+import android.media.Image;
+
 /**
  * All the data needed by a frame analysis.
  */
 class FrameAnalysisContext {
     byte[] frame;
+
+    Image image;
 
     float camViewMeasuredHeight, camViewMeasuredWidth;
     float cameraWidth, cameraHeight;

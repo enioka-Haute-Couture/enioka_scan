@@ -25,8 +25,8 @@ class FrameAnalyserManager {
     private static final int BEGIN_FPS_ANALYSIS_DELAY_SECONDS = 1;
     private static final int INBETWEEN_ANALYSIS_DELAY_SECONDS = 3;
     private static final int LOWER_FPS_THRESHOLD = 10;
-    private static final int LOWER_COMFORTABLE_FPS_THRESHOLD = 12;
-    private static final int UPPER_FPS_THRESHOLD = 15;
+    private static final int LOWER_COMFORTABLE_FPS_THRESHOLD = 15;
+    private static final int UPPER_FPS_THRESHOLD = 20;
     private static final int SUCCESSIVE_THRESHOLD_VIOLATIONS_THRESHOLD = 2;
 
     // Success callback

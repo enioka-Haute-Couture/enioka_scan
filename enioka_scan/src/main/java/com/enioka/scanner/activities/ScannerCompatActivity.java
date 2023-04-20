@@ -121,7 +121,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * Actual access to the scanners.
      */
-    private ScannerServiceApi scannerService;
+    protected ScannerServiceApi scannerService;
     private boolean serviceBound = false;
 
     /**
@@ -501,7 +501,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         flashlight.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), iconId));
     }
 
-    private boolean anyScannerSupportsIllumination() {
+    protected boolean anyScannerSupportsIllumination() {
         for (final Scanner s : scannerService.getConnectedScanners()) {
             if (s.getIlluminationSupport() != null) {
                 return true;
@@ -510,7 +510,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         return false;
     }
 
-    private boolean anyScannerHasIlluminationOn() {
+    protected boolean anyScannerHasIlluminationOn() {
         for (final Scanner s : scannerService.getConnectedScanners()) {
             if (s.getIlluminationSupport() != null && s.getIlluminationSupport().isIlluminationOn()) {
                 return true;

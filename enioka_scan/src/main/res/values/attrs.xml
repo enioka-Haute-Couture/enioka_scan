@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CameraBarcodeScanView">
+        <attr name="forceCameraApiVersion" format="enum" >
+            <enum name="Auto" value="0"/>
+            <enum name="V1" value="1"/>
+            <enum name="V2" value="2"/>
+        </attr>
+    </declare-styleable>
+</resources>

@@ -1,6 +1,7 @@
 package com.enioka.scanner.camera;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
@@ -11,6 +12,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.FrameLayout;
 
+import com.enioka.scanner.R;
 import com.enioka.scanner.data.BarcodeType;
 
 /**
@@ -33,7 +35,24 @@ public class CameraBarcodeScanView extends FrameLayout {
 
     public CameraBarcodeScanView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        api = guessBestApiLevel();
+
+        TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.CameraBarcodeScanView,
+                0, 0);
+
+        int forcedApi = styledAttributes.getInteger(R.styleable.CameraBarcodeScanView_forceCameraApiVersion, 0);
+        switch (forcedApi) {
+            case 1:
+                api = CameraApiLevel.Camera1;
+                break;
+            case 2:
+                api = CameraApiLevel.Camera2;
+                break;
+            default:
+                api = guessBestApiLevel();
+                break;
+        }
 
         setLayout(attrs);
     }

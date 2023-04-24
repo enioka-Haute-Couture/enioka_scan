@@ -3,6 +3,7 @@ package com.enioka.scanner.camera;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -54,16 +55,29 @@ abstract class CameraBarcodeScanViewBase extends FrameLayout implements ScannerC
 
     protected SurfaceView camPreviewSurfaceView;
     protected View targetView;
+    protected final TypedArray styledAttributes;
 
 
     public CameraBarcodeScanViewBase(@NonNull Context context) {
         super(context);
+        this.styledAttributes = null;
     }
 
     public CameraBarcodeScanViewBase(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        if (attrs != null && attrs.getAttributeValue(null, "readerMode") != null) {
-            readerMode = CameraReader.valueOf(attrs.getAttributeValue(null, "readerMode"));
+        this.styledAttributes = context.getTheme().obtainStyledAttributes(
+                attrs,
+                R.styleable.CameraBarcodeScanView,
+                0, 0);
+
+        int rm = styledAttributes.getInt(R.styleable.CameraBarcodeScanView_readerMode, 0);
+        switch (rm) {
+            case 1:
+                readerMode = CameraReader.ZXING;
+                break;
+            default:
+                readerMode = CameraReader.ZBAR;
+                break;
         }
     }
 
@@ -226,7 +240,7 @@ abstract class CameraBarcodeScanViewBase extends FrameLayout implements ScannerC
      * because: we want to add this view last, in order to put it on top. (and we need to calculate the crop rectangle early).
      */
     protected void addTargetView() {
-        final View targetView = new TargetView(this.getContext());
+        final View targetView = new TargetView(this.getContext(), this.styledAttributes);
         targetView.setId(R.id.barcode_scanner_camera_view);
         final FrameLayout.LayoutParams prms = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, (int) (RECT_HEIGHT / MM_INSIDE_INCH * ydpi));
         prms.setMargins(0, cropRect.top, 0, 0);

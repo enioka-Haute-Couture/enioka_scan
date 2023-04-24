@@ -14,7 +14,10 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:readerMode="Auto"
+        app:targetColor="@color/colorRed"
+        app:targetStrokeWidth="5" />
 
     <TextView
         android:id="@+id/scanner_text_last_scan"

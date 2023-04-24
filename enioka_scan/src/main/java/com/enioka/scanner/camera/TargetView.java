@@ -1,15 +1,19 @@
 package com.enioka.scanner.camera;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+
+import com.enioka.scanner.R;
 
 /**
  * The "target visor" view to be drawn on top of the scanner view.
@@ -21,20 +25,28 @@ class TargetView extends View {
     protected Rect wholeView = new Rect();
     protected Rect targetRect = new Rect();
 
-    public TargetView(Context context) {
-        super(context);
-        init();
-    }
+    @ColorInt
+    protected final int rectColor;
+    protected final int rectStrokeWidth;
 
-    public TargetView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+    public TargetView(Context context, @Nullable TypedArray styledAttributes) {
+        super(context);
+
+        if (styledAttributes != null) {
+            rectColor = styledAttributes.getColor(R.styleable.CameraBarcodeScanView_targetColor, Color.RED);
+            rectStrokeWidth = styledAttributes.getInteger(R.styleable.CameraBarcodeScanView_targetStrokeWidth, 5);
+        } else {
+            rectColor = Color.RED;
+            rectStrokeWidth = 5;
+        }
+
         init();
     }
 
     protected void init() {
         targetRectPaint = new Paint();
-        targetRectPaint.setColor(Color.RED);
-        targetRectPaint.setStrokeWidth(5);
+        targetRectPaint.setColor(rectColor);
+        targetRectPaint.setStrokeWidth(rectStrokeWidth);
         targetRectPaint.setStyle(Paint.Style.STROKE);
 
         guideLinePaint = new Paint();

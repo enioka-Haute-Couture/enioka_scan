@@ -13,5 +13,6 @@
         </attr>
         <attr name="targetColor" format="color" />
         <attr name="targetStrokeWidth" format="integer" />
+        <attr name="targetIsFixed" format="boolean" />
     </declare-styleable>
 </resources>

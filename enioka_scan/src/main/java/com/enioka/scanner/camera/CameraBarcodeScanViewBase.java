@@ -79,6 +79,8 @@ abstract class CameraBarcodeScanViewBase extends FrameLayout implements ScannerC
                 readerMode = CameraReader.ZBAR;
                 break;
         }
+
+        this.allowTargetDrag = !styledAttributes.getBoolean(R.styleable.CameraBarcodeScanView_targetIsFixed, false);
     }
 
     /**
@@ -284,12 +286,6 @@ abstract class CameraBarcodeScanViewBase extends FrameLayout implements ScannerC
                 return false;
             });
         }
-    }
-
-    @SuppressWarnings("unused")
-    // TODO: expose as view property.
-    public void setAllowTargetDrag(boolean allowTargetDrag) {
-        this.allowTargetDrag = allowTargetDrag;
     }
 
     protected abstract int getCameraDisplayOrientation();

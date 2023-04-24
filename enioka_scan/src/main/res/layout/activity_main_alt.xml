@@ -17,6 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:readerMode="Auto"
         app:targetColor="@color/colorRed"
+        app:targetIsFixed="false"
         app:targetStrokeWidth="5" />
 
     <TextView

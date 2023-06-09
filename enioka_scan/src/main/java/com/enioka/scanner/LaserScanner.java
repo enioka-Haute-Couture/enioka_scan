@@ -213,6 +213,10 @@ public final class LaserScanner {
             Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because bluetooth option is disabled");
             return false;
         }
+        if (psh.getMeta().isIntent() && !options.allowIntentDevices) {
+            Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because intent option is disabled");
+            return false;
+        }
         if (options.excludedProviderKeys != null && options.excludedProviderKeys.contains(psh.getMeta().getProviderKey())) {
             Log.d(LOG_TAG, "Provider " + psh.getMeta().getProviderKey() + " skipped because blacklisted by option (excludes " + options.excludedProviderKeys + ")");
             return false;

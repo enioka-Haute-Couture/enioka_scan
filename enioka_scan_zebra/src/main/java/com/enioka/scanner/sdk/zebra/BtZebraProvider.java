@@ -97,7 +97,7 @@ public class BtZebraProvider implements ScannerProvider, IDcsSdkApiDelegate {
         if (created.get() > 0 || options.allowLaterConnections) {
             cb.onAllScannersCreated(getKey());
         } else {
-            Log.i(LOG_TAG, "No Zebra BT devices connected to this device and master device connection si disabled - disabling Zebra BT SDK");
+            Log.i(LOG_TAG, "No Zebra BT devices connected to this device and master device connection is disabled - disabling Zebra BT SDK");
             cb.onProviderUnavailable(PROVIDER_KEY); // Costly search. We do not want it to do it on each scanner search.
             sdkHandler.dcssdkClose();
         }

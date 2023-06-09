@@ -14,6 +14,8 @@ public class ScannerProviderMeta implements Comparable {
      */
     private boolean bluetooth;
 
+    private boolean intent;
+
     /**
      * The provider's name.
      */
@@ -29,6 +31,7 @@ public class ScannerProviderMeta implements Comparable {
     public ScannerProviderMeta(ServiceInfo si) {
         this.bluetooth = si.metaData != null && si.metaData.getBoolean("bluetooth");
         this.priority = si.metaData != null ? si.metaData.getInt("priority", 0) : 0;
+        this.intent = si.metaData != null && si.metaData.getBoolean("intent");
 
         this.name = si.name;
     }
@@ -42,6 +45,10 @@ public class ScannerProviderMeta implements Comparable {
 
     public boolean isBluetooth() {
         return bluetooth;
+    }
+
+    public boolean isIntent() {
+        return intent;
     }
 
     public String getName() {

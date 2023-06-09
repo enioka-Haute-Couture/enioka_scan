@@ -41,6 +41,11 @@ public interface ScannerServiceApi {
     String EXTRA_SEARCH_ALLOW_BT_BOOLEAN = "useBlueTooth";
 
     /**
+     * If true, intent scanner will be  used. False by default as we cannot really detect if these scanner exist or not.
+     */
+    String EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN = "useIntent";
+
+    /**
      * If true, some providers may find scanners after initial search is done. For example, a master BT device may connect later.
      * Default is true. May be ignored by some providers.
      */

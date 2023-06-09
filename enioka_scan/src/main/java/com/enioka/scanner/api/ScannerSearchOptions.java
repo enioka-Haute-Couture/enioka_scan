@@ -29,6 +29,11 @@ public class ScannerSearchOptions {
     public boolean useBlueTooth = true;
 
     /**
+     * If true, providers using another application for controlling scanners will be allowed. This is important as most of the time, it is impossible to say if these apps are actually installed, and therefore it is impossible to detect the presence of an actual laser scanner or not.
+     */
+    public boolean allowIntentDevices = false;
+
+    /**
      * If true, some providers may retrieve scanners after initial search.
      */
     public boolean allowLaterConnections = true;
@@ -65,6 +70,7 @@ public class ScannerSearchOptions {
     /**
      * Sets the option's attributes based on a given intent's extras.
      * The expected extras are those used by the Scanner Service API.
+     *
      * @param intent The intent to translate
      */
     public ScannerSearchOptions fromIntentExtras(final Intent intent) {
@@ -73,6 +79,7 @@ public class ScannerSearchOptions {
             waitDisconnected = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_WAIT_DISCONNECTED_BOOLEAN, waitDisconnected);
             returnOnlyFirst = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_RETURN_ONLY_FIRST_BOOLEAN, returnOnlyFirst);
             useBlueTooth = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_BT_BOOLEAN, useBlueTooth);
+            allowIntentDevices = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, allowIntentDevices);
             allowLaterConnections = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, allowLaterConnections);
             allowPairingFlow = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, allowPairingFlow);
             allowInitialSearch = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, allowInitialSearch);
@@ -96,6 +103,7 @@ public class ScannerSearchOptions {
     /**
      * Sets an intent's extras based on the option's attributes.
      * The expected extras are those used by the Scanner Service API.
+     *
      * @param intent The intent to update
      */
     public void toIntentExtras(final Intent intent) {

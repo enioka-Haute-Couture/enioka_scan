@@ -127,7 +127,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * Optional camera scanner
      */
-    private CameraBarcodeScanViewScanner cameraScanner;
+    protected CameraBarcodeScanViewScanner cameraScanner;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

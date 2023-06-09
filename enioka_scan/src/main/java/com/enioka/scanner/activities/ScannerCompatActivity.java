@@ -103,6 +103,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      */
     protected int scannerModeToggleViewId = R.id.scanner_switch_zxing;
 
+    protected int keyboardOpenViewId = R.id.scanner_bt_keyboard;
+
     /**
      * An optional fragment allowing to input a value with the soft keyboard (for cases when scanners do not work).
      */
@@ -533,7 +535,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * Display a manual input (keyboard) button for manual input.
      */
     protected void displayManualInputButton() {
-        final View bt = findViewById(R.id.scanner_bt_keyboard);
+        final View bt = findViewById(keyboardOpenViewId);
         if (bt == null) {
             return;
         }

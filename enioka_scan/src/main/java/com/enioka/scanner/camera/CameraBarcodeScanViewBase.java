@@ -221,7 +221,7 @@ abstract class CameraBarcodeScanViewBase extends FrameLayout implements ScannerC
         }
 
         int y1, y3;
-        if (top != -1) {
+        if (top > 10) {
             y1 = top;
             y3 = (int) (top + RECT_HEIGHT / MM_INSIDE_INCH * ydpi);
         } else {

@@ -179,6 +179,19 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 );
     }
 
+    /**
+     * @return true if the only scan means available is an internal camera. False if no camera available or a laser scanner is connected. Reflects the current state of the devices - does not wait for ongoing connections.
+     */
+    protected boolean onlyHasCameraCurrentlyConnected() {
+        if (!Common.hasCamera(this)) {
+            return false;
+        }
+        if (!this.serviceBound) {
+            return false;
+        }
+        return this.scannerService.getConnectedScanners() == null || this.scannerService.getConnectedScanners().isEmpty();
+    }
+
     private void bindAndStartService() {
         if (serviceBound) {
             return;
@@ -189,7 +202,18 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (getIntent().getExtras() != null) {
             intent.putExtras(getIntent().getExtras());
         }
+        if (getServiceInitExtras() != null) {
+            intent.putExtras(getServiceInitExtras());
+        }
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    protected Bundle getServiceInitExtras() {
+        Bundle res = new Bundle();
+        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_BT_BOOLEAN, false);
+        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, false);
+        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, false);
+        return res;
     }
 
     /**

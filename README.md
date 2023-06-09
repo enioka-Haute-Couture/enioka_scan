@@ -103,21 +103,42 @@ public class MyScanningActivity extends ScannerCompatActivity {
 }
 ```
 
-This creates an activity with a very simple layout which display status messages from the scanners as well as scanning results and a button to toggle illumination. Now, most activities of course want to use their own layouts. This is allowed by setting two fields (one for the camera layout, one for the laser layout) in the `onCreate()` method or the constructor:
+This creates an activity with a very simple layout which display status messages from the scanners as well as scanning results and a button to toggle illumination. Now, most activities of course want to use their own layouts. This is allowed by setting two fields (one for the camera layout, one for the laser layout) in the constructor of the activity:
 
 ```java
 @Override
-protected void onCreate(Bundle savedInstanceState) {
+protected void MyConstructor() {
+    super.onCreate();
     layoutIdLaser = R.layout.activity_parcel_scan_laser;
     layoutIdCamera = R.layout.activity_parcel_scan_camera;
-
-    super.onCreate(savedInstanceState);
 }
 ```
 
 There are a few other fields to allow you to customize further the activity, which are all documented inside the class. These include options to rename the toggle illumination button ID, to disable camera or laser or both, or enable a fallback dialog with manual input and auto-completion.
 
 If the provided template does not suit your needs, but you still want to take advantage of the [`ScannerServiceApi`][scanner-service-api], simply make sure that your activity follows the steps described in the section below.
+
+if you use a custom layout, you need to use our Camera scanning view. The ID of this view should by default be `camera_scan_view` (which can be customized inside the constructor as for the other views). This view accepts a few parameters, which are displayed here with their default values:
+
+```xml
+    <com.enioka.scanner.camera.CameraBarcodeScanView
+        android:id="@+id/camera_scan_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:forceCameraApiVersion="Auto"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:readerMode="Auto"
+        app:targetColor="@color/colorRed"
+        app:targetIsFixed="false"
+        app:targetStrokeWidth="5" />
+```
+
+Finally, note that inside the activity code there are a few hooks that can be overloaded - these are public or protected methods, with full javadoc. Of notice are:*
+* `onData(List<Barcode> data)`
+* `onStatusChanged(Scanner, ScannerStatusCallback.Status)`
 
 ## Outside an activity
 

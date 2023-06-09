@@ -316,6 +316,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
     public void pauseCamera() {
         if (this.captureSession != null) {
+            this.imageReader.close();
+            this.imageReader = null;
             this.captureSession.close();
             this.captureSession = null;
         }
@@ -328,6 +330,9 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
     @Override
     void setTorchInternal(boolean value) {
+        if (captureSession == null) {
+            return;
+        }
         try {
             if (value) {
                 captureRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH);
@@ -456,6 +461,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         } catch (CameraAccessException e) {
             Log.e(TAG, "Configuration request could not be created " + e.getMessage());
             throw new RuntimeException(e);
+        } catch (NullPointerException e) {
+            Log.d(TAG, "Trying to start preview after camera shutdown - ignored.");
         }
 
         Log.d(TAG, "Preview analysis loop start method done");
@@ -481,7 +488,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             // Create builder
             try {
                 captureRequestBuilder = CameraBarcodeScanViewV2.this.cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            } catch (CameraAccessException e) {
+            } catch (CameraAccessException | IllegalStateException e) {
                 Log.e(TAG, "cannot use createCaptureRequest " + e);
                 cameraCaptureSession.close();
                 return;

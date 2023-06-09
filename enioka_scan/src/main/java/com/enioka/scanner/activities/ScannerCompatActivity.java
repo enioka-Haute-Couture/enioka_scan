@@ -272,7 +272,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected void onDestroy() {
         Log.i(LOG_TAG, "Scanner activity is being destroyed");
         super.onDestroy();
-        unbindService(connection);
+        if (serviceBound) {
+            unbindService(connection);
+        }
         serviceBound = false;
     }
 
@@ -504,6 +506,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     protected boolean anyScannerSupportsIllumination() {
+        if (scannerService == null) {
+            return true;
+        }
         for (final Scanner s : scannerService.getConnectedScanners()) {
             if (s.getIlluminationSupport() != null) {
                 return true;
@@ -513,6 +518,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     protected boolean anyScannerHasIlluminationOn() {
+        if (scannerService == null) {
+            return false;
+        }
         for (final Scanner s : scannerService.getConnectedScanners()) {
             if (s.getIlluminationSupport() != null && s.getIlluminationSupport().isIlluminationOn()) {
                 return true;

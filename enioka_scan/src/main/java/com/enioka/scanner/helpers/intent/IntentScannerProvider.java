@@ -55,7 +55,6 @@ public abstract class IntentScannerProvider implements ScannerProvider {
             }
 
             if (!found) {
-                cb.onProviderUnavailable(getKey());
                 compatible = false;
             }
         }

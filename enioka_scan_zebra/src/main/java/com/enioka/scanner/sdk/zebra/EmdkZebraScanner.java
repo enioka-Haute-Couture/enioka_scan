@@ -38,7 +38,7 @@ import java.util.Set;
 public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKManager.EMDKListener, com.symbol.emdk.barcode.Scanner.StatusListener, com.symbol.emdk.barcode.Scanner.DataListener {
     private final static String LOG_TAG = "ScannerZebra";
 
-    private Scanner selfScanner = this;
+    private final Scanner selfScanner = this;
     private boolean waitingForResult = false;
     private ScannerDataCallbackProxy dataCb = null;
     private ScannerStatusCallback statusCb = null;
@@ -162,7 +162,7 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
 
             // Parameters - symbologies
             ScannerConfig cfg = scanner.getConfig();
-            for(BarcodeType symbology: symbologies) {
+            for (BarcodeType symbology : symbologies) {
                 switch (symbology) {
                     case DIS25:
                         cfg.decoderParams.d2of5.enabled = true;
@@ -412,6 +412,7 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
             this.scanner = null;
         }
         if (this.emdkManager != null) {
+            Log.i(LOG_TAG, "Releasing EMDK service");
             this.emdkManager.release();
         }
         if (cb != null) {

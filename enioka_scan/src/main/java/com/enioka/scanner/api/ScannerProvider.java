@@ -40,7 +40,7 @@ public interface ScannerProvider {
         void connectionProgress(String providerKey, String scannerKey, String message);
 
         /**
-         * Called when the provider has dtermined it cannot run (is not available) on this device and should not be revived.
+         * Called when the provider has determined it cannot run (is not available) on this device and should not be revived.
          *
          * @param providerKey a unique key identifying the provider.
          */

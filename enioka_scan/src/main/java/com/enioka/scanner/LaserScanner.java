@@ -55,7 +55,8 @@ public final class LaserScanner {
     /**
      * Private constructor to prevent ever creating an instance from this class.
      */
-    private LaserScanner() {}
+    private LaserScanner() {
+    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,7 +133,7 @@ public final class LaserScanner {
         for (final ScannerProviderHolder provider : providers) {
             if (provider.getProvider().getKey().equals(SerialBtScannerProvider.PROVIDER_KEY)) {
                 // BT providers
-                providerKeys.addAll(((SerialBtScannerProvider)provider.getProvider()).getProviderCache());
+                providerKeys.addAll(((SerialBtScannerProvider) provider.getProvider()).getProviderCache());
             } else {
                 // Regular provider, add to the list
                 providerKeys.add(provider.getProvider().getKey());
@@ -264,6 +265,16 @@ public final class LaserScanner {
         }
         Collections.sort(sortedProviders, Collections.reverseOrder()); // priority then name
         Log.i(LOG_TAG, "There are " + providersExpectedToAnswerCount + " providers which are going to be invoked for fresh laser scanners");
+        for (ScannerProviderHolder sph : sortedProviders) {
+            Log.i(LOG_TAG, "\t" + sph.getProvider().getKey());
+        }
+
+        if (sortedProviders.isEmpty()) {
+            Log.i(LOG_TAG, "There are no laser scanners available after filtering and sorting");
+            handler.noScannerAvailable();
+            handler.endOfScannerSearch();
+            return;
+        }
 
         providersHavingAnswered.drainPermits();
         final ScannerProvider.ProviderCallback providerCallback = getProviderCallback(handler, options);
@@ -308,6 +319,8 @@ public final class LaserScanner {
 
     private static ScannerProvider.ProviderCallback getProviderCallback(final ScannerConnectionHandlerProxy handler, final ScannerSearchOptions options) {
         return new ScannerProvider.ProviderCallback() {
+            private final Set<String> providersHavingFailed = new HashSet<>();
+
             @Override
             public void onScannerCreated(String providerKey, String scannerKey, Scanner s) {
                 if (s == null) {
@@ -324,8 +337,6 @@ public final class LaserScanner {
                         scannerFound = true;
                     }
                 }
-
-                checkEnd(providerKey);
             }
 
             @Override
@@ -335,24 +346,27 @@ public final class LaserScanner {
 
             @Override
             public void onProviderUnavailable(String providerKey) {
+                if (!providersHavingFailed.add(providerKey)) {
+                    Log.e(LOG_TAG, "Scanner provider " + providerKey + " reports FOR THE SECOND TIME it is not compatible - ignored");
+                }
+
                 Log.i(LOG_TAG, "Scanner provider " + providerKey + " reports it is not compatible with the device and will be disabled");
                 handler.scannerConnectionProgress(providerKey, null, "No " + providerKey + " scanners available.");
 
                 // Remove the provider for ever - that way future searches are faster.
                 synchronized (LaserScanner.providers) {
-                    ScannerProviderHolder toRemove = null;
+                    List<ScannerProviderHolder> toRemove = new ArrayList<>();
                     for (ScannerProviderHolder sph : LaserScanner.providers) {
                         if (sph.getProvider().getKey().equals(providerKey)) {
-                            toRemove = sph;
-                            break;
+                            toRemove.add(sph);
                         }
                     }
-                    if (toRemove != null) {
-                        LaserScanner.providers.remove(toRemove);
+                    for (ScannerProviderHolder sph : toRemove) {
+                        LaserScanner.providers.remove(sph);
                     }
 
                     if (LaserScanner.providers.isEmpty()) {
-                        Log.i(LOG_TAG, "There are no laser scanners available at all");
+                        Log.i(LOG_TAG, "There are no laser scanners available at all as all providers have declared themselves unavailable on this device");
                         handler.noScannerAvailable();
                     }
                 }
@@ -373,6 +387,10 @@ public final class LaserScanner {
                 return btRegistry.isAlreadyConnected(device);
             }
 
+            /**
+             * Called when a provider is done searching (whatever the result). (and only then)
+             * @param providerKey the provider key
+             */
             private void checkEnd(String providerKey) {
                 // Free BT mutex - another BT provider may run. (copy set: concurrent usage otherwise)
                 for (ScannerProviderMeta psm : declaredProviders.values()) {

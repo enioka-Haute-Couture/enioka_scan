@@ -160,6 +160,14 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     protected synchronized void initProviderDiscovery() {
         Log.i(LOG_TAG, "(re)starting provider discovery!");
+        if (!LaserScanner.getProviderCache().isEmpty()) {
+            Log.d(LOG_TAG, "Cached providers are used");
+            if (firstBind && startScannerSearchOnFirstBind) {
+                this.initLaserScannerSearch();
+            }
+            return;
+        }
+
         LaserScanner.discoverProviders(this.getApplicationContext(), () -> {
             onStatusChanged(null, Status.SERVICE_PROVIDER_SEARCH_OVER); // TODO - 2022/03/02: ScannerStatusCallback may not be the appropriate way to communicate Service status
             for (final ScannerClient client : clients) {

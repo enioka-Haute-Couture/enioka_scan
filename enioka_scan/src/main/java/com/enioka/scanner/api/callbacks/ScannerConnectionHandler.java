@@ -25,12 +25,12 @@ public interface ScannerConnectionHandler {
     void scannerCreated(final String providerKey, final String scannerKey, final Scanner s);
 
     /**
-     * Called when there is no scanner available on the device.
+     * Called when there is no scanner available on the device. {@link #endOfScannerSearch()} is always called after this.
      */
     void noScannerAvailable();
 
     /**
-     * Called when the search for scanners in the different providers is over
+     * Called when the search for scanners in the different providers is over.
      */
     void endOfScannerSearch();
 }

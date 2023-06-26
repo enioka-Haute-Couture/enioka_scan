@@ -38,6 +38,7 @@ import com.enioka.scanner.sdk.camera.CameraBarcodeScanViewScanner;
 import com.enioka.scanner.service.ScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
+import com.enioka.scanner.service.ScannerServiceBinderHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -209,11 +210,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     protected Bundle getServiceInitExtras() {
-        Bundle res = new Bundle();
-        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_BT_BOOLEAN, false);
-        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, false);
-        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, false);
-        return res;
+        return ScannerServiceBinderHelper.defaultServiceConfiguration();
     }
 
     /**
@@ -229,6 +226,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             scannerService = binder.getService();
             serviceBound = true;
             scannerService.registerClient(ScannerCompatActivity.this);
+            scannerService.resume(); // may have been paused before bind by another activity.
         }
 
         @Override
@@ -244,15 +242,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         super.onResume();
 
         if (!enableScan) {
+            Log.i(LOG_TAG, "Resuming scanner activity with all scanning modes disabled");
             return;
         }
 
-        Log.i(LOG_TAG, "Resuming scanner activity - scanners will be (re)connected");
-
         if (goToCamera) {
+            Log.i(LOG_TAG, "Resuming scanner activity in camera mode");
             initCamera();
             return;
         }
+        Log.i(LOG_TAG, "Resuming scanner activity - scanners will be (re)connected");
 
         // Reset data fields
         if (findViewById(R.id.scanner_text_last_scan) != null) {
@@ -299,6 +298,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         Log.i(LOG_TAG, "Scanner activity is being destroyed");
         super.onDestroy();
         if (serviceBound) {
+            scannerService.unregisterClient(this);
             unbindService(connection);
         }
         serviceBound = false;

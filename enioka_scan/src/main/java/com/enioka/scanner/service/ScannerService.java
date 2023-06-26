@@ -110,6 +110,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.i(LOG_TAG, "ScannerService is receiving a new bind request - onBind");
         scannerSearchOptions.fromIntentExtras(intent);
 
         final Bundle extras = intent.getExtras();
@@ -129,10 +130,8 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         if (this.scanners.isEmpty()) {
             // Return the same scanners on each bind - do not go look again for them.
             this.initProviderDiscovery();
-        } else {
-            // They may have been paused before - we expect working scanners on bind.
-            this.resume();
         }
+
         return new LocalBinder();
     }
 

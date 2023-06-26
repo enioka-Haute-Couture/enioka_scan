@@ -175,6 +175,26 @@ It is then possible to use the [`ScannerServiceApi`][scanner-service-api] object
 
 Please remember to unbind the service when it is not needed anymore, as for any other service. This will often be in "onDestroy" hooks. Also, as this is a bound service, it is destroyed whenever it has no bound clients left. Many applications actually bind the service on startup onto the application context to be sure it is never destroyed and therefore is very quick to bind from anywhere, but this depends on the use-case and is not compulsory at all.
 
+If you want to bind the service inside your application class, a helper is provided to avoid boilerplate code that can be used as such:
+
+```java
+public class App extends Application {
+    ScannerServiceBinderHelper serviceBinder;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        serviceBinder = ScannerServiceBinderHelper.bind(this); // a second overload exists with a configuration Bundle.
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        serviceBinder.disconnect();
+    }
+}
+```
+
 Finally, there are a few Intent extra properties which can be set to control the behaviour of the service such as filters used in the scanner search.
 These can be found as static strings inside the [`ScannerServiceApi`][scanner-service-api] interface, and methods in the [`ScannerSearchOptions`][scanner-search-options] class help converting search parameters to and from those intent extras.
 

@@ -126,7 +126,13 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
             }
         }
 
-        this.initProviderDiscovery();
+        if (this.scanners.isEmpty()) {
+            // Return the same scanners on each bind - do not go look again for them.
+            this.initProviderDiscovery();
+        } else {
+            // They may have been paused before - we expect working scanners on bind.
+            this.resume();
+        }
         return new LocalBinder();
     }
 

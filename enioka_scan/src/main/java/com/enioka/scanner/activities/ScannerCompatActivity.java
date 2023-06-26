@@ -58,7 +58,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * Don't start camera mode, even if no lasers are available
      */
-    protected boolean laserModeOnly = true;
+    protected boolean laserModeOnly = false;
 
     /**
      * If set to false, ScannerCompatActivity will behave like an standard AppCompatActivity

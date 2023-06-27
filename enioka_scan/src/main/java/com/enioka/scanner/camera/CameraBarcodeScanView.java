@@ -54,10 +54,16 @@ public class CameraBarcodeScanView extends FrameLayout {
                 break;
         }
 
+        styledAttributes.recycle();
+
         setLayout(attrs);
     }
 
     private CameraApiLevel guessBestApiLevel() {
+        if (this.isInEditMode()) {
+            return CameraApiLevel.Camera2;
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
             CameraManager cameraManager = (CameraManager) getContext().getSystemService(Context.CAMERA_SERVICE);

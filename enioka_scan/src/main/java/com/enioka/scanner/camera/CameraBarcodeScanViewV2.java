@@ -97,6 +97,12 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         camPreviewSurfaceView = new SurfaceView(getContext());
         camPreviewSurfaceView.getHolder().addCallback(this); // this calls callback when ready.
         this.addView(camPreviewSurfaceView);
+
+        if (isInEditMode()) {
+            // In normal mode done in surface created callback, but no callback in edit mode.
+            computeCropRectangle();
+            addTargetView();
+        }
     }
 
     private void selectCameraParameters() {
@@ -385,7 +391,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         // This will simply select the camera
         selectCameraParameters();
-
         // Set the surface buffer size
         surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
 

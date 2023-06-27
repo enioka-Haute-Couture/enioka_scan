@@ -50,9 +50,6 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camer
 
     public CameraBarcodeScanViewV1(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        if (attributeSet.getAttributeValue(null, "readerMode") != null) {
-            readerMode = CameraReader.valueOf(attributeSet.getAttributeValue(null, "readerMode"));
-        }
         initOnce(context);
     }
     //

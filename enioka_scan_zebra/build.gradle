@@ -20,6 +20,10 @@ android {
     namespace 'com.enioka.scanner.sdk.zebra'
 }
 
+ext {
+    mavenArtifactIdD = "provider-cs-zebra"
+}
+
 allprojects {
     repositories {
         google()

@@ -22,11 +22,11 @@ jobs:
       - name: Build
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: enioka_scan:build
+          arguments: build
       - name: Publish the library to MavenCentral
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: enioka_scan:publish
+          arguments: publish
         env:
           OSSRH_LOGIN: ${{ secrets.OSSRH_LOGIN }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}

@@ -29,18 +29,18 @@ dependencies {
     // Reference our own library, directly compiled from its project
     implementation project(':enioka_scan');
 
-    if (rootProject.ext.withHoneywell)
+    if (gradle.ext.withHoneywell)
         implementation project(':enioka_scan_honeywell');
 
-    if (rootProject.ext.withKoamtac)
+    if (gradle.ext.withKoamtac)
         implementation project(':enioka_scan_koamtac');
 
-    if (rootProject.ext.withZebra) {
+    if (gradle.ext.withZebra) {
         implementation project(':enioka_scan_zebra');
         implementation fileTree(dir: '../enioka_scan_zebra/libs', include: ['*.aar'])
     }
 
-    if (rootProject.ext.withM3)
+    if (gradle.ext.withM3)
         implementation project(':enioka_scan_m3');
 
     // Android stuff

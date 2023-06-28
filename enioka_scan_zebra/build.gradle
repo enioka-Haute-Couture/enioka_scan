@@ -26,9 +26,21 @@ ext {
 
 repositories {
     maven {
+        name = "zebra"
         url = "https://zebratech.jfrog.io/artifactory/EMDK-Android/"
     }
+    if (gradle.ext.gpr != null) {
+        maven {
+            name = "github"
+            url = "https://maven.pkg.github.com/enioka-Haute-Couture/enioka_scan_drivers"
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GH_DRIVER_REPOSITORY_USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("GH_DRIVER_REPOSITORY_TOKEN")
+            }
+        }
+    }
 }
+
 
 dependencies {
     // We need the APIs
@@ -38,7 +50,11 @@ dependencies {
     implementation 'com.android.support:support-annotations:28.0.0'
 
     // Libs contains Zebra BT SDK (barcode_scanner_library_vX.X.X.X.aar).
-    compileOnly fileTree(dir: 'libs', include: ['*.aar'])
+    if (gradle.ext.gpr != null) {
+        compileOnly 'com.enioka.hc.external:zebra-bt-driver:2.5.1'
+    } else {
+        compileOnly fileTree(dir: 'libs', include: ['*.aar'])
+    }
 
     // Symbol/Zebra EMDK is actually provided by the platform, so exclude from run path
     compileOnly 'com.symbol:emdk:9.1.1'

@@ -1,28 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-def excludedSubprojects = []
-["Honeywell", "Koamtac", "Zebra", "M3"].each { sdkName ->
-    def propertyName = "with" + sdkName
-    def subprojectName = "enioka_scan_" + sdkName.toLowerCase()
-
-    def path = subprojectName + "/libs"
-    def files = file(path).list()
-    if (files.any { it.endsWith(".jar") || it.endsWith(".aar") }) {
-        ext.setProperty(propertyName, true)
-    } else {
-        ext.setProperty(propertyName, false)
-        excludedSubprojects.add(subprojectName)
-    }
-}
-
-gradle.taskGraph.whenReady {
-    gradle.taskGraph.allTasks.each {
-        if (it.project.name in excludedSubprojects) {
-            it.onlyIf { false }
-        }
-    }
-}
-
 buildscript {
     repositories {
         google()

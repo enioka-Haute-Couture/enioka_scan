@@ -1,1 +1,32 @@
-include ':enioka_scan', 'enioka_scan_mock', ':enioka_scan_honeywell', ':enioka_scan_koamtac', ':enioka_scan_zebra', ':enioka_scan_m3', ':demoscannerapp'
+include ':enioka_scan', 'enioka_scan_mock', ':demoscannerapp'
+
+// Projects which can only be built if drivers are present inside /libs
+["Honeywell", "Koamtac", "M3"].each { sdkName ->
+    def propertyName = "with" + sdkName
+    def subprojectName = "enioka_scan_" + sdkName.toLowerCase()
+
+    def path = subprojectName + "/libs"
+    def files = file(path).list()
+    if (files.any { it.endsWith(".jar") || it.endsWith(".aar") }) {
+        gradle.ext.setProperty(propertyName, true)
+        include ":" + subprojectName
+    } else {
+        gradle.ext.setProperty(propertyName, false)
+    }
+}
+
+// Projects with either local libs or inside a private Maven repository
+gradle.ext.gpr = ext.find('gpr.user') ?: System.getenv("GITHUB_DRIVER_REPOSITORY_USERNAME")
+["Zebra"].each { sdkName ->
+    def propertyName = "with" + sdkName
+    def subprojectName = "enioka_scan_" + sdkName.toLowerCase()
+
+    def path = subprojectName + "/libs"
+    def files = file(path).list()
+    if (files.any { it.endsWith(".jar") || it.endsWith(".aar") } || gradle.ext.gpr != null) {
+        gradle.ext.setProperty(propertyName, true)
+        include ":" + subprojectName
+    } else {
+        gradle.ext.setProperty(propertyName, false)
+    }
+}

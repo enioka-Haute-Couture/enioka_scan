@@ -1,0 +1,77 @@
+//apply plugin: 'com.android.library'
+
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+ext {
+    mavenArtifactId = null
+}
+
+android {
+    namespace 'com.enioka.scanner'
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+signing {
+    useInMemoryPgpKeys(
+            System.getenv("SIGN_KEYID"),
+            System.getenv("SIGN_KEY"),
+            System.getenv("SIGN_PASSWORD")
+    )
+    sign publishing.publications
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = System.getenv("OSSRH_LOGIN")
+                password = System.getenv("OSSRH_PASSWORD")
+            }
+        }
+    }
+
+    if (project.ext.mavenArtifactId != null) {
+        release(MavenPublication) {
+            groupId 'com.enioka.scanner'
+            artifactId project.ext.mavenArtifactId
+            version System.getenv("LIB_VERSION")
+
+            from components.release
+
+            pom {
+                name = 'Enioka Scan - ' + project.name
+                description = project.description
+                url = 'https://github.com/enioka/enioka_scan'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:github.com/enioka/enioka_scan.git'
+                    developerConnection = 'scm:git:ssh://github.com/enioka/enioka_scan.git'
+                    url = 'https://github.com/enioka/enioka_scan/tree/master'
+                }
+                developers {
+                    developer {
+                        id = 'mag'
+                        name = 'Marc-Antoine Gouillart'
+                        email = 'mag@enioka.com'
+                    }
+                }
+            }
+        }
+    }
+}

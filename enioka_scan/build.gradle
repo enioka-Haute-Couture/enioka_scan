@@ -18,6 +18,13 @@ android {
         disable 'ExpiredTargetSdkVersion'
     }
     namespace 'com.enioka.scanner'
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 apply plugin: 'maven-publish'

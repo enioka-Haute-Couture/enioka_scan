@@ -29,46 +29,50 @@ signing {
     sign publishing.publications
 }
 
-publishing {
-    repositories {
-        maven {
-            name = "OSSRH"
-            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                username = System.getenv("OSSRH_LOGIN")
-                password = System.getenv("OSSRH_PASSWORD")
+afterEvaluate {
+    publishing {
+        repositories {
+            maven {
+                name = "OSSRH"
+                url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username = System.getenv("OSSRH_LOGIN")
+                    password = System.getenv("OSSRH_PASSWORD")
+                }
             }
         }
-    }
 
-    if (project.ext.mavenArtifactId != null) {
-        release(MavenPublication) {
-            groupId 'com.enioka.scanner'
-            artifactId project.ext.mavenArtifactId
-            version System.getenv("LIB_VERSION")
+        publications {
+            if (project.ext.mavenArtifactId != null) {
+                release(MavenPublication) {
+                    groupId 'com.enioka.scanner'
+                    artifactId project.ext.mavenArtifactId
+                    version System.getenv("LIB_VERSION")
 
-            from components.release
+                    from components.release
 
-            pom {
-                name = 'Enioka Scan - ' + project.name
-                description = project.description
-                url = 'https://github.com/enioka/enioka_scan'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:github.com/enioka/enioka_scan.git'
-                    developerConnection = 'scm:git:ssh://github.com/enioka/enioka_scan.git'
-                    url = 'https://github.com/enioka/enioka_scan/tree/master'
-                }
-                developers {
-                    developer {
-                        id = 'mag'
-                        name = 'Marc-Antoine Gouillart'
-                        email = 'mag@enioka.com'
+                    pom {
+                        name = 'Enioka Scan - ' + project.name
+                        description = project.description
+                        url = 'https://github.com/enioka/enioka_scan'
+                        licenses {
+                            license {
+                                name = 'The Apache License, Version 2.0'
+                                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            }
+                        }
+                        scm {
+                            connection = 'scm:git:github.com/enioka/enioka_scan.git'
+                            developerConnection = 'scm:git:ssh://github.com/enioka/enioka_scan.git'
+                            url = 'https://github.com/enioka/enioka_scan/tree/master'
+                        }
+                        developers {
+                            developer {
+                                id = 'mag'
+                                name = 'Marc-Antoine Gouillart'
+                                email = 'mag@enioka.com'
+                            }
+                        }
                     }
                 }
             }

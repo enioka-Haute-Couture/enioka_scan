@@ -80,7 +80,7 @@ dependencies {
 
     compile 'me.dm7.barcodescanner:zbar:1.8.3'
 
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:appcompat-v7:28.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }
 ```

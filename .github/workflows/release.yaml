@@ -23,6 +23,9 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
+        env:
+          GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
+          GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
       - name: Publish the library to MavenCentral
         uses: gradle/gradle-build-action@v2
         with:
@@ -34,6 +37,8 @@ jobs:
           SIGN_KEY: ${{ secrets.SIGN_KEY }}
           SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
           LIB_VERSION: ${{ steps.get_version.outputs.VERSION }}
+          GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
+          GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
       - name: Create a GitHub release
         id: create_release
         uses: actions/create-release@v1

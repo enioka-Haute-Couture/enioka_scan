@@ -21,27 +21,26 @@ android {
 }
 
 ext {
-    mavenArtifactIdD = "provider-cs-zebra"
+    mavenArtifactId = "provider-cs-zebra"
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter()
+repositories {
+    maven {
+        url = "https://zebratech.jfrog.io/artifactory/EMDK-Android/"
     }
 }
 
 dependencies {
+    // We need the APIs
     implementation project(':enioka_scan')
 
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    // Linter helpers
+    implementation 'com.android.support:support-annotations:28.0.0'
 
-    // Libs contains Zebra BT SDK. This lib has to be included as it is not provided by the device.
+    // Libs contains Zebra BT SDK (barcode_scanner_library_vX.X.X.X.aar).
     compileOnly fileTree(dir: 'libs', include: ['*.aar'])
 
-    // Symbol/Zebra EMDK is actually provided by the platform, so exclude from build path
+    // Symbol/Zebra EMDK is actually provided by the platform, so exclude from run path
     compileOnly 'com.symbol:emdk:9.1.1'
 
     // Test things (useless for now)

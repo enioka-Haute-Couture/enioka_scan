@@ -4,6 +4,13 @@ plugins {
     id 'signing'
 }
 
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
 ext {
     mavenArtifactId = null
 }

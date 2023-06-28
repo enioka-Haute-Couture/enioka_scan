@@ -31,13 +31,6 @@ task androidSourcesJar(type: Jar) {
     from android.sourceSets.main.kotlin.srcDirs
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
 dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

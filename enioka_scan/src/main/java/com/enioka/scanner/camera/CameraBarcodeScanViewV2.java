@@ -578,34 +578,46 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             return;
         }
 
-        // Sanity check
-        assert (image.getPlanes().length == 3);
-        //Log.d(TAG, image.getWidth() + " - " + image.getHeight());
-
         // Get luminance buffer.
-        // TODO: reuse buffers.
-        ByteBuffer buffer = image.getPlanes()[0].getBuffer(); // Y.
-        byte[] bytes = new byte[buffer.remaining()];
-        buffer.get(bytes);
+        try {
+            // Sanity check
+            assert (image.getPlanes().length == 3);
 
-        FrameAnalysisContext ctx = new FrameAnalysisContext();
-        ctx.frame = bytes;
-        ctx.camViewMeasuredWidth = camPreviewSurfaceView.getMeasuredWidth();
-        ctx.camViewMeasuredHeight = camPreviewSurfaceView.getMeasuredHeight();
-        ctx.vertical = DisplayUtils.getScreenOrientation(getContext()) == 1;
-        ctx.cameraHeight = resolution.currentPreviewResolution.y;
-        ctx.cameraWidth = resolution.currentPreviewResolution.x;
-        ctx.x1 = cropRect.left;
-        ctx.x2 = cropRect.right;
-        ctx.x3 = ctx.x2;
-        ctx.x4 = ctx.x1;
-        ctx.y1 = cropRect.top;
-        ctx.y2 = ctx.y1;
-        ctx.y3 = cropRect.bottom;
-        ctx.y4 = ctx.y3;
-        ctx.image = image;
+            ByteBuffer buffer = image.getPlanes()[0].getBuffer(); // Y.
+            byte[] bytes = new byte[buffer.remaining()]; // TODO: reuse buffers.
+            buffer.get(bytes);
 
-        frameAnalyser.handleFrame(ctx);
+            FrameAnalysisContext ctx = new FrameAnalysisContext();
+            ctx.frame = bytes;
+            ctx.camViewMeasuredWidth = camPreviewSurfaceView.getMeasuredWidth();
+            ctx.camViewMeasuredHeight = camPreviewSurfaceView.getMeasuredHeight();
+            ctx.vertical = DisplayUtils.getScreenOrientation(getContext()) == 1;
+            ctx.cameraHeight = resolution.currentPreviewResolution.y;
+            ctx.cameraWidth = resolution.currentPreviewResolution.x;
+            ctx.x1 = cropRect.left;
+            ctx.x2 = cropRect.right;
+            ctx.x3 = ctx.x2;
+            ctx.x4 = ctx.x1;
+            ctx.y1 = cropRect.top;
+            ctx.y2 = ctx.y1;
+            ctx.y3 = cropRect.bottom;
+            ctx.y4 = ctx.y3;
+            ctx.image = image;
+
+            frameAnalyser.handleFrame(ctx);
+        } catch (IllegalStateException e) {
+            if (e.getMessage().equals("buffer is inaccessible")) {
+                // This happens due to hardware bugs, and should be ignored.
+                Log.w(TAG, "buffer is inaccessible - skipping frame", e);
+                try {
+                    image.close();
+                } catch (Exception e2) {
+                    // We do not care - what is important is to try to give the buffer back
+                }
+            } else {
+                throw e;
+            }
+        }
     };
 
 

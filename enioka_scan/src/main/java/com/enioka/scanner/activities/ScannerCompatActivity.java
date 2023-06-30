@@ -160,6 +160,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         super.onStart();
         Log.d(LOG_TAG, "Scanner activity is starting");
 
+        if (!enableScan) {
+            return;
+        }
+
         if (canUseBluetooth()) {
             bindAndStartService();
         } else {
@@ -305,7 +309,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void setViewContent() {
-        if (goToCamera && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (enableScan && goToCamera && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             // Can only add/open a camera view if camera is allowed.
             setContentView(layoutIdCamera);
         } else {
@@ -441,7 +445,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     public void onScannerInitEnded(int scannerCount) {
         Log.i(LOG_TAG, "Activity can now use all received scanners (" + scannerCount + ")");
 
-        if (scannerCount == 0 && !laserModeOnly) {
+        if (scannerCount == 0 && !laserModeOnly && enableScan) {
             // In that case try to connect to a camera.
             initCamera();
         }

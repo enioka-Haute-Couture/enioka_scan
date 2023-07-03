@@ -11,6 +11,7 @@ import android.util.Log;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerProvider;
 import com.enioka.scanner.api.ScannerSearchOptions;
+import com.enioka.scanner.helpers.Common;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,10 +61,7 @@ public abstract class IntentScannerProvider implements ScannerProvider {
         }
 
         if (intentToTest != null) {
-            Intent i = new Intent(intentToTest);
-            PackageManager pkManager = ctx.getPackageManager();
-            List<ResolveInfo> services = pkManager.queryIntentServices(i, PackageManager.GET_META_DATA);
-            if (services.isEmpty()) {
+            if (!Common.checkIntentListener(intentToTest, ctx)) {
                 compatible = false;
             }
         }

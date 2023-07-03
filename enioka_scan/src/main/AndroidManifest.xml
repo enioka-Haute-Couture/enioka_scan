@@ -186,4 +186,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- For API <= 28 -->
 
     <uses-permission android:name="com.honeywell.decode.permission.DECODE" /> <!-- Needed by Honeywell OSS SDK for integrated scanners -->
+
+    <queries>
+        <package android:name="com.honeywell.decode.DecodeService" />
+        <package android:name="kr.co.bluebird.android.bbapi.action.BARCODE_OPEN" />
+    </queries>
 </manifest>

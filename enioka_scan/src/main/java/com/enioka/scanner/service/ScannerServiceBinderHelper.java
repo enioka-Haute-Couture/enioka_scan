@@ -39,7 +39,7 @@ public class ScannerServiceBinderHelper {
     public static Bundle defaultServiceConfiguration() {
         Bundle res = new Bundle();
         res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_BT_BOOLEAN, false);
-        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, false);
+        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, true);
         res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, false);
 
         return res;

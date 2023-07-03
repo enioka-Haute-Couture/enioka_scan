@@ -14,8 +14,8 @@ public class BluebirdProvider extends IntentScannerProvider {
 
     @Override
     protected void configureProvider() {
-        //intentToTest = "kr.co.bluebird.android.bbapi.action.BARCODE_OPEN";
-        appPackageToTest = "kr.co.bluebird.android.bbsettings";
+        intentToTest = "kr.co.bluebird.android.bbapi.action.BARCODE_OPEN";
+        //appPackageToTest = "kr.co.bluebird.android.bbsettings";
     }
 
     @Override

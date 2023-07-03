@@ -7,7 +7,7 @@ import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.helpers.intent.IntentScannerProvider;
 
 /**
- * Provider for Bluebird integrated scanners through an intent service.
+ * Provider for Proglove integrated scanners through an intent service.
  */
 public class ProgloveProvider extends IntentScannerProvider {
     public static final String PROVIDER_KEY = "ProgloveProvider";

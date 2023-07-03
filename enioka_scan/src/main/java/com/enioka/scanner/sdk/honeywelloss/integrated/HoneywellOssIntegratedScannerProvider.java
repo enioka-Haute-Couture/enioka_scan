@@ -14,7 +14,7 @@ public class HoneywellOssIntegratedScannerProvider extends IntentScannerProvider
 
     @Override
     public void configureProvider() {
-        specificDevices.add("EDA52");
+        intentToTest = "com.honeywell.decode.DecodeService";
     }
 
     @Override

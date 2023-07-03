@@ -76,6 +76,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     }
 
     private void init() {
+        Log.d(TAG, "Camera2 specific initialization start");
+
         // Create resolution manager.
         resolution = new Resolution(getContext());
 
@@ -90,7 +92,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     }
 
     private void initLayout() {
+        Log.d(TAG, "Creating layout");
+
         if (this.camPreviewSurfaceView != null) {
+            Log.d(TAG, "Layout is already initialized, nothing to do");
             return;
         }
 
@@ -277,6 +282,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     }
 
     private void openCamera() {
+        Log.d(TAG, "Trying to open camera from CameraManager");
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             throw new RuntimeException("missing use camera permission");
         }
@@ -293,14 +299,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     }
 
     private synchronized void closeCamera() {
-        if (null != captureSession) {
-            captureSession.close();
-            captureSession = null;
-        }
-        if (null != cameraDevice) {
-            cameraDevice.close();
-            cameraDevice = null;
-        }
         if (null != imageReader) {
             imageReader.close();
             imageReader = null;
@@ -309,7 +307,18 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             frameAnalyser.close();
             frameAnalyser = null;
         }
-        stopBackgroundThread();
+        if (null != captureSession) {
+            captureSession.close();
+            captureSession = null;
+        }
+        if (null != cameraDevice) {
+            cameraDevice.close();
+            cameraDevice = null;
+        }
+
+        if (null != backgroundThread) {
+            stopBackgroundThread();
+        }
     }
 
     @Override
@@ -389,19 +398,23 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        Log.d(TAG, "Preview surface created, camera will be initialized soon");
+
         // This will simply select the camera
         selectCameraParameters();
         // Set the surface buffer size
         surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
 
-        // Go for camera
+        // Go for camera. Camera object is given in callback.
         if (!isInEditMode()) {
             openCamera();
         }
 
         // Add targeting rectangle (must be done after everything is drawn and dimensions are known)
         computeCropRectangle();
-        addTargetView();
+        if (this.targetView == null) {
+            addTargetView();
+        }
 
         // Preview is started in onChange, after camera is plugged in.
     }
@@ -427,18 +440,22 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     private final CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
+            Log.v(TAG, "CameraDevice.StateCallback.onOpened");
             // Start preview when camera is actually opened
             CameraBarcodeScanViewV2.this.cameraDevice = cameraDevice;
+            startPreview();
         }
 
         @Override
         public void onDisconnected(@NonNull CameraDevice cameraDevice) {
+            Log.v(TAG, "CameraDevice.StateCallback.onDisconnected");
             cameraDevice.close();
             CameraBarcodeScanViewV2.this.cameraDevice = null;
         }
 
         @Override
         public void onError(@NonNull CameraDevice cameraDevice, int i) {
+            Log.v(TAG, "CameraDevice.StateCallback.onError");
             cameraDevice.close();
             CameraBarcodeScanViewV2.this.cameraDevice = null;
             Toast toast = Toast.makeText(getContext(), "camera error " + i, Toast.LENGTH_LONG);
@@ -446,7 +463,23 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         }
     };
 
+    /**
+     * Try to start the preview. Fails silently if surface or camera are not ready yet.
+     */
     private void startPreview() {
+        if (this.camPreviewSurfaceView == null) {
+            Log.d(TAG, "Preview surface not ready yet");
+            return;
+        }
+        if (this.cameraDevice == null) {
+            Log.d(TAG, "Camera device not ready yet");
+            return;
+        }
+        if (this.imageReader != null) {
+            Log.d(TAG, "Image reader already created");
+            return;
+        }
+
         Log.i(TAG, "Initializing or reinitializing preview analysis loop");
 
         //this.camPreviewSurfaceView.getHolder().setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
@@ -468,6 +501,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             throw new RuntimeException(e);
         } catch (NullPointerException e) {
             Log.d(TAG, "Trying to start preview after camera shutdown - ignored.");
+            return;
         }
 
         Log.d(TAG, "Preview analysis loop start method done");
@@ -533,8 +567,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             try {
                 captureSession.setRepeatingRequest(CameraBarcodeScanViewV2.this.captureRequest, null, backgroundHandler);
             } catch (CameraAccessException | IllegalStateException e) {
-                Log.w(TAG, "Camera loop start has failed, this is usually due to changing resolution too fast. Error was: " + e.getMessage());
-                e.printStackTrace();
+                Log.w(TAG, "Camera loop start has failed, this is usually due to changing resolution too fast. Error was: " + e.getMessage(), e);
+                CameraBarcodeScanViewV2.this.closeCamera();
             }
         }
 
@@ -553,6 +587,9 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         @Override
         public void onReady(@NonNull CameraCaptureSession session) {
             Log.d(TAG, "Capture session is ready " + session.hashCode());
+            if (frameAnalyser == null) {
+                reinitialiseFrameAnalyser();
+            }
         }
 
         @Override
@@ -571,7 +608,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         try {
             image = reader.acquireLatestImage();
         } catch (IllegalStateException e) {
-            Log.w(TAG, "Discarding image as all analysers are busy");
+            Log.w(TAG, "Discarding image as all analysers are busy", e);
             return;
         }
         if (image == null) {
@@ -614,6 +651,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
                 } catch (Exception e2) {
                     // We do not care - what is important is to try to give the buffer back
                 }
+            } else if (e.getMessage().equals("Image is already closed")) {
+                // Ignore - happens when we close the camera on some devices.
             } else {
                 throw e;
             }

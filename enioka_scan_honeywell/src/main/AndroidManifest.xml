@@ -12,6 +12,10 @@
             android:exported="false"
             tools:ignore="Instantiatable">
 
+            <meta-data
+                android:name="intent"
+                android:value="true" />
+
             <intent-filter>
                 <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
             </intent-filter>

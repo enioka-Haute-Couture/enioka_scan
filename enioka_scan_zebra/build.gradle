@@ -31,16 +31,6 @@ repositories {
         name = "zebra"
         url = "https://zebratech.jfrog.io/artifactory/EMDK-Android/"
     }
-    if (gradle.ext.gpr != null) {
-        maven {
-            name = "github"
-            url = "https://maven.pkg.github.com/enioka-Haute-Couture/enioka_scan_drivers"
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GH_DRIVER_REPOSITORY_USERNAME")
-                password = project.findProperty("gpr.key") ?: System.getenv("GH_DRIVER_REPOSITORY_TOKEN")
-            }
-        }
-    }
 }
 
 

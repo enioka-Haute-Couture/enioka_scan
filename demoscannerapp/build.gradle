@@ -29,8 +29,10 @@ dependencies {
     // Reference our own library, directly compiled from its project
     implementation project(':enioka_scan');
 
-    if (gradle.ext.withHoneywell)
+    if (gradle.ext.withHoneywell) {
         implementation project(':enioka_scan_honeywell');
+        implementation fileTree(dir: '../enioka_scan_honeywell/libs', include: ['*.aar']);
+    }
 
     if (gradle.ext.withKoamtac)
         implementation project(':enioka_scan_koamtac');

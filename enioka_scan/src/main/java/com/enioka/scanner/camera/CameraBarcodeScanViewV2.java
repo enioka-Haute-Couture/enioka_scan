@@ -291,6 +291,11 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         if (manager == null) {
             throw new RuntimeException("cannot use Camera2 API on this device - null CameraManager");
         }
+
+        if (backgroundThread == null) {
+            startBackgroundThread();
+        }
+
         try {
             manager.openCamera(this.cameraId, this.stateCallback, backgroundHandler);
         } catch (CameraAccessException e) {
@@ -299,34 +304,26 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     }
 
     private synchronized void closeCamera() {
-        if (null != imageReader) {
-            imageReader.close();
-            imageReader = null;
-        }
-        if (null != frameAnalyser) {
-            frameAnalyser.close();
-            frameAnalyser = null;
-        }
+        Log.d(TAG, "Starting camera release");
         if (null != captureSession) {
+            // This should not be needed, as doc states session is closed when camera is closed but anyway...
+            // So we actually have reversed logics: session's closing closes in turn the camera.
+            Log.d(TAG, " * Closing camera capture session");
+
             captureSession.close();
             captureSession = null;
         }
-        if (null != cameraDevice) {
-            cameraDevice.close();
-            cameraDevice = null;
-        }
 
-        if (null != backgroundThread) {
-            stopBackgroundThread();
-        }
+        // capture session is closed above.
+        // capture session onClose callback closes image reader
+        // capture session onClose callback closes camera
+        // camera onClose callback closes backgroundThread
+        // camera onClose callback closes analyzers
     }
 
     @Override
     public void cleanUp() {
-        if (cameraDevice != null) {
-            pauseCamera();
-            cameraDevice.close();
-        }
+        // Do not do anything. Cleaning up is actually triggered by destroying the surface view. No need for manual call.
     }
 
     public void pauseCamera() {
@@ -354,8 +351,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             } else {
                 captureRequestBuilder.set(CaptureRequest.FLASH_MODE, null);
             }
-            captureSession.stopRepeating();
-            captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, backgroundHandler);
+            if (captureSession != null) {
+                captureSession.stopRepeating();
+                captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, backgroundHandler);
+            }
             isTorchOn = value;
         } catch (CameraAccessException e) {
             isTorchOn = false;
@@ -382,13 +381,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
      */
     private void stopBackgroundThread() {
         backgroundThread.quitSafely();
-        try {
-            backgroundThread.join();
-            backgroundThread = null;
-            backgroundHandler = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        backgroundThread = null;
+        backgroundHandler = null;
     }
 
 
@@ -454,8 +448,27 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         }
 
         @Override
+        public void onClosed(@NonNull CameraDevice camera) {
+            Log.v(TAG, "CameraDevice.StateCallback.onClosed");
+            super.onClosed(camera);
+
+            if (null != backgroundThread) {
+                Log.d(TAG, " * Background camera thread is closing");
+                stopBackgroundThread();
+            }
+
+            if (null != frameAnalyser) {
+                Log.d(TAG, " * Closing analyzers");
+                frameAnalyser.close();
+                frameAnalyser = null;
+            }
+
+            Log.i(TAG, "Camera scanner view has finished releasing all camera resources");
+        }
+
+        @Override
         public void onError(@NonNull CameraDevice cameraDevice, int i) {
-            Log.v(TAG, "CameraDevice.StateCallback.onError");
+            Log.e(TAG, "CameraDevice.StateCallback.onError on device " + i);
             cameraDevice.close();
             CameraBarcodeScanViewV2.this.cameraDevice = null;
             Toast toast = Toast.makeText(getContext(), "camera error " + i, Toast.LENGTH_LONG);
@@ -521,6 +534,11 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             // Only now redraw surface (otherwise deadlock)
             //CameraBarcodeScanViewV2.this.camPreviewSurfaceView.getHolder().setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
 
+            // We need our threads
+            if (frameAnalyser == null) {
+                reinitialiseFrameAnalyser();
+            }
+
             // If here, preview session is open and we can start the actual preview.
             CameraBarcodeScanViewV2.this.captureSession = cameraCaptureSession;
 
@@ -570,6 +588,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
                 Log.w(TAG, "Camera loop start has failed, this is usually due to changing resolution too fast. Error was: " + e.getMessage(), e);
                 CameraBarcodeScanViewV2.this.closeCamera();
             }
+
+            Log.i(TAG, "Camera repeating capture request was set up");
         }
 
         @Override
@@ -586,15 +606,22 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
         @Override
         public void onReady(@NonNull CameraCaptureSession session) {
-            Log.d(TAG, "Capture session is ready " + session.hashCode());
-            if (frameAnalyser == null) {
-                reinitialiseFrameAnalyser();
-            }
+            Log.d(TAG, "Capture session has nothing to process " + session.hashCode());
         }
 
         @Override
         public void onClosed(@NonNull CameraCaptureSession session) {
             Log.i(TAG, "Capture session has closed " + session.hashCode());
+            if (imageReader != null) {
+                Log.d(TAG, " * ImageReader closing");
+                imageReader.close();
+                imageReader = null;
+            }
+            captureSession = null;
+
+            Log.d(TAG, " * Camera device closing");
+            cameraDevice.close();
+            cameraDevice = null;
         }
     };
 
@@ -608,7 +635,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         try {
             image = reader.acquireLatestImage();
         } catch (IllegalStateException e) {
-            Log.w(TAG, "Discarding image as all analysers are busy", e);
+            Log.w(TAG, "Too many images being borrowed from reader", e);
             return;
         }
         if (image == null) {
@@ -654,6 +681,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             } else if (e.getMessage().equals("Image is already closed")) {
                 // Ignore - happens when we close the camera on some devices.
             } else {
+                // Just crash
                 throw e;
             }
         }

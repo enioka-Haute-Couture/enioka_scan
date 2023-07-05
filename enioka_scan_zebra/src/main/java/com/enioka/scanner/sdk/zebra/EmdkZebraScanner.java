@@ -228,7 +228,7 @@ public class EmdkZebraScanner implements Scanner, Scanner.WithBeepSupport, EMDKM
                 case IDLE:
                     statusStr = r.getString(R.string.scanner_status_PAUSED);
 
-                    if (waitingForResult) {
+                    if (waitingForResult && !scanner.isReadPending()) {
                         // Happens when the user has pressed the button, then did not scan anything. Rearm.
                         try {
                             scanner.read();

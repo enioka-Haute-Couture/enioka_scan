@@ -18,9 +18,10 @@ public class KoamtacScannerProvider implements ScannerProvider {
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
         try {
-            this.getClassLoader().loadClass("koamtac.kdc.sdk.KDCReader");
+            this.getClass().getClassLoader().loadClass("koamtac.kdc.sdk.KDCReader");
         } catch (ClassNotFoundException e) {
             cb.onProviderUnavailable(PROVIDER_KEY);
+            return;
         }
         //KDCReader.EnableDebug(KDCConstants.DebugCategory.ALL_CATEGORY, true);
 

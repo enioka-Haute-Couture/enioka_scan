@@ -1,7 +1,7 @@
 include ':enioka_scan', 'enioka_scan_mock', ':demoscannerapp'
 
 // Projects which can only be built if drivers are present inside /libs
-["Koamtac", "M3"].each { sdkName ->
+["M3"].each { sdkName ->
     def propertyName = "with" + sdkName
     def subprojectName = "enioka_scan_" + sdkName.toLowerCase()
 
@@ -17,7 +17,7 @@ include ':enioka_scan', 'enioka_scan_mock', ':demoscannerapp'
 
 // Projects with either local libs or inside a private Maven repository
 gradle.ext.gpr = ext.find('gpr.user') ?: System.getenv("GH_DRIVER_REPOSITORY_USERNAME")
-["Zebra", "Honeywell"].each { sdkName ->
+["Zebra", "Honeywell", "Koamtac"].each { sdkName ->
     def propertyName = "with" + sdkName
     def subprojectName = "enioka_scan_" + sdkName.toLowerCase()
 

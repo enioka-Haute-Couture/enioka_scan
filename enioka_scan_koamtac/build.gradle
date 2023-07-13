@@ -1,4 +1,6 @@
-apply plugin: 'com.android.library'
+apply plugin: 'scanner.published-library'
+
+description 'Scanner provider for Koamtac devices using the official KDC driver (not provided)'
 
 android {
     compileSdkVersion 28
@@ -20,22 +22,22 @@ android {
     namespace 'com.enioka.scanner.sdk.koamtac'
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter()
-    }
+ext {
+    mavenArtifactId = "provider-cs-koamtac"
 }
 
 dependencies {
     implementation project(':enioka_scan')
 
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    // Linter helpers
+    implementation 'com.android.support:support-annotations:28.0.0'
 
     // Libs contains Koamtac SDK. This lib has to be included as it is not provided by the device.
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    if (gradle.ext.gpr != null) {
+        compileOnly 'com.enioka.hc.external:koamtac-kdc-driver:3.05.10'
+    } else {
+        compileOnly fileTree(dir: 'libs', include: ['*.jar'])
+    }
 
     // Test things (useless for now)
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {

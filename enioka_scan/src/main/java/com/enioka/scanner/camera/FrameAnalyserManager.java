@@ -14,6 +14,7 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Holder for analyser thread pool.
@@ -52,9 +53,19 @@ class FrameAnalyserManager {
     private String latestBarcodeRead = "";
     private static final int DOUBLE_READ_THRESHOLD_MS = 500;
 
-    // Analyser pool
+    /**
+     * Analyzer pool.
+     */
     private final Queue<FrameAnalyser> analysers = new ArrayDeque<>(NUMBER_OF_CORES);
-    private final BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(2 * NUMBER_OF_CORES, false);
+    /**
+     * Entry queue. There at most as many buffers waiting for analysis as there are workers.
+     * (corresponds to the worst case when all workers fiish analyss at the same time and require an new buffer to process)
+     * <br><br>This queue is key to uncouple the rate of buffer production (camera preview FPS) and
+     * the analysis rate (depending on CPU power) - buffers too many are simply discarded and we
+     * skip analysing frames if the camera goes too fast for our analyzers to keep up.
+     */
+    private final BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(NUMBER_OF_CORES, false);
+
 
     FrameAnalyserManager(ScannerCallback parent, Resolution bag, CameraReader readerToUse) {
         this.parent = parent;
@@ -83,11 +94,12 @@ class FrameAnalyserManager {
 
     void handleFrame(FrameAnalysisContext ctx) {
         if (!queue.offer(ctx)) {
+            Log.d(TAG, "Discarding image");
             endOfFrame(ctx);
         }
     }
 
-    void endOfFrame(FrameAnalysisContext ctx) {
+    protected void endOfFrame(FrameAnalysisContext ctx) {
         parent.giveBufferBack(ctx);
     }
 
@@ -219,5 +231,15 @@ class FrameAnalyserManager {
         for (FrameAnalyser frameAnalyser : analysers) {
             frameAnalyser.addSymbology(barcodeType);
         }
+    }
+
+    int workerCount() {
+        return NUMBER_OF_CORES;
+    }
+
+    int maxBuffersInConcurrentUse() {
+        // At most there are workerCount buffers being processed inside the worker + a full waiting queue.
+        // The +1 is here because there may be a buffer trying to enter the queue
+        return workerCount() * 2 + 1;
     }
 }

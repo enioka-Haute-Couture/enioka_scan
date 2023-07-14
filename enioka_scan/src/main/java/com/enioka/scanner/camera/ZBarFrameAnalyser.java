@@ -38,8 +38,8 @@ class ZBarFrameAnalyser extends FrameAnalyser {
     }
 
     private ImageScanner scanner;
-    private FrameAnalyserManager parent;
-    private Set<Integer> symbologies = new HashSet<>(10);
+    private final FrameAnalyserManager parent;
+    private final Set<Integer> symbologies = new HashSet<>(10);
 
     ZBarFrameAnalyser(BlockingQueue<FrameAnalysisContext> queue, FrameAnalyserManager parent) {
         this.parent = parent;

@@ -35,7 +35,7 @@ class ViewHelpersResolution {
         if (preferredRatio < 1) {
             preferredRatio = 1 / preferredRatio;
         }
-        Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio + ". (view is " + camView.getMeasuredHeight() + "*" + camView.getMeasuredWidth() + ")");
+        Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio + ". (view is h*w " + camView.getMeasuredHeight() + "*" + camView.getMeasuredWidth() + ")");
         boolean goodMatchFound = false;
 
         Set<String> forbiddenRezs = ViewHelpersPreferences.getPreferencesStringSet(context, "rezs_too_high");

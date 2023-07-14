@@ -38,7 +38,7 @@ import java.util.Arrays;
 import me.dm7.barcodescanner.core.DisplayUtils;
 
 /**
- * Experimental. Should NOT be used.
+ * V2 implementation of the camera view. Default implementation.
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements SurfaceHolder.Callback {
@@ -499,7 +499,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         Surface previewSurface = this.camPreviewSurfaceView.getHolder().getSurface();
 
         try {
-            imageReader = ImageReader.newInstance(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y, ImageFormat.YUV_420_888, Runtime.getRuntime().availableProcessors() * 2);
+            imageReader = ImageReader.newInstance(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y, ImageFormat.YUV_420_888, frameAnalyser.maxBuffersInConcurrentUse()+1);
             imageReader.setOnImageAvailableListener(imageCallback, backgroundHandler);
 
             Log.d(TAG, "Capture session creation begins");

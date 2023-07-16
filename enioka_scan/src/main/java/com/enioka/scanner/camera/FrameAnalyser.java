@@ -18,6 +18,12 @@ abstract class FrameAnalyser implements Runnable {
     BlockingQueue<FrameAnalysisContext> queue;
     private final Semaphore end = new Semaphore(0);
 
+    protected final FrameAnalyserManager parent;
+
+    protected FrameAnalyser(FrameAnalyserManager parent) {
+        this.parent = parent;
+    }
+
     @Override
     public void run() {
         android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -35,7 +41,10 @@ abstract class FrameAnalyser implements Runnable {
                 try {
                     onPreviewFrame(ctx);
                 } catch (Exception e) {
+                    Log.w(TAG, "Analysis transient failure - buffer is ignored", e);
                     // Happens on resolution changes which result in an inconsistent context.
+                } finally {
+                    parent.endOfFrame(ctx);
                 }
             }
         }

@@ -38,11 +38,10 @@ class ZBarFrameAnalyser extends FrameAnalyser {
     }
 
     private ImageScanner scanner;
-    private final FrameAnalyserManager parent;
     private final Set<Integer> symbologies = new HashSet<>(10);
 
     ZBarFrameAnalyser(BlockingQueue<FrameAnalysisContext> queue, FrameAnalyserManager parent) {
-        this.parent = parent;
+        super(parent);
         this.queue = queue;
 
         Log.i(TAG, "Analyser (ZBar) is ready inside pool");
@@ -110,7 +109,6 @@ class ZBarFrameAnalyser extends FrameAnalyser {
         }
         int luma = (int) ((double) barcodeData.lumaSum / (barcodeData.croppedDataWidth * barcodeData.croppedDataHeight));
         parent.fpsCounter(luma);
-        parent.endOfFrame(ctx);
         //Log.v(TAG, "Took ms: " + (System.nanoTime() - start) / 1000000);
     }
 }

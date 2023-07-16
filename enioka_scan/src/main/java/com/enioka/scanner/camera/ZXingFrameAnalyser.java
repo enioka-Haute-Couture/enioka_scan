@@ -41,14 +41,12 @@ class ZXingFrameAnalyser extends FrameAnalyser {
     }
 
     private MultiFormatReader scanner;
-    private FrameAnalyserManager parent;
     private Set<BarcodeFormat> symbologies = new HashSet<>(10);
     private Map<DecodeHintType, Object> hints;
 
     ZXingFrameAnalyser(BlockingQueue<FrameAnalysisContext> queue, FrameAnalyserManager parent) {
-        this.parent = parent;
+        super(parent);
         this.queue = queue;
-
 
         Log.i(TAG, "Analyser (ZXing) is ready inside pool");
     }
@@ -105,7 +103,6 @@ class ZXingFrameAnalyser extends FrameAnalyser {
         // End
         int luma = (int) ((double) barcodeData.lumaSum / (barcodeData.croppedDataWidth * barcodeData.croppedDataHeight));
         parent.fpsCounter(luma);
-        parent.endOfFrame(ctx);
         //Log.v(TAG, "Took ms: " + (System.nanoTime() - start) / 1000000);
     }
 }

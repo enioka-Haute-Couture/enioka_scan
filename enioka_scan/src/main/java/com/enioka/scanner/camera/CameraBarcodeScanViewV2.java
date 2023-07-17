@@ -34,14 +34,14 @@ import android.widget.Toast;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import me.dm7.barcodescanner.core.DisplayUtils;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * V2 implementation of the camera view. Default implementation.
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements SurfaceHolder.Callback {
+class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> implements SurfaceHolder.Callback {
     private String cameraId;
     private CameraManager cameraManager;
 
@@ -64,6 +64,12 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
      */
     private Handler backgroundHandler;
     private HandlerThread backgroundThread;
+    private boolean stopping = false;
+
+    /**
+     * Unbounded cache of image buffers.
+     */
+    private final ConcurrentLinkedQueue<byte[]> imageBufferQueue = new ConcurrentLinkedQueue<>();
 
     public CameraBarcodeScanViewV2(@NonNull Context context) {
         super(context);
@@ -305,18 +311,34 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
     private synchronized void closeCamera() {
         Log.d(TAG, "Starting camera release");
-        if (null != captureSession) {
-            // This should not be needed, as doc states session is closed when camera is closed but anyway...
-            // So we actually have reversed logics: session's closing closes in turn the camera.
-            Log.d(TAG, " * Closing camera capture session");
 
+        // Stop feeding the analyzers at once (we will wait for them in the end)
+        stopping = true;
+        if (null != frameAnalyser) {
+            frameAnalyser.cancelPendingWork();
+        }
+
+        if (null != captureSession) {
+            Log.d(TAG, " * Closing camera capture session");
             captureSession.close();
             captureSession = null;
         }
 
+        if (null != cameraDevice) {
+            Log.d(TAG, " * Camera device closing");
+            cameraDevice.close();
+            cameraDevice = null;
+        }
+
+        if (imageReader != null) {
+            Log.d(TAG, " * ImageReader closing");
+            imageReader.close();
+            imageReader = null;
+        }
+
         // capture session is closed above.
-        // capture session onClose callback closes image reader
-        // capture session onClose callback closes camera
+        // reader is closed above.
+        // camera device  is closed above.
         // camera onClose callback closes backgroundThread
         // camera onClose callback closes analyzers
     }
@@ -416,8 +438,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
         Log.i(TAG, "surface changed");
-        surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
-        startPreview();
+        // surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
+        // startPreview();
     }
 
     @Override
@@ -463,6 +485,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
                 frameAnalyser = null;
             }
 
+            imageBufferQueue.clear();
+            croppedImageBufferQueue.clear();
+
+            stopping = false;
             Log.i(TAG, "Camera scanner view has finished releasing all camera resources");
         }
 
@@ -479,7 +505,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     /**
      * Try to start the preview. Fails silently if surface or camera are not ready yet.
      */
-    private void startPreview() {
+    private synchronized void startPreview() {
         if (this.camPreviewSurfaceView == null) {
             Log.d(TAG, "Preview surface not ready yet");
             return;
@@ -495,11 +521,14 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
 
         Log.i(TAG, "Initializing or reinitializing preview analysis loop");
 
+        // We need the worker count to init the preview
+        initializeFrameAnalyzerIfNeeded();
+
         //this.camPreviewSurfaceView.getHolder().setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
         Surface previewSurface = this.camPreviewSurfaceView.getHolder().getSurface();
 
         try {
-            imageReader = ImageReader.newInstance(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y, ImageFormat.YUV_420_888, frameAnalyser.maxBuffersInConcurrentUse()+1);
+            imageReader = ImageReader.newInstance(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y, ImageFormat.YUV_420_888, frameAnalyser.maxBuffersInConcurrentUse() + 1);
             imageReader.setOnImageAvailableListener(imageCallback, backgroundHandler);
 
             Log.d(TAG, "Capture session creation begins");
@@ -513,7 +542,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             Log.e(TAG, "Configuration request could not be created " + e.getMessage());
             throw new RuntimeException(e);
         } catch (NullPointerException e) {
-            Log.d(TAG, "Trying to start preview after camera shutdown - ignored.");
+            Log.d(TAG, "Trying to start preview after camera shutdown - ignored.", e);
             return;
         }
 
@@ -535,9 +564,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             //CameraBarcodeScanViewV2.this.camPreviewSurfaceView.getHolder().setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
 
             // We need our threads
-            if (frameAnalyser == null) {
-                reinitialiseFrameAnalyser();
-            }
+            initializeFrameAnalyzerIfNeeded();
 
             // If here, preview session is open and we can start the actual preview.
             CameraBarcodeScanViewV2.this.captureSession = cameraCaptureSession;
@@ -612,16 +639,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         @Override
         public void onClosed(@NonNull CameraCaptureSession session) {
             Log.i(TAG, "Capture session has closed " + session.hashCode());
-            if (imageReader != null) {
-                Log.d(TAG, " * ImageReader closing");
-                imageReader.close();
-                imageReader = null;
-            }
             captureSession = null;
-
-            Log.d(TAG, " * Camera device closing");
-            cameraDevice.close();
-            cameraDevice = null;
         }
     };
 
@@ -631,6 +649,11 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
     ///////////////////////////////////////////////////////////////////////////
 
     final ImageReader.OnImageAvailableListener imageCallback = reader -> {
+        if (stopping) {
+            // no need to fetch images while we are stopping everything
+            return;
+        }
+
         Image image;
         try {
             image = reader.acquireLatestImage();
@@ -642,34 +665,33 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
             return;
         }
 
-        // Get luminance buffer.
+        // Create the analysis context containing the luminance plane
+        FrameAnalysisContext<Image> ctx = new FrameAnalysisContext<>();
         try {
             // Sanity check
             assert (image.getPlanes().length == 3);
 
-            ByteBuffer buffer = image.getPlanes()[0].getBuffer(); // Y.
-            byte[] bytes = new byte[buffer.remaining()]; // TODO: reuse buffers.
-            buffer.get(bytes);
+            // Luminance
+            ByteBuffer luminanceBuffer = image.getPlanes()[0].getBuffer(); // Y.
 
-            FrameAnalysisContext ctx = new FrameAnalysisContext();
-            ctx.frame = bytes;
-            ctx.camViewMeasuredWidth = camPreviewSurfaceView.getMeasuredWidth();
-            ctx.camViewMeasuredHeight = camPreviewSurfaceView.getMeasuredHeight();
-            ctx.vertical = DisplayUtils.getScreenOrientation(getContext()) == 1;
-            ctx.cameraHeight = resolution.currentPreviewResolution.y;
-            ctx.cameraWidth = resolution.currentPreviewResolution.x;
-            ctx.x1 = cropRect.left;
-            ctx.x2 = cropRect.right;
-            ctx.x3 = ctx.x2;
-            ctx.x4 = ctx.x1;
-            ctx.y1 = cropRect.top;
-            ctx.y2 = ctx.y1;
-            ctx.y3 = cropRect.bottom;
-            ctx.y4 = ctx.y3;
-            ctx.image = image;
+            // Get the byte array and crop it.
+            if (luminanceBuffer.hasArray()) {
+                ctx.croppedPicture = this.extractBarcodeRectangle(luminanceBuffer.array());
+            } else {
+                // We cannot crop a ByteBuffer directly - it is not a from/length operation, so we need the whole buffer.
+                byte[] tempBuffer = getCachedImageBuffer(luminanceBuffer.remaining());
+                luminanceBuffer.get(tempBuffer);
+                ctx.croppedPicture = this.extractBarcodeRectangle(tempBuffer);
+                imageBufferQueue.add(tempBuffer);
+            }
 
+            // We want to keep a reference to the image in order to close it when we are done with it.
+            ctx.originalImage = image;
+
+            // Submit to the analyser (in another thread)
             frameAnalyser.handleFrame(ctx);
         } catch (IllegalStateException e) {
+            Log.w("exception", e);
             if (e.getMessage().equals("buffer is inaccessible")) {
                 // This happens due to hardware bugs, and should be ignored.
                 Log.w(TAG, "buffer is inaccessible - skipping frame", e);
@@ -687,20 +709,40 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase implements Surfa
         }
     };
 
+    private final AtomicInteger bufferCount = new AtomicInteger(0);
+
+    private byte[] getCachedImageBuffer(int desiredLength) {
+        byte[] res;
+
+        while (true) {
+            res = imageBufferQueue.poll();
+            if (res == null) {
+                // Queue is empty, create a new buffer
+                Log.d(TAG, "Creating new buffer (MB) " + ((int) (desiredLength / 1024 / 1024)) + " count is " + bufferCount.incrementAndGet());
+                return new byte[desiredLength];
+            }
+            if (res.length != desiredLength) {
+                Log.i(TAG, "Discarding old buffer of length " + res.length + " (requested " + desiredLength + ") " + bufferCount.decrementAndGet());
+            } else {
+                return res;
+            }
+        }
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Life cycle handlers
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void giveBufferBack(FrameAnalysisContext analysisContext) {
-        analysisContext.image.close();
+    public void giveBufferBackInternal(FrameAnalysisContext<Image> analysisContext) {
+        analysisContext.originalImage.close();
     }
 
     @Override
     public void setPreviewResolution(Point newResolution) {
         Log.d(TAG, "New preview resolution set");
-        resolution.currentPreviewResolution = newResolution;
+        //resolution.currentPreviewResolution = newResolution;
+        //pauseCamera();
         this.startPreview();
     }
 

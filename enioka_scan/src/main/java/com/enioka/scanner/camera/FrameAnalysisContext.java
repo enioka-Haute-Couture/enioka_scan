@@ -3,17 +3,12 @@ package com.enioka.scanner.camera;
 import android.media.Image;
 
 /**
- * All the data needed by a frame analysis.
+ * All the data needed for a frame analysis.
+ * It also contains all the necessary data for buffer reuse between frames (closing Images, ...)<br>
+ * TODO: merge with CroppedPicture one day.
  */
-class FrameAnalysisContext {
-    byte[] frame;
+class FrameAnalysisContext<T> {
+    CroppedPicture croppedPicture;
 
-    Image image;
-
-    float camViewMeasuredHeight, camViewMeasuredWidth;
-    float cameraWidth, cameraHeight;
-    boolean vertical;
-
-    // Targeting rectangle
-    int x1, y1, x2, y2, x3, y3, x4, y4; // 1 = top left, 2 = top right, 3 = bottom right, 4 = bottom left.
+    T originalImage;
 }

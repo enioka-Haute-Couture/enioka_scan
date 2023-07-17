@@ -7,7 +7,7 @@ import com.enioka.scanner.data.BarcodeType;
 /**
  * Methods needed by the {@link FrameAnalyserManager}
  */
-interface ScannerCallback {
+interface ScannerCallback<T> {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Main callbacks (analysis result handling)
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ interface ScannerCallback {
      *
      * @param analysisContext what was analysed
      */
-    void giveBufferBack(FrameAnalysisContext analysisContext);
+    void giveBufferBack(FrameAnalysisContext<T> analysisContext);
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

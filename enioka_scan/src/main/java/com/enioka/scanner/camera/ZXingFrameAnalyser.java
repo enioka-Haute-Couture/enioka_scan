@@ -80,7 +80,7 @@ class ZXingFrameAnalyser extends FrameAnalyser {
     protected void onPreviewFrame(FrameAnalysisContext ctx) {
         long start = System.nanoTime();
 
-        BarcodeRectangleData barcodeData = extractBarcodeRectangle(ctx);
+        CroppedPicture barcodeData = ctx.croppedPicture;
 
         Binarizer binarizer = new HybridBinarizer(new PlanarYUVLuminanceSource(barcodeData.barcode, barcodeData.croppedDataWidth, barcodeData.croppedDataHeight, 0, 0, barcodeData.croppedDataWidth, barcodeData.croppedDataHeight, false));
         BinaryBitmap bitmap = new BinaryBitmap(binarizer);
@@ -96,7 +96,7 @@ class ZXingFrameAnalyser extends FrameAnalyser {
         if (res != null) {
             String readBarcode = res.getText();
             if (readBarcode != null && !readBarcode.isEmpty()) {
-                parent.handleResult(readBarcode, barcodeTypeZXing2Lib.get(res.getBarcodeFormat()), ctx.frame);
+                parent.handleResult(readBarcode, barcodeTypeZXing2Lib.get(res.getBarcodeFormat()), ctx.croppedPicture.barcode);
             }
         }
 

@@ -79,7 +79,7 @@ class FrameAnalyserManager {
 
         // Create threads
         FrameAnalyser frameAnalyser;
-        for (int i = 0; i < NUMBER_OF_CORES; i++) {
+        for (int i = 0; i < workerCount(); i++) {
             if (readerToUse == CameraReader.ZBAR) {
                 frameAnalyser = new ZBarFrameAnalyser(queue, this);
             } else {
@@ -89,7 +89,7 @@ class FrameAnalyserManager {
             analysers.add(frameAnalyser);
         }
 
-        Log.i(TAG, "Analyser pool initialized with " + NUMBER_OF_CORES + " threads");
+        Log.i(TAG, "Analyser pool initialized with " + workerCount() + " threads");
     }
 
     void handleFrame(FrameAnalysisContext ctx) {
@@ -109,7 +109,9 @@ class FrameAnalyserManager {
         }
         for (FrameAnalyser frameAnalyser : analysers) {
             try {
-                frameAnalyser.awaitTermination(2, TimeUnit.SECONDS);
+                if (!frameAnalyser.awaitTermination(2, TimeUnit.SECONDS)) {
+                    Log.w(TAG, "An analyser did not quit in time");
+                }
             } catch (InterruptedException e) {
                 // nothing to do - dying anyway.
             }
@@ -206,7 +208,7 @@ class FrameAnalyserManager {
      * Called after each successful analysis.
      */
     synchronized void handleResult(String result, BarcodeType symType, byte[] imagePreview) {
-        if (result == null) {
+        if (result == null || result.isEmpty()) {
             return;
         }
 
@@ -241,5 +243,9 @@ class FrameAnalyserManager {
         // At most there are workerCount buffers being processed inside the worker + a full waiting queue.
         // The +1 is here because there may be a buffer trying to enter the queue
         return workerCount() * 2 + 1;
+    }
+
+    void cancelPendingWork() {
+        this.queue.clear();
     }
 }

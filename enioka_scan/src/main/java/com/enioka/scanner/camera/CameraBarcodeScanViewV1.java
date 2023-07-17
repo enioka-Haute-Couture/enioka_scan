@@ -33,7 +33,7 @@ import me.dm7.barcodescanner.core.DisplayUtils;
  */
 @SuppressWarnings({"unused"})
 // Deprecation: using CameraV1. Unused: some methods only used in clients.
-class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camera.PreviewCallback, SurfaceHolder.Callback {
+class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implements Camera.PreviewCallback, SurfaceHolder.Callback {
     private Camera cam;
 
     protected boolean scanningStarted = true;
@@ -481,27 +481,14 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase implements Camer
         }
 
         FrameAnalysisContext ctx = new FrameAnalysisContext();
-        ctx.frame = data;
-        ctx.cameraHeight = camera.getParameters().getPreviewSize().height;
-        ctx.cameraWidth = camera.getParameters().getPreviewSize().width;
-        ctx.camViewMeasuredHeight = this.camPreviewSurfaceView.getMeasuredHeight();
-        ctx.camViewMeasuredWidth = this.camPreviewSurfaceView.getMeasuredWidth();
-        ctx.vertical = DisplayUtils.getScreenOrientation(this.getContext()) == 1;
-        ctx.x1 = cropRect.left;
-        ctx.x2 = cropRect.right;
-        ctx.x3 = ctx.x2;
-        ctx.x4 = ctx.x1;
-        ctx.y1 = cropRect.top;
-        ctx.y2 = ctx.y1;
-        ctx.y3 = cropRect.bottom;
-        ctx.y4 = ctx.y3;
+        ctx.originalImage = data;
+        ctx.croppedPicture = this.extractBarcodeRectangle(data);
         frameAnalyser.handleFrame(ctx);
     }
 
-
-    public void giveBufferBack(FrameAnalysisContext ctx) {
-        if (ctx.frame.length == previewBufferSize) {
-            this.cam.addCallbackBuffer(ctx.frame);
+    public void giveBufferBackInternal(FrameAnalysisContext<byte[]> ctx) {
+        if (ctx.originalImage.length == previewBufferSize) {
+            this.cam.addCallbackBuffer(ctx.originalImage);
         }
     }
     //

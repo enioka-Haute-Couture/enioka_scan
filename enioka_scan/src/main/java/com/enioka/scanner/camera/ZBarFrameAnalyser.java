@@ -82,7 +82,7 @@ class ZBarFrameAnalyser extends FrameAnalyser {
         //Log.i(TAG, "New frame analysis");
         String symData;
         int symType;
-        BarcodeRectangleData barcodeData = extractBarcodeRectangle(ctx);
+        CroppedPicture barcodeData = ctx.croppedPicture;
 
         // Analysis
         //TODO: reuse image if present.
@@ -103,7 +103,7 @@ class ZBarFrameAnalyser extends FrameAnalyser {
 
                 if (!TextUtils.isEmpty(symData) && !foundStrings.contains(symData)) {
                     foundStrings.add(symData);
-                    parent.handleResult(symData, barcodeTypeZBar2Lib.get(symType), ctx.frame);
+                    parent.handleResult(symData, barcodeTypeZBar2Lib.get(symType), ctx.croppedPicture.barcode);
                 }
             }
         }

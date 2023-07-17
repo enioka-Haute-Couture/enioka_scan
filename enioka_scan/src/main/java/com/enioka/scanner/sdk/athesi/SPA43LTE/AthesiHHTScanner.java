@@ -83,7 +83,7 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
         }
 
         // Set symbologies
-        for(BarcodeType symbology:this.symbologies) {
+        for (BarcodeType symbology : this.symbologies) {
             activeSymbologies.add(AthesiHHTSymbology.getSymbology(symbology));
         }
 
@@ -114,8 +114,8 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
         c.moveToFirst();
 
         while (numRow > 0) {
-            name = c.getString(c.getColumnIndex("scanner_name"));
-            enabled = c.getString(c.getColumnIndex("scanner_para")).equals("enabled");
+            name = c.getString(c.getColumnIndexOrThrow("scanner_name"));
+            enabled = c.getString(c.getColumnIndexOrThrow("scanner_para")).equals("enabled");
 
             //Log.d(LOG_TAG, "Configuration item " + name + " - " + c.getString(c.getColumnIndex("scanner_para")));
             if (name.startsWith("Scanner_")) {

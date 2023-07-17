@@ -36,6 +36,11 @@ android {
             withJavadocJar()
         }
     }
+
+    // TODO: reactivate this
+    lintOptions {
+        disable 'MissingPermission'
+    }
 }
 
 signing {

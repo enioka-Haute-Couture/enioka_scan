@@ -1,7 +1,10 @@
 package com.enioka.scanner.sdk.koamtac;
 
+import android.Manifest;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
 import com.enioka.scanner.api.ScannerProvider;
@@ -17,6 +20,12 @@ public class KoamtacScannerProvider implements ScannerProvider {
 
     @Override
     public void getScanner(Context ctx, ProviderCallback cb, ScannerSearchOptions options) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ctx.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(LOG_TAG, "Missing BT permission");
+            cb.onProviderUnavailable(PROVIDER_KEY);
+            return;
+        }
+
         try {
             this.getClass().getClassLoader().loadClass("koamtac.kdc.sdk.KDCReader");
         } catch (ClassNotFoundException e) {

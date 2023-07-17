@@ -1,7 +1,10 @@
 package com.enioka.scanner.sdk.koamtac;
 
+import android.Manifest;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -33,11 +36,10 @@ class KoamtacScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithLe
     private static final String LOG_TAG = "KoamtacScanner";
 
     private KDCReader scanner;
-    private BluetoothDevice btDevice;
+    private final BluetoothDevice btDevice;
     private ScannerDataCallbackProxy dataCallback;
     private ScannerStatusCallbackProxy statusCallback;
     private ScannerInitCallbackProxy initCallback;
-    private Context ctx;
     private Set<BarcodeType> symbologies;
 
     KoamtacScanner(BluetoothDevice device) {
@@ -46,7 +48,12 @@ class KoamtacScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithLe
 
     @Override
     public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
-        this.ctx = applicationContext;
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && applicationContext.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(LOG_TAG, "Missing BT permission");
+            initCallback.onConnectionFailure(this);
+            return;
+        }
+
         this.dataCallback = dataCallback;
         this.statusCallback = statusCallback;
         this.initCallback = initCallback;
@@ -147,7 +154,7 @@ class KoamtacScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithLe
     private void configureScanner() {
         this.scanner.DisableAllSymbologies();
         KDCSymbology s = this.scanner.GetSymbology();
-        for(Map.Entry<KDCConstants.Symbology, BarcodeType> entry: KoamtacDataTranslator.sdk2Api.entrySet()) {
+        for (Map.Entry<KDCConstants.Symbology, BarcodeType> entry : KoamtacDataTranslator.sdk2Api.entrySet()) {
             s.Enable(entry.getKey(), symbologies.contains(entry.getValue()));
         }
         this.scanner.SetSymbology(s, scanner.GetKDCDeviceInfo());

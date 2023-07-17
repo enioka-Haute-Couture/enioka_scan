@@ -1,12 +1,15 @@
 package com.enioka.scanner.bt.manager;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.os.ParcelUuid;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
@@ -136,6 +139,13 @@ public class SerialBtScannerProvider implements ScannerProvider, SerialBtScanner
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void getDevices(Context ctx, ScannerSearchOptions options) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (ActivityCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)) {
+            Log.w(PROVIDER_KEY, "Required API 31+ Bluetooth permissions are not granted");
+            this.providerCallback.onProviderUnavailable(PROVIDER_KEY);
+            return;
+        }
+
         // Init cache of providers if needed.
         if (scannerProviders.isEmpty()) {
             discoverProviders(ctx);
@@ -168,7 +178,7 @@ public class SerialBtScannerProvider implements ScannerProvider, SerialBtScanner
         if (options.allowInitialSearch) {
             Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
             for (BluetoothDevice bt : pairedDevices) {
-                logDeviceInfo(bt);
+                logDeviceInfo(bt, ctx);
 
                 // Some devices may be already used by another SDK
                 if (this.providerCallback.isAlreadyConnected(bt)) {
@@ -218,11 +228,16 @@ public class SerialBtScannerProvider implements ScannerProvider, SerialBtScanner
         // Done.
     }
 
-    private void logDeviceInfo(BluetoothDevice bt) {
+    private void logDeviceInfo(BluetoothDevice bt, Context ctx) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
         // Compensate for lack of lambdas and String.join in API19.
         List<String> uuids = new ArrayList<>();
         String uuidString = "";
         if (bt.getUuids() != null) {
+
             for (ParcelUuid uuid : bt.getUuids()) {
                 uuids.add(uuid.getUuid().toString());
                 uuidString += uuid.getUuid().toString() + ", ";

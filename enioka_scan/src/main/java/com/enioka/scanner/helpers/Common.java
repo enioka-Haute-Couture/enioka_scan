@@ -68,13 +68,14 @@ public final class Common {
         return pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
 
+    // TODO: move code from compat activity to here.
     public static void askForPermission(Activity ctx) {
         boolean arePermissionsGranted = ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED
                 && ContextCompat.checkSelfPermission(ctx, "com.symbol.emdk.permission.EMDK") == PackageManager.PERMISSION_GRANTED;
         if (!arePermissionsGranted) {
-            ActivityCompat.requestPermissions(ctx, new String[]{Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, "com.symbol.emdk.permission.EMDK"}, 1789);
+            ActivityCompat.requestPermissions(ctx, new String[]{Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, "com.symbol.emdk.permission.EMDK", Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN}, 1789);
         }
 
     }

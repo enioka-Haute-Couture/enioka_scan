@@ -2,6 +2,7 @@ package com.enioka.scanner.sdk.m3;
 
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
@@ -19,26 +20,25 @@ import com.m3.ringscannersdk.RingScannerService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 class M3RingScanner implements Scanner {
     private static final String LOG_TAG = "M3RingScanner";
 
-    private RingScannerService scanner;
+    private final RingScannerService scanner;
     private ScannerDataCallbackProxy dataCallback;
     private ScannerStatusCallbackProxy statusCallback;
     private ScannerInitCallbackProxy initCallback;
-    private Context context;
 
     M3RingScanner(RingScannerService scannerService) {
         this.scanner = scannerService;
     }
 
     @Override
-    public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode) {
+    public void initialize(Context applicationContext, ScannerInitCallbackProxy initCallback, ScannerDataCallbackProxy dataCallback, ScannerStatusCallbackProxy statusCallback, Mode mode, Set<BarcodeType> symbologySelection) {
         this.dataCallback = dataCallback;
         this.statusCallback = statusCallback;
         this.initCallback = initCallback;
-        this.context = applicationContext;
 
         Log.i(LOG_TAG, "Start of initialization of M3 ring scanner.");
 

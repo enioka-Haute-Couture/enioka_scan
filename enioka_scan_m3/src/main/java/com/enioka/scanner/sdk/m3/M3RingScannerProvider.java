@@ -19,7 +19,7 @@ public class M3RingScannerProvider implements ScannerProvider {
     public void getScanner(Context ctx, final ProviderCallback cb, ScannerSearchOptions options) {
         // This provider needs a M3 SDK to work (this is an AIDL proxy, much easier to reuse a pre-made one)
         try {
-            this.getClassLoader().loadClass("com.m3.ringscannersdk.RingScannerService");
+            M3RingScannerProvider.class.getClassLoader().loadClass("com.m3.ringscannersdk.RingScannerService");
         } catch (ClassNotFoundException e) {
             Log.d(LOG_TAG, "M3 ring scanner SDK is not present - skipping M3 ring scanners");
             cb.onProviderUnavailable(PROVIDER_KEY);

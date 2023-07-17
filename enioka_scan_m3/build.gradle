@@ -1,10 +1,11 @@
-apply plugin: 'com.android.library'
+apply plugin: 'scanner.published-library'
+
+description 'Scanner provider for M3 bluetooth ring devices using the official drivers (not provided)'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 33
     defaultConfig {
         minSdkVersion 19
-        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -20,23 +21,26 @@ android {
     namespace 'com.enioka.scanner.sdk.m3'
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter()
-    }
+ext {
+    mavenArtifactId = "provider-cs-m3"
 }
 
 dependencies {
     implementation project(':enioka_scan')
 
+    // Linter helpers
+    implementation 'com.android.support:support-annotations:28.0.0'
+
     // Libs contains SDK. This lib has to be included as it is not provided by the device.
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    if (gradle.ext.gpr != null) {
+        compileOnly 'com.enioka.hc.external:m3-bt-driver:0.1.0'
+    } else {
+        compileOnly fileTree(dir: 'libs', include: ['*.jar'])
+    }
 
     // Test things (useless for now)
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 }

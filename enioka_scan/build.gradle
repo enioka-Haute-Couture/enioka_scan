@@ -3,10 +3,9 @@ apply plugin: 'scanner.published-library'
 description('A library that makes the integration of all barcode scanners easy in any Android application, avoiding vendor lock-in and lowering the cost of advanced scanner integration.')
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 33
     defaultConfig {
         minSdkVersion 19
-        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.media.Image;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -303,7 +302,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     /**
      * Cropping method (according to the targeting rectangle)
      */
-    protected CroppedPicture extractBarcodeRectangle(byte[] frame) {
+    protected CroppedPicture extractBarcodeRectangle(byte[] frame, int length) {
         CroppedPicture res = new CroppedPicture();
 
         // Data characteristics
@@ -315,7 +314,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
         int camViewMeasuredHeight = camPreviewSurfaceView.getMeasuredHeight();
 
         // Sanity check
-        if (dataWidth * dataHeight != frame.length) {
+        if (frame.length < length || dataWidth * dataHeight != length) {
             // This happens when the resolution/orientation has just changed
             res.barcode = new byte[0];
             return res;
@@ -326,25 +325,25 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             // French (vertical) - crop & rotate
 
             // The rectangle is in view coordinates.
-            float yRatio = (float) dataWidth / camViewMeasuredHeight;  // Photo pixels per preview surface pixel. Width because: 90° rotated.
-            float xRatio = (float) dataHeight / camViewMeasuredWidth;
+            float yRatio = (float) dataHeight / camViewMeasuredWidth;  // Photo pixels per preview surface pixel. Width because: 90° rotated.
+            float xRatio = (float) dataWidth / camViewMeasuredHeight;
 
             // Boundaries
-            int realY1 = (int) (cropRect.top * yRatio);
-            int realY3 = (int) (cropRect.bottom * yRatio);
-            int realX1 = (int) (cropRect.left * xRatio);
-            int realX3 = (int) (cropRect.right * xRatio);
+            int realY1 = (int) ((camViewMeasuredWidth - cropRect.right) * yRatio);
+            int realY3 = (int) ((camViewMeasuredWidth - cropRect.left) * yRatio);
+            int realX1 = (int) (cropRect.top * xRatio);
+            int realX3 = (int) (cropRect.bottom * xRatio);
 
             // Cropped barcode data buffer
-            res.croppedDataWidth = (1 + realX3 - realX1);
-            res.croppedDataHeight = (1 + realY3 - realY1);
+            res.croppedDataHeight = (1 + realX3 - realX1);
+            res.croppedDataWidth = (1 + realY3 - realY1);
             res.barcode = getCroppedImageBuffer(res.croppedDataWidth * res.croppedDataHeight);
 
             // Copy and rotate the buffer
             int i = 0;
-            for (int w = realY1; w <= realY3; w++) {
-                for (int h = realX3 - 1; h >= realX1; h--) {
-                    res.barcode[i++] = frame[h * dataWidth + w];
+            for (int w = realX1; w <= realX3; w++) {
+                for (int h = realY3; h >= realY1; h--) {
+                    res.barcode[i++] = frame[(h - 1) * (dataWidth) + w];
                     res.lumaSum += res.barcode[i - 1] & 0xff;
                 }
             }
@@ -363,8 +362,6 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             res.croppedDataWidth = (1 + realX3 - realX1);
             res.croppedDataHeight = (1 + realY3 - realY1);
             res.barcode = getCroppedImageBuffer(res.croppedDataWidth * res.croppedDataHeight);
-
-            // Log.d(TAG, "Camera resolution is w*h " + dataWidth + "*" + dataHeight + " (" + dataWidth * dataHeight + ") buffer is " + frame.length + " - cropped is w*h " + res.croppedDataWidth + "*" + res.croppedDataHeight);
 
             // Copy data without rotation.
             int i = 0;

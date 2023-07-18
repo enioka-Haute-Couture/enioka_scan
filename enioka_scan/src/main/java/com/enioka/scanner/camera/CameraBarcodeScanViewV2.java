@@ -26,9 +26,11 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
+import android.view.Gravity;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import java.nio.ByteBuffer;
@@ -44,7 +46,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> implements SurfaceHolder.Callback {
     private String cameraId;
     private CameraManager cameraManager;
-
 
     private CameraCaptureSession captureSession;
     private CaptureRequest.Builder captureRequestBuilder;
@@ -107,6 +108,9 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> implement
 
         camPreviewSurfaceView = new SurfaceView(getContext());
         camPreviewSurfaceView.getHolder().addCallback(this); // this calls callback when ready.
+        FrameLayout.LayoutParams prms = this.generateDefaultLayoutParams();
+        prms.gravity = Gravity.CENTER;
+        camPreviewSurfaceView.setLayoutParams(prms);
         this.addView(camPreviewSurfaceView);
 
         if (isInEditMode()) {
@@ -436,10 +440,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> implement
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int pixelFormat, int newWidth, int newHeight) {
         Log.i(TAG, "surface changed");
-        // surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
-        // startPreview();
     }
 
     @Override
@@ -524,7 +526,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> implement
         // We need the worker count to init the preview
         initializeFrameAnalyzerIfNeeded();
 
-        //this.camPreviewSurfaceView.getHolder().setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
         Surface previewSurface = this.camPreviewSurfaceView.getHolder().getSurface();
 
         try {
@@ -559,9 +560,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> implement
                 Log.e(TAG, "cannot start a session - camera not initialized");
                 return;
             }
-
-            // Only now redraw surface (otherwise deadlock)
-            //CameraBarcodeScanViewV2.this.camPreviewSurfaceView.getHolder().setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
 
             // We need our threads
             initializeFrameAnalyzerIfNeeded();
@@ -671,17 +669,22 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> implement
             // Sanity check
             assert (image.getPlanes().length == 3);
 
+            // Sanity check
+            if (image.getPlanes()[0].getPixelStride() != 1) {
+                throw new RuntimeException("not a luminance buffer");
+            }
+
             // Luminance
             ByteBuffer luminanceBuffer = image.getPlanes()[0].getBuffer(); // Y.
 
             // Get the byte array and crop it.
             if (luminanceBuffer.hasArray()) {
-                ctx.croppedPicture = this.extractBarcodeRectangle(luminanceBuffer.array());
+                ctx.croppedPicture = this.extractBarcodeRectangle(luminanceBuffer.array(), luminanceBuffer.remaining());
             } else {
                 // We cannot crop a ByteBuffer directly - it is not a from/length operation, so we need the whole buffer.
                 byte[] tempBuffer = getCachedImageBuffer(luminanceBuffer.remaining());
                 luminanceBuffer.get(tempBuffer);
-                ctx.croppedPicture = this.extractBarcodeRectangle(tempBuffer);
+                ctx.croppedPicture = this.extractBarcodeRectangle(tempBuffer, tempBuffer.length);
                 imageBufferQueue.add(tempBuffer);
             }
 

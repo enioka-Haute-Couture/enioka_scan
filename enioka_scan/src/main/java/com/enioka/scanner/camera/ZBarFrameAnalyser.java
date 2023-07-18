@@ -78,7 +78,6 @@ class ZBarFrameAnalyser extends FrameAnalyser {
     @Override
     protected void onPreviewFrame(FrameAnalysisContext ctx) {
         long start = System.nanoTime();
-
         //Log.i(TAG, "New frame analysis");
         String symData;
         int symType;
@@ -86,10 +85,9 @@ class ZBarFrameAnalyser extends FrameAnalyser {
 
         // Analysis
         //TODO: reuse image if present.
-        Image pic = new Image(barcodeData.croppedDataWidth, barcodeData.croppedDataHeight, "Y800");
+        Image pic = new Image(barcodeData.croppedDataWidth, barcodeData.croppedDataHeight, "GREY");
         pic.setData(barcodeData.barcode);
 
-        //pic.setCrop(0, realY1, dataWidth, realY3 - realY1); // Left, top, width, height
         if (this.scanner.scanImage(pic) > 0) {
             // There is a result! Extract it.
             SymbolSet var15 = this.scanner.getResults();

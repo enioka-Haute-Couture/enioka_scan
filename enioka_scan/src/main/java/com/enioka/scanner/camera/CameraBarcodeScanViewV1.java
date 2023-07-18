@@ -31,7 +31,7 @@ import me.dm7.barcodescanner.core.DisplayUtils;
  * To be directly reused in layouts.
  * We are using deprecated Camera API because old Android.
  */
-@SuppressWarnings({"unused"})
+@SuppressWarnings({"unused", "deprecation"})
 // Deprecation: using CameraV1. Unused: some methods only used in clients.
 class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implements Camera.PreviewCallback, SurfaceHolder.Callback {
     private Camera cam;
@@ -482,7 +482,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
 
         FrameAnalysisContext ctx = new FrameAnalysisContext();
         ctx.originalImage = data;
-        ctx.croppedPicture = this.extractBarcodeRectangle(data);
+        ctx.croppedPicture = this.extractBarcodeRectangle(data, resolution.currentPreviewResolution.x * resolution.currentPreviewResolution.y); // Only take the Y part of the buffer (at the start)
         frameAnalyser.handleFrame(ctx);
     }
 

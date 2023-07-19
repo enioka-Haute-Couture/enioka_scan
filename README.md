@@ -123,17 +123,17 @@ if you use a custom layout, you need to use our Camera scanning view. The ID of 
 ```xml
     <com.enioka.scanner.camera.CameraBarcodeScanView
         android:id="@+id/camera_scan_view"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+
         app:forceCameraApiVersion="Auto"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:maxDistortionRatio="0.3"
+        app:maxResolutionY="1080"
+        app:previewRatioMode="fillAvailableSpace"
         app:readerMode="Auto"
+        app:storePreferredResolution="false"
         app:targetColor="@color/colorRed"
         app:targetIsFixed="false"
-        app:targetStrokeWidth="5" />
+        app:targetStrokeWidth="5"
+        app:useAdaptiveResolution="true"  />
 ```
 
 Finally, note that inside the activity code there are a few hooks that can be overloaded - these are public or protected methods, with full javadoc. Of notice are:*

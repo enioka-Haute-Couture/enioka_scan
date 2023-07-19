@@ -4,13 +4,16 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -24,7 +27,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import me.dm7.barcodescanner.core.DisplayUtils;
 
-abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements ScannerCallback<T> {
+abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements ScannerCallback<T>, SurfaceHolder.Callback {
     protected static final String TAG = "BARCODE";
 
     /////////////////////////////////
@@ -65,6 +68,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     public CameraBarcodeScanViewBase(@NonNull Context context) {
         super(context);
         this.styledAttributes = null;
+        initLayout();
     }
 
     public CameraBarcodeScanViewBase(@NonNull Context context, @Nullable AttributeSet attrs) {
@@ -85,6 +89,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
         }
 
         this.allowTargetDrag = !styledAttributes.getBoolean(R.styleable.CameraBarcodeScanView_targetIsFixed, false);
+        initLayout();
     }
 
     /**
@@ -199,6 +204,49 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Target area handling
+
+    protected void initLayout() {
+        if (this.camPreviewSurfaceView != null) {
+            Log.d(TAG, "Layout is already initialized, nothing to do");
+            return;
+        }
+
+        Log.d(TAG, "Creating camera view layout");
+
+        if (!this.isInEditMode()) {
+            // ZBar is a native library
+            System.loadLibrary("iconv");
+            reinitialiseFrameAnalyser();
+        }
+
+        // If the preview does not take all the space
+        this.setBackgroundColor(Color.BLACK);
+
+        // The view holding the preview. This will in turn (camHolder.addCallback) call setUpCamera.
+        if (this.camPreviewSurfaceView == null) {
+            camPreviewSurfaceView = new SurfaceView(getContext());
+            FrameLayout.LayoutParams prms = this.generateDefaultLayoutParams();
+            prms.gravity = Gravity.CENTER;
+            camPreviewSurfaceView.setLayoutParams(prms);
+            this.addView(camPreviewSurfaceView);
+        }
+        camPreviewSurfaceView.getHolder().addCallback(this);
+
+        // For the preview inside the IDE - callbacks will not be called in the IDE
+        if (isInEditMode()) {
+            // In normal mode done in surface created callback, but no callback in edit mode.
+            computeCropRectangle();
+            addTargetView();
+        }
+    }
+
+    @Override
+    public void surfaceCreated(@NonNull SurfaceHolder holder) {
+        if (this.targetView == null) {
+            computeCropRectangle();
+            addTargetView();
+        }
+    }
 
     /**
      * Sets up the central targeting rectangle. Must be called after surface init.
@@ -373,6 +421,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             }
         }
 
+        // Log.d(TAG, "Camera resolution is w*h " + dataWidth + "*" + dataHeight + " (" + dataWidth * dataHeight + "), preview pane is w*h " + camViewMeasuredWidth + "*" + camViewMeasuredHeight + " buffer is " + frame.length + " - cropped is w*h " + res.croppedDataWidth + "*" + res.croppedDataHeight + " according to " + cropRect);
         return res;
     }
 
@@ -383,7 +432,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             res = croppedImageBufferQueue.poll();
             if (res == null) {
                 // Queue is empty, create a new buffer
-                Log.d(TAG, "Creating new cropped buffer (MB) " + ((int) (desiredLength / 1024 / 1024)));
+                Log.d(TAG, "Creating new cropped buffer (MB) " + (desiredLength / 1024 / 1024));
                 return new byte[desiredLength];
             }
             if (res.length != desiredLength) {

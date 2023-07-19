@@ -5,26 +5,23 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.WindowManager;
 
 import com.enioka.scanner.R;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import me.dm7.barcodescanner.core.DisplayUtils;
 
 /**
  * Helper view that encapsulates the ZBar (default) and ZXing (option) barcode analysis engines.
@@ -33,7 +30,7 @@ import me.dm7.barcodescanner.core.DisplayUtils;
  */
 @SuppressWarnings({"unused", "deprecation"})
 // Deprecation: using CameraV1. Unused: some methods only used in clients.
-class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implements Camera.PreviewCallback, SurfaceHolder.Callback {
+class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implements Camera.PreviewCallback {
     private Camera cam;
 
     protected boolean scanningStarted = true;
@@ -45,35 +42,16 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     // Stupid constructors
     public CameraBarcodeScanViewV1(Context context) {
         super(context);
-        initOnce(context);
     }
 
     public CameraBarcodeScanViewV1(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
-        initOnce(context);
     }
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Layout and camera initialization
-    public void initOnce(Context context) {
-        if (!this.isInEditMode()) {
-            // ZBar is a native library
-            System.loadLibrary("iconv");
-            reinitialiseFrameAnalyser();
-        }
-
-        // If the preview does not take all the space
-        this.setBackgroundColor(Color.BLACK);
-
-        // The view holding the preview. This will in turn (camHolder.addCallback) call setUpCamera.
-        if (this.camPreviewSurfaceView == null) {
-            camPreviewSurfaceView = new SurfaceView(context);
-            this.addView(camPreviewSurfaceView);
-        }
-        camPreviewSurfaceView.getHolder().addCallback(this);
-    }
 
     protected boolean isUsingPreviewForPhoto() {
         return this.resolution.usePreviewForPhoto;
@@ -437,8 +415,11 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Reactions to preview pane being created/modified/destroyed.
     @Override
-    public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        computeCropRectangle();
+    public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
+        super.surfaceCreated(surfaceHolder);
+
+        Log.d(TAG, "Preview surface created, camera will be initialized soon");
+
         if (this.cam == null) {
             setUpCamera();
             surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
@@ -453,18 +434,17 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         } catch (Exception e) {
             throw new RuntimeException("Could not start camera preview and preview data analysis", e);
         }
-        if (this.targetView == null) {
-            addTargetView();
-        }
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         // TODO: check if this can happen.
+        Log.i(TAG, "surface changed");
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        Log.i(TAG, "surface destroyed");
         cleanUp();
     }
     //

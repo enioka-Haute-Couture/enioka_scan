@@ -3,6 +3,7 @@ package com.enioka.scanner.camera;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.hardware.camera2.CameraAccessException;
@@ -43,7 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * V2 implementation of the camera view. Default implementation.
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> implements SurfaceHolder.Callback {
+class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     private String cameraId;
     private CameraManager cameraManager;
 
@@ -85,39 +86,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> implement
     private void init() {
         Log.d(TAG, "Camera2 specific initialization start");
 
-        // Create resolution manager.
-        resolution = new Resolution(getContext());
-
-        // The real scanner
-        reinitialiseFrameAnalyser();
-
         // A thread for dealing with camera technical operations.
         startBackgroundThread();
-
-        // This will add the preview view. Its completion callback calls selectCameraParameters, then openCamera (and initOverlay), which has a completion callback which starts the preview.
-        initLayout();
-    }
-
-    private void initLayout() {
-        Log.d(TAG, "Creating layout");
-
-        if (this.camPreviewSurfaceView != null) {
-            Log.d(TAG, "Layout is already initialized, nothing to do");
-            return;
-        }
-
-        camPreviewSurfaceView = new SurfaceView(getContext());
-        camPreviewSurfaceView.getHolder().addCallback(this); // this calls callback when ready.
-        FrameLayout.LayoutParams prms = this.generateDefaultLayoutParams();
-        prms.gravity = Gravity.CENTER;
-        camPreviewSurfaceView.setLayoutParams(prms);
-        this.addView(camPreviewSurfaceView);
-
-        if (isInEditMode()) {
-            // In normal mode done in surface created callback, but no callback in edit mode.
-            computeCropRectangle();
-            addTargetView();
-        }
     }
 
     private void selectCameraParameters() {
@@ -417,26 +387,29 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> implement
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+    public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
+        super.surfaceCreated(surfaceHolder);
+
         Log.d(TAG, "Preview surface created, camera will be initialized soon");
 
-        // This will simply select the camera
+        // This will select the camera and all the resolution, exposure, AF... parameters.
         selectCameraParameters();
-        // Set the surface buffer size
-        surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
+
+        // Set the preview surface buffer size
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
+        } else {
+            //noinspection SuspiciousNameCombination - on purpose!
+            surfaceHolder.setFixedSize(resolution.currentPreviewResolution.y, resolution.currentPreviewResolution.x);
+        }
 
         // Go for camera. Camera object is given in callback.
         if (!isInEditMode()) {
             openCamera();
         }
 
-        // Add targeting rectangle (must be done after everything is drawn and dimensions are known)
-        computeCropRectangle();
-        if (this.targetView == null) {
-            addTargetView();
-        }
-
-        // Preview is started in onChange, after camera is plugged in.
+        // Preview is actually started in CameraDevice.StateCallback.onOpened, after camera is plugged in.
+        // This is triggered by the openCamera() call above.
     }
 
     @Override

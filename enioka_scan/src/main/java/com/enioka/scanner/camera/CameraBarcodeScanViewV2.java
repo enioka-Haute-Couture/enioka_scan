@@ -396,16 +396,13 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         selectCameraParameters();
 
         // Set the preview surface buffer size
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
-        } else {
-            //noinspection SuspiciousNameCombination - on purpose!
-            surfaceHolder.setFixedSize(resolution.currentPreviewResolution.y, resolution.currentPreviewResolution.x);
-        }
+        surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
+        camPreviewSurfaceView.requestLayout();
 
         // Go for camera. Camera object is given in callback.
         if (!isInEditMode()) {
-            openCamera();
+            // Do it on the view thread to ensure the resize is already taken into account.
+            camPreviewSurfaceView.post(this::openCamera);
         }
 
         // Preview is actually started in CameraDevice.StateCallback.onOpened, after camera is plugged in.
@@ -415,6 +412,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int pixelFormat, int newWidth, int newHeight) {
         Log.i(TAG, "surface changed");
+
+
     }
 
     @Override
@@ -499,15 +498,15 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         // We need the worker count to init the preview
         initializeFrameAnalyzerIfNeeded();
 
-        Surface previewSurface = this.camPreviewSurfaceView.getHolder().getSurface();
-
         try {
             imageReader = ImageReader.newInstance(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y, ImageFormat.YUV_420_888, frameAnalyser.maxBuffersInConcurrentUse() + 1);
             imageReader.setOnImageAvailableListener(imageCallback, backgroundHandler);
 
             Log.d(TAG, "Capture session creation begins");
             this.cameraDevice.createCaptureSession(
-                    Arrays.asList(previewSurface, imageReader.getSurface())
+                    Arrays.asList(
+                            this.camPreviewSurfaceView.getHolder().getSurface(),
+                            imageReader.getSurface())
                     , cameraCaptureSessionStateCallback
                     , backgroundHandler);
 
@@ -739,8 +738,21 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     }
 
     @Override
-    public int getCameraDisplayOrientation() {
+    public int getCameraOrientationRelativeToDeviceNaturalOrientation() {
         Integer o = getCharacteristics().get(CameraCharacteristics.SENSOR_ORIENTATION);
         return o != null ? (180 - o % 360) : 0;
+    }
+
+    @Override
+    int getCameraFace() {
+        Integer o = getCharacteristics().get(CameraCharacteristics.LENS_FACING);
+        switch (o) {
+            case CameraCharacteristics.LENS_FACING_FRONT:
+                return 1;
+            case CameraCharacteristics.LENS_FACING_BACK:
+                return 0;
+            default:
+                throw new IllegalStateException("wrong camera face");
+        }
     }
 }

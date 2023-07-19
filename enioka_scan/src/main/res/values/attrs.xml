@@ -14,5 +14,9 @@
         <attr name="targetColor" format="color" />
         <attr name="targetStrokeWidth" format="integer" />
         <attr name="targetIsFixed" format="boolean" />
+        <attr name="previewRatioMode" format="enum">
+            <enum name="fillAvailableSpace" value="0" />
+            <enum name="fitToPicture" value="1" />
+        </attr>
     </declare-styleable>
 </resources>

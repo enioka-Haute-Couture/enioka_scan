@@ -13,10 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Display;
-import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.WindowManager;
 
 import com.enioka.scanner.R;
 
@@ -529,49 +526,24 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         this.cam.release();
         this.cam = null;
     }
-
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Helpers
-    public int getCameraDisplayOrientation() {
+    @Override
+    int getCameraOrientationRelativeToDeviceNaturalOrientation() {
         Camera.CameraInfo info = new Camera.CameraInfo();
         Camera.getCameraInfo(0, info);
-        WindowManager wm = (WindowManager) this.getContext().getSystemService(Context.WINDOW_SERVICE);
-        if (wm == null) {
-            Log.w(TAG, "could not get the window manager");
-            return 0;
-        }
-        Display display = wm.getDefaultDisplay();
-        int rotation = display.getRotation();
-        short degrees = 0;
-        switch (rotation) {
-            case Surface.ROTATION_0:
-                degrees = 0;
-                break;
-            case Surface.ROTATION_90:
-                degrees = 90;
-                break;
-            case Surface.ROTATION_180:
-                degrees = 180;
-                break;
-            case Surface.ROTATION_270:
-                degrees = 270;
-                break;
-        }
-
-        int result;
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            result = (info.orientation + degrees) % 360;
-            result = (360 - result) % 360;
-        } else {
-            result = (info.orientation - degrees + 360) % 360;
-        }
-        return result;
+        return info.orientation;
     }
 
-
+    @Override
+    int getCameraFace() {
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(0, info);
+        return info.facing;
+    }
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 

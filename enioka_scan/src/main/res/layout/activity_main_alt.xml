@@ -15,6 +15,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:previewRatioMode="fillAvailableSpace"
         app:readerMode="Auto"
         app:targetColor="@color/colorRed"
         app:targetIsFixed="false"
@@ -28,7 +29,7 @@
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/activity_scan_barcode_value_placeholder"
         android:textColor="@android:color/black"
-        android:textSize="22sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -36,12 +37,12 @@
     <TextView
         android:id="@+id/scanner_text_scanner_status"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="60dp"
         android:background="#59ffffff"
         android:gravity="center_horizontal|top"
         android:text="@string/activity_scan_scanner_not_initialized"
         android:textColor="@color/colorPrimaryDark"
-        android:textSize="22sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent" />
 

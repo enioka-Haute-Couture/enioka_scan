@@ -245,7 +245,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         }
 
         // Resolution selection
-        ViewHelpersResolution.setPreviewResolution(getContext(), resolution, this.camPreviewSurfaceView);
+        ViewHelpersResolution.setPreviewResolution(getContext(), resolution, this);
 
         // We now have a preview resolution for sure. (exception otherwise)
 
@@ -532,7 +532,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Helpers
     @Override
-    int getCameraOrientationRelativeToDeviceNaturalOrientation() {
+    public int getCameraOrientationRelativeToDeviceNaturalOrientation() {
         Camera.CameraInfo info = new Camera.CameraInfo();
         Camera.getCameraInfo(0, info);
         return info.orientation;

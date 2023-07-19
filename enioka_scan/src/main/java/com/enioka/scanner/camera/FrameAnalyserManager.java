@@ -59,7 +59,7 @@ class FrameAnalyserManager {
     private final Queue<FrameAnalyser> analysers = new ArrayDeque<>(NUMBER_OF_CORES);
     /**
      * Entry queue. There at most as many buffers waiting for analysis as there are workers.
-     * (corresponds to the worst case when all workers fiish analyss at the same time and require an new buffer to process)
+     * (corresponds to the worst case when all workers finish analysis at the same time and require an new buffer to process)
      * <br><br>This queue is key to uncouple the rate of buffer production (camera preview FPS) and
      * the analysis rate (depending on CPU power) - buffers too many are simply discarded and we
      * skip analysing frames if the camera goes too fast for our analyzers to keep up.

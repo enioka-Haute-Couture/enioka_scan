@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements ScannerCallback<T>, SurfaceHolder.Callback {
+abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements ScannerCallback<T>, CameraPreviewSurfaceView.Callback {
     protected static final String TAG = "BARCODE";
 
     /////////////////////////////////
@@ -227,7 +228,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
         // The view holding the preview. This will in turn (camHolder.addCallback) call setUpCamera.
         if (this.camPreviewSurfaceView == null) {
             //camPreviewSurfaceView = new SurfaceView(getContext());
-            camPreviewSurfaceView = new CameraPreviewSurfaceView(getContext(), styledAttributes, resolution, this);
+            camPreviewSurfaceView = new CameraPreviewSurfaceView(getContext(), styledAttributes, this);
             FrameLayout.LayoutParams prms = this.generateDefaultLayoutParams();
             prms.gravity = Gravity.CENTER;
             /*prms.leftMargin = 10;
@@ -407,6 +408,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             res.croppedDataWidth = (1 + realY3 - realY1);
             if (res.croppedDataHeight * res.croppedDataWidth < 0) {
                 // Ignore - Happens when the orientation has just changed and we analyze an horizontal buffer
+                Log.w(TAG, "Corrupted buffer");
                 res.barcode = new byte[0];
                 return res;
             }
@@ -449,6 +451,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             res.croppedDataHeight = (1 + realY3 - realY1);
             if (res.croppedDataHeight * res.croppedDataWidth < 0) {
                 // Ignore - Happens when the orientation has just changed and we analyze a vertical buffer
+                Log.w(TAG, "Corrupted buffer");
                 res.barcode = new byte[0];
                 return res;
             }
@@ -494,14 +497,14 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
 
     protected abstract void giveBufferBackInternal(FrameAnalysisContext<T> analysisContext);
 
-    abstract int getCameraOrientationRelativeToDeviceNaturalOrientation();
+    public abstract int getCameraOrientationRelativeToDeviceNaturalOrientation();
 
     /**
      * @return 0 if facing back, 1 if facing front.
      */
     abstract int getCameraFace();
 
-    int getDeviceOrientationRelativeToDeviceNaturalOrientation() {
+    public int getDeviceOrientationRelativeToDeviceNaturalOrientation() {
         WindowManager wm = (WindowManager) this.getContext().getSystemService(Context.WINDOW_SERVICE);
         if (wm == null) {
             Log.w(TAG, "could not get the window manager");
@@ -537,6 +540,10 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
         return result;
     }
 
+    @Override
+    public Point getCurrentCameraResolution() {
+        return this.resolution != null && this.resolution.currentPreviewResolution != null ? this.resolution.currentPreviewResolution : null;
+    }
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 

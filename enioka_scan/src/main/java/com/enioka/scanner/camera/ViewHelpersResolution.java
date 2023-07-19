@@ -4,7 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.util.Log;
-import android.view.SurfaceView;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +19,7 @@ import java.util.Set;
 class ViewHelpersResolution {
     private static final String TAG = "BARCODE";
 
-    static void setPreviewResolution(Context context, Resolution bag, SurfaceView camView) {
+    static void setPreviewResolution(Context context, Resolution bag, View containerView) {
         Point previewResolution = null;
 
         // Get memory limit - we do not want a resolution so high as to cause an OOM with all the buffers
@@ -31,11 +31,11 @@ class ViewHelpersResolution {
         Log.i(TAG, "Using memory limit (MB): " + maxMb);
 
         // Look for a resolution not too far from the view ratio.
-        float preferredRatio = (float) camView.getMeasuredHeight() / (float) camView.getMeasuredWidth();
+        float preferredRatio = (float) containerView.getMeasuredHeight() / (float) containerView.getMeasuredWidth();
         if (preferredRatio < 1) {
             preferredRatio = 1 / preferredRatio;
         }
-        Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio + ". (view is h*w " + camView.getMeasuredHeight() + "*" + camView.getMeasuredWidth() + ")");
+        Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio + ". (view is h*w " + containerView.getMeasuredHeight() + "*" + containerView.getMeasuredWidth() + ")");
         boolean goodMatchFound = false;
 
         Set<String> forbiddenRezs = ViewHelpersPreferences.getPreferencesStringSet(context, "rezs_too_high");
@@ -49,7 +49,7 @@ class ViewHelpersResolution {
             Log.d(TAG, "\tsupports preview resolution " + resolution.x + "*" + resolution.y + " - " + ((float) resolution.x / (float) resolution.y));
 
             if (forbiddenRezs.contains(resolution.x + "*" + resolution.y)) {
-                Log.d(TAG, "\t\tResolution is forbidden - FPS too low");
+                Log.d(TAG, "\t\tResolution is forbidden - FPS would be too low");
                 continue;
             }
             int previewBufferSize = (int) (resolution.x * resolution.y * bag.bytesPerPixel);
@@ -58,9 +58,17 @@ class ViewHelpersResolution {
                 continue;
             }
 
+            if (resolution.y > 14400) {
+                Log.d(TAG, "\t\tResolution is removed - would result in too big barcodes at short range");
+                continue;
+            }
+
             allRatioPreviewResolutions.add(resolution);
             if (Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.3f) {
                 bag.allowedPreviewResolutions.add(resolution);
+            } else {
+                Log.d(TAG, "\t\tResolution is removed - ratio is distant from ideal ratio by " + Math.round(Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) * 100f) / 100f);
+                continue;
             }
         }
         Collections.sort(bag.allowedPreviewResolutions, new Comparator<Point>() {

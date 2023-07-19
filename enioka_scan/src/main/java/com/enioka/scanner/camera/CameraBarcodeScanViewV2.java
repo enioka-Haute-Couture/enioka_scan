@@ -3,7 +3,6 @@ package com.enioka.scanner.camera;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.hardware.camera2.CameraAccessException;
@@ -27,11 +26,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
-import android.view.Gravity;
-import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import java.nio.ByteBuffer;
@@ -230,7 +225,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         for (Size s : choices) {
             resolution.supportedPreviewResolutions.add(new Point(s.getWidth(), s.getHeight()));
         }
-        ViewHelpersResolution.setPreviewResolution(getContext(), resolution, this.camPreviewSurfaceView);
+        ViewHelpersResolution.setPreviewResolution(getContext(), resolution, this);
     }
 
     private Range<Integer> selectFpsRange(CameraCharacteristics characteristics) {
@@ -322,8 +317,13 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         // Do not do anything. Cleaning up is actually triggered by destroying the surface view. No need for manual call.
     }
 
+    @Override
     public void pauseCamera() {
+        // This version actually simply stops the capture session, but keeps the camera open.
+        // Preview is frozen when session is closed.
+        // TODO: add an actual pause, by stopping the repeating loop of the session instead of destroying it.
         if (this.captureSession != null) {
+            Log.i(TAG, "Stopping capture session");
             this.imageReader.close();
             this.imageReader = null;
             this.captureSession.close();
@@ -396,8 +396,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         selectCameraParameters();
 
         // Set the preview surface buffer size
-        surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
-        camPreviewSurfaceView.requestLayout();
+        camPreviewSurfaceView.post(() -> surfaceHolder.setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y));
+        camPreviewSurfaceView.post(camPreviewSurfaceView::requestLayout);
 
         // Go for camera. Camera object is given in callback.
         if (!isInEditMode()) {
@@ -412,8 +412,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int pixelFormat, int newWidth, int newHeight) {
         Log.i(TAG, "surface changed");
-
-
+        camPreviewSurfaceView.post(this::startPreview);
     }
 
     @Override
@@ -609,7 +608,6 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         @Override
         public void onClosed(@NonNull CameraCaptureSession session) {
             Log.i(TAG, "Capture session has closed " + session.hashCode());
-            captureSession = null;
         }
     };
 
@@ -716,9 +714,11 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     @Override
     public void setPreviewResolution(Point newResolution) {
         Log.d(TAG, "New preview resolution set");
-        //resolution.currentPreviewResolution = newResolution;
-        //pauseCamera();
-        this.startPreview();
+        pauseCamera();
+        resolution.currentPreviewResolution = newResolution;
+        camPreviewSurfaceView.post(() -> camPreviewSurfaceView.getHolder().setFixedSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y));
+        camPreviewSurfaceView.post(camPreviewSurfaceView::requestLayout);
+        // startPreview is implicit in surfaceChanged
     }
 
 

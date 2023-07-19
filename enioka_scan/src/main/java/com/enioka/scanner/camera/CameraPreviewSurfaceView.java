@@ -2,7 +2,8 @@ package com.enioka.scanner.camera;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.util.AttributeSet;
+import android.graphics.Point;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.enioka.scanner.R;
@@ -15,24 +16,23 @@ import com.enioka.scanner.R;
  * As a bonus, we enable the possibility to "fit to ratio" the preview (adding black bars, not cropping).
  */
 class CameraPreviewSurfaceView extends SurfaceView {
-    Resolution res;
-    CameraBarcodeScanViewBase parent;
-    private boolean respectCameraRatio = false;
+    private final Callback parent;
+    private final boolean respectCameraRatio;
 
-    public CameraPreviewSurfaceView(Context context, TypedArray styledAttributes, Resolution res, CameraBarcodeScanViewBase parent) {
+    interface Callback extends SurfaceHolder.Callback {
+        Point getCurrentCameraResolution();
+
+        int getCameraOrientationRelativeToDeviceNaturalOrientation();
+
+        int getDeviceOrientationRelativeToDeviceNaturalOrientation();
+    }
+
+    public CameraPreviewSurfaceView(Context context, TypedArray styledAttributes, Callback parent) {
         super(context);
-        this.res = res;
         this.parent = parent;
 
         int rm = styledAttributes.getInt(R.styleable.CameraBarcodeScanView_previewRatioMode, 0);
-        switch (rm) {
-            case 1:
-                respectCameraRatio = true;
-                break;
-            default:
-                respectCameraRatio = false;
-                break;
-        }
+        respectCameraRatio = rm == 1;
     }
 
     @Override
@@ -42,15 +42,15 @@ class CameraPreviewSurfaceView extends SurfaceView {
         int parentImposedWidthPx = MeasureSpec.getSize(widthMeasureSpec);
         int parentImposedHeightPx = MeasureSpec.getSize(heightMeasureSpec);
 
-        if (res.currentPreviewResolution == null || !respectCameraRatio) {
+        if (parent.getCurrentCameraResolution() == null || !respectCameraRatio) {
             setMeasuredDimension(parentImposedWidthPx, parentImposedHeightPx);
         } else {
-            float dataRatio = ((float) res.currentPreviewResolution.x) / res.currentPreviewResolution.y;
+            float dataRatio = ((float) parent.getCurrentCameraResolution().x) / parent.getCurrentCameraResolution().y;
 
             // What is the ratio main dimension?
             int relativeOrientation = (parent.getCameraOrientationRelativeToDeviceNaturalOrientation() - parent.getDeviceOrientationRelativeToDeviceNaturalOrientation() + 360) % 360;
             if (relativeOrientation == 0 || relativeOrientation == 180) {
-                // Device and camera have currenbtly the same orientation
+                // Device and camera have currently the same orientation
             } else {
                 dataRatio = 1 / dataRatio;
             }

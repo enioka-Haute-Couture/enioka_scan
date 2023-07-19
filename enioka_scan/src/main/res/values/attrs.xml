@@ -19,5 +19,8 @@
             <enum name="fitToPicture" value="1" />
         </attr>
         <attr name="useAdaptiveResolution" format="boolean" />
+        <attr name="storePreferredResolution" format="boolean" />
+        <attr name="maxResolutionY" format="integer" />
+        <attr name="maxDistortionRatio" format="float" />
     </declare-styleable>
 </resources>

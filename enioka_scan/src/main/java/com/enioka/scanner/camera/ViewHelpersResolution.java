@@ -58,16 +58,16 @@ class ViewHelpersResolution {
                 continue;
             }
 
-            if (resolution.y > 14400) {
-                Log.d(TAG, "\t\tResolution is removed - would result in too big barcodes at short range");
+            if (resolution.y > bag.maxResolutionY) {
+                Log.d(TAG, "\t\tResolution is removed - it is higher than the maximum resolution configured in the view (" + bag.maxResolutionY + ")");
                 continue;
             }
 
             allRatioPreviewResolutions.add(resolution);
-            if (Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < 0.3f) {
+            if (Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) < bag.maxDistortionRatio) {
                 bag.allowedPreviewResolutions.add(resolution);
             } else {
-                Log.d(TAG, "\t\tResolution is removed - ratio is distant from ideal ratio by " + Math.round(Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) * 100f) / 100f);
+                Log.d(TAG, "\t\tResolution is removed - ratio is distant from ideal ratio by " + Math.round(Math.abs((float) resolution.x / (float) resolution.y - preferredRatio) * 100f) / 100f + " which is more than parameter " + bag.maxDistortionRatio);
                 continue;
             }
         }
@@ -112,7 +112,7 @@ class ViewHelpersResolution {
         }
 
         // Finally, if there is a preferred preview size, just use it.
-        Point preferred = ViewHelpersPreferences.getDefaultPreviewResolution(context);
+        Point preferred = bag.getDefaultPreviewResolution();
         if (preferred != null && preferred.x > 0 && preferred.y > 0) {
             for (Point resolution : bag.allowedPreviewResolutions) {
                 if (preferred.x == resolution.x && preferred.y == resolution.y) {
@@ -123,9 +123,13 @@ class ViewHelpersResolution {
             }
         }
 
+        // DEBUG
+        //previewResolution = new Point(320, 240);
+        //Log.w(TAG, "Using debug resolution " + previewResolution);
+
         // We now have a preview resolution for sure.
         bag.currentPreviewResolution = previewResolution;
-        bag.preferredPreviewResolution = ViewHelpersPreferences.getDefaultPreviewResolution(context);
+        bag.preferredPreviewResolution = bag.getDefaultPreviewResolution();
     }
 
 

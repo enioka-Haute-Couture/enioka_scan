@@ -93,6 +93,9 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
 
         this.allowTargetDrag = !styledAttributes.getBoolean(R.styleable.CameraBarcodeScanView_targetIsFixed, false);
         this.resolution.useAdaptiveResolution = styledAttributes.getBoolean(R.styleable.CameraBarcodeScanView_useAdaptiveResolution, true);
+        this.resolution.storePreferredResolution = styledAttributes.getBoolean(R.styleable.CameraBarcodeScanView_storePreferredResolution, true);
+        this.resolution.maxResolutionY = styledAttributes.getInteger(R.styleable.CameraBarcodeScanView_maxResolutionY, 1080);
+        this.resolution.maxDistortionRatio = styledAttributes.getFloat(R.styleable.CameraBarcodeScanView_maxDistortionRatio, 0.3f);
         initLayout();
     }
 

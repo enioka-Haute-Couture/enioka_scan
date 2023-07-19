@@ -14,33 +14,53 @@ import java.util.Set;
  */
 class Resolution {
     private static final String TAG = "BARCODE";
-
     private static final String PREFERENCE_FORBIDDEN_REZ = "forbidden_resolutions";
 
     Resolution(Context context) {
         this.context = context;
     }
 
-    private final Context context;
-
+    ////////////////////////////////////////////////////////////////////////////
+    // Preview
     List<Point> supportedPreviewResolutions = new ArrayList<>(20);
     List<Point> allowedPreviewResolutions = new ArrayList<>(20);
 
-    List<Point> supportedPhotoResolutions = new ArrayList<>(20);
-
     Point currentPreviewResolution = null;
     Point preferredPreviewResolution = null;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Photo
+    List<Point> supportedPhotoResolutions = new ArrayList<>(20);
     Point currentPhotoResolution = null;
-
     boolean usePreviewForPhoto = false;
-    boolean useAdaptiveResolution = true;
 
+    ////////////////////////////////////////////////////////////////////////////
+    // Adaptive resolution parameters
+    boolean useAdaptiveResolution = true;
+    boolean storePreferredResolution = true;
+    int maxResolutionY;
+    float maxDistortionRatio;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Misc
     float bytesPerPixel;
+    private final Context context;
 
     void persistDefaultPreviewResolution(Point resolution) {
+        if (!storePreferredResolution) {
+            return;
+        }
         Log.i(TAG, "Persisting default preview resolution: " + resolution.x + "*" + resolution.y);
         ViewHelpersPreferences.persistDefaultPreviewResolution(context, resolution);
     }
+
+    Point getDefaultPreviewResolution() {
+        if (!storePreferredResolution) {
+            return null;
+        }
+        return ViewHelpersPreferences.getDefaultPreviewResolution(context);
+    }
+
 
     void removeResolution(Point rez) {
         Point s = null;

@@ -18,5 +18,6 @@
             <enum name="fillAvailableSpace" value="0" />
             <enum name="fitToPicture" value="1" />
         </attr>
+        <attr name="useAdaptiveResolution" format="boolean" />
     </declare-styleable>
 </resources>

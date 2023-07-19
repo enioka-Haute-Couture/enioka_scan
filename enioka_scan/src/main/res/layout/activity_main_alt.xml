@@ -19,7 +19,8 @@
         app:readerMode="Auto"
         app:targetColor="@color/colorRed"
         app:targetIsFixed="false"
-        app:targetStrokeWidth="5" />
+        app:targetStrokeWidth="5"
+        app:useAdaptiveResolution="true" />
 
     <TextView
         android:id="@+id/scanner_text_last_scan"

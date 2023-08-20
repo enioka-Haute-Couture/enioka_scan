@@ -223,6 +223,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     }
 
     private void selectResolution(Size[] choices) {
+        if (resolution.currentPreviewResolution != null) {
+            Log.d(TAG, "Reusing previously chosen resolution");
+            return;
+        }
         for (Size s : choices) {
             resolution.supportedPreviewResolutions.add(new Point(s.getWidth(), s.getHeight()));
         }
@@ -282,6 +286,11 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     private synchronized void closeCamera() {
         Log.d(TAG, "Starting camera release " + this.hashCode());
 
+        if (stopping) {
+            Log.d(TAG, "Camera release start request skipped because already closing");
+            return;
+        }
+
         // Stop feeding the analyzers at once (we will wait for them in the end)
         stopping = true;
         if (null != frameAnalyser) {
@@ -290,6 +299,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
         if (null != captureSession) {
             Log.d(TAG, " * Closing camera capture session");
+
+            captureRequestBuilder.removeTarget(this.camPreviewSurfaceView.getHolder().getSurface());
+            captureRequestBuilder = null;
+
             captureSession.close();
             captureSession = null;
         }
@@ -461,6 +474,11 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
                 Log.d(TAG, " * Closing analyzers");
                 frameAnalyser.close();
                 frameAnalyser = null;
+            }
+
+            if (camPreviewSurfaceView != null && camPreviewSurfaceView.getHolder() != null && camPreviewSurfaceView.getHolder().getSurface() != null) {
+                // Bug #108 - if surface is not released, camera will be closed when surface is destroyed. Really. Prevents other activities to use camera.
+                camPreviewSurfaceView.getHolder().getSurface().release();
             }
 
             imageBufferQueue.clear();

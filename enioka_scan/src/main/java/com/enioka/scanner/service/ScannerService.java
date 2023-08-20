@@ -188,7 +188,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void registerClient(ScannerClient client) {
-        Log.d(LOG_TAG, "Registering new client: " + client.toString());
+        Log.d(LOG_TAG, "Registering new client: " + client.toString() + " " + client.hashCode());
         this.clients.add(client);
 
         if (!firstBind) {
@@ -204,6 +204,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     @Override
     public void unregisterClient(ScannerClient client) {
+        Log.d(LOG_TAG, "Unregistering client: " + client.toString() + " " + client.hashCode());
         this.clients.remove(client);
     }
 

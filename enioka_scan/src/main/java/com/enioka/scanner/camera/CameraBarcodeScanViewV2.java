@@ -205,6 +205,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         if (characteristics == null) {
             throw new RuntimeException("no suitable camera found on device");
         }
+        Log.i(TAG, "Selected camera id: " + this.cameraId);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             cameraManager.registerTorchCallback(new CameraManager.TorchCallback() {
@@ -257,7 +258,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     }
 
     private void openCamera() {
-        Log.d(TAG, "Trying to open camera from CameraManager");
+        Log.d(TAG, "Trying to open camera from CameraManager " + this.hashCode());
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             throw new RuntimeException("missing use camera permission");
         }
@@ -279,7 +280,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     }
 
     private synchronized void closeCamera() {
-        Log.d(TAG, "Starting camera release");
+        Log.d(TAG, "Starting camera release " + this.hashCode());
 
         // Stop feeding the analyzers at once (we will wait for them in the end)
         stopping = true;
@@ -305,6 +306,8 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             imageReader = null;
         }
 
+        Log.d(TAG, "All close requests sent " + this.hashCode());
+
         // capture session is closed above.
         // reader is closed above.
         // camera device  is closed above.
@@ -314,7 +317,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
     @Override
     public void cleanUp() {
-        // Do not do anything. Cleaning up is actually triggered by destroying the surface view. No need for manual call.
+        this.closeCamera();
     }
 
     @Override
@@ -367,6 +370,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
      * Starts a background thread and its {@link Handler}.
      */
     private void startBackgroundThread() {
+        Log.d(TAG, "Starting background thread handler " + this.hashCode());
         backgroundThread = new HandlerThread("CameraBackground");
         backgroundThread.start();
         backgroundHandler = new Handler(backgroundThread.getLooper());
@@ -376,6 +380,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
      * Stops the background thread and its {@link Handler}.
      */
     private void stopBackgroundThread() {
+        Log.d(TAG, "Stopping background thread handler " + this.hashCode());
         backgroundThread.quitSafely();
         backgroundThread = null;
         backgroundHandler = null;
@@ -390,7 +395,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
         super.surfaceCreated(surfaceHolder);
 
-        Log.d(TAG, "Preview surface created, camera will be initialized soon");
+        Log.d(TAG, "Preview surface created, camera will be initialized soon " + this.hashCode());
 
         // This will select the camera and all the resolution, exposure, AF... parameters.
         selectCameraParameters();
@@ -411,13 +416,13 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int pixelFormat, int newWidth, int newHeight) {
-        Log.i(TAG, "surface changed");
+        Log.i(TAG, "surface changed " + this.hashCode());
         camPreviewSurfaceView.post(this::startPreview);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        Log.i(TAG, "surface destroyed");
+        Log.i(TAG, "surface destroyed " + this.hashCode());
         closeCamera();
     }
 
@@ -429,7 +434,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     private final CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
-            Log.v(TAG, "CameraDevice.StateCallback.onOpened");
+            Log.v(TAG, "CameraDevice.StateCallback.onOpened " + CameraBarcodeScanViewV2.this.hashCode());
             // Start preview when camera is actually opened
             CameraBarcodeScanViewV2.this.cameraDevice = cameraDevice;
             startPreview();
@@ -437,14 +442,14 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
         @Override
         public void onDisconnected(@NonNull CameraDevice cameraDevice) {
-            Log.v(TAG, "CameraDevice.StateCallback.onDisconnected");
+            Log.v(TAG, "CameraDevice.StateCallback.onDisconnected " + CameraBarcodeScanViewV2.this.hashCode());
             cameraDevice.close();
             CameraBarcodeScanViewV2.this.cameraDevice = null;
         }
 
         @Override
         public void onClosed(@NonNull CameraDevice camera) {
-            Log.v(TAG, "CameraDevice.StateCallback.onClosed");
+            Log.v(TAG, "CameraDevice.StateCallback.onClosed " + CameraBarcodeScanViewV2.this.hashCode());
             super.onClosed(camera);
 
             if (null != backgroundThread) {
@@ -462,7 +467,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             croppedImageBufferQueue.clear();
 
             stopping = false;
-            Log.i(TAG, "Camera scanner view has finished releasing all camera resources");
+            Log.i(TAG, "Camera scanner view has finished releasing all camera resources " + CameraBarcodeScanViewV2.this.hashCode());
         }
 
         @Override
@@ -524,7 +529,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     private final CameraCaptureSession.StateCallback cameraCaptureSessionStateCallback = new CameraCaptureSession.StateCallback() {
         @Override
         public void onConfigured(@NonNull final CameraCaptureSession cameraCaptureSession) {
-            Log.i(TAG, "Capture session is now configured and will start the capture request loop " + cameraCaptureSession.hashCode());
+            Log.i(TAG, "Capture session is now configured and will start the capture request loop " + CameraBarcodeScanViewV2.this.hashCode());
 
             // Sanity check
             if (null == cameraDevice) {
@@ -585,7 +590,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
                 CameraBarcodeScanViewV2.this.closeCamera();
             }
 
-            Log.i(TAG, "Camera repeating capture request was set up");
+            Log.i(TAG, "Camera repeating capture request was set up " + CameraBarcodeScanViewV2.this.hashCode());
         }
 
         @Override
@@ -597,12 +602,12 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
         @Override
         public void onActive(@NonNull CameraCaptureSession session) {
-            Log.d(TAG, "Capture session is getting active " + session.hashCode());
+            Log.d(TAG, "Capture session is getting active " + CameraBarcodeScanViewV2.this.hashCode());
         }
 
         @Override
         public void onReady(@NonNull CameraCaptureSession session) {
-            Log.d(TAG, "Capture session has nothing to process " + session.hashCode());
+            Log.d(TAG, "Capture session has nothing to process " + CameraBarcodeScanViewV2.this.hashCode());
         }
 
         @Override

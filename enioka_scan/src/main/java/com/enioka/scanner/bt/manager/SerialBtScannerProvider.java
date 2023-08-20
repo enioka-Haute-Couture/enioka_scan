@@ -162,6 +162,7 @@ public class SerialBtScannerProvider implements ScannerProvider, SerialBtScanner
                 Log.d(PROVIDER_KEY, "Provider " + provider.getKey() + " skipped because not whitelisted by option (only allows " + options.allowedProviderKeys + ")");
                 continue;
             }
+            Log.d(PROVIDER_KEY, "Provider " + provider.getKey() + " added to allowed providers list");
             sortedScannerProviders.add(provider);
         }
 

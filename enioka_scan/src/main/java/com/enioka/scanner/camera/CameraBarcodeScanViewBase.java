@@ -231,14 +231,9 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
 
         // The view holding the preview. This will in turn (camHolder.addCallback) call setUpCamera.
         if (this.camPreviewSurfaceView == null) {
-            //camPreviewSurfaceView = new SurfaceView(getContext());
             camPreviewSurfaceView = new CameraPreviewSurfaceView(getContext(), styledAttributes, this);
             FrameLayout.LayoutParams prms = this.generateDefaultLayoutParams();
             prms.gravity = Gravity.CENTER;
-            /*prms.leftMargin = 10;
-            prms.rightMargin = 10;
-            prms.bottomMargin = 10;
-            prms.topMargin = 10;*/
             camPreviewSurfaceView.setLayoutParams(prms);
             this.addView(camPreviewSurfaceView);
         }

@@ -140,6 +140,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(LOG_TAG, "Scanner activity is created " + this.hashCode());
         //Common.askForPermission(this); // NO: this actually pauses then resumes the activity.
 
         // Set content immediately - that way our callbacks can draw on the layout.
@@ -158,7 +159,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(LOG_TAG, "Scanner activity is starting");
+        Log.d(LOG_TAG, "Scanner activity is starting " + this.hashCode());
 
         if (!enableScan) {
             return;
@@ -264,6 +265,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i(LOG_TAG, "Scanner activity is resuming " + this.hashCode());
 
         if (!enableScan) {
             Log.i(LOG_TAG, "Resuming scanner activity with all scanning modes disabled");
@@ -301,7 +303,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
     @Override
     protected void onPause() {
-        Log.i(LOG_TAG, "Scanner activity is being paused");
+        Log.i(LOG_TAG, "Scanner activity is being paused " + this.hashCode());
         if (serviceBound) {
             scannerService.pause();
         }
@@ -314,12 +316,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     @Override
     protected void onStop() {
         super.onStop();
-        Log.i(LOG_TAG, "Scanner activity is being stopped");
+        Log.i(LOG_TAG, "Scanner activity is being stopped " + this.hashCode());
     }
 
     @Override
     protected void onDestroy() {
-        Log.i(LOG_TAG, "Scanner activity is being destroyed");
+        Log.i(LOG_TAG, "Scanner activity is being destroyed " + this.hashCode());
         super.onDestroy();
         if (serviceBound) {
             scannerService.unregisterClient(this);

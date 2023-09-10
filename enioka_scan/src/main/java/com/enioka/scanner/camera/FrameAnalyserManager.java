@@ -14,7 +14,6 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Holder for analyser thread pool.
@@ -207,18 +206,21 @@ class FrameAnalyserManager {
     /**
      * Called after each successful analysis.
      */
-    synchronized void handleResult(String result, BarcodeType symType, byte[] imagePreview) {
+     void handleResult(String result, BarcodeType symType, byte[] imagePreview) {
         if (result == null || result.isEmpty()) {
             return;
         }
 
-        if (latestBarcodeRead.equals(result) && Calendar.getInstance().getTimeInMillis() < latestResultTime.getTimeInMillis() + DOUBLE_READ_THRESHOLD_MS) {
-            // Ignore this result, its the same barcode that was just read.
-            return;
+        synchronized (this) {
+            if (latestBarcodeRead.equals(result) && Calendar.getInstance().getTimeInMillis() < latestResultTime.getTimeInMillis() + DOUBLE_READ_THRESHOLD_MS) {
+                // Ignore this result, its the same barcode that was just read.
+                return;
+            }
+            latestBarcodeRead = result;
+            latestResultTime = Calendar.getInstance();
         }
-        latestBarcodeRead = result;
-        latestResultTime = Calendar.getInstance();
 
+        // Do NOT put beep inside the synchronized block - deadlock in recent Android versions.
         Common.beepScanSuccessful();
         Log.d(TAG, "barcode read: " + result);
         parent.analyserCallback(result, symType, imagePreview);

@@ -14,31 +14,32 @@ import android.support.v4.content.ContextCompat;
  * A set of helpers for scanner SDK providers.
  */
 public final class Common {
+    private static ToneGenerator tg;
+    private static ToneGenerator toneGenerator() {
+        if (tg == null) {
+            tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+        }
+        return tg;
+    }
     /**
      * Short high beep to indicate successful scan
      */
     public static void beepScanSuccessful() {
-        ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
-        tg.startTone(ToneGenerator.TONE_PROP_PROMPT, 100);
-        tg.release();
+        toneGenerator().startTone(ToneGenerator.TONE_PROP_PROMPT, 100);
     }
 
     /**
      * Long low beep to indicate unsuccessful scan
      */
     public static void beepScanFailure() {
-        ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
-        tg.startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 300);
-        tg.release();
+        toneGenerator().startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 300);
     }
 
     /**
      * Different beep to indicate a completed barcode pairing
      */
     public static void beepPairingCompleted() {
-        ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
-        tg.startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 300);
-        tg.release();
+        toneGenerator().startTone(ToneGenerator.TONE_CDMA_ALERT_NETWORK_LITE, 300);
     }
 
     /**

@@ -400,9 +400,17 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         // TODO: add an actual pause, by stopping the repeating loop of the session instead of destroying it.
         if (this.captureSession != null) {
             Log.i(TAG, "Stopping capture session");
-            this.imageReader.close();
+            try {
+                this.imageReader.close();
+            } catch (IllegalArgumentException e) {
+                Log.i(TAG, "image reader would not close");
+            }
             this.imageReader = null;
-            this.captureSession.close();
+            try {
+                this.captureSession.close();
+            } catch (IllegalArgumentException e) {
+                Log.i(TAG, "captureSession would not close");
+            }
             this.captureSession = null;
         }
         post(() -> {
@@ -642,6 +650,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
             // Capture targets
             captureRequestBuilder.addTarget(CameraBarcodeScanViewV2.this.camPreviewSurfaceView.getHolder().getSurface());
+            if (imageReader == null) {
+                Log.d(TAG, "stopping init - view is being stopped");
+                return;
+            }
             captureRequestBuilder.addTarget(imageReader.getSurface());
 
             // Full auto (without this AF & AE are mostly disabled)

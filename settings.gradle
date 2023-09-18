@@ -1,4 +1,4 @@
-include ':enioka_scan', 'enioka_scan_mock', ':demoscannerapp'
+include ':enioka_scan', 'enioka_scan_mock', 'enioka_scan_zebra_dw', ':demoscannerapp'
 
 // Projects with either local libs or inside a private Maven repository
 gradle.ext.gpr = ext.find('gpr.user') ?: System.getenv("GH_DRIVER_REPOSITORY_USERNAME")

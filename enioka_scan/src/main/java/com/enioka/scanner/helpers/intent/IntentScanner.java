@@ -70,6 +70,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
 
         // Let the child provider set all the configuration values if needed.
         configureProvider();
+        configureProvider(ctx);
 
         // Register the broadcast receiver.
         registerReceivers(ctx, initCallback, statusCallback);
@@ -101,6 +102,13 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
      * Called just before initial scanner initialization. Empty by default. An occasion to set the configuration fields.
      */
     protected void configureProvider() {
+    }
+
+    /**
+     * Called just before initial scanner initialization. Empty by default. An occasion to set the configuration fields.
+     */
+    protected void configureProvider(final Context applicationContext) {
+
     }
 
     /**

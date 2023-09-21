@@ -741,7 +741,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         FrameAnalysisContext<Image> ctx = new FrameAnalysisContext<>();
         try {
             // Sanity check
-            assert (image.getPlanes().length == 3);
+            if (image.getPlanes().length != 3 || image.getPlanes()[0] == null) {
+                image.close();
+                return;
+            }
 
             // Sanity check
             if (image.getPlanes()[0].getPixelStride() != 1) {

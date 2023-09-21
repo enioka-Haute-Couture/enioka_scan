@@ -225,8 +225,8 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
         broadcastIntentFilters.add(ZebraDwIntents.DW_CONFIGURATION_CALLBACK_ACTION);
         broadcastIntentFilters.add(ZebraDwIntents.DW_NOTIFICATION_ACTION);
 
-        disableScanner = newIntent(ZebraDwIntents.DW_API_MAIN_ACTION, "com.symbol.datawedge.api.ENABLE_DATAWEDGE", true);
-        enableScanner = newIntent(ZebraDwIntents.DW_API_MAIN_ACTION, "com.symbol.datawedge.api.ENABLE_DATAWEDGE", false);
+        disableScanner = newIntent(ZebraDwIntents.DW_API_MAIN_ACTION, "com.symbol.datawedge.api.ENABLE_DATAWEDGE", false);
+        enableScanner = newIntent(ZebraDwIntents.DW_API_MAIN_ACTION, "com.symbol.datawedge.api.ENABLE_DATAWEDGE", true);
     }
 
     @Override
@@ -241,6 +241,9 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
 
         // Retrieve current scanner status
         getScannerStatus();
+
+        // Enable datawedge just in case.
+        resume();
     }
 
 

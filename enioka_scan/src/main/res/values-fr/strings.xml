@@ -34,4 +34,5 @@
     <string name="activity_scan_no_compatible_sdk">Aucun scanner compatible n\'est disponible sur cet appareil</string>
     <string name="service_description">Service d\'assistance à la gestion des scanners</string>
     <string name="activity_scan_use_zxing">ZXing</string>
+    <string name="activity_scan_pause_camera">Pause</string>
 </resources>

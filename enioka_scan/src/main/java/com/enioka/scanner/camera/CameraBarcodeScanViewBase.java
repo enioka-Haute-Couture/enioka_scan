@@ -64,7 +64,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
 
 
     protected SurfaceView camPreviewSurfaceView;
-    protected View targetView;
+    protected TargetView targetView;
     protected final TypedArray styledAttributes;
 
 
@@ -308,7 +308,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     protected void addTargetView() {
         float rectHeightPixelsViewCoordinates = (float) RECT_HEIGHT / MM_INSIDE_INCH * ydpi;
 
-        final View targetView = new TargetView(this.getContext(), this.styledAttributes);
+        final TargetView targetView = new TargetView(this.getContext(), this.styledAttributes);
         targetView.setId(R.id.barcode_scanner_camera_view);
         final FrameLayout.LayoutParams prms = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, (int) rectHeightPixelsViewCoordinates);
         prms.setMargins(0, cropRect.top, 0, 0);

@@ -17,9 +17,9 @@ interface ScannerCallback<T> {
      *
      * @param result      barcode read
      * @param type        barcode type (as in Symbol class)
-     * @param previewData the buffer used for this analysis.
+     * @param previewData the context used for this analysis.
      */
-    void analyserCallback(final String result, final BarcodeType type, byte[] previewData);
+    void analyserCallback(final String result, final BarcodeType type, FrameAnalysisContext previewData);
 
     /**
      * To be called after each analysis.

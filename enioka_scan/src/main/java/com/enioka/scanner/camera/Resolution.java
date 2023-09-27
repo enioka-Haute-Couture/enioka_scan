@@ -32,7 +32,6 @@ class Resolution {
     // Photo
     List<Point> supportedPhotoResolutions = new ArrayList<>(20);
     Point currentPhotoResolution = null;
-    boolean usePreviewForPhoto = false;
 
     ////////////////////////////////////////////////////////////////////////////
     // Adaptive resolution parameters

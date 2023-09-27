@@ -1,7 +1,5 @@
 package com.enioka.scanner.camera;
 
-import android.media.Image;
-
 /**
  * All the data needed for a frame analysis.
  * It also contains all the necessary data for buffer reuse between frames (closing Images, ...)<br>
@@ -10,5 +8,5 @@ import android.media.Image;
 class FrameAnalysisContext<T> {
     CroppedPicture croppedPicture;
 
-    T originalImage;
+    T originalImage; // byte[] for CameraV1, android.media.Image for CameraV2
 }

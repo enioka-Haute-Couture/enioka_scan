@@ -242,14 +242,16 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             return new Range<>(10, 30);
         }
 
+        Log.d(TAG, "Supported FPS ranges:");
         Range<Integer> result = ranges[0];
         for (Range<Integer> range : ranges) {
-            int upper = range.getUpper();
-            if (upper > result.getUpper() && range.getLower() >= 8) {
+            Log.d(TAG, "\t" + range.getLower() + "," + range.getUpper());
+            if (range.getLower() >= result.getLower() && range.getUpper() >= result.getUpper() && range.getLower() * 1.5 > range.getUpper()) {
                 result = range;
             }
         }
 
+        Log.i(TAG, "Requesting preview FPS range at " + result.getLower() + "," + result.getUpper());
         return result;
     }
 
@@ -604,8 +606,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
             //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
 
-            // TODO: FPS
-            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
+            captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
 
             // GO for preview
             CameraBarcodeScanViewV2.this.captureRequest = captureRequestBuilder.build();

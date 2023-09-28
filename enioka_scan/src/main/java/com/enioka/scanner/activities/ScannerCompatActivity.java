@@ -104,6 +104,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      */
     protected int scannerModeToggleViewId = R.id.scanner_switch_zxing;
 
+    protected int scannerModeTogglePauseId = R.id.scanner_switch_pause;
+
     protected int keyboardOpenViewId = R.id.scanner_bt_keyboard;
 
     /**
@@ -407,6 +409,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         displayTorch();
         displayManualInputButton();
         displayCameraReaderToggle();
+        displayCameraPauseToggle();
     }
 
 
@@ -634,6 +637,23 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             Log.i(LOG_TAG, "Changing reader mode");
             CameraBarcodeScanView cameraView = findViewById(cameraViewId);
             cameraView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
+        });
+    }
+
+    protected void displayCameraPauseToggle() {
+        final Switch toggle = findViewById(scannerModeTogglePauseId);
+        if (toggle == null) {
+            return;
+        }
+
+        toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.i(LOG_TAG, "Toggling camera pause");
+            CameraBarcodeScanView cameraView = findViewById(cameraViewId);
+            if (isChecked) {
+                cameraView.pauseCamera();
+            } else {
+                cameraView.resumeCamera();
+            }
         });
     }
 

@@ -11,7 +11,8 @@
             <enum name="ZXing" value="1" />
             <enum name="Auto" value="0" />
         </attr>
-        <attr name="targetColor" format="color" />
+        <attr name="targetColorActive" format="color" />
+        <attr name="targetColorPaused" format="color" />
         <attr name="targetStrokeWidth" format="integer" />
         <attr name="targetIsFixed" format="boolean" />
         <attr name="previewRatioMode" format="enum">

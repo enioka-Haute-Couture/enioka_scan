@@ -479,6 +479,9 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
             this.cam.setPreviewCallbackWithBuffer(null);
             this.cam.stopPreview();
         }
+        if (this.targetView != null) {
+            this.targetView.pauseTarget();
+        }
     }
 
     public void resumeCamera() {
@@ -487,6 +490,9 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
             if (scanningStarted) {
                 this.cam.setPreviewCallback(this);
             }
+        }
+        if (this.targetView != null) {
+            this.targetView.resumeTarget();
         }
     }
 

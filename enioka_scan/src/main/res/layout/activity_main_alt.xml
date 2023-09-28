@@ -20,7 +20,8 @@
         app:previewRatioMode="fillAvailableSpace"
         app:readerMode="Auto"
         app:storePreferredResolution="false"
-        app:targetColor="@color/colorRed"
+        app:targetColorActive="@color/colorRed"
+        app:targetColorPaused="@color/defaultItemColor"
         app:targetIsFixed="false"
         app:targetStrokeWidth="5"
         app:useAdaptiveResolution="true" />
@@ -81,4 +82,12 @@
         android:text="@string/activity_scan_use_zxing"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/scanner_bt_keyboard" />
+
+    <Switch
+        android:id="@+id/scanner_switch_pause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/activity_scan_pause_camera"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/scanner_switch_zxing" />
 </android.support.constraint.ConstraintLayout>

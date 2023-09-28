@@ -26,17 +26,21 @@ class TargetView extends View {
     protected Rect targetRect = new Rect();
 
     @ColorInt
-    protected final int rectColor;
+    protected final int rectColorActive;
+    @ColorInt
+    protected final int rectColorPaused;
     protected final int rectStrokeWidth;
 
     public TargetView(Context context, @Nullable TypedArray styledAttributes) {
         super(context);
 
         if (styledAttributes != null) {
-            rectColor = styledAttributes.getColor(R.styleable.CameraBarcodeScanView_targetColor, Color.RED);
+            rectColorActive = styledAttributes.getColor(R.styleable.CameraBarcodeScanView_targetColorActive, Color.RED);
+            rectColorPaused = styledAttributes.getColor(R.styleable.CameraBarcodeScanView_targetColorPaused, Color.GRAY);
             rectStrokeWidth = styledAttributes.getInteger(R.styleable.CameraBarcodeScanView_targetStrokeWidth, 5);
         } else {
-            rectColor = Color.RED;
+            rectColorActive = Color.RED;
+            rectColorPaused = Color.GRAY;
             rectStrokeWidth = 5;
         }
 
@@ -45,7 +49,7 @@ class TargetView extends View {
 
     protected void init() {
         targetRectPaint = new Paint();
-        targetRectPaint.setColor(rectColor);
+        targetRectPaint.setColor(rectColorActive);
         targetRectPaint.setStrokeWidth(rectStrokeWidth);
         targetRectPaint.setStyle(Paint.Style.STROKE);
 
@@ -53,6 +57,18 @@ class TargetView extends View {
         guideLinePaint.setColor(Color.RED);
         guideLinePaint.setStyle(Paint.Style.STROKE);
         guideLinePaint.setPathEffect(new DashPathEffect(new float[]{5, 10, 15, 20}, 0));
+    }
+
+    public void pauseTarget() {
+        targetRectPaint.setColor(rectColorPaused);
+        guideLinePaint.setColor(rectColorPaused);
+        invalidate(); // Force redraw
+    }
+
+    public void resumeTarget() {
+        targetRectPaint.setColor(rectColorActive);
+        guideLinePaint.setColor(Color.RED);
+        invalidate(); // Force redraw
     }
 
     @Override
@@ -82,7 +98,6 @@ class TargetView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         canvas.drawRect(targetRect, targetRectPaint);
         canvas.drawLine(0, (wholeView.bottom - wholeView.top) / 2, wholeView.right, (wholeView.bottom - wholeView.top) / 2, guideLinePaint);
     }

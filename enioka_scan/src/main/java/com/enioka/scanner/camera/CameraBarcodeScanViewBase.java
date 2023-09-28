@@ -47,7 +47,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     protected boolean failed = false;
 
     protected Resolution resolution = new Resolution(getContext());
-    protected byte[] lastPreviewData;
+    protected FrameAnalysisContext lastSuccessfulScanData;
     protected final ConcurrentLinkedQueue<byte[]> croppedImageBufferQueue = new ConcurrentLinkedQueue<>();
 
     ///////////////////////////////
@@ -192,10 +192,8 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
         return isTorchOn;
     }
 
-    public void analyserCallback(final String result, final BarcodeType type, byte[] previewData) {
-        if (resolution.usePreviewForPhoto) {
-            lastPreviewData = previewData;
-        }
+    public void analyserCallback(final String result, final BarcodeType type, FrameAnalysisContext previewData) {
+        lastSuccessfulScanData = previewData;
 
         /*if (!keepScanning) {
             this.closeCamera();
@@ -546,4 +544,10 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Get the JPEG data of the image used in the latest successful scan.
+     *
+     * @return a byte[] of JPEG data, or null if there is no previous scan data.
+     */
+    abstract byte[] getLatestSuccessfulScanJpeg();
 }

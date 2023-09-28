@@ -206,7 +206,7 @@ class FrameAnalyserManager {
     /**
      * Called after each successful analysis.
      */
-     void handleResult(String result, BarcodeType symType, byte[] imagePreview) {
+     void handleResult(String result, BarcodeType symType, FrameAnalysisContext imagePreviewContext) {
         if (result == null || result.isEmpty()) {
             return;
         }
@@ -223,7 +223,7 @@ class FrameAnalyserManager {
         // Do NOT put beep inside the synchronized block - deadlock in recent Android versions.
         Common.beepScanSuccessful();
         Log.d(TAG, "barcode read: " + result);
-        parent.analyserCallback(result, symType, imagePreview);
+        parent.analyserCallback(result, symType, imagePreviewContext);
     }
 
     /**

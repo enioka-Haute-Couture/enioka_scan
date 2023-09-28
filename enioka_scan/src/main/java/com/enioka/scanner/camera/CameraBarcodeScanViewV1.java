@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
@@ -17,6 +18,7 @@ import android.view.SurfaceHolder;
 
 import com.enioka.scanner.R;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,10 +51,6 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Layout and camera initialization
-
-    protected boolean isUsingPreviewForPhoto() {
-        return this.resolution.usePreviewForPhoto;
-    }
 
     /**
      * After this call the camera is selected, with correct parameters and open, ready to be plugged on a preview pane.
@@ -250,31 +248,26 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         // We now have a preview resolution for sure. (exception otherwise)
 
         // COMPAT HACKS
-        resolution.usePreviewForPhoto = false;
         switch (android.os.Build.MODEL) {
             case "LG-H340n":
                 resolution.currentPreviewResolution = new Point(1600, 1200);
                 resolution.useAdaptiveResolution = false;
-                resolution.usePreviewForPhoto = true;
                 Log.i(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
                 break;
             case "SPA43LTE":
                 resolution.currentPreviewResolution = new Point(1280, 720);
                 resolution.useAdaptiveResolution = false;
-                resolution.usePreviewForPhoto = true;
                 Log.i(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
                 break;
             case "Archos Sense 50X":
                 resolution.currentPreviewResolution = new Point(1280, 720);
                 resolution.useAdaptiveResolution = false;
-                resolution.usePreviewForPhoto = true;
                 Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
                 break;
             default:
                 Log.i(TAG, "Using preview resolution " + resolution.currentPreviewResolution.x + "*" +
                         resolution.currentPreviewResolution.y + ". Ratio is " +
                         ((float) resolution.currentPreviewResolution.x / ((float) resolution.currentPreviewResolution.y)));
-                resolution.usePreviewForPhoto = resolution.currentPreviewResolution.y >= 1080;
         }
 
         // Set a denormalized field - this is used widely in the class.
@@ -517,7 +510,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
             this.cam.setPreviewCallback(null);
             this.cam.stopPreview();
             this.setOnClickListener(null);
-            this.lastPreviewData = null;
+            this.lastSuccessfulScanData = null;
             this.frameAnalyser.close();
             this.frameAnalyser = null;
         }
@@ -556,19 +549,35 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Camera as a camera!
-    public void takePicture(final Camera.PictureCallback callback) {
-        if (resolution.usePreviewForPhoto && lastPreviewData != null) {
-            Log.d(TAG, "Picture from preview");
-            final Camera camera = this.cam;
-            new ConvertPreviewAsync(lastPreviewData, resolution.currentPreviewResolution, new ConvertPreviewAsync.Callback() {
-                @Override
-                public void onDone(byte[] jpeg) {
-                    callback.onPictureTaken(jpeg, camera);
-                }
-            }).execute();
+    @Override
+    public byte[] getLatestSuccessfulScanJpeg() {
+        if (lastSuccessfulScanData != null) {
+            Log.d(TAG, "Convert last saved image to JPEG");
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            YuvImage img = new YuvImage((byte[])lastSuccessfulScanData.originalImage, ImageFormat.NV21, resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y, null);
+            Rect imgRect = new Rect(0, 0, resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
+            img.compressToJpeg(imgRect, 100, buffer);
+
+            /* // Save as file
+            File sdCardFile = new File(Environment.getExternalStorageDirectory() + "/" + "scanV1_" + new Random().nextInt() + ".jpg");
+            OutputStream s = null;
+            try {
+                s = new FileOutputStream(sdCardFile, false);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            img.compressToJpeg(imgRect, 100, s);
+            try {
+                s.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            */
+
+            return buffer.toByteArray();
         } else {
-            Log.d(TAG, "Picture from camera");
-            this.cam.takePicture(null, null, callback);
+            Log.d(TAG, "No saved image");
+            return null;
         }
     }
     //

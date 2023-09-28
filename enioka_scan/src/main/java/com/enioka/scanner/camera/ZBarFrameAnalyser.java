@@ -101,7 +101,7 @@ class ZBarFrameAnalyser extends FrameAnalyser {
 
                 if (!TextUtils.isEmpty(symData) && !foundStrings.contains(symData)) {
                     foundStrings.add(symData);
-                    parent.handleResult(symData, barcodeTypeZBar2Lib.get(symType), ctx.croppedPicture.barcode);
+                    parent.handleResult(symData, barcodeTypeZBar2Lib.get(symType), ctx);
                 }
             }
         }

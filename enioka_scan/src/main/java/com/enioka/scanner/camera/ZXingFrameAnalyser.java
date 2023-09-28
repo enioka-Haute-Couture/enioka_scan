@@ -96,7 +96,7 @@ class ZXingFrameAnalyser extends FrameAnalyser {
         if (res != null) {
             String readBarcode = res.getText();
             if (readBarcode != null && !readBarcode.isEmpty()) {
-                parent.handleResult(readBarcode, barcodeTypeZXing2Lib.get(res.getBarcodeFormat()), ctx.croppedPicture.barcode);
+                parent.handleResult(readBarcode, barcodeTypeZXing2Lib.get(res.getBarcodeFormat()), ctx);
             }
         }
 

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -29,6 +31,7 @@ import android.util.Size;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -782,6 +785,98 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
                 return 0;
             default:
                 throw new IllegalStateException("wrong camera face");
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Camera as a camera
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private YuvImage mediaImageToYuvImage(Image image) {
+        /*
+        Source: https://blog.minhazav.dev/how-to-convert-yuv-420-sp-android.media.Image-to-Bitmap-or-jpeg/#how-to-convert-yuv_420_888-image-to-yuvimage
+         */
+        if (image.getFormat() != ImageFormat.YUV_420_888) {
+            throw new IllegalArgumentException("Invalid image format");
+        }
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        // Order of U/V channel guaranteed, read more:
+        // https://developer.android.com/reference/android/graphics/ImageFormat#YUV_420_888
+        Image.Plane yPlane = image.getPlanes()[0];
+        Image.Plane uPlane = image.getPlanes()[1];
+        Image.Plane vPlane = image.getPlanes()[2];
+
+        ByteBuffer yBuffer = yPlane.getBuffer();
+        ByteBuffer uBuffer = uPlane.getBuffer();
+        ByteBuffer vBuffer = vPlane.getBuffer();
+
+        // Full size Y channel and quarter size U+V channels.
+        int numPixels = (int) (width * height * 1.5f);
+        byte[] nv21 = new byte[numPixels];
+        int index = 0;
+
+        // Copy Y channel.
+        int yRowStride = yPlane.getRowStride();
+        int yPixelStride = yPlane.getPixelStride();
+        for(int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                nv21[index++] = yBuffer.get(y * yRowStride + x * yPixelStride);
+            }
+        }
+
+        // Copy VU data; NV21 format is expected to have YYYYVU packaging.
+        // The U/V planes are guaranteed to have the same row stride and pixel stride.
+        int uvRowStride = uPlane.getRowStride();
+        int uvPixelStride = uPlane.getPixelStride();
+        int uvWidth = width / 2;
+        int uvHeight = height / 2;
+
+        for(int y = 0; y < uvHeight; ++y) {
+            for (int x = 0; x < uvWidth; ++x) {
+                int bufferIndex = (y * uvRowStride) + (x * uvPixelStride);
+                // V channel.
+                nv21[index++] = vBuffer.get(bufferIndex);
+                // U channel.
+                nv21[index++] = uBuffer.get(bufferIndex);
+            }
+        }
+        return new YuvImage(
+                nv21, ImageFormat.NV21, width, height, null);
+    }
+
+    @Override
+    public byte[] getLatestSuccessfulScanJpeg() {
+        if (lastSuccessfulScanData != null) {
+            Log.d(TAG, "Convert last saved image to JPEG");
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            YuvImage img = mediaImageToYuvImage((Image)lastSuccessfulScanData.originalImage);
+            Rect imgRect = new Rect(0, 0, resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
+            img.compressToJpeg(imgRect, 100, buffer);
+
+            /* // Save as file
+            File sdCardFile = new File(Environment.getExternalStorageDirectory() + "/" + "scanV2_" + new Random().nextInt() + ".jpg");
+            OutputStream s = null;
+            try {
+                s = new FileOutputStream(sdCardFile, false);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            img.compressToJpeg(imgRect, 100, s);
+            try {
+                s.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            */
+
+            return buffer.toByteArray();
+        } else {
+            Log.d(TAG, "No saved image");
+            return null;
         }
     }
 }

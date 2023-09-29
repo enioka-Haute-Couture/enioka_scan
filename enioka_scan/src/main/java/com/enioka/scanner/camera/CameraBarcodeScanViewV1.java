@@ -315,6 +315,10 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         }
     }
 
+    protected void refreshAutofocusZone() {
+        setAreas(this.cam.getParameters());
+    }
+
     public void setPreviewResolution(Point newResolution) {
         Camera.Parameters prms = this.cam.getParameters();
         pauseCamera();

@@ -343,6 +343,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
                     case MotionEvent.ACTION_UP:
                         dragStartY = 0;
                         v.performClick();
+                        this.refreshAutofocusZone();
                         ViewHelpersPreferences.storePreferences(getContext(), "y" + getDeviceOrientationRelativeToDeviceNaturalOrientation(), cropRect.top);
                         break;
                 }
@@ -351,6 +352,11 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             });
         }
     }
+
+    /**
+     * Updates the camera's AF zone to the current position of the targetting rectangle.
+     */
+    abstract void refreshAutofocusZone();
 
     /**
      * Cropping method (according to the targeting rectangle)

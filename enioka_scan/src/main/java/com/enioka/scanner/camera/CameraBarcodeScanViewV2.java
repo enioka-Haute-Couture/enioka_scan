@@ -265,6 +265,23 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         return new MeteringRectangle(x0, y0, x1 - x0, y1 - y0, 1000);
     }
 
+    protected void refreshAutofocusZone() {
+        if (afZones > 0) {
+            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, new MeteringRectangle[]{getMeteringZone()});
+            captureRequest = captureRequestBuilder.build();
+
+            try {
+                captureSession.stopRepeating();
+                captureSession.setRepeatingRequest(CameraBarcodeScanViewV2.this.captureRequest, null, backgroundHandler);
+            } catch (CameraAccessException | IllegalStateException e) {
+                Log.w(TAG, "Camera loop update has failed, this is usually due to changing resolution too fast. Error was: " + e.getMessage(), e);
+                CameraBarcodeScanViewV2.this.closeCamera();
+            }
+
+            Log.i(TAG, "Camera repeating capture request was updated " + CameraBarcodeScanViewV2.this.hashCode());
+        }
+    }
+
     private void openCamera() {
         Log.d(TAG, "Trying to open camera from CameraManager " + this.hashCode());
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {

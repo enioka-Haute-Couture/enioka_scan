@@ -256,12 +256,11 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     }
 
     private MeteringRectangle getMeteringZone() {
-        // TODO: use cropRect
-        // Coordinate system is 0 topleft/bottomright
-        int x0 = this.resolution.currentPreviewResolution.x / 2 - 50;
-        int y0 = this.resolution.currentPreviewResolution.y / 2 - 50;
-        int x1 = this.resolution.currentPreviewResolution.x / 2 + 50;
-        int y1 = this.resolution.currentPreviewResolution.y / 2 + 50;
+        // Coordinate system is 0 topleft / 1 bottomright
+        int x0 = this.cropRect.left;
+        int y0 = this.cropRect.top;
+        int x1 = this.cropRect.right;
+        int y1 = this.cropRect.bottom;
         Log.d(TAG, "Using metering zone (" + x0 + "," + y0 + ") (" + x1 + "," + y1 + ")");
         return new MeteringRectangle(x0, y0, x1 - x0, y1 - y0, 1000);
     }

@@ -9,13 +9,16 @@ import android.util.Log;
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Scanner interface for Zebra DataWedge scanners
@@ -23,8 +26,13 @@ import java.util.UUID;
 public class ZebraDwScanner extends IntentScanner<String> implements Scanner.WithTriggerSupport, Scanner.WithIlluminationSupport {
     private static final String LOG_TAG = "ZebraDwScanner";
 
-    private final Map<String, String> commandsWaitingForResult = new HashMap<>();
+    private final Map<String, ZebraDwCommand> commandsWaitingForResult = new HashMap<>();
     private boolean illuminationOn = false;
+    private String profileName;
+    private String dwIntentPluginActionName;
+
+    private ZebraDwConfig currentConfig;
+    private String currentlyActiveProfile = null;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -41,39 +49,47 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
             }
         }
 
-        // Command result?
+        // Command/action result?
         String command = intent.getStringExtra("COMMAND");
-        if (command != null && !command.isEmpty()) {
+        if (intent.getAction() != null && intent.getAction().equals("com.symbol.datawedge.api.RESULT_ACTION")) {
             String commandIdentifier = intent.getStringExtra("COMMAND_IDENTIFIER");
+            if (commandIdentifier == null && intent.getExtras() != null) {
+                // Some commands do not obey the COMMAND_IDENTIFIER extra... in this case we use the extra name.
+                commandIdentifier = intent.getExtras().keySet().iterator().next();
+            }
             String result = intent.getStringExtra("RESULT");
 
+            Log.d(LOG_TAG, "Received result for datawedge command " + command + " -  " + result + " - " + commandIdentifier);
             if (commandsWaitingForResult.containsKey(commandIdentifier)) {
-                Log.i(LOG_TAG, "Received result for datawedge configuration command " + command + " -  " + result);
-                commandsWaitingForResult.remove(commandIdentifier);
+                ZebraDwCommand cmd = commandsWaitingForResult.remove(commandIdentifier);
+                if (cmd != null && cmd.getCallback() != null) {
+                    if (result == null || result.equals("SUCCESS")) { // null result means COMMAND_IDENTIFIER not supported by this command.
+                        cmd.getCallback().onSuccess(intent);
+                    } else {
+                        cmd.getCallback().onFailure(intent);
+                    }
+                }
             } else {
-                Log.w(LOG_TAG, "Received result for datawedge configuration command not initiated here");
+                Log.d(LOG_TAG, "Received result for datawedge command " + command + " not initiated here: " + commandIdentifier);
+                if (intent.getExtras() != null) {
+                    Log.d(LOG_TAG, intent.getExtras().toString());
+                }
             }
         }
 
         // Config query result?
         if (intent.getExtras() != null && intent.getExtras().containsKey("com.symbol.datawedge.api.RESULT_GET_CONFIG")) {
-            ZebraDwConfig config = ZebraDwHelpers.getConfig(intent);
-            if (config == null) {
+            currentConfig = ZebraDwHelpers.getConfig(intent);
+            if (currentConfig == null) {
                 Log.w(LOG_TAG, "Could not query config - empty result");
             } else {
                 Log.i(LOG_TAG, "Scanner configuration received");
-                Log.i(LOG_TAG, config.toString());
-                illuminationOn = !config.getParameter("BARCODE", "illumination_mode").equals("off");
+                Log.i(LOG_TAG, currentConfig.toString());
+                if (this.currentlyActiveProfile != null && this.currentlyActiveProfile.equals(this.currentlyActiveProfile)) {
+                    configureSymbologies();
+                }
+                illuminationOn = !currentConfig.getParameter("BARCODE", "illumination_mode").equals("off");
             }
-        }
-
-        // Status? (explicit query)
-        if (intent.getExtras() != null && intent.hasExtra("com.symbol.datawedge.api.RESULT_SCANNER_STATUS")) {
-            String scannerStatus = intent.getStringExtra("com.symbol.datawedge.api.RESULT_SCANNER_STATUS");
-            if (this.statusCb != null && scannerStatus != null) {
-                this.statusCb.onStatusChanged(this, ZebraDwHelpers.getStatus(scannerStatus));
-            }
-            Log.d(LOG_TAG, "Scanner status:" + scannerStatus);
         }
 
         // Status notification?
@@ -96,11 +112,15 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
                         break;
 
                     case ZebraDwIntents.DW_NOTIFICATION_CHANGE_PROFILE:
-                        Log.d(LOG_TAG, "PROFILE_SWITCH: profileName: " + b.getString("PROFILE_NAME") + ", profileEnabled: " + b.getBoolean("PROFILE_ENABLED"));
+                        Log.i(LOG_TAG, "PROFILE_SWITCH: profileName: " + b.getString("PROFILE_NAME") + ", profileEnabled: " + b.getBoolean("PROFILE_ENABLED"));
+                        currentlyActiveProfile = b.getString("PROFILE_NAME");
+                        if (currentConfig != null) {
+                            configureSymbologies();
+                        }
                         break;
 
                     case ZebraDwIntents.DW_NOTIFICATION_CHANGE_CONFIGURATION:
-                        Log.d(LOG_TAG, "CONFIGURATION_UPDATE: status: " + b.getString("STATUS") + ", profileName: " + b.getString("PROFILE_NAME"));
+                        Log.i(LOG_TAG, "CONFIGURATION_UPDATE: status: " + b.getString("STATUS") + ", profileName: " + b.getString("PROFILE_NAME"));
                         break;
 
                     case ZebraDwIntents.DW_NOTIFICATION_CHANGE_WORKFLOW:
@@ -120,28 +140,29 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
     // DW Intent creation
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void configureItem(String key, String value) {
-        Log.d(LOG_TAG, "Configuring via intent " + key + " - " + value);
-        Intent i = new Intent();
-        i.setAction(ZebraDwIntents.DW_API_MAIN_ACTION);
-
+    private void configureRuntimeItem(String key, String value) {
         Bundle b = new Bundle();
         b.putString(key, value);
-
-        i.putExtra(ZebraDwIntents.DW_API_PARAM_EXTRA, b);
-
-        String cmdId = UUID.randomUUID().toString();
-        i.putExtra(ZebraDwIntents.DW_API_CMD_ID_EXTRA, cmdId);
-        i.putExtra("SEND_RESULT", "true");
-
-        // Store the command - we are waiting for its result.
-        commandsWaitingForResult.put(cmdId, key);
+        ZebraDwCommand cmd = ZebraDwCommand.create().putExtra(ZebraDwIntents.DW_API_PARAM_EXTRA, b)
+                .setCallback(intent -> Log.d(LOG_TAG, "DW action is done - configured [" + key + "] to value [" + value + "]"));
 
         // Go!
-        this.broadcastIntent(i);
+        this.broadcastDwAction(cmd);
     }
 
-    private void getConfig() {
+    private void configureRuntimeItems(Map<String, String> items) {
+        Bundle b = new Bundle();
+        for (Map.Entry<String, String> e : items.entrySet()) {
+            b.putString(e.getKey(), e.getValue());
+        }
+        ZebraDwCommand cmd = ZebraDwCommand.create().putExtra(ZebraDwIntents.DW_API_PARAM_EXTRA, b)
+                .setCallback(intent -> Log.i(LOG_TAG, "DW action is done - configured " + items.toString()));
+
+        // Go!
+        this.broadcastDwAction(cmd);
+    }
+
+    private void getConfig(String bundleToQuery) {
         // Structure is :
         // Main extra is named com.symbol.datawedge.api.GET_CONFIG
         // For internal processes, its argument is a bundle:
@@ -155,7 +176,7 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
         //      PLUGIN_CONFIG -> bundle
         //          PLUGIN_NAME -> string array list (the plugins to query)
         Bundle bundle = new Bundle();
-        bundle.putString("PROFILE_NAME", "Profile0 (default)");
+        bundle.putString("PROFILE_NAME", bundleToQuery); // "Profile0 (default)");
         Bundle pluginConfigBundle = new Bundle();
 
         ArrayList<String> pluginNameList = new ArrayList<>();
@@ -170,15 +191,172 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
         i.putExtra("com.symbol.datawedge.api.GET_CONFIG", bundle);
 
         Log.d(LOG_TAG, bundle.toString());
-        Log.i(LOG_TAG, "Sending configuration query");
+        Log.d(LOG_TAG, "Sending configuration query");
         this.broadcastIntent(i);
     }
 
+    private void createProfile() {
+        broadcastDwAction(ZebraDwCommand.create("com.symbol.datawedge.api.CREATE_PROFILE", profileName).setCallback(intent -> {
+            Log.i(LOG_TAG, "Profile " + profileName + " was created successfully");
+            configureProfile();
+        }));
+    }
+
+    private void queryProfileList() {
+        ZebraDwCommand cmd = ZebraDwCommand.create()
+                .putExtra("com.symbol.datawedge.api.GET_PROFILES_LIST", "")
+                .setExpectedResultKey("com.symbol.datawedge.api.RESULT_GET_PROFILES_LIST") // No
+                .setCallback(intent -> {
+                    if (intent.hasExtra("com.symbol.datawedge.api.RESULT_GET_PROFILES_LIST")) {
+                        String[] profilesList = intent.getStringArrayExtra("com.symbol.datawedge.api.RESULT_GET_PROFILES_LIST");
+                        if (profilesList == null) {
+                            throw new IllegalArgumentException("a datawedge intent must have a RESULT_GET_PROFILES_LIST extra when listing profiles");
+                        }
+
+                        Log.i(LOG_TAG, "The following DW profiles already exist:");
+                        for (String profile : profilesList) {
+                            Log.i(LOG_TAG, "\t" + profile);
+                        }
+
+                        Optional<String> existingProfile = Arrays.stream(profilesList).filter(p -> p.equals(profileName)).findFirst();
+                        if (existingProfile.isPresent()) {
+                            Log.i(LOG_TAG, "Profile " + profileName + " already exists");
+                            configureProfile();
+                        } else {
+                            Log.i(LOG_TAG, "Profile " + profileName + " does not exist - begin creation");
+                            createProfile();
+                        }
+                    } else {
+                        throw new IllegalArgumentException("A datawedge intent must have a RESULT_GET_PROFILES_LIST extra when listing profiles");
+                    }
+                });
+
+        broadcastDwAction(cmd);
+    }
+
+    private void queryActiveProfile() {
+        broadcastDwAction(ZebraDwCommand.create("com.symbol.datawedge.api.GET_ACTIVE_PROFILE", "")
+                .setExpectedResultKey("com.symbol.datawedge.api.RESULT_GET_ACTIVE_PROFILE")
+                .setCallback(intent -> {
+                    if (intent.hasExtra("com.symbol.datawedge.api.RESULT_GET_ACTIVE_PROFILE")) {
+                        currentlyActiveProfile = intent.getExtras().getString("com.symbol.datawedge.api.RESULT_GET_ACTIVE_PROFILE");
+                        Log.i(LOG_TAG, "Active profile is " + currentlyActiveProfile);
+
+                        if (currentlyActiveProfile.equals(profileName)) {
+                            // No need to create, just reconfigure
+                            configureProfile();
+                        } else {
+                            queryProfileList();
+                        }
+                    }
+                }));
+    }
+
+    private void configureProfile() {
+        // Root config
+        Bundle rootBundle = new Bundle();
+        rootBundle.putString("PROFILE_NAME", this.profileName);
+        rootBundle.putString("PROFILE_ENABLED", "true");
+        rootBundle.putString("CONFIG_MODE", "UPDATE");
+
+        // Children
+        ArrayList<Bundle> bundlePluginConfig = new ArrayList<>();
+        rootBundle.putParcelableArrayList("PLUGIN_CONFIG", bundlePluginConfig);
+
+        // Barcode input config
+        Bundle barcodeInputBundle = new Bundle();
+        bundlePluginConfig.add(barcodeInputBundle);
+        barcodeInputBundle.putString("PLUGIN_NAME", "BARCODE");
+        barcodeInputBundle.putString("RESET_CONFIG", "false");
+
+        Bundle barcodeInputParams = new Bundle();
+        barcodeInputBundle.putBundle("PARAM_LIST", barcodeInputParams);
+        barcodeInputParams.putString("scanner_selection", "auto");
+        barcodeInputParams.putString("scanner_input_enabled", "true");
+
+        // Intent output config
+        Bundle intentOutputBundle = new Bundle();
+        bundlePluginConfig.add(intentOutputBundle);
+        intentOutputBundle.putString("PLUGIN_NAME", "INTENT");
+        intentOutputBundle.putString("RESET_CONFIG", "false");
+
+        Bundle intentOutputParams = new Bundle();
+        intentOutputBundle.putBundle("PARAM_LIST", intentOutputParams);
+        intentOutputParams.putString("intent_output_enabled", "true");
+        intentOutputParams.putString("intent_action", this.dwIntentPluginActionName);
+        intentOutputParams.putString("intent_category", "");
+        intentOutputParams.putInt("intent_delivery", 2); // 0 = start activity, 1 = start service, 2 = broadcast
+
+        // Create intent with this configuration.
+        ZebraDwCommand cmd = ZebraDwCommand.create().putExtra("com.symbol.datawedge.api.SET_CONFIG", rootBundle).setCallback(intent -> {
+            getConfig(this.profileName);
+            switchToOurProfile();
+            getScannerStatus();
+        });
+        broadcastDwAction(cmd);
+    }
+
+    private void configureSymbologies() {
+        if (currentConfig == null) {
+            throw new IllegalStateException("configureSymbologies can only be called after a configuration query to ensure which barcode types to disable");
+        }
+        Map<String, String> result = new HashMap<>(symbologies.size());
+
+        for (Map.Entry<String, String> entry : currentConfig.getPluginConfig("BARCODE").entrySet().stream().filter(k -> k.getKey().startsWith("decoder_") && k.getKey().lastIndexOf("_") == 7).collect(Collectors.toList())) {
+            if (entry.getValue().equals("true")) {
+                result.put(entry.getKey(), "false");
+            }
+        }
+
+        for (BarcodeType bt : symbologies) {
+            ZebraDwSymbology zds = ZebraDwSymbology.getSymbology(bt);
+            if (zds == null) {
+                Log.w(LOG_TAG, "This provider does not support symbology " + bt);
+                continue;
+            }
+
+            if (result.containsKey(zds.intentExtraDecoderConfigName)) {
+                // If present in result = we wanted to put it to false = it is already true!
+                result.remove(zds.intentExtraDecoderConfigName);
+                continue;
+            }
+
+            // If here we need to enable this symbology
+            result.put(ZebraDwSymbology.getSymbology(bt).intentExtraDecoderConfigName, "true");
+        }
+
+        if (!result.isEmpty()) {
+            configureRuntimeItems(result);
+        }
+    }
+
+    private void switchToOurProfile() {
+        if (this.currentlyActiveProfile == null || this.currentlyActiveProfile.equals(this.profileName)) {
+            return;
+        }
+        //this.currentlyActiveProfile = this.profileName;
+
+        broadcastDwAction(ZebraDwCommand.create("com.symbol.datawedge.api.SWITCH_TO_PROFILE", this.profileName).setCallback(i -> {
+            Log.d(LOG_TAG, "Profile switch done with success");
+        }));
+    }
+
+    private void broadcastDwAction(ZebraDwCommand command) {
+        // Store the command - we are waiting for its result.
+        commandsWaitingForResult.put(command.getId(), command);
+
+        Log.d(LOG_TAG, "Sending DW action. " + command.toString());
+        this.broadcastIntent(command.getIntentToSend());
+    }
+
     private void getScannerStatus() {
-        Map<String, String> extras = new HashMap<>(2);
-        extras.put("SEND_RESULT", "true");
-        extras.put(ZebraDwIntents.DW_API_GET_STATUS_EXTRA, "");
-        broadcastIntent(ZebraDwIntents.DW_API_MAIN_ACTION, extras);
+        broadcastDwAction(ZebraDwCommand.create(ZebraDwIntents.DW_API_GET_STATUS_EXTRA, "").setExpectedResultKey("com.symbol.datawedge.api.RESULT_SCANNER_STATUS").setCallback(intent -> {
+            String scannerStatus = intent.getStringExtra("com.symbol.datawedge.api.RESULT_SCANNER_STATUS");
+            if (this.statusCb != null && scannerStatus != null) {
+                this.statusCb.onStatusChanged(this, ZebraDwHelpers.getStatus(scannerStatus));
+            }
+            Log.d(LOG_TAG, "Scanner status:" + scannerStatus);
+        }));
     }
 
     private void notificationSubscription(Context ctx) {
@@ -216,12 +394,15 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
 
     @Override
     protected void configureProvider(final Context applicationContext) {
-        String mainCallback = applicationContext.getResources().getString(R.string.com_enioka_scanners_zebra_dw_intent_callback_name);
-        if (mainCallback.isEmpty()) {
-            mainCallback = ZebraDwIntents.DW_MAIN_CALLBACK_ACTION;
+        String overloadedProfileName = applicationContext.getString(R.string.enioka_scan_zebra_dw_profile_name);
+        profileName = overloadedProfileName.trim().isEmpty() ? applicationContext.getPackageName() : overloadedProfileName;
+        dwIntentPluginActionName = applicationContext.getResources().getString(R.string.enioka_scan_zebra_dw_intent_name);
+
+        if (dwIntentPluginActionName.isEmpty()) {
+            dwIntentPluginActionName = ZebraDwIntents.DW_MAIN_CALLBACK_ACTION;
         }
 
-        broadcastIntentFilters.add(mainCallback);
+        broadcastIntentFilters.add(dwIntentPluginActionName);
         broadcastIntentFilters.add(ZebraDwIntents.DW_CONFIGURATION_CALLBACK_ACTION);
         broadcastIntentFilters.add(ZebraDwIntents.DW_NOTIFICATION_ACTION);
 
@@ -236,16 +417,19 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
         // We want to know what is happening on the device, at least for logs
         notificationSubscription(ctx);
 
-        // Retrieve current config
-        getConfig();
-
-        // Retrieve current scanner status
-        getScannerStatus();
+        // Create profile and configure it.
+        // (this triggers a callback chain)
+        queryActiveProfile();
 
         // Enable datawedge just in case.
         resume();
     }
 
+    @Override
+    public void resume(@Nullable ScannerCommandCallbackProxy cb) {
+        super.resume(cb);
+        switchToOurProfile();
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // SOFTWARE TRIGGERS
@@ -267,19 +451,19 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
 
     @Override
     public void enableIllumination(@Nullable ScannerCommandCallbackProxy cb) {
-        configureItem("illumination_mode", "torch");
+        configureRuntimeItem("illumination_mode", "torch");
         illuminationOn = true;
     }
 
     @Override
     public void disableIllumination(@Nullable ScannerCommandCallbackProxy cb) {
-        configureItem("illumination_mode", "off");
+        configureRuntimeItem("illumination_mode", "off");
         illuminationOn = false;
     }
 
     @Override
     public void toggleIllumination(@Nullable ScannerCommandCallbackProxy cb) {
-        configureItem("illumination_mode", illuminationOn ? "off" : "torch");
+        configureRuntimeItem("illumination_mode", illuminationOn ? "off" : "torch");
         illuminationOn = !illuminationOn;
     }
 

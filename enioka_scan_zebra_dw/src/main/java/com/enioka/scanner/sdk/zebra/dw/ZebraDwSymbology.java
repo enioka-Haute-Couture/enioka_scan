@@ -7,12 +7,12 @@ import com.enioka.scanner.data.BarcodeType;
  */
 enum ZebraDwSymbology {
     // Items supported by the lib
-    CODE39("LABEL-TYPE-CODE39", BarcodeType.CODE39),
-    CODE128("LABEL-TYPE-CODE128", BarcodeType.CODE128),
-    DIS25("LABEL-TYPE-D2OF5", BarcodeType.DIS25),
-    INT25("LABEL-TYPE-I2OF5", BarcodeType.INT25),
-    EAN13("LABEL-TYPE-EAN13", BarcodeType.EAN13),
-    UNKNOWN("none", BarcodeType.UNKNOWN);
+    CODE39("LABEL-TYPE-CODE39", "decoder_code39", BarcodeType.CODE39),
+    CODE128("LABEL-TYPE-CODE128", "decoder_code128", BarcodeType.CODE128),
+    DIS25("LABEL-TYPE-D2OF5", "decoder_d2of5", BarcodeType.DIS25),
+    INT25("LABEL-TYPE-I2OF5", "decoder_i2of5", BarcodeType.INT25),
+    EAN13("LABEL-TYPE-EAN13", "decoder_ean13", BarcodeType.EAN13),
+    UNKNOWN("none", "none", BarcodeType.UNKNOWN);
 
     // Items not supported by the lib. Present because we need to be able to disable them.
     /*
@@ -75,12 +75,14 @@ enum ZebraDwSymbology {
                     "LABEL-TYPE-UNDEFINED" */
 
     public final BarcodeType type;
-    public final String intentExtraName;
+    public final String intentExtraReadBarcodeTypeName;
+    public final String intentExtraDecoderConfigName;
 
 
-    ZebraDwSymbology(String intentExtraName, BarcodeType type) {
+    ZebraDwSymbology(String intentExtraReadBarcodeTypeName, String intentExtraDecoderConfigName, BarcodeType type) {
         this.type = type;
-        this.intentExtraName = intentExtraName;
+        this.intentExtraReadBarcodeTypeName = intentExtraReadBarcodeTypeName;
+        this.intentExtraDecoderConfigName = intentExtraDecoderConfigName;
     }
 
     public static ZebraDwSymbology getSymbology(BarcodeType type) {
@@ -94,7 +96,7 @@ enum ZebraDwSymbology {
 
     public static ZebraDwSymbology getSymbology(String intentExtraValue) {
         for (ZebraDwSymbology s : ZebraDwSymbology.values()) {
-            if (intentExtraValue.equals(s.intentExtraName)) {
+            if (intentExtraValue.equals(s.intentExtraReadBarcodeTypeName)) {
                 return s;
             }
         }

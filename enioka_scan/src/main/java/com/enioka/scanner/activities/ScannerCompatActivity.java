@@ -640,22 +640,41 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     private boolean ledToggle = false;
 
     private void displayToggleLedButton() {
-        if (findViewById(R.id.scanner_red_led) != null) {
-            findViewById(R.id.scanner_red_led).setOnClickListener(view -> {
-                if (!ledToggle) {
-                    for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
-                        if (s.getLedSupport() != null)
-                            s.getLedSupport().ledColorOn(ScannerLedColor.RED);
-                    }
-                } else {
-                    for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
-                        if (s.getLedSupport() != null)
-                            s.getLedSupport().ledColorOff(ScannerLedColor.RED);
-                    }
-                }
-                ledToggle = !ledToggle;
-            });
+        // Button present in layout?
+        if (findViewById(R.id.scanner_red_led) == null) {
+            return;
         }
+        View v = findViewById(R.id.scanner_red_led);
+
+        // Check if we should display the button
+        boolean anySupport = false;
+        for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
+            if (s.getLedSupport() != null) {
+                anySupport = true;
+                break;
+            }
+        }
+        if (!anySupport) {
+            v.setVisibility(View.GONE);
+            return;
+        }
+
+        // Set the event handler
+        v.setOnClickListener(view -> {
+            if (!ledToggle) {
+                for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
+                    if (s.getLedSupport() != null)
+                        s.getLedSupport().ledColorOn(ScannerLedColor.RED);
+                }
+            } else {
+                for (final Scanner s : ScannerCompatActivity.this.scannerService.getConnectedScanners()) {
+                    if (s.getLedSupport() != null)
+                        s.getLedSupport().ledColorOff(ScannerLedColor.RED);
+                }
+            }
+            ledToggle = !ledToggle;
+        });
+
     }
 
     private void displayDisableScanButton() {

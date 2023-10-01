@@ -34,13 +34,17 @@ class ZebraDwConfig {
         return pluginConfig.get(key);
     }
 
+    Map<String, String> getPluginConfig(String pluginName) {
+        return plugins.get(pluginName);
+    }
+
     @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Profile configuration");
+        sb.append("Profile ");
         sb.append(profileName);
-        sb.append("\n");
+        sb.append(" configuration:\n");
 
         for (String pluginName : plugins.keySet()) {
             sb.append("\tPlugin: ");

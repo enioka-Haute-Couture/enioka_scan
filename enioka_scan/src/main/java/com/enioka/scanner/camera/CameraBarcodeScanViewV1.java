@@ -32,6 +32,8 @@ import java.util.List;
 class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implements Camera.PreviewCallback {
     private Camera cam;
 
+    private String autoFocusMode;
+
     protected boolean scanningStarted = true;
 
     private int previewBufferSize;
@@ -171,19 +173,23 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         List<String> supportedFocusModes = prms.getSupportedFocusModes();
         Log.d(TAG, "Supported focus modes: " + supportedFocusModes.toString());
         if (supportedFocusModes.contains("mw_continuous-picture")) {
-            prms.setFocusMode("mw_continuous-picture");
+            autoFocusMode = "mw_continuous-picture";
             Log.i(TAG, "supportedFocusModes - mw_continuous-picture supported and selected");
         } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+            autoFocusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE;
             Log.i(TAG, "supportedFocusModes - continuous-picture supported and selected");
         } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+            autoFocusMode = Camera.Parameters.FOCUS_MODE_AUTO;
             Log.i(TAG, "supportedFocusModes - auto supported and selected");
         } else if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_MACRO)) {
-            prms.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
+            autoFocusMode = Camera.Parameters.FOCUS_MODE_MACRO;
             Log.i(TAG, "supportedFocusModes - macro supported and selected");
         } else {
             Log.i(TAG, "no autofocus supported");
+        }
+
+        if (autoFocusMode != null) {
+            prms.setFocusMode(autoFocusMode);
         }
 
         // Set flash mode to torch if supported
@@ -316,7 +322,29 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     }
 
     protected void refreshAutofocusZone() {
-        setAreas(this.cam.getParameters());
+        if (autoFocusMode == null) {
+            return;
+        }
+
+        cam.cancelAutoFocus();
+        Camera.Parameters prms = this.cam.getParameters();
+        setAreas(prms);
+        // While FOCUS_MODE_CONTINUOUS_PICTURE is usually faster, it yields poor
+        // results whenever the focus zone changes, both for newer and older devices.
+        // FOCUS_MODE_AUTO handles focus area changes much better.
+        // The original mode will be set back as soon as the manual focus is done, which means the manual focus will likely be overridden
+        // immediately, but it will force the focus to refresh itself, which gives it a chance to find the expected level.
+        prms.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+
+        setCameraParameters(prms);
+
+        cam.autoFocus((success, cam) -> {
+            Log.d(TAG, "Focus success: " + success);
+            // Resume original focus mode
+            prms.setFocusMode(autoFocusMode);
+            setCameraParameters(prms);
+            cam.cancelAutoFocus();
+        });
     }
 
     public void setPreviewResolution(Point newResolution) {

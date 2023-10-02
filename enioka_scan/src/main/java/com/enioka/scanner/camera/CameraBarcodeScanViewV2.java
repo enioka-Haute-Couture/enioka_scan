@@ -12,7 +12,9 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
@@ -267,18 +269,55 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
     protected void refreshAutofocusZone() {
         if (afZones > 0) {
-            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, new MeteringRectangle[]{getMeteringZone()});
-            captureRequest = captureRequestBuilder.build();
+            CameraCaptureSession.CaptureCallback captureHandler = new CameraCaptureSession.CaptureCallback() {
+                @Override
+                public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+                    super.onCaptureCompleted(session, request, result);
+                    if (request.getTag() == "FOCUS_TAG") {
+                        Log.d(TAG, "Camera focus change was successful.");
+                        try {
+                            // Remove the AF trigger from the builder to continue repeating captures
+                            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
+                            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null);
+                            captureSession.setRepeatingRequest(captureRequestBuilder.build(), null, null);
+                        } catch (CameraAccessException e) {
+                            Log.w(TAG, "Camera loop continuation has failed, this is usually due to changing resolution too fast. Error was: " + e.getMessage(), e);
+                            CameraBarcodeScanViewV2.this.closeCamera();
+                        }
+                    }
+                }
+
+                @Override
+                public void onCaptureFailed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
+                    super.onCaptureFailed(session, request, failure);
+                    Log.w(TAG, "Camera focus change has failed.");
+                    CameraBarcodeScanViewV2.this.closeCamera();
+                }
+            };
 
             try {
+                // Stop current autofocus process
                 captureSession.stopRepeating();
-                captureSession.setRepeatingRequest(CameraBarcodeScanViewV2.this.captureRequest, null, backgroundHandler);
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraCharacteristics.CONTROL_AF_TRIGGER_CANCEL);
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraCharacteristics.CONTROL_AF_MODE_OFF);
+                captureSession.capture(captureRequestBuilder.build(), captureHandler, backgroundHandler);
+
+                // Update the autofocus zone
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, new MeteringRectangle[]{getMeteringZone()});
+                captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraCharacteristics.CONTROL_MODE_AUTO);
+                // While CONTROL_AF_MODE_CONTINUOUS_PICTURE is usually faster, it yields poor
+                // results whenever the focus zone changes, both for newer and older devices.
+                // CONTROL_AF_MODE_AUTO handles focus area changes much better.
+                // The original mode will be set back as soon as the manual focus is done, which means the manual focus will likely be overridden
+                // immediately, but it will force the focus to refresh itself, which gives it a chance to find the expected level.
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraCharacteristics.CONTROL_AF_MODE_AUTO);
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraCharacteristics.CONTROL_AF_TRIGGER_START);
+                captureRequestBuilder.setTag("FOCUS_TAG");
+                captureSession.capture(captureRequestBuilder.build(), captureHandler, backgroundHandler);
             } catch (CameraAccessException | IllegalStateException e) {
                 Log.w(TAG, "Camera loop update has failed, this is usually due to changing resolution too fast. Error was: " + e.getMessage(), e);
                 CameraBarcodeScanViewV2.this.closeCamera();
             }
-
-            Log.i(TAG, "Camera repeating capture request was updated " + CameraBarcodeScanViewV2.this.hashCode());
         }
     }
 

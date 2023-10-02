@@ -218,8 +218,14 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
                             Log.i(LOG_TAG, "\t" + profile);
                         }
 
-                        Optional<String> existingProfile = Arrays.stream(profilesList).filter(p -> p.equals(profileName)).findFirst();
-                        if (existingProfile.isPresent()) {
+                        boolean profileFound = false;
+                        for (String profile : profilesList) {
+                            if (profile.equals(profileName)) {
+                                profileFound = true;
+                                break;
+                            }
+                        }
+                        if (profileFound) {
                             Log.i(LOG_TAG, "Profile " + profileName + " already exists");
                             configureProfile();
                         } else {

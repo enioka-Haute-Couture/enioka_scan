@@ -204,6 +204,8 @@ When there is no laser scanner available, or when a button is clicked, the `Scan
 
 The camera scanner can actually be used easily inside your own activities without any links with the rest of the library (no need to use the scanner service, etc) by just adding the `CameraBarcodeScanView` to your layouts, and then registering a callback on this view using `CameraBarcodeScanView.setResultHandler`. Other APIs are available to enable the torch or pause scanning.
 
+The provided Camera activity will display a target rectangle, which can be moved or tapped to change or refresh the autofocus area.
+
 # Developer quick start (modifying this library)
 
 ## Developing for Android

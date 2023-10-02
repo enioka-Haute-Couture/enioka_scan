@@ -308,7 +308,11 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
         }
         Map<String, String> result = new HashMap<>(symbologies.size());
 
-        for (Map.Entry<String, String> entry : currentConfig.getPluginConfig("BARCODE").entrySet().stream().filter(k -> k.getKey().startsWith("decoder_") && k.getKey().lastIndexOf("_") == 7).collect(Collectors.toList())) {
+        for (Map.Entry<String, String> entry : currentConfig.getPluginConfig("BARCODE").entrySet()) {
+            if (!entry.getKey().startsWith("decoder_") || entry.getKey().lastIndexOf("_") != 7) {
+                continue; // Not a decoder master switch
+            }
+
             if (entry.getValue().equals("true")) {
                 result.put(entry.getKey(), "false");
             }

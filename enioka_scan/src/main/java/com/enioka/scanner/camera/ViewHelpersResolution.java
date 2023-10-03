@@ -58,6 +58,11 @@ class ViewHelpersResolution {
                 continue;
             }
 
+            if (resolution.y < bag.minResolutionY) {
+                Log.d(TAG, "\t\tResolution is removed - it is lower than the minimum resolution configured in the view (" + bag.minResolutionY + ")");
+                continue;
+            }
+
             if (resolution.y > bag.maxResolutionY) {
                 Log.d(TAG, "\t\tResolution is removed - it is higher than the maximum resolution configured in the view (" + bag.maxResolutionY + ")");
                 continue;

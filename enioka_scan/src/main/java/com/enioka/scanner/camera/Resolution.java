@@ -37,6 +37,7 @@ class Resolution {
     // Adaptive resolution parameters
     boolean useAdaptiveResolution = true;
     boolean storePreferredResolution = true;
+    int minResolutionY;
     int maxResolutionY;
     float maxDistortionRatio;
 

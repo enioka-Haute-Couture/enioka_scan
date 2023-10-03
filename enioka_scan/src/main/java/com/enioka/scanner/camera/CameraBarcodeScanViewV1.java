@@ -253,29 +253,8 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
 
         // We now have a preview resolution for sure. (exception otherwise)
 
-        // COMPAT HACKS
-        switch (android.os.Build.MODEL) {
-            case "LG-H340n":
-                resolution.currentPreviewResolution = new Point(1600, 1200);
-                resolution.useAdaptiveResolution = false;
-                Log.i(TAG, "LG-H340n specific - using hard-coded preview resolution" + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
-                break;
-            case "SPA43LTE":
-                resolution.currentPreviewResolution = new Point(1280, 720);
-                resolution.useAdaptiveResolution = false;
-                Log.i(TAG, "SPA43LTE specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
-                break;
-            case "Archos Sense 50X":
-                resolution.currentPreviewResolution = new Point(1280, 720);
-                resolution.useAdaptiveResolution = false;
-                Log.i(TAG, "Archos Sense 50X specific - using hard-coded preview resolution " + prms.getPreviewSize().width + "*" + prms.getPreviewSize().height + ". Ratio is " + ((float) prms.getPreviewSize().width / prms.getPreviewSize().height));
-                break;
-            default:
-                Log.i(TAG, "Using preview resolution " + resolution.currentPreviewResolution.x + "*" +
-                        resolution.currentPreviewResolution.y + ". Ratio is " +
-                        ((float) resolution.currentPreviewResolution.x / ((float) resolution.currentPreviewResolution.y)));
-        }
-
+        Log.i(TAG, "Using preview resolution " + resolution.currentPreviewResolution.x + "*" + resolution.currentPreviewResolution.y + "."
+                + " Ratio is " + ((float) resolution.currentPreviewResolution.x / ((float) resolution.currentPreviewResolution.y)));
         // Set a denormalized field - this is used widely in the class.
         prms.setPreviewSize(resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
     }

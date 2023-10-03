@@ -3,7 +3,7 @@ apply plugin: 'scanner.published-library'
 description 'Scanner provider for Zebra devices using the official Zebra/Symbol drivers (not provided)'
 
 android {
-    compileSdkVersion 33
+    compileSdk 33
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28

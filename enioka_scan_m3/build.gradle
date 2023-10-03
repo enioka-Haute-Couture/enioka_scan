@@ -3,7 +3,7 @@ apply plugin: 'scanner.published-library'
 description 'Scanner provider for M3 bluetooth ring devices using the official drivers (not provided)'
 
 android {
-    compileSdkVersion 33
+    compileSdk 33
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28

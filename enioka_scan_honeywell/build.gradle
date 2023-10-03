@@ -3,7 +3,7 @@ apply plugin: 'scanner.published-library'
 description 'Scanner provider for Honeywell devices using the official AIDC driver (not provided)'
 
 android {
-    compileSdkVersion 33
+    compileSdk 33
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28

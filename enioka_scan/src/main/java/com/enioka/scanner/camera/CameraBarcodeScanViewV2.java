@@ -405,17 +405,21 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             this.captureSession.close();
             this.captureSession = null;
         }
-        if (this.targetView != null) {
-            this.targetView.pauseTarget();
-        }
+        post(() -> {
+            if (this.targetView != null) {
+                this.targetView.pauseTarget();
+            }
+        });
     }
 
     @Override
     public void resumeCamera() {
         startPreview();
-        if (this.targetView != null) {
-            this.targetView.resumeTarget();
-        }
+        post(() -> {
+            if (this.targetView != null) {
+                this.targetView.resumeTarget();
+            }
+        });
     }
 
     @Override

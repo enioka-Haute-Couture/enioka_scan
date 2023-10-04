@@ -14,7 +14,7 @@ public class ZebraDwProvider extends IntentScannerProvider {
 
     @Override
     protected void configureProvider() {
-        serviceToTest = "com.symbol.datawedge/.ScanningService";
+        appPackageToTest = "com.symbol.datawedge";
     }
 
     @Override

@@ -46,11 +46,13 @@ public abstract class IntentScannerProvider implements ScannerProvider {
         boolean compatible = true;
 
         if (specificDevices != null && !specificDevices.isEmpty()) {
+            Log.d("IntentProvider", "Provider " + getKey() + ": Checking specific devices `" + specificDevices + "`");
             boolean found = false;
 
             for (String device : specificDevices) {
                 if (android.os.Build.MODEL.equals(device)) {
                     found = true;
+                    Log.d("IntentProvider", "Provider " + getKey() + ": Specific devices `" + device + "` found");
                     break;
                 }
             }
@@ -61,41 +63,54 @@ public abstract class IntentScannerProvider implements ScannerProvider {
         }
 
         if (intentToTest != null) {
+            Log.d("IntentProvider", "Provider " + getKey() + ": Checking intent `" + intentToTest + "`");
             if (!Common.checkIntentListener(intentToTest, ctx)) {
+                Log.d("IntentProvider", "Provider " + getKey() + ": Intent `" + intentToTest + "` not found");
                 compatible = false;
             }
         }
 
         if (appPackageToTest != null) {
+            Log.d("IntentProvider", "Provider " + getKey() + ": Checking appPackage `" + appPackageToTest + "`");
             PackageManager pkManager = ctx.getPackageManager();
             try {
                 if (!pkManager.getApplicationInfo(appPackageToTest, 0).enabled) {
                     compatible = false;
+                    Log.d("IntentProvider", "Provider " + getKey() + ": AppPackage `" + appPackageToTest + "` not found");
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 compatible = false;
+                Log.d("IntentProvider", "Provider " + getKey() + ": AppPackage `" + appPackageToTest + "` not found");
             }
         }
 
         if (serviceToTest != null) {
+            Log.d("IntentProvider", "Provider " + getKey() + ": Checking service `" + serviceToTest + "`");
             Intent i = new Intent();
             i.setComponent(new ComponentName(serviceToTest.split("/")[0], serviceToTest.split("/")[1]));
             try {
+                boolean success;
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-                    ctx.startForegroundService(i);
+                    success = ctx.startForegroundService(i) != null;
                 } else {
-                    ctx.startService(i);
+                    success = ctx.startService(i) != null;
+                }
+                if (!success) {
+                    Log.d("IntentProvider", "Provider " + getKey() + ": Service `" + serviceToTest + "` not found");
+                    compatible = false;
                 }
             } catch (Exception e) {
-                Log.i("LaserScanner", "could not start service " + serviceToTest, e);
+                Log.d("IntentProvider", "Provider " + getKey() + ": Could not start service " + serviceToTest, e);
                 compatible = false;
             }
         }
 
         if (compatible) {
+            Log.d("IntentProvider", "Provider " + getKey() + " compatible");
             cb.onScannerCreated(getKey(), "internal", createNewScanner(ctx, options));
             cb.onAllScannersCreated(getKey());
         } else {
+            Log.d("IntentProvider", "Provider " + getKey() + " not compatible");
             cb.onProviderUnavailable(getKey());
         }
     }

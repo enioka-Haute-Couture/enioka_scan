@@ -1,14 +1,10 @@
 package com.enioka.scanner.helpers;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 
 /**
  * A set of helpers for scanner SDK providers.
@@ -67,17 +63,5 @@ public final class Common {
     public static boolean hasCamera(Context a) {
         PackageManager pm = a.getPackageManager();
         return pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
-    }
-
-    // TODO: move code from compat activity to here.
-    public static void askForPermission(Activity ctx) {
-        boolean arePermissionsGranted = ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(ctx, "com.symbol.emdk.permission.EMDK") == PackageManager.PERMISSION_GRANTED;
-        if (!arePermissionsGranted) {
-            ActivityCompat.requestPermissions(ctx, new String[]{Manifest.permission.CAMERA, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, "com.symbol.emdk.permission.EMDK", Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN}, 1789);
-        }
-
     }
 }

@@ -1,15 +1,15 @@
 package com.enioka.scanner.bt.manager;
 
-import android.Manifest;
+import static com.enioka.scanner.helpers.Permissions.PERMISSIONS_BT;
+import static com.enioka.scanner.helpers.Permissions.hasPermissionSet;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Build;
 import android.os.ParcelUuid;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
@@ -139,9 +139,8 @@ public class SerialBtScannerProvider implements ScannerProvider, SerialBtScanner
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void getDevices(Context ctx, ScannerSearchOptions options) {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (ActivityCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)) {
-            Log.w(PROVIDER_KEY, "Required API 31+ Bluetooth permissions are not granted");
+        if (!hasPermissionSet(ctx, PERMISSIONS_BT)) {
+            Log.w(PROVIDER_KEY, "Required Bluetooth permissions are not granted");
             this.providerCallback.onProviderUnavailable(PROVIDER_KEY);
             return;
         }
@@ -230,7 +229,7 @@ public class SerialBtScannerProvider implements ScannerProvider, SerialBtScanner
     }
 
     private void logDeviceInfo(BluetoothDevice bt, Context ctx) {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ActivityCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+        if (!hasPermissionSet(ctx, PERMISSIONS_BT)) {
             return;
         }
 

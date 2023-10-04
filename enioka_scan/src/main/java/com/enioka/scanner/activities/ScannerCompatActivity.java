@@ -1,6 +1,10 @@
 package com.enioka.scanner.activities;
 
-import android.Manifest;
+import static com.enioka.scanner.helpers.Permissions.PERMISSIONS_BT;
+import static com.enioka.scanner.helpers.Permissions.PERMISSIONS_CAMERA;
+import static com.enioka.scanner.helpers.Permissions.hasPermissionSet;
+import static com.enioka.scanner.helpers.Permissions.requestPermissionSet;
+
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,12 +13,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -53,8 +55,7 @@ import java.util.List;
 public class ScannerCompatActivity extends AppCompatActivity implements ScannerClient {
     protected final static String LOG_TAG = "ScannerActivity";
     protected final static int PERMISSION_REQUEST_ID_CAMERA = 1790;
-    protected final static int PERMISSION_REQUEST_ID_BT_EMDK = 1791;
-    protected final static int PERMISSION_REQUEST_ID_POSITION = 1792;
+    protected final static int PERMISSION_REQUEST_ID_BT = 1792;
 
     /**
      * Don't start camera mode, even if no lasers are available
@@ -136,7 +137,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Init and destruction
+    // Activity lifecycle callbacks
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
@@ -167,102 +168,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
-        if (canUseBluetooth()) {
+        if (useBluetooth && hasPermissionSet(this, PERMISSIONS_BT)) {
             bindAndStartService();
         } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH,
-                            Manifest.permission.BLUETOOTH_ADMIN,
-                            android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.P ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION,
-                            android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.BLUETOOTH_CONNECT : Manifest.permission.BLUETOOTH_ADMIN,
-                            android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? Manifest.permission.BLUETOOTH_SCAN : Manifest.permission.BLUETOOTH_ADMIN,
-                    },
-                    PERMISSION_REQUEST_ID_POSITION);
+            requestPermissionSet(this, PERMISSIONS_BT, PERMISSION_REQUEST_ID_BT);
         }
     }
-
-    private boolean canUseBluetooth() {
-        return useBluetooth && canUseBluetoothCommonChecks() && canUseBluetooth28() && canUseBluetooth31();
-    }
-
-    private boolean canUseBluetoothCommonChecks() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private boolean canUseBluetooth28() {
-        if (android.os.Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            // Older version
-            return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        } else {
-            return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        }
-    }
-
-    private boolean canUseBluetooth31() {
-        // New permissions.
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            return ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
-                    && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED;
-        }
-        return true;
-    }
-
-    /**
-     * @return true if the only scan means available is an internal camera. False if no camera available or a laser scanner is connected. Reflects the current state of the devices - does not wait for ongoing connections.
-     */
-    protected boolean onlyHasCameraCurrentlyConnected() {
-        if (!Common.hasCamera(this)) {
-            return false;
-        }
-        if (!this.serviceBound) {
-            return false;
-        }
-        return this.scannerService.getConnectedScanners() == null || this.scannerService.getConnectedScanners().isEmpty();
-    }
-
-    private void bindAndStartService() {
-        if (serviceBound) {
-            return;
-        }
-
-        // Bind to ScannerService service
-        Intent intent = new Intent(this, ScannerService.class);
-        if (getIntent().getExtras() != null) {
-            intent.putExtras(getIntent().getExtras());
-        }
-        if (getServiceInitExtras() != null) {
-            intent.putExtras(getServiceInitExtras());
-        }
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
-    }
-
-    protected Bundle getServiceInitExtras() {
-        return ScannerServiceBinderHelper.defaultServiceConfiguration();
-    }
-
-    /**
-     * Defines callbacks for service binding
-     */
-    private final ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to ScannerService, cast the IBinder and get the ScannerServiceApi instance
-            Log.d(LOG_TAG, "Service is connected to activity");
-            ScannerService.LocalBinder binder = (ScannerService.LocalBinder) service;
-            scannerService = binder.getService();
-            serviceBound = true;
-            scannerService.registerClient(ScannerCompatActivity.this);
-            scannerService.resume(); // may have been paused before bind by another activity.
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            Log.d(LOG_TAG, "Service is disconnected from activity");
-            serviceBound = false;
-            scannerService = null;
-        }
-    };
 
     @Override
     protected void onResume() {
@@ -311,6 +222,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
         if (cameraScanner != null) {
             cameraScanner.disconnect();
+            cameraScanner = null;
         }
         super.onPause();
     }
@@ -333,13 +245,62 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void setViewContent() {
-        if (enableScan && goToCamera && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (enableScan && goToCamera && hasPermissionSet(this, PERMISSIONS_CAMERA)) {
             // Can only add/open a camera view if camera is allowed.
             setContentView(layoutIdCamera);
         } else {
             setContentView(layoutIdLaser);
         }
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Scanner service init
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void bindAndStartService() {
+        if (serviceBound) {
+            return;
+        }
+
+        // Bind to ScannerService service
+        Intent intent = new Intent(this, ScannerService.class);
+        if (getIntent().getExtras() != null) {
+            intent.putExtras(getIntent().getExtras());
+        }
+        if (getServiceInitExtras() != null) {
+            intent.putExtras(getServiceInitExtras());
+        }
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    protected Bundle getServiceInitExtras() {
+        return ScannerServiceBinderHelper.defaultServiceConfiguration();
+    }
+
+    /**
+     * Defines callbacks for service binding
+     */
+    private final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to ScannerService, cast the IBinder and get the ScannerServiceApi instance
+            Log.d(LOG_TAG, "Service is connected to activity");
+            ScannerService.LocalBinder binder = (ScannerService.LocalBinder) service;
+            scannerService = binder.getService();
+            serviceBound = true;
+            scannerService.registerClient(ScannerCompatActivity.this);
+            scannerService.resume(); // may have been paused before bind by another activity.
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Log.d(LOG_TAG, "Service is disconnected from activity");
+            serviceBound = false;
+            scannerService = null;
+        }
+    };
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -376,12 +337,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         boolean activityStartedInCameraMode = goToCamera;
         goToCamera = true;
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (hasPermissionSet(this, PERMISSIONS_CAMERA)) {
             if (!activityStartedInCameraMode) {
                 // The view needs permissions BEFORE initializing. And it initializes as soon as the layout is set.
                 setContentView(layoutIdCamera);
             }
-            actuallyOpenCamera();
+            initCameraScanner();
 
             // Reinit text
             if (findViewById(R.id.scanner_text_scanner_status) != null) {
@@ -389,11 +350,14 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 tv.setText("");
             }
         } else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_ID_CAMERA);
+            requestPermissionSet(this, PERMISSIONS_CAMERA, PERMISSION_REQUEST_ID_CAMERA);
         }
     }
 
-    private void actuallyOpenCamera() {
+    private void initCameraScanner() {
+        if (cameraScanner != null) {
+            return;
+        }
         // TODO: should be in camera constructor, not here...
         CameraBarcodeScanView cameraView = findViewById(cameraViewId);
         if (cameraView == null) {
@@ -425,23 +389,15 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     goToCamera = true; // in case the activity was paused by the permission request dialog
                     setViewContent();
-                    actuallyOpenCamera(); // for other cases. May result in double camera init, not an issue as it only happens the first time
+                    initCameraScanner();
                 } else {
                     Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();
                 }
                 break;
             }
-            case PERMISSION_REQUEST_ID_BT_EMDK: {
+            case PERMISSION_REQUEST_ID_BT: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //initLaserScannerSearch();
-                } else {
-                    Toast.makeText(this, R.string.scanner_status_DISABLED, Toast.LENGTH_SHORT).show();
-                }
-                break;
-            }
-            case PERMISSION_REQUEST_ID_POSITION: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (canUseBluetooth()) {
+                    if (useBluetooth && hasPermissionSet(this, PERMISSIONS_BT)) {
                         bindAndStartService();
                     }
                 } else {

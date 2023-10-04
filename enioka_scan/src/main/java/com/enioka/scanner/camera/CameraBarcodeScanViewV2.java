@@ -1,8 +1,9 @@
 package com.enioka.scanner.camera;
 
-import android.Manifest;
+import static com.enioka.scanner.helpers.Permissions.PERMISSIONS_CAMERA;
+import static com.enioka.scanner.helpers.Permissions.hasPermissionSet;
+
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -25,7 +26,6 @@ import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Range;
@@ -323,7 +323,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
     private void openCamera() {
         Log.d(TAG, "Trying to open camera from CameraManager " + this.hashCode());
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (!hasPermissionSet(getContext(), PERMISSIONS_CAMERA)) {
             throw new RuntimeException("missing use camera permission");
         }
 

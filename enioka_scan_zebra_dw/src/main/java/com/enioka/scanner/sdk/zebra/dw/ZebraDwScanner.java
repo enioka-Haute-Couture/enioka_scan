@@ -13,12 +13,9 @@ import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Scanner interface for Zebra DataWedge scanners
@@ -85,7 +82,7 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
             } else {
                 Log.i(LOG_TAG, "Scanner configuration received");
                 Log.i(LOG_TAG, currentConfig.toString());
-                if (this.currentlyActiveProfile != null && this.currentlyActiveProfile.equals(this.currentlyActiveProfile)) {
+                if (this.currentlyActiveProfile != null && this.currentlyActiveProfile.equals(currentConfig.getProfileName())) {
                     configureSymbologies();
                 }
                 illuminationOn = !currentConfig.getParameter("BARCODE", "illumination_mode").equals("off");
@@ -114,8 +111,12 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
                     case ZebraDwIntents.DW_NOTIFICATION_CHANGE_PROFILE:
                         Log.i(LOG_TAG, "PROFILE_SWITCH: profileName: " + b.getString("PROFILE_NAME") + ", profileEnabled: " + b.getBoolean("PROFILE_ENABLED"));
                         currentlyActiveProfile = b.getString("PROFILE_NAME");
-                        if (currentConfig != null) {
+                        if (currentConfig != null && profileName.equals(currentlyActiveProfile)) {
                             configureSymbologies();
+                        }
+                        if (!paused && !profileName.equals(currentlyActiveProfile)) {
+                            // DW will change the profile between activities and apps. We must check each time a switch is done.
+                            switchToOurProfile();
                         }
                         break;
 
@@ -342,6 +343,7 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
 
     private void switchToOurProfile() {
         if (this.currentlyActiveProfile == null || this.currentlyActiveProfile.equals(this.profileName)) {
+            Log.d(LOG_TAG, "Not switching profile - already active");
             return;
         }
         //this.currentlyActiveProfile = this.profileName;

@@ -38,6 +38,10 @@ class ZebraDwConfig {
         return plugins.get(pluginName);
     }
 
+    public String getProfileName() {
+        return profileName;
+    }
+
     @NonNull
     @Override
     public String toString() {

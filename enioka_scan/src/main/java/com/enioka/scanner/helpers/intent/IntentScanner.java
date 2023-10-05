@@ -58,6 +58,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     protected ScannerStatusCallbackProxy statusCb = null;
     protected Scanner.Mode mode;
     protected Set<BarcodeType> symbologies;
+    protected boolean paused = true;
 
 
     @Override
@@ -86,6 +87,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         if (this.statusCb != null) {
             this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.READY);
         }
+        paused = false;
     }
 
     protected void registerReceivers(Context ctx, ScannerInitCallbackProxy initCallback, ScannerStatusCallbackProxy statusCallback) {
@@ -142,6 +144,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         } else if (cb != null) {
             cb.onFailure();
         }
+        paused = true;
     }
 
     @Override
@@ -155,6 +158,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         } else if (cb != null) {
             cb.onFailure();
         }
+        paused = false;
     }
 
 

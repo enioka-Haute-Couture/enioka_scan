@@ -33,6 +33,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -40,6 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
+    private static Semaphore criticalInitBlock = new Semaphore(1);
     private String cameraId;
     private CameraManager cameraManager;
 
@@ -266,6 +269,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             throw new RuntimeException("missing use camera permission");
         }
+        acquire();
 
         CameraManager manager = (CameraManager) getContext().getSystemService(android.content.Context.CAMERA_SERVICE);
         if (manager == null) {
@@ -493,6 +497,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             croppedImageBufferQueue.clear();
 
             stopping = false;
+            release();
             Log.i(TAG, "Camera scanner view has finished releasing all camera resources " + CameraBarcodeScanViewV2.this.hashCode());
         }
 
@@ -792,5 +797,21 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             default:
                 throw new IllegalStateException("wrong camera face");
         }
+    }
+
+    private void acquire() {
+        try {
+            if (!criticalInitBlock.tryAcquire(10, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("cannot acquire camera semaphore - it may be locked by another activity/fragment");
+            }
+        } catch (InterruptedException e) {
+            if (Thread.currentThread().isInterrupted()) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void release() {
+        criticalInitBlock.release();
     }
 }

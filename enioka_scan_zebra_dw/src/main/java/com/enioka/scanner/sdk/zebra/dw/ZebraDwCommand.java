@@ -104,11 +104,14 @@ class ZebraDwCommand {
         sb.append(this.getIntentToSend().getAction());
         sb.append("\n");
         if (extras != null && !extras.isEmpty()) {
+
             for (String key : extras.keySet()) {
+                Object value = extras.get(key);
+
                 sb.append("\t");
                 sb.append(key);
                 sb.append("=");
-                sb.append(extras.get(key).toString());
+                sb.append(value != null ? value.toString() : "");
                 sb.append("\n");
             }
         }

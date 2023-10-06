@@ -38,6 +38,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -45,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
+    private static final Semaphore criticalInitBlock = new Semaphore(1);
     private String cameraId;
     private CameraManager cameraManager;
 
@@ -88,6 +91,22 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
         // A thread for dealing with camera technical operations.
         startBackgroundThread();
+    }
+
+    private void acquire() {
+        try {
+            if (!criticalInitBlock.tryAcquire(10, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("cannot acquire camera semaphore - it may be locked by another activity/fragment");
+            }
+        } catch (InterruptedException e) {
+            if (Thread.currentThread().isInterrupted()) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void release() {
+        criticalInitBlock.release();
     }
 
     private void selectCameraParameters() {
@@ -326,6 +345,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         if (!hasPermissionSet(getContext(), PERMISSIONS_CAMERA)) {
             throw new RuntimeException("missing use camera permission");
         }
+        acquire();
 
         CameraManager manager = (CameraManager) getContext().getSystemService(android.content.Context.CAMERA_SERVICE);
         if (manager == null) {
@@ -400,9 +420,17 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         // TODO: add an actual pause, by stopping the repeating loop of the session instead of destroying it.
         if (this.captureSession != null) {
             Log.i(TAG, "Stopping capture session");
-            this.imageReader.close();
+            try {
+                this.imageReader.close();
+            } catch (IllegalArgumentException e) {
+                Log.i(TAG, "image reader would not close");
+            }
             this.imageReader = null;
-            this.captureSession.close();
+            try {
+                this.captureSession.close();
+            } catch (IllegalArgumentException e) {
+                Log.i(TAG, "captureSession would not close");
+            }
             this.captureSession = null;
         }
         post(() -> {
@@ -555,6 +583,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             croppedImageBufferQueue.clear();
 
             stopping = false;
+            release();
             Log.i(TAG, "Camera scanner view has finished releasing all camera resources " + CameraBarcodeScanViewV2.this.hashCode());
         }
 
@@ -642,6 +671,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
             // Capture targets
             captureRequestBuilder.addTarget(CameraBarcodeScanViewV2.this.camPreviewSurfaceView.getHolder().getSurface());
+            if (imageReader == null) {
+                Log.d(TAG, "stopping init - view is being stopped");
+                return;
+            }
             captureRequestBuilder.addTarget(imageReader.getSurface());
 
             // Full auto (without this AF & AE are mostly disabled)
@@ -729,7 +762,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         FrameAnalysisContext<Image> ctx = new FrameAnalysisContext<>();
         try {
             // Sanity check
-            assert (image.getPlanes().length == 3);
+            if (image.getPlanes().length != 3 || image.getPlanes()[0] == null) {
+                image.close();
+                return;
+            }
 
             // Sanity check
             if (image.getPlanes()[0].getPixelStride() != 1) {

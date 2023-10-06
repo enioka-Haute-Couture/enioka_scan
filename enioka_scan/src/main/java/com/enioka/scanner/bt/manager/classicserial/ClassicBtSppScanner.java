@@ -368,10 +368,11 @@ public class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal 
         }
 
         if (!res.expectingMoreData && res.data != null) {
-            Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString());
+            Log.d(LOG_TAG, "Data was interpreted as: " + res.data.toString() + " (" + res.getClass().getSimpleName() + ")");
 
             // ACK first - the event handlers may write to stream and create out of order ACKs.
             if (res.acknowledger != null) {
+                Log.d(LOG_TAG, "This command requires an ACK from this device");
                 this.outputStreamWriter.endOfCommand();
                 this.outputStreamWriter.write(res.acknowledger.getCommand(this), true);
             }

@@ -33,16 +33,20 @@ dependencies {
         implementation fileTree(dir: '../enioka_scan_honeywell/libs', include: ['*.aar']);
     }
 
-    if (gradle.ext.withKoamtac)
+    if (gradle.ext.withKoamtac) {
         implementation project(':enioka_scan_koamtac');
+    }
 
     if (gradle.ext.withZebra) {
         implementation project(':enioka_scan_zebra');
         implementation fileTree(dir: '../enioka_scan_zebra/libs', include: ['*.aar'])
     }
 
-    if (gradle.ext.withM3)
+    if (gradle.ext.withM3) {
         implementation project(':enioka_scan_m3');
+    }
+
+    implementation project(':enioka_scan_zebra_dw');
 
     // Android stuff
 

@@ -58,6 +58,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     protected ScannerStatusCallbackProxy statusCb = null;
     protected Scanner.Mode mode;
     protected Set<BarcodeType> symbologies;
+    protected boolean paused = true;
 
 
     @Override
@@ -70,6 +71,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
 
         // Let the child provider set all the configuration values if needed.
         configureProvider();
+        configureProvider(ctx);
 
         // Register the broadcast receiver.
         registerReceivers(ctx, initCallback, statusCallback);
@@ -85,6 +87,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         if (this.statusCb != null) {
             this.statusCb.onStatusChanged(this, ScannerStatusCallback.Status.READY);
         }
+        paused = false;
     }
 
     protected void registerReceivers(Context ctx, ScannerInitCallbackProxy initCallback, ScannerStatusCallbackProxy statusCallback) {
@@ -101,6 +104,13 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
      * Called just before initial scanner initialization. Empty by default. An occasion to set the configuration fields.
      */
     protected void configureProvider() {
+    }
+
+    /**
+     * Called just before initial scanner initialization. Empty by default. An occasion to set the configuration fields.
+     */
+    protected void configureProvider(final Context applicationContext) {
+
     }
 
     /**
@@ -134,6 +144,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         } else if (cb != null) {
             cb.onFailure();
         }
+        paused = true;
     }
 
     @Override
@@ -147,6 +158,7 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
         } else if (cb != null) {
             cb.onFailure();
         }
+        paused = false;
     }
 
 

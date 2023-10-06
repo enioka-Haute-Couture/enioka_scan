@@ -1,0 +1,4 @@
+<resources>
+    <string name="enioka_scan_zebra_dw_intent_name" translatable="false">com.enioka.scanners.zebra.dw.intent.callback.name</string>
+    <string name="enioka_scan_zebra_dw_profile_name" translatable="false"> </string>
+</resources>

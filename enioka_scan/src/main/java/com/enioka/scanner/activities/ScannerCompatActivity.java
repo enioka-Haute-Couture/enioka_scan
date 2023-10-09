@@ -265,11 +265,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         // Bind to ScannerService service
         Intent intent = new Intent(this, ScannerService.class);
-        if (getIntent().getExtras() != null) {
-            intent.putExtras(getIntent().getExtras());
-        }
         if (getServiceInitExtras() != null) {
             intent.putExtras(getServiceInitExtras());
+        }
+        if (getIntent().getExtras() != null) {
+            intent.putExtras(getIntent().getExtras());
         }
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }

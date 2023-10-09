@@ -16,6 +16,8 @@ public class SsiParser implements ScannerDataParser {
 
     private SsiMultiPacket multiPacketBuffer = null;
 
+    private boolean useHostAck = false;
+
     @Override
     public ParsingResult parse(byte[] buffer, int offset, int dataLength) {
         ParsingResult res = new ParsingResult();
@@ -30,7 +32,7 @@ public class SsiParser implements ScannerDataParser {
                 res.expectingMoreData = false;
                 res.data = multiPacketBuffer.toBarcode();
                 multiPacketBuffer = null;
-                res.acknowledger = new Ack();
+                res.acknowledger = new Ack(useHostAck);
             } else {
                 res.acknowledger = new MultipacketAck(); // FIXME: not quite understood how ACKs work yet or when to send these, scanner seems to work fine eiter way
             }
@@ -58,11 +60,15 @@ public class SsiParser implements ScannerDataParser {
             Log.e(LOG_TAG, "Unsupported op code received: " + ssiPacket.getOpCode() + ". Message is ignored.");
             return new ParsingResult(MessageRejectionReason.INVALID_OPERATION);
         }
-        if (meta.needsAck())
-            res.acknowledger = new Ack();
-
         if (meta.getSource() == SsiSource.HOST)
             throw new IllegalStateException("Should not receive host-sent messages");
+        if (meta == SsiCommand.SCANNER_INIT_RESPONSE) {
+            Log.i(LOG_TAG, "Using HOST_ACK instead of CMD_ACK");
+            useHostAck = true;
+        }
+        if (meta.needsAck())
+            res.acknowledger = new Ack(useHostAck);
+
         res.data = meta.getParser().parseData(ssiPacket.getData());
         res.expectingMoreData = false;
         return res;

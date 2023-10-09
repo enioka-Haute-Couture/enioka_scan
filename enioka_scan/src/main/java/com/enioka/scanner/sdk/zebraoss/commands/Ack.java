@@ -6,7 +6,7 @@ import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
  * A message or segment acknowledgment.
  */
 public class Ack extends CommandExpectingNothing {
-    public Ack() {
-        super(SsiCommand.CMD_ACK.getOpCode());
+    public Ack(boolean useHostAck) {
+        super(useHostAck ? SsiCommand.HOST_ACK.getOpCode() : SsiCommand.CMD_ACK.getOpCode());
     }
 }

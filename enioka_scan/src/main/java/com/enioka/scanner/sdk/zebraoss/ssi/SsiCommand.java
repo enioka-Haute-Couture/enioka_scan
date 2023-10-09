@@ -24,8 +24,9 @@ public enum SsiCommand {
     MULTIPACKET_ACK(0x74, SsiSource.HOST), // Triggered directly in the parser
     SSI_MGMT_COMMAND(0x80, SsiSource.BOTH, true, new RsmResponseParser()),
     SCANNER_INIT_COMMAND(0x90, SsiSource.HOST),
-    SCANNER_INIT(0x91, SsiSource.DECODER, new ScannerInitParser()),
+    SCANNER_INIT_RESPONSE(0x91, SsiSource.DECODER, new ScannerInitParser()), // If received after a SCANNER_INIT_COMMAND, use HOST_ACK instead of CMD_ACK
     TEMP_COMMAND(0x93, SsiSource.BOTH, true, new GenericParser()), // Not documented, source of problems
+    HOST_ACK(0x96, SsiSource.HOST),
     REQUEST_REVISION(0xA3, SsiSource.HOST),
     REPLY_REVISION(0xA4, SsiSource.DECODER, false, new ReplyRevisionParser()),
     IMAGE_DATA(0xB1, SsiSource.DECODER, true, new GenericParser()),

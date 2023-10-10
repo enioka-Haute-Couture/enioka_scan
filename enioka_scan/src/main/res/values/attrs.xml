@@ -21,6 +21,7 @@
         </attr>
         <attr name="useAdaptiveResolution" format="boolean" />
         <attr name="storePreferredResolution" format="boolean" />
+        <attr name="minResolutionY" format="integer" />
         <attr name="maxResolutionY" format="integer" />
         <attr name="maxDistortionRatio" format="float" />
     </declare-styleable>

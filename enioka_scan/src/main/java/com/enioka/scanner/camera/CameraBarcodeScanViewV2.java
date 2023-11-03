@@ -499,7 +499,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             if (value) {
                 captureRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH);
             } else {
-                captureRequestBuilder.set(CaptureRequest.FLASH_MODE, null);
+                captureRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
             }
             if (captureSession != null) {
                 captureSession.stopRepeating();

@@ -86,6 +86,37 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         init();
     }
 
+    /**
+     * Checks all attributes necessary for camera operations and returns true if any is null.
+     * None of these attributes are expected to be null unless the camera is either uninitialized, paused or closed.
+     *
+     * @param caller The name of the caller function, for logging
+     * @return true if any camera-related attribute is null.
+     */
+    private boolean anyAttributeMissing(String caller) {
+        if (cameraManager == null) {
+            Log.w(TAG, caller + ": No cameraManager instance, make sure camera was properly initialized");
+            return true;
+        }
+        if (captureSession == null) {
+            Log.w(TAG, caller + ": No captureSession instance, make sure camera was properly initialized and `pauseCamera()` or `closeCamera()` were not called previously");
+            return true;
+        }
+        if (captureRequestBuilder == null) {
+            Log.w(TAG, caller + ": No captureRequestBuilder instance, make sure camera was properly initialized and `closeCamera()` was not called previously");
+            return true;
+        }
+        if (cameraDevice == null) {
+            Log.w(TAG, caller + ": No cameraDevice instance, make sure camera was properly initialized and not used by another application or view, and `closeCamera()` was not called previously");
+            return true;
+        }
+        if (imageReader == null) {
+            Log.w(TAG, caller + ": No imageReader instance, make sure camera was properly initialized and `pauseCamera()` or `closeCamera()` were not called previously");
+            return true;
+        }
+        return false;
+    }
+
     private void init() {
         Log.d(TAG, "Camera2 specific initialization start");
 
@@ -287,6 +318,10 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     }
 
     protected void refreshAutofocusZone() {
+        if (anyAttributeMissing("refreshAutofocusZone")) {
+            return;
+        }
+
         if (afZones > 0) {
             CameraCaptureSession.CaptureCallback captureHandler = new CameraCaptureSession.CaptureCallback() {
                 @Override
@@ -380,11 +415,15 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         if (null != captureSession) {
             Log.d(TAG, " * Closing camera capture session");
 
-            captureRequestBuilder.removeTarget(this.camPreviewSurfaceView.getHolder().getSurface());
-            captureRequestBuilder = null;
-
             captureSession.close();
             captureSession = null;
+        }
+
+        if (null != captureRequestBuilder) {
+            Log.d(TAG, " * Clearing camera capture builder");
+
+            captureRequestBuilder.removeTarget(this.camPreviewSurfaceView.getHolder().getSurface());
+            captureRequestBuilder = null;
         }
 
         if (null != cameraDevice) {
@@ -452,14 +491,15 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
 
     @Override
     void setTorchInternal(boolean value) {
-        if (captureSession == null) {
+        if (anyAttributeMissing("setTorchInternal")) {
             return;
         }
+
         try {
             if (value) {
                 captureRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH);
             } else {
-                captureRequestBuilder.set(CaptureRequest.FLASH_MODE, null);
+                captureRequestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_OFF);
             }
             if (captureSession != null) {
                 captureSession.stopRepeating();
@@ -768,7 +808,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             }
 
             // Sanity check
-            if (image.getPlanes()[0].getPixelStride() != 1) {
+            if (image.getPlanes()[0].getPixelStride() != 1 || image.getPlanes()[0].getBuffer() == null) {
                 throw new RuntimeException("not a luminance buffer");
             }
 
@@ -918,7 +958,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         // Copy Y channel.
         int yRowStride = yPlane.getRowStride();
         int yPixelStride = yPlane.getPixelStride();
-        for(int y = 0; y < height; ++y) {
+        for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
                 nv21[index++] = yBuffer.get(y * yRowStride + x * yPixelStride);
             }
@@ -931,7 +971,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         int uvWidth = width / 2;
         int uvHeight = height / 2;
 
-        for(int y = 0; y < uvHeight; ++y) {
+        for (int y = 0; y < uvHeight; ++y) {
             for (int x = 0; x < uvWidth; ++x) {
                 int bufferIndex = (y * uvRowStride) + (x * uvPixelStride);
                 // V channel.
@@ -949,7 +989,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         if (lastSuccessfulScanData != null) {
             Log.d(TAG, "Convert last saved image to JPEG");
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            YuvImage img = mediaImageToYuvImage((Image)lastSuccessfulScanData.originalImage);
+            YuvImage img = mediaImageToYuvImage((Image) lastSuccessfulScanData.originalImage);
             Rect imgRect = new Rect(0, 0, resolution.currentPreviewResolution.x, resolution.currentPreviewResolution.y);
             img.compressToJpeg(imgRect, 100, buffer);
 

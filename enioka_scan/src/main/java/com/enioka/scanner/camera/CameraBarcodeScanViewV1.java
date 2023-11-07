@@ -301,6 +301,11 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     }
 
     protected void refreshAutofocusZone() {
+        if (this.cam == null) {
+            Log.w(VIEW_LOG_TAG, "refreshAutofocusZone: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
+            return;
+        }
+
         if (autoFocusMode == null) {
             return;
         }
@@ -327,6 +332,11 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     }
 
     public void setPreviewResolution(Point newResolution) {
+        if (this.cam == null) {
+            Log.w(VIEW_LOG_TAG, "setPreviewResolution: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
+            return;
+        }
+
         Camera.Parameters prms = this.cam.getParameters();
         pauseCamera();
         resolution.currentPreviewResolution = newResolution;
@@ -337,6 +347,11 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     }
 
     private void setInitialBuffers(Camera.Parameters prms) {
+        if (this.cam == null) {
+            Log.w(VIEW_LOG_TAG, "setInitialBuffers: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
+            return;
+        }
+
         previewBufferSize = (int) (resolution.currentPreviewResolution.x * resolution.currentPreviewResolution.y * ImageFormat.getBitsPerPixel(prms.getPreviewFormat()) / 8f);
         for (int i = 0; i < Runtime.getRuntime().availableProcessors() * 2; i++) {
             this.cam.addCallbackBuffer(new byte[previewBufferSize]);
@@ -381,6 +396,11 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
 
     @Override
     void setTorchInternal(boolean value) {
+        if (this.cam == null) {
+            Log.w(VIEW_LOG_TAG, "setTorchInternal: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
+            return;
+        }
+
         Camera.Parameters prms = this.cam.getParameters();
         if (value) {
             prms.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
@@ -403,6 +423,11 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
      * @param prms Instance of camera configuration to apply
      */
     public void setCameraParameters(Camera.Parameters prms) {
+        if (this.cam == null) {
+            Log.w(VIEW_LOG_TAG, "setCameraParameters: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
+            return;
+        }
+
         try {
             this.cam.setParameters(prms);
         } catch (Exception e) {
@@ -468,6 +493,11 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     }
 
     public void giveBufferBackInternal(FrameAnalysisContext<byte[]> ctx) {
+        if (this.cam == null) {
+            Log.w(VIEW_LOG_TAG, "giveBufferBackInternal: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
+            return;
+        }
+
         if (ctx.originalImage.length == previewBufferSize) {
             this.cam.addCallbackBuffer(ctx.originalImage);
         }
@@ -482,6 +512,8 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         if (this.cam != null) {
             this.cam.setPreviewCallbackWithBuffer(null);
             this.cam.stopPreview();
+        } else {
+            Log.w(VIEW_LOG_TAG, "pauseCamera: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
         }
         post(() -> {
             if (this.targetView != null) {
@@ -496,6 +528,8 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
             if (scanningStarted) {
                 this.cam.setPreviewCallback(this);
             }
+        } else {
+            Log.w(VIEW_LOG_TAG, "resumeCamera: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
         }
         post(() -> {
             if (this.targetView != null) {
@@ -505,6 +539,10 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     }
 
     public void startScanner() {
+        if (this.cam == null) {
+            Log.w(VIEW_LOG_TAG, "startScanner: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
+            return;
+        }
         Log.d(VIEW_LOG_TAG, "Scanning started");
         this.scanningStarted = true;
         this.cam.setPreviewCallback(this);
@@ -520,20 +558,24 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Clean up methods
     public void cleanUp() {
-        if (this.cam != null) {
-            Log.i(TAG, "Removing all camera callbacks and stopping it");
-            this.cam.setPreviewCallback(null);
-            this.cam.stopPreview();
-            this.setOnClickListener(null);
-            this.lastSuccessfulScanData = null;
-            this.frameAnalyser.close();
-            this.frameAnalyser = null;
+        if (this.cam == null) {
+            Log.w(VIEW_LOG_TAG, "cleanup: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
+            return;
         }
+
+        Log.i(TAG, "Removing all camera callbacks and stopping it");
+        this.cam.setPreviewCallback(null);
+        this.cam.stopPreview();
+        this.setOnClickListener(null);
+        this.lastSuccessfulScanData = null;
+        this.frameAnalyser.close();
+        this.frameAnalyser = null;
         closeCamera();
     }
 
     void closeCamera() {
         if (this.cam == null) {
+            Log.w(VIEW_LOG_TAG, "closeCamera: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
             return;
         }
         Log.i(TAG, "Camera is being released");

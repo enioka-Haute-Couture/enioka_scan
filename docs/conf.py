@@ -1,8 +1,6 @@
 # coding: utf-8
 
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.txt': 'markdown',
     '.md': 'markdown',
 }
 source_encoding = 'utf-8'

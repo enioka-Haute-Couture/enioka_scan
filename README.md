@@ -1,5 +1,7 @@
 # Enioka Haute Couture Android Barcode Scanning Library
 
+[External documentation available](https://enioka-scan.readthedocs.io/en/130-documentation/), this README will be reworked once everything is correctly ported.
+
 This library makes the integration of all barcode scanners easy in any Android application,
 avoiding vendor lock-in and lowering the cost of advanced scanner integration.
 

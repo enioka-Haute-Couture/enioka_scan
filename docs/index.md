@@ -35,5 +35,5 @@ quickstart
 dependencies
 guides/index
 api/index
-dev/index
+develop
 :::

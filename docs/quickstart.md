@@ -9,8 +9,7 @@ This documentation is a work in progress.
 :::{admonition} TODO
 :class: attention
 
-* Edit source links to redirect to the API reference. Maybe a `guides` section could help too.
-* Simplify the quick start, currently too much text and too many parts
+* Edit source links to redirect to the API reference or guides.
 :::
 
 This guide will show you the minimum required steps to include **enioka Scan** in your application.
@@ -193,10 +192,8 @@ scanning.
 The provided Camera activity will display a target rectangle, which can be moved or tapped to change
 or refresh the autofocus area.
 
-[mock-sdk]: https://github.com/enioka-Haute-Couture/enioka_scan/blob/master/enioka_scan_mock
 [scanner-api]: https://github.com/enioka-Haute-Couture/enioka_scan/blob/master/enioka_scan/src/main/java/com/enioka/scanner/api/Scanner.java
 [scanner-client]: https://github.com/enioka-Haute-Couture/enioka_scan/blob/master/enioka_scan/src/main/java/com/enioka/scanner/service/ScannerClient.java
 [scanner-compat-activity]: https://github.com/enioka-Haute-Couture/enioka_scan/blob/master/enioka_scan/src/main/java/com/enioka/scanner/activities/ScannerCompatActivity.java
-[scanner-provider-api]: https://github.com/enioka-Haute-Couture/enioka_scan/blob/master/enioka_scan/src/main/java/com/enioka/scanner/api/ScannerProvider.java
 [scanner-search-options]: https://github.com/enioka-Haute-Couture/enioka_scan/blob/master/enioka_scan/src/main/java/com/enioka/scanner/api/ScannerSearchOptions.java
 [scanner-service-api]: https://github.com/enioka-Haute-Couture/enioka_scan/blob/master/enioka_scan/src/main/java/com/enioka/scanner/service/ScannerServiceApi.java

@@ -23,7 +23,7 @@ directly call the overloaded method with a proxy callback.
 
 :::{seealso}
 
-[Callbacks](scanner_callbacks) documentation.
+[Callbacks](scanner_callbacks.md) documentation.
 :::
 
 ## The `Scanner` interface
@@ -57,7 +57,7 @@ between the library and the physical devices and registers callbacks.
 :::{method} getProviderKey() -> String
 
 For logging and sorting purpose, this is the key of the SDK behind this scanner (same as 
-[`ScannerProvider.getKey()`](scanner_provider))
+[`ScannerProvider.getKey()`](scanner_provider.md#getKey))
 :::
 
 :::{method} setDataCallBack(ScannerDataCallbackProxy cb) -> void

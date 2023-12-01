@@ -10,13 +10,18 @@ This documentation is a work in progress.
 :class: attention
 
 * Edit source links to redirect to the API reference or guides.
+* Simplify the quickstart to only include the bare minimum necessary for the lib to function.
+  Further details should be put in a dedicated page in [guides](guides/index.md).
+* Add an explanation of the scanner creation process, from the start of the service to the ability
+  to interact with the scanner. This will be important to direct users to the correct guides or API
+  reference pages, especially when it comes to bluetooth, which deserves its own category.
 :::
 
 This guide will show you the minimum required steps to include **enioka Scan** in your application.
 It assumes that you already have a configured Android Studio project.
 
 This guide will only go over the minimal code. For a more in-depth guide for each use case, check
-the [API reference](/api/index).
+the [API reference](api/index.md).
 
 ## Add the required dependencies
 
@@ -32,7 +37,7 @@ dependencies {
 ```
 
 Depending on your scanning devices, this single dependency may be enough. For some devices, other
-dependencies are required, you can check [Dependencies](/dependencies) for a detailed overview.
+dependencies are required, you can check [Dependencies](dependencies.md) for a detailed overview.
 
 ## Using the library
 

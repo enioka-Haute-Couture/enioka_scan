@@ -13,7 +13,10 @@ extensions = [
 myst_enable_extensions = [
     'colon_fence',  # Alternative directive call using :::{directive} :::
     'strikethrough',  # Text strikethrough using ~~text~~
+    'fieldlist',  # Better handling of manyfields blocks, useful for API documentation
 ]
+
+myst_heading_anchors = 4
 
 suppress_warnings = [
     'myst.strikethrough',  # We only generate HTML docs, ignore non-html warnings.

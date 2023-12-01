@@ -13,9 +13,11 @@ It is compatible with a wide variety of scanning devices, integrated or external
 vendors such as Zebra, Honeywell, Athesi and more. 
 
 When there are no compatible hardware devices available, the library provides a camera reader based 
-on [ZBar](https://mvnrepository.com/artifact/me.dm7.barcodescanner/zbar) (default) or [ZXing](https://mvnrepository.com/artifact/com.google.zxing/core).
+on [ZBar](https://mvnrepository.com/artifact/me.dm7.barcodescanner/zbar) (default) or 
+[ZXing](https://mvnrepository.com/artifact/com.google.zxing/core).
 
-Through a common abstraction, it provides access to the following methods (provided the hardware supports them):
+Through a common abstraction, it provides access to the following methods (provided the hardware 
+supports them):
 - press/release the scanner's trigger
 - pause/resume scanning abilities
 - disconnect/reconnect scanners

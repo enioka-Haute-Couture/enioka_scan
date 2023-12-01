@@ -56,7 +56,8 @@ scanner creation and device compatibility checks).
 
 In order for a new scanner SDK to be found by the library, the 
 [`ScannerProvider`][scanner-provider-api] implementation needs to be declared as a service in its 
-`AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER`.
+`AndroidManifest.xml` with an intent-filter containing the action `com.enioka.scan.PROVIDE_SCANNER`
+for "regular" devices, and `com.enioka.scan.PROVIDE_SPP_SCANNER` for bluetooth devices.
 
 The associated Java class does not need to extend Android's `Service` class(the 
 `tools:ignore="Instantiatable"` attribute may be added to the service in the manifest), 

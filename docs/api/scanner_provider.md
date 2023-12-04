@@ -12,6 +12,8 @@ interact with a device, and handle the [`Scanner`](scanner.md) creation.
 In most cases, users will not need to interact with a provider directly, but adding compatibility to
 more devices will require adding a new provider.
 
+This page regroups all provider-related interfaces and helper classes.
+
 ## The `ScannerProvider` interface
 
 The core methods of a provider common between, all types of devices.

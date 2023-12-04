@@ -13,7 +13,7 @@ This section contains more in-depth info about important classes and interfaces 
 
 :::{toctree}
 :caption: For most users
-:maxdepth: 3
+:maxdepth: 2
 
 scanner
 scanner_service
@@ -25,8 +25,11 @@ others
 
 :::{toctree}
 :caption: For advanced users and enioka Scan developpers
-:maxdepth: 3
+:maxdepth: 2
 
 lazerscanner
 scanner_provider
 :::
+
+% API guides for the BluetoothScanner API may be helpful for provider developpers but is not a 
+% priority. A full bluetooth guide may be needed.

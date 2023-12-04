@@ -94,6 +94,11 @@ to send information to your application. These callbacks are grouped in the `Sca
 interface, which should be implemented by the part of your code responsible for handling the service
 lifecycle and barcode reads.
 
+:::{seealso}
+This interface extends `ScannerStatusCallback` and needs to implement its method, see more in the 
+[callbacks documentation](scanner_callbacks.md#the-scannerstatuscallback-interface-and-proxy-class).
+:::
+
 :::{method} onScannerInitEnded(int count) -> void
 
 This callback is used once the initialization of scanners is over. It will be called 

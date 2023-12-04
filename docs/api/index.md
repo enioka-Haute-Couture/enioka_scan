@@ -12,13 +12,21 @@ This documentation is a work in progress.
 This section contains more in-depth info about important classes and interfaces of **enioka Scan**.
 
 :::{toctree}
+:caption: For most users
 :maxdepth: 3
 
 scanner
-scanner_provider
 scanner_service
-scanner_activity
 scanner_callbacks
+scanner_activity
 camera
 others
+:::
+
+:::{toctree}
+:caption: For advanced users and enioka Scan developpers
+:maxdepth: 3
+
+lazerscanner
+scanner_provider
 :::

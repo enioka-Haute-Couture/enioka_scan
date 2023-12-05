@@ -317,6 +317,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         return new MeteringRectangle(x0, y0, x1 - x0, y1 - y0, 1000);
     }
 
+    @Override
     protected void refreshAutofocusZone() {
         if (anyAttributeMissing("refreshAutofocusZone")) {
             return;

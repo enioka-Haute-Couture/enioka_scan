@@ -202,3 +202,13 @@ Called if the provider can manage the device.
 
 Called if the provider can not manage the device.
 :::
+
+## The `CameraBarcodeScanView.ResultHandler` interface
+
+Callback used by the camera reader when a barcode is read from the camera feed.
+
+:::{method} handleScanResult(String result, BarcodeType type) -> void
+
+:param String result: The barcode data
+:param BarcodeType type: The barcode symbology
+:::

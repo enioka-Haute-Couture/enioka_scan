@@ -62,8 +62,8 @@ The layout used by the activity when using the camera as a scanner. May be repla
 
 :::{cpp:var} int cameraViewId = R.id.camera_scan_view
 
-The ID of the [`CameraBarcodeScanView`](camera.md#cameraBarcodeScanView) inside the `layoutIdCamera`
-layout.
+The ID of the [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the
+`layoutIdCamera` layout.
 :::
 
 :::{cpp:var} int cameraToggleId = R.id.scanner_bt_camera
@@ -120,6 +120,8 @@ Initialized by the [`onStart()`](#onStart) and [`onResume()`](#onResume) methods
 :::{cpp:var} CameraBarcodeScanViewScanner cameraScanner;
 
 The instance of the camera scanner, can be used to access camera methods but should not be replaced.
+`CameraBarcodeScanViewScanner` is a simple provider-less implementation of the [`Scanner`](scanner)
+API.
 
 Initialized by the [`initCamera()`](#initCamera) method.
 :::

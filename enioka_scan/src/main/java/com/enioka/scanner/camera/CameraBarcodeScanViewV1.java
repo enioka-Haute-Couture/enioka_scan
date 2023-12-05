@@ -300,6 +300,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         }
     }
 
+    @Override
     protected void refreshAutofocusZone() {
         if (this.cam == null) {
             Log.w(VIEW_LOG_TAG, "refreshAutofocusZone: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
@@ -331,6 +332,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         });
     }
 
+    @Override
     public void setPreviewResolution(Point newResolution) {
         if (this.cam == null) {
             Log.w(VIEW_LOG_TAG, "setPreviewResolution: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
@@ -501,6 +503,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         frameAnalyser.handleFrame(ctx);
     }
 
+    @Override
     public void giveBufferBackInternal(FrameAnalysisContext<byte[]> ctx) {
         if (this.cam == null) {
             Log.w(VIEW_LOG_TAG, "giveBufferBackInternal: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
@@ -517,6 +520,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Lifecycle external toggles
+    @Override
     public void pauseCamera() {
         if (this.cam != null) {
             this.cam.setPreviewCallbackWithBuffer(null);
@@ -531,6 +535,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         });
     }
 
+    @Override
     public void resumeCamera() {
         if (this.cam != null) {
             this.cam.startPreview();
@@ -566,6 +571,7 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Clean up methods
+    @Override
     public void cleanUp() {
         if (this.cam == null) {
             Log.w(VIEW_LOG_TAG, "cleanup: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");

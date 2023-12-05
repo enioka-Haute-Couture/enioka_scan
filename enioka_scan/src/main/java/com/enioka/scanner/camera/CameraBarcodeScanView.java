@@ -184,4 +184,13 @@ public class CameraBarcodeScanView extends FrameLayout {
     public void resetTargetPosition() {
         this.proxiedView.resetTargetPosition();
     }
+
+    /**
+     * Get the JPEG data of the image used in the latest successful scan.
+     *
+     * @return a byte[] of JPEG data, or null if there is no previous scan data.
+     */
+    public byte[] getLatestSuccessfulScanJpeg() {
+        return this.proxiedView.getLatestSuccessfulScanJpeg();
+    }
 }

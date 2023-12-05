@@ -73,7 +73,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected boolean goToCamera = false;
 
     /**
-     * Use bluetooth to look for scanners (if available).
+     * Check the app's bluetooth permissions. This variable does not affect scanner search options.
      */
     protected boolean useBluetooth = true;
 
@@ -96,12 +96,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected int cameraViewId = R.id.camera_scan_view;
 
     /**
+     * The ID of the ImageButton on which to press to manually switch to camera mode.
+     */
+    protected int cameraToggleId = R.id.scanner_bt_camera;
+
+    /**
      * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
      */
     protected int flashlightViewId = R.id.scanner_flashlight;
 
     /**
-     * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
+     * The ID of the optional ImageButton on which to press to toggle the zxing/zbar camera scan library.
      */
     protected int scannerModeToggleViewId = R.id.scanner_switch_zxing;
 
@@ -168,9 +173,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
-        if (useBluetooth && hasPermissionSet(this, PERMISSIONS_BT)) {
+        if (!useBluetooth || hasPermissionSet(this, PERMISSIONS_BT)) {
             bindAndStartService();
-        } else {
+        } else if (useBluetooth && !hasPermissionSet(this, PERMISSIONS_BT)) {
             requestPermissionSet(this, PERMISSIONS_BT, PERMISSION_REQUEST_ID_BT);
         }
     }
@@ -201,7 +206,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
 
         // Immediately set some buttons (which do no need to wait for scanners).
-        resetCameraButton();
+        displayCameraButton();
         displayManualInputButton();
 
         // Register this activity on the scanner service (hooks onData) and ask it to hook possible scanners needing foreground control onto this activity.
@@ -397,7 +402,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             }
             case PERMISSION_REQUEST_ID_BT: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (useBluetooth && hasPermissionSet(this, PERMISSIONS_BT)) {
+                    if (!useBluetooth || hasPermissionSet(this, PERMISSIONS_BT)) {
                         bindAndStartService();
                     }
                 } else {
@@ -472,7 +477,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * Display the torch button "on" or "off" is the device has capability.
      **/
-    protected void displayTorch() {
+    private void displayTorch() {
         final ImageButton flashlight = findViewById(flashlightViewId);
         if (findViewById(flashlightViewId) == null) {
             return;
@@ -543,7 +548,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * Display a manual input (keyboard) button for manual input.
      */
-    protected void displayManualInputButton() {
+    private void displayManualInputButton() {
         final View bt = findViewById(keyboardOpenViewId);
         if (bt == null) {
             return;
@@ -577,13 +582,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * Display a "use camera" button to allow using camera input even when a laser is available.
      */
-    protected void resetCameraButton() {
-        if (findViewById(R.id.scanner_bt_camera) != null) {
-            findViewById(R.id.scanner_bt_camera).setOnClickListener(view -> initCamera());
+    private void displayCameraButton() {
+        if (findViewById(cameraToggleId) != null) {
+            findViewById(cameraToggleId).setOnClickListener(view -> initCamera());
         }
     }
 
-    protected void displayCameraReaderToggle() {
+    private void displayCameraReaderToggle() {
         final Switch toggle = findViewById(scannerModeToggleViewId);
         if (toggle == null) {
             return;
@@ -596,7 +601,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         });
     }
 
-    protected void displayCameraPauseToggle() {
+    private void displayCameraPauseToggle() {
         final Switch toggle = findViewById(scannerModeTogglePauseId);
         if (toggle == null) {
             return;

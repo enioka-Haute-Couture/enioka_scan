@@ -31,7 +31,7 @@ Called when the command failed, either through or SDK error or negative answer (
 Called when the command's expected answer did not arrive in time (usually only with BT scanners).
 :::
 
-## The `ScannerConnectionHandler` interface and `ScannerCommandCallbackProxy` class
+## The `ScannerConnectionHandler` interface and `ScannerConnectionHandlerProxy` class
 
 Callback used during the scanner search to retrieve created [`Scanner`](scanner) instances.
 

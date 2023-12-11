@@ -1,13 +1,8 @@
 # The LazerScanner class
 
-:::{admonition} WIP
-:class: attention
-
-This documentation is a work in progress.
-:::
-
 `LazerScanner` is the main scanner factory and the core of the library. It is in charge of finding
-scanner providers and scanner devices. Most users will let the [`ScannerService`](scanner_service)
+scanner providers and scanner devices. Most users will let the 
+[`ScannerService`](scanner_service.md#the-scannerserviceapi-interface)
 handle its own instance of `LazerScanner`, but should you need it, you can use its static methods
 directly.
 
@@ -37,4 +32,9 @@ There is a specific callback when no scanner is available.
 :param ScannerConnectionHandler handler: The callback used whenever a scanner is found.
     Automatically wrapped by a `ScannerConnectionHandlerProxy`, for which a public overload exists.
 :param ScannerSearchOptions options: The options used to refine the search.
+:::
+
+:::{seealso}
+
+* The [Callbacks](scanner_callbacks.md) documentation
 :::

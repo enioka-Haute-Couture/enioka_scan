@@ -1,11 +1,5 @@
 # The camera scanner
 
-:::{admonition} WIP
-:class: attention
-
-This documentation is a work in progress.
-:::
-
 **enioka Scan** can still be used to manage barcodes scanned using the Android camera. For that, it
 exposes the `CameraBarcodeScanView` and a series of helper classes to handle compatibility with both
 Camera 1 and Camera 2 hardware APIs.
@@ -19,7 +13,7 @@ the API-specific `CameraBarcodeScanViewBase` implementation and handles the API 
 the device's properties.
 
 For most users, this is the class they will interact with if they need to interact with the Camera
-hardware and not just the [`Scanner`](scanner) instance.
+hardware and not just the [`Scanner` instance](scanner.md#the-scanner-interface).
 
 :::{method} setReaderMode(CameraReader readerMode) -> void
 
@@ -44,8 +38,7 @@ Used by `CameraBarcodeScanViewScanner` to register itself with the view and corr
 barcodes read by the camera as any regular scanner reads.
 
 :param ResultHandler handler: the 
-    [`ResultHandler`](scanner_callbacks.md#the-camerabarcodescanviewresulthandler-interface) 
-    implementation
+    [`ResultHandler` implementation](scanner_callbacks.md#the-camerabarcodescanviewresulthandler-interface)
 :::
 
 :::{method} setTorch(boolean value) -> void

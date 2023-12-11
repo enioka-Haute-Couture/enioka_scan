@@ -1,17 +1,5 @@
 # The Scanner API
 
-:::{admonition} WIP
-:class: attention
-
-This documentation is a work in progress.
-:::
-
-:::{admonition} TODO
-:class: attention
-
-* Correct links to specific methods of other API reference pages (e.g. `ScannerProvider.getKey()`)
-:::
-
 The `Scanner` interface is the central part of the library. It is the piece of code that gives the
 user control on the physical scanner devices. All devices have common methods relating to basic
 functionalities (reading a barcode) or lifecycle control. Some devices have access to extra features
@@ -23,7 +11,7 @@ directly call the overloaded method with a proxy callback.
 
 :::{seealso}
 
-[Callbacks](scanner_callbacks.md) documentation.
+* The [Callbacks](scanner_callbacks.md) documentation.
 :::
 
 ## The `Scanner` interface
@@ -57,7 +45,7 @@ between the library and the physical devices and registers callbacks.
 :::{method} getProviderKey() -> String
 
 For logging and sorting purpose, this is the key of the SDK behind this scanner (same as 
-[`ScannerProvider.getKey()`](scanner_provider.md#getKey))
+[`ScannerProvider.getKey()`](scanner_provider.md#the-scannerprovider-interface))
 :::
 
 :::{method} setDataCallBack(ScannerDataCallbackProxy cb) -> void
@@ -86,7 +74,7 @@ or absent.
 
 :::{method} resume(@Nullable ScannerCommandCallback cb) -> void
 
-Reverse the effects of [`pause()`](#pause). The scanner is once again ready to scan after 
+Reverse the effects of `pause()`. The scanner is once again ready to scan after 
 this call. The scanner's status callback should be called if needed. Idempotent.
 
 :param ScannerCommandCallback cb: The callback to call with the result of the operation. May be null
@@ -171,7 +159,7 @@ or absent.
 
 :::{method} releaseScanTrigger(@Nullable ScannerCommandCallback cb) -> void
 
-Ends the effect of [`pressScanTrigger()`](#pressScanTrigger).
+Ends the effect of `pressScanTrigger()`.
 
 :param ScannerCommandCallback cb: The callback to call with the result of the operation. May be null
 or absent.
@@ -196,7 +184,7 @@ or absent.
 
 :::{method} disableIllumination(@Nullable ScannerCommandCallback cb) -> void
 
-Opposite of [`enableIllumination()`](#enableIllumination).
+Opposite of `enableIllumination()`.
 
 :param ScannerCommandCallback cb: The callback to call with the result of the operation. May be null
 or absent.
@@ -204,8 +192,7 @@ or absent.
 
 :::{method} toggleIllumination(@Nullable ScannerCommandCallback cb) -> void
 
-See [`enableIllumination()`](#enableIllumination) and 
-[`disableIllumination()`](#disableIllumination).
+See `enableIllumination()` and `disableIllumination()`.
 
 :param ScannerCommandCallback cb: The callback to call with the result of the operation. May be null
 or absent.

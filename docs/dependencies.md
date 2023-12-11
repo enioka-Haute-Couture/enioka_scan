@@ -1,12 +1,6 @@
 # Dependencies and compatible devices
 
-:::{admonition} WIP
-:class: attention
-
-This documentation is a work in progress.
-:::
-
-enioka Scan is split over multiple AAR dependencies, all available through the Maven Central
+**enioka Scan** is split over multiple AAR dependencies, all available through the Maven Central
 repository, allowing you to only include the compatibility layers you need.
 
 The compatibility matrix at the end of this page explains more clearly what devices are supported by

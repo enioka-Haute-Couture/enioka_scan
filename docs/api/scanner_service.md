@@ -1,11 +1,5 @@
 # The ScannerService API
 
-:::{admonition} WIP
-:class: attention
-
-This documentation is a work in progress.
-:::
-
 The `ScannerService` is responsible for handling the search of an available scanner device and SDK 
 for the end user. Once any is found, it can be made available to the user in the form of a 
 [`Scanner`](scanner) instance. 
@@ -19,30 +13,30 @@ and on the handling of found scanners.
 
 :::{method} registerClient(ScannerClient client) -> void
 
-Registers a [`ScannerClient`](#scannerclient) implementation to the service. The service will call
-this client's callbacks whenever applicable.
+Registers a [`ScannerClient`](#the-scannerclient-interface) implementation to the service. The 
+service will call this client's callbacks whenever applicable.
 
 :param ScannerClient client: The client to register.
 :::
 
 :::{method} unregisterClient(ScannerClient client) -> void
 
-Unregisters a [`ScannerClient`](#scannerclient) implementation from the service. The service will no
-no longer call this client's callbacks.
+Unregisters a [`ScannerClient`](#the-scannerclient-interface) implementation from the service. The 
+service will no no longer call this client's callbacks.
 
 :param ScannerClient client: The client to unregister.
 :::
 
 :::{method} restartScannerDiscovery() -> void
 
-Disconnects all currently-connected [scanners](scanner) then starts the initialization process all
-over again.
+Disconnects all currently-connected [scanners](scanner.md#the-scanner-interface) then starts the
+initialization process all over again.
 :::
 
 :::{method} restartProviderDiscovery() -> void
 
-Clears the cache of discovered [scanner providers](scanner_provider) and re-starts their discovery. 
-This is a costly operation.
+Clears the cache of discovered [scanner providers](scanner_provider.md#the-scannerprovider-api) and 
+re-starts their discovery. This is a costly operation.
 :::
 
 :::{method} getAvailableProviders() -> List<String>
@@ -54,7 +48,7 @@ options at runtime.
 :::{method} getConnectedScanners() -> List<Scanner>
 
 :returns: The list of keys of currently-connected scanners, allowing their direct manipulation 
-through the [`Scanner` API](scanner).
+through the [`Scanner` API](scanner.md#the-scanner-interface).
 :::
 
 :::{method} updateScannerSearchOptions(ScannerSearchOptions newOptions) -> void
@@ -67,23 +61,23 @@ Updates the service's scanner search options.
 :::{method} pause() -> void
 :no-index:
 
-Calls the [`Scanner.pause()`](scanner.md#pause) method for all connected scanners.
+Calls the [`Scanner.pause()`](scanner.md#the-scanner-interface) method for all connected scanners.
 :::
 
 :::{method} resume() -> void
 :no-index:
 
-Calls the [`Scanner.resume()`](scanner.md#resume) method for all connected scanners.
+Calls the [`Scanner.resume()`](scanner.md#the-scanner-interface) method for all connected scanners.
 :::
 
 :::{method} disconnect() -> void
 :no-index:
 
-Calls the [`Scanner.disconnect()`](scanner.md#disconnect) method for all connected scanners.
+Calls the [`Scanner.disconnect()`](scanner.md#the-scanner-interface) method for all connected 
+scanners.
 
-Should scanners be needed again, 
-[`ScannerServiceApi.restartScannerDiscovery()`](#restartScannerDiscovery) will need to be called 
-first.
+Should scanners be needed again, `restartScannerDiscovery()` will need to be
+called first.
 :::
 
 ## The `ScannerClient` interface
@@ -96,7 +90,7 @@ lifecycle and barcode reads.
 
 :::{seealso}
 This interface extends `ScannerStatusCallback` and needs to implement its method, see more in the 
-[callbacks documentation](scanner_callbacks.md#the-scannerstatuscallback-interface-and-proxy-class).
+[callbacks documentation](scanner_callbacks.md#the-scannerstatuscallback-interface-and-scannerstatuscallbackproxy-class).
 :::
 
 :::{method} onScannerInitEnded(int count) -> void
@@ -153,7 +147,7 @@ Corresponds to the `ScannerServiceApi.EXTRA_SEARCH_WAIT_DISCONNECTED_BOOLEAN` ex
 :::{cpp:var} boolean returnOnlyFirst = true
 
 If true, will only connect to the first scanner available (or reporting it may become available if 
-[`waitDisconnected`](#waitDisconnected) is true).
+`waitDisconnected` is true).
 
 If false, all available scanners will be used.
 
@@ -214,24 +208,24 @@ Corresponds to the `ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN` e
 Restricts the search to this list of providers. Ignored if null or empty.
 
 Mainly used to whitelist known expected devices, or to refine the scanner search using the results
-of [`ScannerServiceApi.getAvailableProviders()`](#getAvailableProviders).
+of [`ScannerServiceApi.getAvailableProviders()`](#the-scannerserviceapi-interface).
 
 Corresponds to the `ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY` extra.
 :::
 
-:::{cpp:var}Set<String> excludedProviderKeys = null
+:::{cpp:var} Set<String> excludedProviderKeys = null
 
 The providers inside this list will never be used. Ignored if null or empty.
 
 Mainly used to blacklist known unwanted devices, or to refine the scanner search using the results
-of [`ScannerServiceApi.getAvailableProviders()`](#getAvailableProviders).
+of [`ScannerServiceApi.getAvailableProviders()`](#the-scannerserviceapi-interface).
 
 Corresponds to the `ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY` extra.
 :::
 
-:::{cpp:var}Set<String> symbologySelection = null
+:::{cpp:var} Set<String> symbologySelection = null
 
-An array of [`BarcodeType`](others.md#barcodeType) to activate. Ignored if null or empty.
+An array of [`BarcodeType`](others.md#the-barcodetype-enum) to activate. Ignored if null or empty.
 
 Corresponds to the `ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION` extra.
 :::
@@ -259,7 +253,7 @@ Updates an intent's extras based on the current option's attributes.
 ## The `ScannerServiceBinderHelper` class
 
 To make the process of binding your application to the Scanner Service easier, the
-`ScannerServiceBinderHelper` class exposes a series of **static** methods you can use.
+`ScannerServiceBinderHelper` class exposes a series of methods you can use.
 
 :::{method} defaultServiceConfiguration() -> Bundle
 
@@ -275,7 +269,7 @@ Static method. Binds to the Scanner Service using the `defaultServiceConfigurati
 
 :param Application a: The application to which the service will be bound.
 :param Bundle extra: Intent extras passed to the service on bind. See 
-    [`ScannerSearchOptions.toIntentExtras()`](#toIntentExtras).
+    [`ScannerSearchOptions.toIntentExtras()`](#the-scannersearchoptions-class).
 :returns: The `ScannerServiceBinderHelper` instance that bound to the service.
 :::
 
@@ -290,12 +284,12 @@ Static method. Binds to the Scanner Service using the `defaultServiceConfigurati
 
 :::{method} getScannerService() -> ScannerServiceApi
 
-:returns: The `ScannerServiceApi` instance bound to this `ScannerServiceBinderHelper`.
+:returns: The `ScannerServiceApi` instance bound to this `ScannerServiceBinderHelper` instance.
 :throws IllegalStateException: If no service is bound when called.
 :::
 
 :::{method} disconnect() -> void
 :no-index:
 
-Disconnects the currently-connected service from this `ScannerServiceBinderHelper`.
+Disconnects the currently-connected service from this `ScannerServiceBinderHelper` instance.
 :::

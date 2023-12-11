@@ -1,9 +1,10 @@
 # Guides
 
-:::{admonition} WIP
-:class: attention
+This sections contains quick guides to reach specific desired outcomes without having to dig too
+deep in the [API reference](../api/index.md).
 
-This documentation is a work in progress.
+:::{toctree}
+:maxdepth: 1
+
+custom_layout
 :::
-
-This page is the index of the quick guides section.

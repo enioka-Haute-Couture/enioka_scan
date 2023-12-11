@@ -20,7 +20,6 @@ myst_heading_anchors = 4
 
 suppress_warnings = [
     'myst.strikethrough',  # We only generate HTML docs, ignore non-html warnings.
-    'myst.xref_missing',  # Re-enable for debugging and check individually, but anchor links are not correctly recognized and will generate false-positive warnings.
 ]
 
 project = 'enioka Scan'

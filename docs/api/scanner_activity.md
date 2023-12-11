@@ -1,30 +1,26 @@
 # The Scanner activity 
 
-:::{admonition} WIP
-:class: attention
-
-This documentation is a work in progress.
-:::
-
 The simplest way to start using **enioka Scan** in an activity is simply to inherit from the
 `ScannerCompatActivity` class. This class implements the 
-[`ScannerClient`](scanner_service.md#the-scannerclient-interface) interface and handles the scanner
+[`ScannerClient` interface](scanner_service.md#the-scannerclient-interface) and handles the scanner
 service bindings and life cycle. It also exposes a default UI to print scan results, status messages
 and some buttons to manually control the scanner device from the app.
 
 Most of its methods are protected and can be overridden if needed. Mainly, methods from the
-[`ScannerClient`](scanner_service.md#the-scannerclient-interface) interface should be replaced with
+[`ScannerClient` interface](scanner_service.md#the-scannerclient-interface) should be replaced with
 your own to adapt the way scan results are handled by your application.
 
-By default, the activity will use the [default search options](scanner_service.md#defaultOptions) to
-initiate scanner search. There are two ways to change these options: override the 
-[`getServiceInitExtras()`](#getServiceInitExtras) method, and passing the search options as extras 
-to the intent starting the activity. In case both are used, the method is applied first, then intent
-extras.
+By default, the activity will use the 
+[default search options](scanner_service.md#the-scannersearchoptions-class) to initiate scanner
+search. There are two ways to change these options: override the 
+[`getServiceInitExtras()` method](#scannercompatactivity-methods), and passing the search options as
+extras to the intent starting the activity. In case both are used, the method is applied first, then
+intent extras.
 
 This page will describe attributes and methods specific to this activity, disregarding overrides. 
 For most users, it is recommended to only change the value of attributes or interface methods, as 
-overriding class methods may cause unexpected side-effects.
+overriding class methods may cause unexpected side-effects. For example, using a custom layout only
+requires changing the corresponding layout ID attributes.
 
 ## `ScannerCompatActivity` attributes
 
@@ -95,8 +91,6 @@ The ID of the optional toggle button on which to display the manual input fragme
 
 An optional fragment allowing to input a value with the soft keyboard (for cases when scanners do 
 not work).
-
-Initialized by the [`displayManualInputButton()`](#displayManualInputButton) method.
 :::
 
 :::{cpp:var} List<ManualInputItem> autocompletionItems = new ArrayList<>()
@@ -114,16 +108,16 @@ How many characters should be entered before auto-completion starts.
 The instance of the bound scanner service, can be used to access service methods but should not be
 replaced.
 
-Initialized by the [`onStart()`](#onStart) and [`onResume()`](#onResume) methods.
+Initialized by the `onStart()` and `onResume()` methods.
 :::
 
 :::{cpp:var} CameraBarcodeScanViewScanner cameraScanner;
 
 The instance of the camera scanner, can be used to access camera methods but should not be replaced.
-`CameraBarcodeScanViewScanner` is a simple provider-less implementation of the [`Scanner`](scanner)
-API.
+`CameraBarcodeScanViewScanner` is a simple provider-less implementation of the 
+[`Scanner` interface](scanner.md#the-scanner-interface).
 
-Initialized by the [`initCamera()`](#initCamera) method.
+Initialized by the [`initCamera()`](#scannercompatactivity-methods) method.
 :::
 
 ## `ScannerCompatActivity` methods
@@ -169,5 +163,5 @@ Checks whether any available scanner has Illumination toggled on.
 
 :::{seealso}
 
-[`ScannerClient`](scanner_service.md#the-scannerclient-interface) methods.
+* The [`ScannerClient` interface](scanner_service.md#the-scannerclient-interface) documentation.
 :::

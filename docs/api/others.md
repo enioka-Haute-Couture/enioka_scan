@@ -1,11 +1,5 @@
 # Other useful classes
 
-:::{admonition} WIP
-:class: attention
-
-This documentation is a work in progress.
-:::
-
 The library contains a lot of other smaller classes you may need to interact with. This page will
 regroup most of them.
 

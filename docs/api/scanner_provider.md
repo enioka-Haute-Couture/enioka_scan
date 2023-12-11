@@ -1,11 +1,5 @@
 # The ScannerProvider API
 
-:::{admonition} WIP
-:class: attention
-
-This documentation is a work in progress.
-:::
-
 The Scanner Provider is the entrypoint of an SDK. Its purpose is to check if the SDK is able to 
 interact with a device, and handle the [`Scanner`](scanner.md) creation. 
 
@@ -22,13 +16,13 @@ The core methods of a provider common between, all types of devices.
 
 This method will make the provider check whether it is compatible with any scanning device while
 matching requirements imposed by the search options. If it is able to connect to a device, the
-provider will use the callback to notify its availability and return a [`Scanner`](scanner.md)
-instance.
+provider will use the callback to notify its availability and return a
+[`Scanner` instance](scanner.md#the-scanner-interface).
 
 :param Context ctx: The application context.
-:param ProviderCallback cb: The [`ProviderCallback`](scanner_callbacks.md#providerCallback) used
-    to notify the Scanner Service whether this SDK is available (as in, is able to connect to any 
-    scanning device), and the current status of [`Scanner`](scanner.md) creation.
+:param ProviderCallback cb: The `ProviderCallback` used to notify the Scanner Service whether this
+    SDK is available (as in, is able to connect to any scanning device), and the current status of
+    [`Scanner` instance](scanner.md#the-scanner-interface) creation.
 :param ScannerSearchOptions options: The search options the provider may use to further refine its
     compatibility checks.
 :::
@@ -40,8 +34,9 @@ instance.
 
 :::{seealso}
 
-Check the documentation of the [`ProviderCallback`](scanner_callbacks.md#providerCallback) for 
-details on how the provider will communicate its status with the Scanner Service.
+Check the documentation of the 
+[`ProviderCallback` interface](scanner_callbacks.md#the-scannerproviderprovidercallback-interface)
+for details on how the provider will communicate its status with the Scanner Service.
 :::
 
 ## The `IntentScannerProvider` abstract class
@@ -54,8 +49,8 @@ A provider for an integrated scanner should extend this class and override the f
 
 :::{method} createNewScanner(Context ctx, ScannerSearchOptions options) -> Scanner
 
-This method is called by `ScannerProvider.getScanner()` to create the [`Scanner`](scanner.md) 
-instance.
+This method is called by `ScannerProvider.getScanner()` to create the 
+[`Scanner` instance](scanner.md#the-scanner-interface).
 
 :param Context ctx: The application context.
 :param ScannerSearchOptions options: The search options the provider used to confirm compatibility.
@@ -121,15 +116,12 @@ Tests whether a scanner is compatible with the provider. Must complete in under 
 
 :::{method} getInputHandler() -> ScannerDataParser
 
-:returns: The [`ScannerDataParser`](others.md#scannerDataParser) which should be used to parse
-    bluetooth messages from compatible devices.
+:returns: The parser which should be used to parse bluetooth messages from compatible devices.
 :::
 
 :::{seealso}
 
-Check the documentation of the [`ManagementCallback`](scanner_callbacks.md#managementCallback) 
+Check the documentation of the 
+[`ManagementCallback` interace](scanner_callbacks.md#the-btsppscannerprovidermanagementcallback-interface) 
 for details on how the bluetooth provider will communicate its status with the Scanner Service.
-
-Check the documentation of the [`ScannerDataParser`](others.md#scannerDataParser) for
-details bluetooth message parsers.
 :::

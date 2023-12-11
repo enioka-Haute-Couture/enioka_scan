@@ -1,11 +1,5 @@
 # API callbacks
 
-:::{admonition} WIP
-:class: attention
-
-This documentation is a work in progress.
-:::
-
 Most **enioka Scan** actions use callbacks to communicate their result to your code. In the case of
 scanner-related callbacks, proxy classes exist to wrap callback implementations and ensure their
 methods are called on the UI thread.
@@ -33,7 +27,8 @@ Called when the command's expected answer did not arrive in time (usually only w
 
 ## The `ScannerConnectionHandler` interface and `ScannerConnectionHandlerProxy` class
 
-Callback used during the scanner search to retrieve created [`Scanner`](scanner) instances.
+Callback used during the scanner search to retrieve created 
+[`Scanner` instances](scanner.md#the-scanner-interface).
 
 :::{method} scannerConnectionProgress(String providerKey, String scannerKey, String message) -> void
 
@@ -46,8 +41,8 @@ A SDK-specific localized message signaling a change during the search for a scan
 
 :::{method} scannerCreated(String providerKey, String scannerKey, Scanner s) -> void
 
-Called when a scanner was found and created. 
-Depending on [`ScannerSearchOptions.returnOnlyFirst`](scanner_service.md#returnOnlyFirst) may be 
+Called when a scanner was found and created. Depending on
+[`ScannerSearchOptions.returnOnlyFirst`](scanner_service.md#the-scannersearchoptions-class) may be 
 called multiple times.
 
 :param String providerKey: The identifier of the provider/SDK
@@ -57,8 +52,8 @@ called multiple times.
 
 :::{method} noScannerAvailable() -> void
 
-Called when there is no scanner available on the device. 
-[`endOfScannerSearch()`](#endOfScannerSearch) is always called after this.
+Called when there is no scanner available on the device. `endOfScannerSearch()` is always called
+after this.
 :::
 
 :::{method} endOfScannerSearch() -> void
@@ -195,7 +190,8 @@ manage the device it was tested for.
 
 Called if the provider can manage the device.
 
-:param Scanner libraryScanner: The corresponding [`Scanner`](scanner) instance.
+:param Scanner libraryScanner: The corresponding 
+[`Scanner` instance](scanner.md#the-scanner-interface).
 :::
 
 :::{method} cannotManage() -> void

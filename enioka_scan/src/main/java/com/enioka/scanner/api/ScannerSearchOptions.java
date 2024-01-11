@@ -14,6 +14,11 @@ import java.util.Set;
  */
 public class ScannerSearchOptions {
     /**
+     * If true, the service will start searching for scanners immediately upon binding. If false, the service will only discover available providers without requesting scanners immediately.
+     */
+    public boolean startSearchOnServiceBind = true;
+
+    /**
      * If a scanner is known but not available, wait for it. If false, consider the scanner unavailable immediately.
      */
     public boolean waitDisconnected = true;
@@ -58,6 +63,11 @@ public class ScannerSearchOptions {
      */
     public Set<String> excludedProviderKeys = null;
 
+    /**
+     * An array of {@link com.enioka.scanner.data.BarcodeType BarcodeType} to activate. Ignored if null or empty.
+     */
+    public Set<String> symbologySelection = null;
+
     public static ScannerSearchOptions defaultOptions() {
         return new ScannerSearchOptions();
     }
@@ -76,6 +86,7 @@ public class ScannerSearchOptions {
     public ScannerSearchOptions fromIntentExtras(final Intent intent) {
         Bundle extras = intent.getExtras();
         if (extras != null) {
+            startSearchOnServiceBind = extras.getBoolean(ScannerServiceApi.EXTRA_START_SEARCH_ON_SERVICE_BIND, startSearchOnServiceBind);
             waitDisconnected = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_WAIT_DISCONNECTED_BOOLEAN, waitDisconnected);
             returnOnlyFirst = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_RETURN_ONLY_FIRST_BOOLEAN, returnOnlyFirst);
             useBlueTooth = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_BT_BOOLEAN, useBlueTooth);
@@ -95,6 +106,12 @@ public class ScannerSearchOptions {
                 excludedProviderKeys = new HashSet<>();
                 excludedProviderKeys.addAll(Arrays.asList(excludedProviderKeysArray));
             }
+
+            String[] symbologySelectionArray = extras.getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION);
+            if (symbologySelectionArray != null && symbologySelectionArray.length > 0) {
+                symbologySelection = new HashSet<>();
+                symbologySelection.addAll(Arrays.asList(symbologySelectionArray));
+            }
         }
 
         return this;
@@ -107,6 +124,7 @@ public class ScannerSearchOptions {
      * @param intent The intent to update
      */
     public void toIntentExtras(final Intent intent) {
+        intent.putExtra(ScannerServiceApi.EXTRA_START_SEARCH_ON_SERVICE_BIND, startSearchOnServiceBind);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_WAIT_DISCONNECTED_BOOLEAN, waitDisconnected);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_RETURN_ONLY_FIRST_BOOLEAN, returnOnlyFirst);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_BT_BOOLEAN, useBlueTooth);
@@ -118,6 +136,9 @@ public class ScannerSearchOptions {
         }
         if (excludedProviderKeys != null && excludedProviderKeys.size() > 0) {
             intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, excludedProviderKeys.toArray(new String[0]));
+        }
+        if (symbologySelection != null && symbologySelection.size() > 0) {
+            intent.putExtra(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, symbologySelection.toArray(new String[0]));
         }
     }
 }

@@ -8,6 +8,8 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 
+import com.enioka.scanner.api.ScannerSearchOptions;
+
 /**
  * A very simple helper intending to simplify boilerplate code when using the {@link ScannerService} at the application level.
  * Useless if not using the service but using directly {@link com.enioka.scanner.LaserScanner}.
@@ -37,12 +39,9 @@ public class ScannerServiceBinderHelper {
      * Service default configuration, used everywhere else. A new bundle is returned on each call.
      */
     public static Bundle defaultServiceConfiguration() {
-        Bundle res = new Bundle();
-        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_BT_BOOLEAN, false);
-        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, true);
-        res.putBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, false);
-
-        return res;
+        Intent intent = new Intent();
+        ScannerSearchOptions.defaultOptions().toIntentExtras(intent);
+        return intent.getExtras();
     }
 
     private void actuallyBind(Application a, Bundle all) {
@@ -53,15 +52,13 @@ public class ScannerServiceBinderHelper {
 
     public static ScannerServiceBinderHelper bind(Application a, Bundle extra) {
         ScannerServiceBinderHelper res = new ScannerServiceBinderHelper();
-        Bundle b = defaultServiceConfiguration();
-        b.putAll(extra);
-        res.actuallyBind(a, b);
+        res.actuallyBind(a, extra);
 
         return res;
     }
 
     public static ScannerServiceBinderHelper bind(Application a) {
-        return bind(a, new Bundle());
+        return bind(a, defaultServiceConfiguration());
     }
 
     public ScannerServiceApi getScannerService() {

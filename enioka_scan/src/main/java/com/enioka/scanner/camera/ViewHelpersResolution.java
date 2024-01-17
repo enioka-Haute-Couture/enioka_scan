@@ -32,10 +32,15 @@ class ViewHelpersResolution {
 
         // Look for a resolution not too far from the view ratio.
         float preferredRatio = (float) containerView.getMeasuredHeight() / (float) containerView.getMeasuredWidth();
+        boolean isPortrait = containerView.getMeasuredHeight() >= containerView.getMeasuredWidth();
         if (preferredRatio < 1) {
             preferredRatio = 1 / preferredRatio;
         }
-        Log.i(TAG, "Looking for the ideal preview resolution. View ratio is " + preferredRatio + ". (view is h*w " + containerView.getMeasuredHeight() + "*" + containerView.getMeasuredWidth() + ")");
+        Log.i(TAG,
+                "Looking for the ideal preview resolution. "
+                        + "View ratio is " + preferredRatio + ". "
+                        + "(view is h*w " + containerView.getMeasuredHeight() + "*" + containerView.getMeasuredWidth() + "). "
+                        + "Device in " + (isPortrait ? "Portrait" : "Landscape") + " mode.");
         boolean goodMatchFound = false;
 
         Set<String> forbiddenRezs = ViewHelpersPreferences.getPreferencesStringSet(context, "rezs_too_high");
@@ -46,8 +51,14 @@ class ViewHelpersResolution {
         // First simply list resolutions (debug display & sorted res list creation)
         List<Point> allRatioPreviewResolutions = new ArrayList<>();
         for (Point resolution : bag.supportedPreviewResolutions) {
-            Log.d(TAG, "\tsupports preview resolution " + resolution.x + "*" + resolution.y + " - " + ((float) resolution.x / (float) resolution.y));
+            final int resolutionWidth = isPortrait ? resolution.y : resolution.x;
+            final int resolutionHeight = isPortrait ? resolution.x : resolution.y;
+            Log.d(TAG, "\tsupports preview resolution h*w " + resolutionHeight + "*" + resolutionWidth + " - " + ((float) resolution.x / (float) resolution.y));
 
+            if (resolutionWidth > containerView.getMeasuredWidth() || resolutionHeight > containerView.getMeasuredHeight()) {
+                Log.d(TAG, "\t\tResolution is bigger than the device's display resolution");
+                continue;
+            }
             if (forbiddenRezs.contains(resolution.x + "*" + resolution.y)) {
                 Log.d(TAG, "\t\tResolution is forbidden - FPS would be too low");
                 continue;
@@ -58,12 +69,12 @@ class ViewHelpersResolution {
                 continue;
             }
 
-            if (resolution.y < bag.minResolutionY) {
+            if (resolutionWidth < bag.minResolutionY) {
                 Log.d(TAG, "\t\tResolution is removed - it is lower than the minimum resolution configured in the view (" + bag.minResolutionY + ")");
                 continue;
             }
 
-            if (resolution.y > bag.maxResolutionY) {
+            if (resolutionWidth > bag.maxResolutionY) {
                 Log.d(TAG, "\t\tResolution is removed - it is higher than the maximum resolution configured in the view (" + bag.maxResolutionY + ")");
                 continue;
             }

@@ -694,60 +694,64 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
                 return;
             }
 
-            // We need our threads
-            initializeFrameAnalyzerIfNeeded();
-
-            // If here, preview session is open and we can start the actual preview.
-            CameraBarcodeScanViewV2.this.captureSession = cameraCaptureSession;
-
-            // Create builder
             try {
-                captureRequestBuilder = CameraBarcodeScanViewV2.this.cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            } catch (CameraAccessException | IllegalStateException e) {
-                Log.e(TAG, "cannot use createCaptureRequest " + e);
-                cameraCaptureSession.close();
-                return;
-            }
+                // We need our threads
+                initializeFrameAnalyzerIfNeeded();
 
-            // Capture targets
-            captureRequestBuilder.addTarget(CameraBarcodeScanViewV2.this.camPreviewSurfaceView.getHolder().getSurface());
-            if (imageReader == null) {
-                Log.d(TAG, "stopping init - view is being stopped");
-                return;
-            }
-            captureRequestBuilder.addTarget(imageReader.getSurface());
+                // If here, preview session is open and we can start the actual preview.
+                CameraBarcodeScanViewV2.this.captureSession = cameraCaptureSession;
 
-            // Full auto (without this AF & AE are mostly disabled)
-            captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
+                // Create builder
+                try {
+                    captureRequestBuilder = CameraBarcodeScanViewV2.this.cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+                } catch (CameraAccessException | IllegalStateException e) {
+                    Log.e(TAG, "cannot use createCaptureRequest " + e);
+                    cameraCaptureSession.close();
+                    return;
+                }
 
-            // AB
-            if (controlModeAb != null) {
-                captureRequestBuilder.set(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE, controlModeAb);
-            }
+                // Capture targets
+                captureRequestBuilder.addTarget(CameraBarcodeScanViewV2.this.camPreviewSurfaceView.getHolder().getSurface());
+                if (imageReader == null) {
+                    Log.d(TAG, "stopping init - view is being stopped");
+                    return;
+                }
+                captureRequestBuilder.addTarget(imageReader.getSurface());
 
-            // AF & AE
-            if (afZones > 0) {
-                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, new MeteringRectangle[]{getMeteringZone()});
-            }
-            if (controlModeAf != null) {
-                Log.d(TAG, "Setting AF mode to " + controlModeAf);
-                captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
-            }
+                // Full auto (without this AF & AE are mostly disabled)
+                captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO);
 
-            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
-            //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-            //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
+                // AB
+                if (controlModeAb != null) {
+                    captureRequestBuilder.set(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE, controlModeAb);
+                }
 
-            captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
+                // AF & AE
+                if (afZones > 0) {
+                    captureRequestBuilder.set(CaptureRequest.CONTROL_AF_REGIONS, new MeteringRectangle[]{getMeteringZone()});
+                }
+                if (controlModeAf != null) {
+                    Log.d(TAG, "Setting AF mode to " + controlModeAf);
+                    captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, controlModeAf);
+                }
 
-            // GO for preview
-            CameraBarcodeScanViewV2.this.captureRequest = captureRequestBuilder.build();
+                //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, false);
+                //captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+                //captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
 
-            try {
-                captureSession.setRepeatingRequest(CameraBarcodeScanViewV2.this.captureRequest, null, backgroundHandler);
-            } catch (CameraAccessException | IllegalStateException e) {
-                Log.w(TAG, "Camera loop start has failed, this is usually due to changing resolution too fast. Error was: " + e.getMessage(), e);
-                CameraBarcodeScanViewV2.this.closeCamera();
+                captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, previewFpsRange);
+
+                // GO for preview
+                CameraBarcodeScanViewV2.this.captureRequest = captureRequestBuilder.build();
+
+                try {
+                    captureSession.setRepeatingRequest(CameraBarcodeScanViewV2.this.captureRequest, null, backgroundHandler);
+                } catch (CameraAccessException | IllegalStateException e) {
+                    Log.w(TAG, "Camera loop start has failed, this is usually due to changing resolution too fast. Error was: " + e.getMessage(), e);
+                    CameraBarcodeScanViewV2.this.closeCamera();
+                }
+            } catch (final NullPointerException e) {
+                Log.e(TAG, "Camera was destroyed while the initialization process was running", e);
             }
 
             Log.i(TAG, "Camera repeating capture request was set up " + CameraBarcodeScanViewV2.this.hashCode());

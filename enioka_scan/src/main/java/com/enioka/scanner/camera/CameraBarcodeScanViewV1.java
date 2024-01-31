@@ -370,6 +370,9 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
      */
     private boolean getSupportTorch(Camera.Parameters prms) {
         List<String> supportedFlashModes = prms.getSupportedFlashModes();
+        if (supportedFlashModes == null) {
+            return false;
+        }
         if (supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH)) {
             Log.d(TAG, "supportedFlashModes - torch supported");
             return true;
@@ -390,7 +393,8 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
             return false;
         }
         Camera.Parameters prms = this.cam.getParameters();
-        return prms.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH);
+        return prms.getFlashMode() != null
+                && prms.getFlashMode().equals(Camera.Parameters.FLASH_MODE_TORCH);
     }
 
 
@@ -402,6 +406,11 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         }
 
         Camera.Parameters prms = this.cam.getParameters();
+        if (!getSupportTorch(prms)) {
+            Log.w(VIEW_LOG_TAG, "setTorchInternal: No torch support on this device");
+            return;
+        }
+
         if (value) {
             prms.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         } else {

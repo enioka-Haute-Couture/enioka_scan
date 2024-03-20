@@ -85,7 +85,8 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
                 if (this.currentlyActiveProfile != null && this.currentlyActiveProfile.equals(currentConfig.getProfileName())) {
                     configureSymbologies();
                 }
-                illuminationOn = !currentConfig.getParameter("BARCODE", "illumination_mode").equals("off");
+                final String illumination_mode = currentConfig.getParameter("BARCODE", "illumination_mode");
+                illuminationOn = illumination_mode != null && !illumination_mode.equals("off");
             }
         }
 

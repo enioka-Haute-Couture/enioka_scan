@@ -10,7 +10,7 @@ import com.enioka.scanner.helpers.intent.IntentScannerProvider;
  * Provider for Athesi E5L scanners.
  * May use similar intents as other modern Athesi scanners but only the E5L is accepted as it is the only one that could be tested.
  */
-public class AthesiE5LProvider extends IntentScannerProvider {
+public class AthesiRD50TEProvider extends IntentScannerProvider {
     public static final String PROVIDER_KEY = "AthesiE5LProvider";
 
     @Override
@@ -25,6 +25,6 @@ public class AthesiE5LProvider extends IntentScannerProvider {
 
     @Override
     protected Scanner createNewScanner(Context ctx, ScannerSearchOptions options) {
-        return new AthesiE5LScanner();
+        return new AthesiRD50TEScanner();
     }
 }

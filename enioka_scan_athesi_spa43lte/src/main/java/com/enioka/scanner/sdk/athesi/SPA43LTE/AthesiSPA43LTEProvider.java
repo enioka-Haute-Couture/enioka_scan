@@ -9,7 +9,7 @@ import com.enioka.scanner.helpers.intent.IntentScannerProvider;
 /**
  * Provider for the HHT Wrapper Layer, supports old Athesi SPA43 type integrated scanners (only tested with the SPA43 LTE).
  */
-public class AthesiHHTProvider extends IntentScannerProvider {
+public class AthesiSPA43LTEProvider extends IntentScannerProvider {
     public static final String PROVIDER_KEY = "AthesiHHTProvider";
 
     @Override
@@ -24,6 +24,6 @@ public class AthesiHHTProvider extends IntentScannerProvider {
 
     @Override
     protected Scanner createNewScanner(Context ctx, ScannerSearchOptions options) {
-        return new AthesiHHTScanner();
+        return new AthesiSPA43LTEScanner();
     }
 }

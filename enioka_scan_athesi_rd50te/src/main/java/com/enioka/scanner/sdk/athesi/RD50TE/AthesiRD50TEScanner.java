@@ -16,13 +16,13 @@ import java.util.List;
 /**
  * Scanner interface for modern Athesi scanners (i.e. E5L)
  */
-public class AthesiE5LScanner extends IntentScanner<String> implements Scanner.WithTriggerSupport {
+public class AthesiRD50TEScanner extends IntentScanner<String> implements Scanner.WithTriggerSupport {
     private static final String LOG_TAG = "AthesiE5LScanner";
 
     @Override
     public void onReceive(Context context, Intent intent) {
         List<Barcode> barcodes = new ArrayList<>();
-        barcodes.add(new Barcode(intent.getStringExtra(AthesiE5LIntents.BARCODE_DATA_EXTRA), BarcodeType.UNKNOWN));
+        barcodes.add(new Barcode(intent.getStringExtra(AthesiRD50TEIntents.BARCODE_DATA_EXTRA), BarcodeType.UNKNOWN));
         if (dataCb != null) {
             dataCb.onData(this, barcodes);
         }
@@ -30,7 +30,7 @@ public class AthesiE5LScanner extends IntentScanner<String> implements Scanner.W
 
     @Override
     public String getProviderKey() {
-        return AthesiE5LProvider.PROVIDER_KEY;
+        return AthesiRD50TEProvider.PROVIDER_KEY;
     }
 
 
@@ -40,7 +40,7 @@ public class AthesiE5LScanner extends IntentScanner<String> implements Scanner.W
 
     @Override
     protected void configureProvider() {
-        broadcastIntentFilters.add(AthesiE5LIntents.BARCODE_EVENT);
+        broadcastIntentFilters.add(AthesiRD50TEIntents.BARCODE_EVENT);
         disableScanner = null; // FIXME
         enableScanner = null; // FIXME
     }
@@ -52,7 +52,7 @@ public class AthesiE5LScanner extends IntentScanner<String> implements Scanner.W
 
     @Override
     public void pressScanTrigger(@Nullable ScannerCommandCallbackProxy cb) {
-        broadcastIntent(AthesiE5LIntents.PRESS_TRIGGER);
+        broadcastIntent(AthesiRD50TEIntents.PRESS_TRIGGER);
         if (cb != null) {
             cb.onSuccess();
         }
@@ -60,7 +60,7 @@ public class AthesiE5LScanner extends IntentScanner<String> implements Scanner.W
 
     @Override
     public void releaseScanTrigger(@Nullable ScannerCommandCallbackProxy cb) {
-        broadcastIntent(AthesiE5LIntents.RELEASE_TRIGGER);
+        broadcastIntent(AthesiRD50TEIntents.RELEASE_TRIGGER);
         if (cb != null) {
             cb.onSuccess();
         }

@@ -47,6 +47,8 @@ dependencies {
     }
 
     implementation project(':enioka_scan_zebra_dw');
+    implementation project(':enioka_scan_athesi_rd50te')
+    implementation project(':enioka_scan_athesi_spa43lte')
 
     // Android stuff
 

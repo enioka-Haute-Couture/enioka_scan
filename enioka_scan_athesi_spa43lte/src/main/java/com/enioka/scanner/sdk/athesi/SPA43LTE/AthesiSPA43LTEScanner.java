@@ -22,7 +22,7 @@ import java.util.Set;
 /**
  * Scanner interface for HHT Wrapper Layer (i.e. SPA43)
  */
-public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.WithTriggerSupport {
+public class AthesiSPA43LTEScanner extends IntentScanner<String> implements Scanner.WithTriggerSupport {
     private static final String LOG_TAG = "AthesiHHTScanner";
 
     // Initial parameters for SOFTSCANTRIGGER action.
@@ -36,7 +36,7 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
     }
 
     // Initial symbology parameters.
-    private static final List<AthesiHHTSymbology> activeSymbologies = new ArrayList<>();
+    private static final List<AthesiSPA43LTESymbology> activeSymbologies = new ArrayList<>();
 
     private static final Uri scannerSettingsUri = Uri.parse("content://com.oem.startup.ScannerParaProvider/settings");
 
@@ -84,7 +84,7 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
 
         // Set symbologies
         for (BarcodeType symbology : this.symbologies) {
-            activeSymbologies.add(AthesiHHTSymbology.getSymbology(symbology));
+            activeSymbologies.add(AthesiSPA43LTESymbology.getSymbology(symbology));
         }
 
         syncConfig(ctx);
@@ -110,7 +110,7 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
         int numRow = c.getCount();
         String name;
         boolean enabled;
-        AthesiHHTSymbology sym;
+        AthesiSPA43LTESymbology sym;
         c.moveToFirst();
 
         while (numRow > 0) {
@@ -119,7 +119,7 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
 
             //Log.d(LOG_TAG, "Configuration item " + name + " - " + c.getString(c.getColumnIndex("scanner_para")));
             if (name.startsWith("Scanner_")) {
-                sym = AthesiHHTSymbology.getSymbology(name);
+                sym = AthesiSPA43LTESymbology.getSymbology(name);
                 if (sym == null && enabled && !ignored.contains(name)) {
                     Log.w(LOG_TAG, "Scanner reports a symbology unknown to the lib is enabled - cannot disable it. Add it to the lib. " + name);
                     ignored.add(name);
@@ -155,7 +155,7 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
         String barcode = intent.getStringExtra(DataWedge.DATA_STRING);
         int type = intent.getIntExtra(DataWedge.DATA_TYPE, 0);
 
-        AthesiHHTSymbology s = AthesiHHTSymbology.getSymbology(type);
+        AthesiSPA43LTESymbology s = AthesiSPA43LTESymbology.getSymbology(type);
         BarcodeType bt;
         if (s == null) {
             bt = BarcodeType.UNKNOWN;
@@ -172,6 +172,6 @@ public class AthesiHHTScanner extends IntentScanner<String> implements Scanner.W
 
     @Override
     public String getProviderKey() {
-        return AthesiHHTProvider.PROVIDER_KEY;
+        return AthesiSPA43LTEProvider.PROVIDER_KEY;
     }
 }

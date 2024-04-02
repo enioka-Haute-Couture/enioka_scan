@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.enioka.scanner.api.callbacks.ScannerCommandCallback;
 import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;

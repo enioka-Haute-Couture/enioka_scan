@@ -2,7 +2,7 @@ package com.enioka.scanner.sdk.honeywelloss.spp.helpers;
 
 import android.util.Log;
 
-import com.enioka.scanner.sdk.honeywelloss.SymbologyId;
+import com.enioka.scanner.sdk.honeywelloss.spp.SymbologyId;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

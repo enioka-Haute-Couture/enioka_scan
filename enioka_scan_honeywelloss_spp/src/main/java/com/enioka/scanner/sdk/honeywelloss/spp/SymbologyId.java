@@ -1,4 +1,4 @@
-package com.enioka.scanner.sdk.honeywelloss;
+package com.enioka.scanner.sdk.honeywelloss.spp;
 
 import android.support.annotation.Nullable;
 

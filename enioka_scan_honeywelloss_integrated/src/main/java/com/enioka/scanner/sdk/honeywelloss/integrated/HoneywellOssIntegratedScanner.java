@@ -11,7 +11,6 @@ import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.intent.IntentScanner;
-import com.enioka.scanner.sdk.honeywelloss.SymbologyId;
 
 import java.util.ArrayList;
 import java.util.Arrays;

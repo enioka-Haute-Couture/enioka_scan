@@ -1,7 +1,5 @@
 package com.enioka.scanner.sdk.generalscan.commands;
 
-import android.util.Log;
-
 
 public class GetBatteryLevel  {
 

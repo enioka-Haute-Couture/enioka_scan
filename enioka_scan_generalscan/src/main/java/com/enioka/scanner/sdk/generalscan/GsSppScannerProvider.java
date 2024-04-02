@@ -2,11 +2,11 @@ package com.enioka.scanner.sdk.generalscan;
 
 import android.util.Log;
 
-import com.enioka.scanner.bt.api.Command;
-import com.enioka.scanner.bt.api.ScannerDataParser;
 import com.enioka.scanner.bt.api.BluetoothScanner;
 import com.enioka.scanner.bt.api.BtSppScannerProvider;
+import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.DataSubscriptionCallback;
+import com.enioka.scanner.bt.api.ScannerDataParser;
 import com.enioka.scanner.sdk.generalscan.commands.CloseRead;
 import com.enioka.scanner.sdk.generalscan.commands.GetDeviceId;
 import com.enioka.scanner.sdk.generalscan.commands.OpenRead;

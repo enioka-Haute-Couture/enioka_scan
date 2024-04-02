@@ -1,7 +1,7 @@
 package com.enioka.scanner.sdk.generalscan;
 
-import com.enioka.scanner.bt.api.ScannerDataParser;
 import com.enioka.scanner.bt.api.ParsingResult;
+import com.enioka.scanner.bt.api.ScannerDataParser;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.sdk.generalscan.data.DeviceId;

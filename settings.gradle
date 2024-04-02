@@ -1,8 +1,20 @@
-include ':enioka_scan', 'enioka_scan_mock', 'enioka_scan_zebra_dw', ':demoscannerapp', 'enioka_scan_athesi_spa43lte', 'enioka_scan_athesi_rd50te'
+[':enioka_scan',
+ 'enioka_scan_mock',
+ 'enioka_scan_zebra_dw',
+ 'enioka_scan_athesi_spa43lte',
+ 'enioka_scan_athesi_rd50te',
+ ':enioka_scan_bluebird',
+ ':enioka_scan_generalscan',
+ ':enioka_scan_honeywelloss_spp',
+ ':enioka_scan_honeywelloss_integrated',
+ ':enioka_scan_zebraoss',
+ ':enioka_scan_postech',
+ ':enioka_scan_proglove',
+ ':demoscannerapp'].each({ include it })
 
 // Projects with either local libs or inside a private Maven repository
 gradle.ext.gpr = ext.find('gpr.user') ?: System.getenv("GH_DRIVER_REPOSITORY_USERNAME")
-["Zebra", "Honeywell", "Koamtac", "M3"].each { sdkName ->
+["Zebra", "Honeywell", "Koamtac", "M3", "Proglove"].each { sdkName ->
     def propertyName = "with" + sdkName
     def subprojectName = "enioka_scan_" + sdkName.toLowerCase()
 

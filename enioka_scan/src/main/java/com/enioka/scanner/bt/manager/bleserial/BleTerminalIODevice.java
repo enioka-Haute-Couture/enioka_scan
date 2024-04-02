@@ -240,6 +240,11 @@ public class BleTerminalIODevice implements BleStateMachineDevice, BluetoothScan
             return;
         }
 
+        // Check provider is set
+        if (this.inputHandler == null) {
+            throw new IllegalStateException("Scanner is accessed before it is fully initialized ! A provider must be set.");
+        }
+
         // Parse data
         ParsingResult res = this.inputHandler.parse(event.data, 0, event.data.length);
         if (!res.expectingMoreData && res.data != null) {

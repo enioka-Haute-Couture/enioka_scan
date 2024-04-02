@@ -1,7 +1,7 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
-import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.BluetoothScanner;
+import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiMonoPacketWrapper;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiStatus;
 

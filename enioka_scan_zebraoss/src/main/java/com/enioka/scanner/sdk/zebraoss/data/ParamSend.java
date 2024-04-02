@@ -51,7 +51,7 @@ public class ParamSend {
         }
     }
 
-    public ParamSend(List<ParamSend.Param> parameters) {
+    public ParamSend(List<Param> parameters) {
         this.parameters = parameters;
     }
 

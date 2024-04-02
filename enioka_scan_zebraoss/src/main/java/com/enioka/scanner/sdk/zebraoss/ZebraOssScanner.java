@@ -1,12 +1,11 @@
 package com.enioka.scanner.sdk.zebraoss;
 
 import android.content.Context;
-
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.Scanner;
+import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;

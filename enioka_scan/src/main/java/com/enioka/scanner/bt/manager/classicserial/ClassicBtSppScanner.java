@@ -19,7 +19,6 @@ import com.enioka.scanner.bt.manager.common.BluetoothScannerInternal;
 import com.enioka.scanner.bt.manager.common.DataSubscription;
 import com.enioka.scanner.bt.manager.common.OnConnectedCallback;
 import com.enioka.scanner.bt.manager.common.SerialBtScannerPassiveConnectionManager;
-import com.enioka.scanner.sdk.zebraoss.SsiOverSppParser;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -77,7 +76,7 @@ public class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal 
         this.rawDevice = device;
         this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
-        this.inputHandler = new SsiOverSppParser();
+        this.inputHandler = null;
         this.setUpTimeoutTimer();
     }
 
@@ -91,7 +90,7 @@ public class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal 
         this.rawDevice = socket.getRemoteDevice();
         this.parentProvider = parentProvider;
         this.name = this.rawDevice.getName();
-        this.inputHandler = new SsiOverSppParser();
+        this.inputHandler = null;
         this.masterBtDevice = true;
 
         this.clientSocket = socket;
@@ -356,6 +355,11 @@ public class ClassicBtSppScanner implements Closeable, BluetoothScannerInternal 
     }
 
     private int handleInputBufferLoop(byte[] buffer, int offset, int length) {
+        // Check provider is set
+        if (this.inputHandler == null) {
+            throw new IllegalStateException("Scanner is accessed before it is fully initialized ! A provider must be set.");
+        }
+
         ParsingResult res = this.inputHandler.parse(buffer, offset, length);
 
         if (length > 0 && res.read == 0) {

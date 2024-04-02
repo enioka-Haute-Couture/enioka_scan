@@ -1,17 +1,17 @@
 package com.enioka.scanner.sdk.zebraoss.commands;
 
-import com.enioka.scanner.bt.api.Command;
 import com.enioka.scanner.bt.api.BluetoothScanner;
-import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
+import com.enioka.scanner.bt.api.Command;
+import com.enioka.scanner.sdk.zebraoss.data.ReplyRevision;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiCommand;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiMonoPacketWrapper;
 import com.enioka.scanner.sdk.zebraoss.ssi.SsiStatus;
 
-public class CapabilitiesRequest implements Command<CapabilitiesReply> {
+public class RequestRevision implements Command<ReplyRevision> {
     private final SsiMonoPacketWrapper packet;
 
-    public CapabilitiesRequest() {
-        packet = new SsiMonoPacketWrapper(SsiCommand.CAPABILITIES_REQUEST.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[0]);
+    public RequestRevision() {
+        packet = new SsiMonoPacketWrapper(SsiCommand.REQUEST_REVISION.getOpCode(), SsiStatus.DEFAULT.getByte(), new byte[0]);
     }
 
     @Override
@@ -25,12 +25,12 @@ public class CapabilitiesRequest implements Command<CapabilitiesReply> {
     }
 
     @Override
-    public Class<? extends CapabilitiesReply> getReturnType() {
-        return CapabilitiesReply.class;
+    public Class<? extends ReplyRevision> getReturnType() {
+        return ReplyRevision.class;
     }
 
     @Override
     public int getTimeOut() {
-        return 2000;
+        return 1000;
     }
 }

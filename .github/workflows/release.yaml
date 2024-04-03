@@ -15,21 +15,19 @@ jobs:
         id: get_version
         run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
       - name: Set up environment
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'zulu'
-      - name: Build
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: build
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+      - name: Gradle build
+        run: ./gradlew build
         env:
           GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
           GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
       - name: Publish the library to MavenCentral
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: publish
+        run: ./gradlew publish
         env:
           OSSRH_LOGIN: ${{ secrets.OSSRH_LOGIN }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
@@ -42,7 +40,7 @@ jobs:
       - name: Rename the AAR file for GitHub release upload
         run: mv enioka_scan/build/outputs/aar/enioka_scan-release.aar enioka_scan/build/outputs/aar/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aar
       - name: Create a GitHub release with the AAR file as an asset
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.get_version.outputs.VERSION }}
           files: enioka_scan/build/outputs/aar/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aar

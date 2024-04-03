@@ -19,7 +19,7 @@ dependencies {
 }
 ```
 
-Depending on your scanning devices, this single dependency may be enough. For some devices, other
+To use the smartphone's camera as a scanner, this single dependency is enough. To use others devices,
 dependencies are required, you can check the
 [library dependencies and compatibility matrix](dependencies.md) for a detailed overview.
 

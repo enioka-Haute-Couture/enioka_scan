@@ -132,7 +132,10 @@ Includes the following providers:
 ### `provider-cs-zebra-dw`
 
 Includes the `ZebraDwProvider` provider, adding support for most integrated devices supporting
-the Zebra Datawedge service.
+the Zebra Datawedge service (TC26, TC27, TC55...).
+
+> Warning: there are multiple different providers that can manage those devices! Take care only to
+> have the one you want enabled, using the include or exclude provider search parameters.
 
 This provider requires the Datawedge service, in the form of the `com.symbol.datawedge` application
 package, to be installed and enabled on your device.

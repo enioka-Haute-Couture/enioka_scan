@@ -29,13 +29,15 @@ public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSu
     private ScannerDataCallbackProxy dataDb;
     private final ScannerStatusCallback  statusCallback;
 
-    public CameraBarcodeScanViewScanner(CameraBarcodeScanView cameraBarcodeScanView, ScannerDataCallbackProxy mHandler, final ScannerStatusCallbackProxy statusCallback) {
+    public CameraBarcodeScanViewScanner(CameraBarcodeScanView cameraBarcodeScanView, ScannerDataCallbackProxy mHandler, final ScannerStatusCallbackProxy statusCallback, final Set<BarcodeType> symbologySelection) {
         this.dataDb = mHandler;
-
         this.scanner = cameraBarcodeScanView;
 
         scanner.setResultHandler(this);
         scanner.setTorch(false);
+        for(BarcodeType symbology: symbologySelection) {
+            scanner.addSymbology(symbology);
+        }
 
         this.statusCallback = statusCallback;
         this.statusCallback.onStatusChanged(this, ScannerStatusCallback.Status.CONNECTED);
@@ -60,9 +62,6 @@ public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSu
     @Override
     public void initialize(final Context applicationContext, final ScannerInitCallbackProxy initCallback, final ScannerDataCallbackProxy dataCallback, final ScannerStatusCallbackProxy statusCallback, final Mode mode, final Set<BarcodeType> symbologySelection) {
         // Do nothing. The camera view implementation is special, as it is built directly and not through the LaserScanner.
-        for (BarcodeType symbology : symbologySelection) {
-            scanner.addSymbology(symbology);
-        }
         initCallback.onConnectionSuccessful(this);
     }
 

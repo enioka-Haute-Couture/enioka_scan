@@ -35,6 +35,7 @@ import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.camera.CameraBarcodeScanView;
 import com.enioka.scanner.camera.CameraReader;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
 import com.enioka.scanner.sdk.camera.CameraBarcodeScanViewScanner;
 import com.enioka.scanner.service.ScannerClient;
@@ -43,7 +44,10 @@ import com.enioka.scanner.service.ScannerServiceApi;
 import com.enioka.scanner.service.ScannerServiceBinderHelper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A helper activity which implements all scan functions: laser, camera, HID.<br><br>Basic usage is trivial : just inherit this class, and that's all.<br>
@@ -365,7 +369,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
-        cameraScanner = new CameraBarcodeScanViewScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)), new ScannerStatusCallbackProxy(this));
+        final Set<BarcodeType> symbologies = new HashSet<>();
+        if (getIntent().getExtras() != null && getIntent().getExtras().getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION) != null) {
+            for (final String symbology : Objects.requireNonNull(getIntent().getExtras().getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION))) {
+                symbologies.add(BarcodeType.valueOf(symbology));
+            }
+        }
+        if (symbologies.isEmpty()) {
+            symbologies.add(BarcodeType.CODE128);
+        }
+        cameraScanner = new CameraBarcodeScanViewScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)), new ScannerStatusCallbackProxy(this), symbologies);
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);

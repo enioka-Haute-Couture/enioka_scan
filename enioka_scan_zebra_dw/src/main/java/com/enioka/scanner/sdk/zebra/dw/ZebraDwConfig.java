@@ -1,6 +1,6 @@
 package com.enioka.scanner.sdk.zebra.dw;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;

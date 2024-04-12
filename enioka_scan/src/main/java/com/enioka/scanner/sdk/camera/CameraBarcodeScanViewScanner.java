@@ -1,7 +1,7 @@
 package com.enioka.scanner.sdk.camera;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;

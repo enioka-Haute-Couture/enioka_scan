@@ -1,7 +1,7 @@
 package com.enioka.scanner.sdk.generalscan;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;

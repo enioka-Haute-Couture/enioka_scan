@@ -1,8 +1,8 @@
 package com.enioka.scanner.helpers;
 
 import android.content.pm.ServiceInfo;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Helper class containing a ScannerProvider's meta information.

@@ -1,6 +1,6 @@
 package com.enioka.scanner.helpers;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.enioka.scanner.api.ScannerProvider;
 

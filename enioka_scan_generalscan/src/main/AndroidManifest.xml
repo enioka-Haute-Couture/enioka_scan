@@ -19,7 +19,7 @@
             tools:ignore="Instantiatable">
 
             <intent-filter>
-                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+                <action android:name="com.enioka.scan.PROVIDE_SPP_SCANNER" />
             </intent-filter>
         </service>
 

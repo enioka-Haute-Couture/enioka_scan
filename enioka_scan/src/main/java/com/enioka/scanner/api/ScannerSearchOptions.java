@@ -93,6 +93,7 @@ public class ScannerSearchOptions {
             allowIntentDevices = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, allowIntentDevices);
             allowLaterConnections = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, allowLaterConnections);
             allowPairingFlow = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, allowPairingFlow);
+            allowIntentDevices = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, allowIntentDevices);
             allowInitialSearch = extras.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, allowInitialSearch);
 
             String[] allowedProviderKeysArray = extras.getStringArray(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY);
@@ -131,6 +132,7 @@ public class ScannerSearchOptions {
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, allowLaterConnections);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, allowInitialSearch);
         intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, allowPairingFlow);
+        intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, allowIntentDevices);
         if (allowedProviderKeys != null && allowedProviderKeys.size() > 0) {
             intent.putExtra(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys.toArray(new String[0]));
         }

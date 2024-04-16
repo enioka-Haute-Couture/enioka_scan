@@ -46,7 +46,16 @@ dependencies {
         implementation project(':enioka_scan_m3');
     }
 
+    // Implementation of the OSS providers
     implementation project(':enioka_scan_zebra_dw');
+    implementation project(':enioka_scan_athesi_rd50te')
+    implementation project(':enioka_scan_athesi_spa43lte')
+    implementation project(':enioka_scan_bluebird')
+    implementation project(':enioka_scan_generalscan')
+    implementation project(':enioka_scan_honeywelloss_integrated')
+    implementation project(':enioka_scan_honeywelloss_spp')
+    implementation project(':enioka_scan_zebraoss')
+    implementation project(':enioka_scan_proglove');
 
     // Android stuff
 

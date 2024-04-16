@@ -1,0 +1,32 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true">
+
+        <service
+            android:name=".HoneywellOssIntegratedScannerProvider"
+            android:description="@string/service_description"
+            android:exported="false"
+            tools:ignore="Instantiatable">
+
+            <meta-data
+                android:name="intent"
+                android:value="true" />
+
+            <intent-filter>
+                <action android:name="com.enioka.scan.PROVIDE_SCANNER" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+    <uses-permission android:name="com.honeywell.decode.permission.DECODE" /> <!-- Needed by Honeywell OSS SDK for integrated scanners -->
+
+    <queries>
+        <package android:name="com.honeywell.decode.DecodeService" />
+    </queries>
+
+</manifest>

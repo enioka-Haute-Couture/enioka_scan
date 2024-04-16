@@ -9,8 +9,8 @@ import android.widget.Switch;
 
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.data.BarcodeType;
-import com.enioka.scanner.sdk.athesi.RD50TE.AthesiE5LProvider;
-import com.enioka.scanner.sdk.athesi.SPA43LTE.AthesiHHTProvider;
+import com.enioka.scanner.sdk.athesi.RD50TE.AthesiRD50TEProvider;
+import com.enioka.scanner.sdk.athesi.SPA43LTE.AthesiSPA43LTEProvider;
 import com.enioka.scanner.sdk.bluebird.BluebirdProvider;
 import com.enioka.scanner.sdk.generalscan.GsSppScannerProvider;
 import com.enioka.scanner.sdk.honeywelloss.integrated.HoneywellOssIntegratedScannerProvider;
@@ -40,10 +40,11 @@ public class SettingsActivity extends AppCompatActivity {
         ((Switch) findViewById(R.id.switchLaterConnections)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, options.allowLaterConnections));
         ((Switch) findViewById(R.id.switchInitialSearch)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, options.allowInitialSearch));
         ((Switch) findViewById(R.id.switchPairingFlow)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, options.allowPairingFlow));
+        ((Switch) findViewById(R.id.switchIntentDevices)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, options.allowIntentDevices));
 
         final Set<String> allowedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
-        ((CheckBox) findViewById(R.id.checkAllowedHHTProvider)).setChecked(allowedProviderKeys.contains(AthesiHHTProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedE5LProvider)).setChecked(allowedProviderKeys.contains(AthesiE5LProvider.PROVIDER_KEY));
+        ((CheckBox) findViewById(R.id.checkAllowedHHTProvider)).setChecked(allowedProviderKeys.contains(AthesiSPA43LTEProvider.PROVIDER_KEY));
+        ((CheckBox) findViewById(R.id.checkAllowedE5LProvider)).setChecked(allowedProviderKeys.contains(AthesiRD50TEProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkAllowedBluebirdProvider)).setChecked(allowedProviderKeys.contains(BluebirdProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkAllowedProgloveProvider)).setChecked(allowedProviderKeys.contains(ProgloveProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkAllowedGsSppScannerProvider)).setChecked(allowedProviderKeys.contains(GsSppScannerProvider.PROVIDER_KEY));
@@ -53,8 +54,8 @@ public class SettingsActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.checkAllowedHoneywellOssIntegratedScannerProvider)).setChecked(allowedProviderKeys.contains(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY));
 
         final Set<String> excludedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
-        ((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).setChecked(excludedProviderKeys.contains(AthesiHHTProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedE5LProvider)).setChecked(excludedProviderKeys.contains(AthesiE5LProvider.PROVIDER_KEY));
+        ((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).setChecked(excludedProviderKeys.contains(AthesiSPA43LTEProvider.PROVIDER_KEY));
+        ((CheckBox) findViewById(R.id.checkExcludedE5LProvider)).setChecked(excludedProviderKeys.contains(AthesiRD50TEProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkExcludedBluebirdProvider)).setChecked(excludedProviderKeys.contains(BluebirdProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkExcludedProgloveProvider)).setChecked(excludedProviderKeys.contains(ProgloveProvider.PROVIDER_KEY));
         ((CheckBox) findViewById(R.id.checkExcludedGsSppScannerProvider)).setChecked(excludedProviderKeys.contains(GsSppScannerProvider.PROVIDER_KEY));
@@ -85,10 +86,11 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putBoolean(ScannerServiceApi.EXTRA_SEARCH_KEEP_SEARCHING_BOOLEAN, ((Switch) findViewById(R.id.switchLaterConnections)).isChecked());
         editor.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN, ((Switch) findViewById(R.id.switchInitialSearch)).isChecked());
         editor.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, ((Switch) findViewById(R.id.switchPairingFlow)).isChecked());
+        editor.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, ((Switch) findViewById(R.id.switchIntentDevices)).isChecked());
 
         final Set<String> allowedProviderKeys = new HashSet<>();
-        if (((CheckBox) findViewById(R.id.checkAllowedHHTProvider)).isChecked()) { allowedProviderKeys.add(AthesiHHTProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedE5LProvider)).isChecked()) { allowedProviderKeys.add(AthesiE5LProvider.PROVIDER_KEY); }
+        if (((CheckBox) findViewById(R.id.checkAllowedHHTProvider)).isChecked()) { allowedProviderKeys.add(AthesiSPA43LTEProvider.PROVIDER_KEY); }
+        if (((CheckBox) findViewById(R.id.checkAllowedE5LProvider)).isChecked()) { allowedProviderKeys.add(AthesiRD50TEProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkAllowedBluebirdProvider)).isChecked()) { allowedProviderKeys.add(BluebirdProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkAllowedProgloveProvider)).isChecked()) { allowedProviderKeys.add(ProgloveProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkAllowedGsSppScannerProvider)).isChecked()) { allowedProviderKeys.add(GsSppScannerProvider.PROVIDER_KEY); }
@@ -99,8 +101,8 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys);
 
         final Set<String> excludedProviderKeys = new HashSet<>();
-        if (((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).isChecked()) { excludedProviderKeys.add(AthesiHHTProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedE5LProvider)).isChecked()) { excludedProviderKeys.add(AthesiE5LProvider.PROVIDER_KEY); }
+        if (((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).isChecked()) { excludedProviderKeys.add(AthesiSPA43LTEProvider.PROVIDER_KEY); }
+        if (((CheckBox) findViewById(R.id.checkExcludedE5LProvider)).isChecked()) { excludedProviderKeys.add(AthesiRD50TEProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkExcludedBluebirdProvider)).isChecked()) { excludedProviderKeys.add(BluebirdProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkExcludedProgloveProvider)).isChecked()) { excludedProviderKeys.add(ProgloveProvider.PROVIDER_KEY); }
         if (((CheckBox) findViewById(R.id.checkExcludedGsSppScannerProvider)).isChecked()) { excludedProviderKeys.add(GsSppScannerProvider.PROVIDER_KEY); }

@@ -13,6 +13,7 @@
     <string name="allow_initial_search">Autoriser la recherche initiale:</string>
     <string name="allow_later_connections">Autoriser les connexions retardataires:</string>
     <string name="allow_pairing_flow">Autoriser les séquences d\'appairage:</string>
+    <string name="allow_intent_devices">Autoriser les scanners fonctionnant par Intent:</string>
     <string name="allowed_providers">Providers Autorisés (vide = tous):</string>
     <string name="excluded_providers">Providers Exclus (vide = aucun):</string>
     <string name="symbology_selection">Selection de la symbology (vide = EAN,128):</string>

@@ -46,6 +46,7 @@ import java.util.List;
  */
 public class ScannerCompatActivity extends AppCompatActivity implements ScannerClient {
     protected final static String LOG_TAG = "ScannerActivity";
+    protected final static String CAMERA_SDK_PACKAGE = "com.enioka.scanner.sdk.camera";
     protected final static int PERMISSION_REQUEST_ID_BT = 1792;
 
     /**
@@ -101,6 +102,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected ScannerServiceApi scannerService;
     private boolean serviceBound = false;
 
+    /**
+     * Whether the camera scanner SDK is available.
+     */
+    private boolean hasCameraScannerSdk = false;
+
+    /**
+     * The camera scanner activity class, if available.
+     */
+    private Class<?> cameraScannerActivity = null;
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Activity lifecycle callbacks
@@ -133,6 +144,14 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             bindAndStartService();
         } else if (useBluetooth && !hasPermissionSet(this, PERMISSIONS_BT)) {
             requestPermissionSet(this, PERMISSIONS_BT, PERMISSION_REQUEST_ID_BT);
+        }
+
+        // Check if the camera scanner SDK is available.
+        try {
+            cameraScannerActivity = Class.forName(CAMERA_SDK_PACKAGE + ".CameraCompatActivity");
+            hasCameraScannerSdk = true;
+        } catch (ClassNotFoundException e) {
+            hasCameraScannerSdk = false;
         }
     }
 
@@ -270,8 +289,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void startCameraActivity() {
-        try {
-            Class<?> cameraScannerActivity = Class.forName("com.enioka.scanner.sdk.camera.CameraCompatActivity");
+        if (hasCameraScannerSdk && cameraScannerActivity != null) {
             Intent intent = new Intent(this, cameraScannerActivity);
 
             // Add extras
@@ -283,8 +301,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             }
 
             this.startActivity(intent);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } else {
+            Log.w(LOG_TAG, "Camera scanner SDK is not available, can not start camera activity");
         }
     }
 
@@ -469,8 +487,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * Display a "use camera" button to allow using camera input even when a laser is available.
      */
     private void displayCameraButton() {
-        if (findViewById(cameraToggleId) != null) {
-            findViewById(cameraToggleId).setOnClickListener(view -> startCameraActivity());
+        View cameraButtonView = findViewById(cameraToggleId);
+        if (cameraButtonView != null) {
+
+            // Display the camera button if the camera scanner SDK is available.
+            if (!hasCameraScannerSdk) {
+                cameraButtonView.setVisibility(View.GONE);
+                return;
+            }
+
+            cameraButtonView.setOnClickListener(view -> startCameraActivity());
         }
     }
 

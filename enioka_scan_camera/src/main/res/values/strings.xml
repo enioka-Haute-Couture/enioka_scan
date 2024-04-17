@@ -1,25 +1,6 @@
 <resources>
-    <string name="app_name">EniokaScan</string>
-    <string name="service_description">Helper service for scanner management</string>
-
-    <!-- Scanner status -->
-    <string name="scanner_status_WAITING">Scanner is waiting for a connection</string>
-    <string name="scanner_status_CONNECTING">Scanner is in the process of connecting</string>
-    <string name="scanner_status_RECONNECTING">Scanner disconnected but is trying to reconnect</string>
-    <string name="scanner_status_CONNECTED">Scanner has finished connecting</string>
-    <string name="scanner_status_INITIALIZING">Scanner is in the process of initializing</string>
-    <string name="scanner_status_INITIALIZED">Scanner has finished initializing</string>
-    <string name="scanner_status_READY">Scanner is ready to scan and waiting to be used</string>
-    <string name="scanner_status_SCANNING">Scanner is in the process of scanning</string>
-    <string name="scanner_status_PAUSED">Scanner is enabled but not ready to scan</string>
-    <string name="scanner_status_DISABLED">Scanner has been disabled and cannot be used</string>
-    <string name="scanner_status_FAILURE">Scanner is no longer available after a critical error occurred</string>
-    <string name="scanner_status_DISCONNECTED">Scanner disconnected and can no longer be used</string>
-    <string name="scanner_status_UNKNOWN">Scanner is in an unknown status</string>
-    <!-- Scanner Service status -->
-    <string name="scanner_status_SERVICE_PROVIDER_SEARCH_OVER">ScannerService finished discovering scanner providers</string>
-    <string name="scanner_status_SERVICE_SDK_SEARCH_NOCOMPATIBLE">There are no compatible hardware barcode scanners on this device</string>
-    <string name="scanner_status_SERVICE_SDK_SEARCH_OVER">All hardware scanner providers have reported for duty</string>
+    <string name="app_name">EniokaScan Camera</string>
+    <string name="activity_description">Helper service for camera scanner management</string>
 
     <!-- Scanner status (Others) -->
     <string name="scanner_status_no_camera">No camera available</string>
@@ -30,16 +11,6 @@
     <string name="scanner_camera_no_camera">No fallback camera available on device. Please plugin your laser barcode scanner and restart application. Application will now crash.</string>
 
     <!-- Helper activities -->
-    <string name="activity_scan_barcode_value_placeholder">10AL9271B2I8</string>
-    <string name="activity_scan_scanner_not_initialized">Scanner initialization not started</string>
-    <string name="scanner_using_bt_keyboard">Using Bluetooth scanner or keyboard</string>
-    <string name="activity_scan_no_compatible_sdk">There are no compatible scanners on this device</string>
     <string name="activity_scan_use_zxing">ZXing</string>
     <string name="activity_scan_pause_camera">Pause</string>
-
-    <!-- Helper manual scan fragment -->
-    <string name="fragment_scan_manual_title">Manual input</string>
-    <string name="fragment_scan_manual_invite">Please enter the barcode value, then select one item among the results</string>
-    <string name="fragment_scan_manual_hint">0000000000</string>
-    <string name="fragment_scan_manual_ok">Send</string>
 </resources>

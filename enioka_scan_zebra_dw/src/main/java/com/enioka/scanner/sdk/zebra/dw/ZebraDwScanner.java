@@ -33,6 +33,10 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        // Avoid re-config loops in case another enioka_scan instance is running in the foreground
+        if (paused)
+            return;
+
         Log.d(LOG_TAG, "Received data from DW service");
 
         // Barcode?
@@ -41,6 +45,7 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
             List<Barcode> barcodes = new ArrayList<>();
             barcodes.add(new Barcode(barcodeData,
                     ZebraDwSymbology.getSymbology(intent.getStringExtra(ZebraDwIntents.DW_BARCODE_TYPE_EXTRA)).type));
+            Log.d(LOG_TAG, "Received scan result: " + barcodes.get(0).getBarcode() + " (" + barcodes.get(0).getBarcodeType().toString() + ")");
             if (dataCb != null) {
                 dataCb.onData(this, barcodes);
             }
@@ -113,10 +118,12 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
                         Log.i(LOG_TAG, "PROFILE_SWITCH: profileName: " + b.getString("PROFILE_NAME") + ", profileEnabled: " + b.getBoolean("PROFILE_ENABLED"));
                         currentlyActiveProfile = b.getString("PROFILE_NAME");
                         if (currentConfig != null && profileName.equals(currentlyActiveProfile)) {
+                            Log.d(LOG_TAG, "Correct profile, configuring symbologies");
                             configureSymbologies();
                         }
                         if (!paused && !profileName.equals(currentlyActiveProfile)) {
                             // DW will change the profile between activities and apps. We must check each time a switch is done.
+                            Log.d(LOG_TAG, "Incorrect profile " + currentlyActiveProfile + ", requesting profile change to " + profileName);
                             switchToOurProfile();
                         }
                         break;
@@ -127,6 +134,10 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
 
                     case ZebraDwIntents.DW_NOTIFICATION_CHANGE_WORKFLOW:
                         Log.d(LOG_TAG, "WORKFLOW_STATUS: status: " + b.getString("STATUS") + ", profileName: " + b.getString("PROFILE_NAME"));
+                        break;
+
+                    default:
+                        Log.d(LOG_TAG, "Other notification: " + notificationType + " - status: " + b.getString("STATUS") + ", profileName: " + b.getString("PROFILE_NAME"));
                         break;
                 }
             }
@@ -252,8 +263,10 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
 
                         if (currentlyActiveProfile.equals(profileName)) {
                             // No need to create, just reconfigure
+                            Log.d(LOG_TAG, "Correct profile, configuring profile");
                             configureProfile();
                         } else {
+                            Log.d(LOG_TAG, "Incorrect profile " + currentlyActiveProfile + ", requesting profile change to " + profileName);
                             queryProfileList();
                         }
                     }
@@ -343,7 +356,7 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
     }
 
     private void switchToOurProfile() {
-        if (this.currentlyActiveProfile == null || this.currentlyActiveProfile.equals(this.profileName)) {
+        if (this.currentlyActiveProfile != null && this.currentlyActiveProfile.equals(this.profileName)) {
             Log.d(LOG_TAG, "Not switching profile - already active");
             return;
         }
@@ -419,12 +432,14 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
         broadcastIntentFilters.add(ZebraDwIntents.DW_CONFIGURATION_CALLBACK_ACTION);
         broadcastIntentFilters.add(ZebraDwIntents.DW_NOTIFICATION_ACTION);
 
-        disableScanner = newIntent(ZebraDwIntents.DW_API_MAIN_ACTION, "com.symbol.datawedge.api.ENABLE_DATAWEDGE", false);
-        enableScanner = newIntent(ZebraDwIntents.DW_API_MAIN_ACTION, "com.symbol.datawedge.api.ENABLE_DATAWEDGE", true);
+        disableScanner = newIntent(ZebraDwIntents.DW_API_MAIN_ACTION, "com.symbol.datawedge.api.SCANNER_INPUT_PLUGIN", "DISABLE_PLUGIN");
+        enableScanner = newIntent(ZebraDwIntents.DW_API_MAIN_ACTION, "com.symbol.datawedge.api.SCANNER_INPUT_PLUGIN", "ENABLE_PLUGIN");
     }
 
     @Override
     protected void configureAfterInit(Context ctx) {
+        // Enable datawedge just in case.
+        broadcastIntent(newIntent(ZebraDwIntents.DW_API_MAIN_ACTION, "com.symbol.datawedge.api.ENABLE_DATAWEDGE", true));
         super.configureAfterInit(ctx);
 
         // We want to know what is happening on the device, at least for logs
@@ -433,13 +448,12 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
         // Create profile and configure it.
         // (this triggers a callback chain)
         queryActiveProfile();
-
-        // Enable datawedge just in case.
-        resume();
     }
 
     @Override
     public void resume(@Nullable ScannerCommandCallbackProxy cb) {
+        // Enable datawedge just in case.
+        broadcastIntent(newIntent(ZebraDwIntents.DW_API_MAIN_ACTION, "com.symbol.datawedge.api.ENABLE_DATAWEDGE", true));
         super.resume(cb);
         switchToOurProfile();
     }

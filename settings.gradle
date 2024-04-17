@@ -27,3 +27,4 @@ gradle.ext.gpr = ext.find('gpr.user') ?: System.getenv("GH_DRIVER_REPOSITORY_USE
         gradle.ext.setProperty(propertyName, false)
     }
 }
+include ':enioka_scan_camera'

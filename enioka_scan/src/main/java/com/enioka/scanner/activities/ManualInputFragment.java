@@ -76,7 +76,7 @@ public class ManualInputFragment extends DialogFragment {
             // The host should be an activity implementing a barcode listener.
             cb = (ScannerClient) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement ScannerDataCallback");
+            throw new ClassCastException(activity.toString() + " must implement ScannerClient");
         }
     }
 

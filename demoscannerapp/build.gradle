@@ -27,6 +27,7 @@ android {
 dependencies {
     // Reference our own library, directly compiled from its project
     implementation project(':enioka_scan');
+    implementation project(':enioka_scan_camera');
 
     if (gradle.ext.withHoneywell) {
         implementation project(':enioka_scan_honeywell');

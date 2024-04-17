@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CameraBarcodeScanView">
+        <attr name="forceCameraApiVersion" format="enum">
+            <enum name="Auto" value="0" />
+            <enum name="V1" value="1" />
+            <enum name="V2" value="2" />
+        </attr>
+        <attr name="readerMode" format="enum">
+            <enum name="ZBar" value="0" />
+            <enum name="ZXing" value="1" />
+            <enum name="Auto" value="0" />
+        </attr>
+        <attr name="targetColorActive" format="color" />
+        <attr name="targetColorPaused" format="color" />
+        <attr name="targetStrokeWidth" format="integer" />
+        <attr name="targetIsFixed" format="boolean" />
+        <attr name="previewRatioMode" format="enum">
+            <enum name="fillAvailableSpace" value="0" />
+            <enum name="fitToPicture" value="1" />
+        </attr>
+        <attr name="useAdaptiveResolution" format="boolean" />
+        <attr name="storePreferredResolution" format="boolean" />
+        <attr name="minResolutionY" format="integer" />
+        <attr name="maxResolutionY" format="integer" />
+        <attr name="maxDistortionRatio" format="float" />
+    </declare-styleable>
+</resources>

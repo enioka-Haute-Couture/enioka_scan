@@ -34,12 +34,6 @@ If true, the activity will not switch to using the camera, even if no other scan
 If false, the activity will behave like a standard `AppCompatActivity`.
 :::
 
-:::{cpp:var} boolean goToCamera = false
-
-If true, the activity will directly switch to using the camera. This boolean is automatically set
-to true if the scanner service finds no scanner after the first search.
-:::
-
 :::{cpp:var} boolean useBluetooth = true
 
 If true, the activity will check that the application has bluetooth permissions before starting the
@@ -51,17 +45,6 @@ service. **This does not affect scanner search options**.
 The layout used by the activity when using regular scanner devices. May be replaced with your own.
 :::
 
-:::{cpp:var} int layoutIdCamera = R.layout.activity_main_alt
-
-The layout used by the activity when using the camera as a scanner. May be replaced with your own.
-:::
-
-:::{cpp:var} int cameraViewId = R.id.camera_scan_view
-
-The ID of the [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the
-`layoutIdCamera` layout.
-:::
-
 :::{cpp:var} int cameraToggleId = R.id.scanner_bt_camera
 
 The ID of the optional ImageButton on which to press to manually switch to camera mode.
@@ -70,16 +53,6 @@ The ID of the optional ImageButton on which to press to manually switch to camer
 :::{cpp:var} int flashlightViewId = R.id.scanner_flashlight
 
 The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
-:::
-
-:::{cpp:var} int scannerModeToggleViewId = R.id.scanner_switch_zxing
-
-The ID of the optional ImageButton on which to press to toggle the zxing/zbar camera scan library.
-:::
-
-:::{cpp:var} int scannerModeTogglePauseId = R.id.scanner_switch_pause
-
-The ID of the optional toggle button on which to press to pause/unpause the scanner.
 :::
 
 :::{cpp:var} int keyboardOpenViewId = R.id.scanner_bt_keyboard
@@ -111,15 +84,6 @@ replaced.
 Initialized by the `onStart()` and `onResume()` methods.
 :::
 
-:::{cpp:var} CameraBarcodeScanViewScanner cameraScanner;
-
-The instance of the camera scanner, can be used to access camera methods but should not be replaced.
-`CameraBarcodeScanViewScanner` is a simple provider-less implementation of the 
-[`Scanner` interface](scanner.md#the-scanner-interface).
-
-Initialized by the [`initCamera()`](#scannercompatactivity-methods) method.
-:::
-
 ## `ScannerCompatActivity` methods
 
 :::{method} getServiceInitExtras() -> Bundle
@@ -144,11 +108,6 @@ autocompletion threshold.
 
 :param List<String> autocompletion: The autocompletion items to use.
 :param int threshold: The new threshold.
-:::
-
-:::{method} initCamera() -> void
-
-Switches the activity to camera mode. After this method is called, `goToCamera` is set to true.
 :::
 
 :::{method} anyScannerSupportsIllumination() -> boolean

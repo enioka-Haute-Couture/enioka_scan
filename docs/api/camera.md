@@ -1,10 +1,99 @@
 # The camera scanner
 
-**enioka Scan** can still be used to manage barcodes scanned using the Android camera. For that, it
-exposes the `CameraBarcodeScanView` and a series of helper classes to handle compatibility with both
-Camera 1 and Camera 2 hardware APIs.
+**enioka Scan** can still be used to manage barcodes scanned using the Android camera, through
+`com.enioka.scanner.sdk.camera`, (check
+[library dependencies and compatibility matrix](dependencies.md)). For that, it exposes the
+`CameraBarcodeScanView` and a series of helper classes to handle compatiblity with both Camera 1
+and Camera 2 hardware APIs.
 
 This page regroups all information needed to control this special scanner at a deeper level.
+
+## The camera activity
+The simplest way to use the camera scanner in an activity is simply to inherit from the
+`CameraCompatActivity` class. This class implements the
+[`ScannerClient` interface](scanner_service.md#the-scannerclient-interface).
+
+### `CameraCompatActivity` attributes
+
+:::{cpp:var} int layoutIdCamera = R.layout.activity_main_alt
+
+The layout used by the activity when using the camera as a scanner. May be replaced with your own.
+:::
+
+:::{cpp:var} CameraBarcodeScanViewScanner cameraScanner;
+
+The instance of the camera scanner, can be used to access camera methods but should not be replaced.
+`CameraBarcodeScanViewScanner` is a simple provider-less implementation of the
+[`Scanner` interface](scanner.md#the-scanner-interface).
+
+Initialized by the [`initCamera()`](#scannercompatactivity-methods) method.
+:::
+
+:::{cpp:var} int flashlightViewId = R.id.scanner_flashlight
+
+The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
+:::
+
+:::{cpp:var} int cameraViewId = R.id.camera_scan_view
+
+The ID of the [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the
+`layoutIdCamera` layout.
+:::
+
+:::{cpp:var} int scannerModeToggleViewId = R.id.scanner_switch_zxing
+
+The ID of the optional ImageButton on which to press to toggle the zxing/zbar camera scan library.
+:::
+
+:::{cpp:var} int scannerModeTogglePauseId = R.id.scanner_switch_pause
+
+The ID of the optional toggle button on which to press to pause/unpause the scanner.
+:::
+
+:::{cpp:var} int keyboardOpenViewId = R.id.scanner_bt_keyboard
+
+The ID of the optional toggle button on which to display the manual input fragment.
+:::
+
+:::{cpp:var} ManualInputFragment manualInputFragment;
+
+An optional fragment allowing to input a value with the soft keyboard (for cases when scanners do
+not work).
+:::
+
+:::{cpp:var} List<ManualInputItem> autocompletionItems = new ArrayList<>()
+
+Auto completion items for manual input (with manualInputFragment).
+:::
+
+:::{cpp:var} int threshold = 5
+
+How many characters should be entered before auto-completion starts.
+:::
+
+### `CaneraCompatActivity` methods
+
+:::{method} setAutocompletion(List<String> autocompletion, int threshold) -> void
+
+**Inserts** the given autocompletion strings into the `autocompletionItems` and updates the
+autocompletion threshold.
+
+:param List<String> autocompletion: The autocompletion items to add.
+:param int threshold: The new threshold.
+:::
+
+:::{method} setAutocompletionItems(List<ManualInputItem> items, int threshold) -> void
+
+**Replaces** `autocompletionItems` with the given list and updates the autocompletion threshold.
+
+:param List<String> autocompletion: The autocompletion items to use.
+:param int threshold: The new threshold.
+:::
+
+:::{method} initCamera() -> void
+
+Switches the activity to camera mode.
+:::
 
 ## The `CameraBarcodeScanView` class
 

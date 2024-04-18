@@ -19,9 +19,9 @@ dependencies {
 }
 ```
 
-To use the smartphone's camera as a scanner, this single dependency is enough. To use others devices,
-dependencies are required, you can check the
-[library dependencies and compatibility matrix](dependencies.md) for a detailed overview.
+To use others devices or the smartphone's camera as a scanner, dependencies are required,
+you can check the [library dependencies and compatibility matrix](dependencies.md)
+for a detailed overview.
 
 ## Using the library
 
@@ -48,6 +48,10 @@ This creates an activity with a very simple layout, which displays status messag
 as well as scanning results and some utility buttons: triggers for the scanner, a toggle for 
 illumination, and a beep trigger.
 
+If the camera scanner SDK is included (`com.enioka.scanner.sdk.camera`), the camera activity will
+also be available as a fallback of `ScannerCompatActivity`, or can be directly used by inheriting
+from the [`CameraCompatActivity` activity](api/camera.md).
+
 To use your own layouts with this activity, you can follow [this guide](guides/custom_layout.md).
 
 Finally, note that inside the activity code there are a few hooks that can be overloaded - these are
@@ -59,6 +63,7 @@ public or protected methods, with full javadoc. Of notice are:
 :::{seealso}
 
 * The [`ScannerCompatActivity` activity](api/scanner_activity.md) documentation
+* The [`CameraCompatActivity` activity](api/camera.md) documentation
 * The [`ScannerClient` interface](api/scanner_service.md#the-scannerclient-interface) documentation
 :::
 
@@ -114,14 +119,20 @@ help converting search parameters to and from those intent extras.
 
 ## Using the camera
 
+:::{warning}
+
+* `com.enioka.scanner.sdk.camera` dependencies are required to use the camera scanner, check
+  [library dependencies and compatibility matrix](dependencies.md).
+:::
+
 When there is no laser scanner available, or when a button is clicked, the `ScannerCompatActivity` 
-activity will fallback to using the device camera (if any) to scan barcodes. This leverages two 
-different barcode scanning libraries, ZBar and ZXing in recent versions. It is compatible both with 
-very old Camera APIs as well as more recent Camera 2 APIs. It tries to set the best camera 
-parameters for barcode scanning, including dynamically setting the camera resolution according to 
-the processing speed of the device. As a result, it may take a few dozen seconds to reach the most 
-suitable settings on first startup - the resolution is then stored and reused on subsequent 
-initialisations.
+activity will fallback to another activity that is using the  device camera (if any) to scan
+barcodes. This leverages two different barcode scanning libraries, ZBar and ZXing in recent
+versions. It is compatible both with very old Camera APIs as well as more recent Camera 2 APIs.
+It tries to set the best camera  parameters for barcode scanning, including dynamically setting the
+camera resolution according to the processing speed of the device. As a result, it may take a few
+dozen seconds to reach the most suitable settings on first startup - the resolution is then stored
+and reused on subsequent initialisations.
 
 The camera scanner can actually be used easily inside your own activities without any links with the
 rest of the library (no need to use the scanner service, etc) by just adding the

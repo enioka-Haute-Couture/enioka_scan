@@ -293,7 +293,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     // Camera
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void startCameraActivity() {
+    private void startCameraActivity() {
         if (hasCameraScannerSdk && cameraScannerActivity != null) {
             Intent intent = new Intent(this, cameraScannerActivity);
 

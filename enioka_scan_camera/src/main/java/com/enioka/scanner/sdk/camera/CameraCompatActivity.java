@@ -214,6 +214,25 @@ public class CameraCompatActivity extends AppCompatActivity implements ScannerCl
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Configuration hooks
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @SuppressWarnings("unused")
+    public void setAutocompletion(List<String> autocompletion, int threshold) {
+        for (String item : autocompletion) {
+            this.autocompletionItems.add(new ManualInputItem(item, false));
+        }
+        this.threshold = threshold;
+    }
+
+    @SuppressWarnings("unused")
+    public void setAutocompletionItems(List<ManualInputItem> items, int threshold) {
+        this.autocompletionItems = items;
+        this.threshold = threshold;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // Permissions
     ////////////////////////////////////////////////////////////////////////////////////////////////
 

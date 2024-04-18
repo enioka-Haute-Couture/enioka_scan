@@ -112,6 +112,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      */
     private Class<?> cameraScannerActivity = null;
 
+    /**
+     * Whether the camera scanner is started for the first time.
+     */
+    private boolean firstCameraStart = true;
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Activity lifecycle callbacks
@@ -301,6 +306,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             }
 
             this.startActivity(intent);
+            firstCameraStart = false;
         } else {
             Log.w(LOG_TAG, "Camera scanner SDK is not available, can not start camera activity");
         }
@@ -343,7 +349,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     public void onScannerInitEnded(int scannerCount) {
         Log.i(LOG_TAG, "Activity can now use all received scanners (" + scannerCount + ")");
 
-        if (scannerCount == 0 && !laserModeOnly && enableScan) {
+        if (scannerCount == 0 && !laserModeOnly && enableScan && firstCameraStart) {
             // In that case try to connect to a camera by launching the camera activity.
             startCameraActivity();
         }

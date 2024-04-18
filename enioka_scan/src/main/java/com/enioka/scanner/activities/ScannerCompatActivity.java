@@ -354,11 +354,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             startCameraActivity();
         }
 
-        displayTorch();
-        displayToggleLedButton();
-        displayEnableScanButton();
-        displayDisableScanButton();
-        displayBellButton();
+        if (scannerCount > 0) {
+            displayTorch();
+            displayToggleLedButton();
+            displayEnableScanButton();
+            displayDisableScanButton();
+            displayBellButton();
+        }
     }
 
     @Override
@@ -400,6 +402,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
+        flashlight.setVisibility(View.VISIBLE);
         toggleTorch();
 
         flashlight.setOnClickListener(v -> {
@@ -464,6 +467,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
+        bt.setVisibility(View.VISIBLE);
+
         bt.setOnClickListener(view -> {
             // Pause camera or laser scanner during manual input.
             scannerService.pause();
@@ -497,7 +502,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (cameraButtonView != null) {
 
             // Display the camera button if the camera scanner SDK is available.
-            if (!hasCameraScannerSdk) {
+            if (hasCameraScannerSdk) {
+                cameraButtonView.setVisibility(View.VISIBLE);
+            } else {
                 cameraButtonView.setVisibility(View.GONE);
                 return;
             }
@@ -514,6 +521,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
         View v = findViewById(R.id.scanner_red_led);
+
+        v.setVisibility(View.VISIBLE);
 
         // Check if we should display the button
         boolean anySupport = false;
@@ -547,8 +556,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void displayDisableScanButton() {
-        if (findViewById(R.id.scanner_trigger_off) != null) {
-            findViewById(R.id.scanner_trigger_off).setOnClickListener(view -> {
+        View scannerTriggerOff = findViewById(R.id.scanner_trigger_off);
+
+        if (scannerTriggerOff != null) {
+            scannerTriggerOff.setVisibility(View.VISIBLE);
+            scannerTriggerOff.setOnClickListener(view -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
                     if (s.getTriggerSupport() != null)
                         s.getTriggerSupport().releaseScanTrigger();
@@ -558,8 +570,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void displayEnableScanButton() {
-        if (findViewById(R.id.scanner_trigger_on) != null) {
-            findViewById(R.id.scanner_trigger_on).setOnClickListener(view -> {
+        View scannerTriggerOnView = findViewById(R.id.scanner_trigger_on);
+
+        if (scannerTriggerOnView!= null) {
+            scannerTriggerOnView.setVisibility(View.VISIBLE);
+            scannerTriggerOnView.setOnClickListener(view -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
                     if (s.getTriggerSupport() != null)
                         s.getTriggerSupport().pressScanTrigger();
@@ -569,8 +584,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void displayBellButton() {
-        if (findViewById(R.id.scanner_bell) != null) {
-            findViewById(R.id.scanner_bell).setOnClickListener(view -> {
+        View scannerBellView = findViewById(R.id.scanner_bell);
+
+        if (scannerBellView != null) {
+            scannerBellView.setVisibility(View.VISIBLE);
+            scannerBellView.setOnClickListener(view -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
                     if (s.getBeepSupport() != null)
                         s.getBeepSupport().beepScanSuccessful();

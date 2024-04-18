@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:visibility="visible"
     tools:context=".activities.ScannerCompatActivity">
 
     <TextView
@@ -37,7 +38,8 @@
         android:background="@null"
         android:src="@drawable/ic_photo"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:visibility="gone" />
 
     <ImageButton
         android:id="@+id/scanner_bt_keyboard"
@@ -45,6 +47,7 @@
         android:layout_height="45dp"
         android:background="@null"
         android:src="@drawable/icn_keyboard"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
@@ -54,10 +57,11 @@
         android:layout_height="45dp"
         android:background="@null"
         android:src="@drawable/icn_flash_off_on"
-        app:tint="@color/colorRed"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/scanner_flashlight" />
+        app:layout_constraintRight_toLeftOf="@id/scanner_flashlight"
+        app:tint="@color/colorRed"
+        android:visibility="gone" />
 
     <ImageButton
         android:id="@+id/scanner_flashlight"
@@ -67,7 +71,8 @@
         android:src="@drawable/icn_flash_off"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/scanner_red_led"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        android:visibility="gone" />
 
     <ImageButton
         android:id="@+id/scanner_trigger_on"
@@ -76,6 +81,7 @@
         android:background="@null"
         android:scaleType="fitCenter"
         android:src="@drawable/scan_active"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/scanner_trigger_off"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -87,6 +93,7 @@
         android:background="@null"
         android:scaleType="fitCenter"
         android:src="@drawable/scan_inactive"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/scanner_bell"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/scanner_trigger_on" />
@@ -98,10 +105,11 @@
         android:background="@null"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_bell"
-        app:tint="@android:color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scanner_trigger_off" />
+        app:layout_constraintTop_toBottomOf="@id/scanner_trigger_off"
+        app:tint="@android:color/black"
+        android:visibility="gone" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -51,14 +51,16 @@ service. **This does not affect scanner search options**.
 The layout used by the activity when using regular scanner devices. May be replaced with your own.
 :::
 
-:::{cpp:var} int layoutIdCamera = R.layout.activity_main_alt
+:::{cpp:var} Integer layoutIdCamera = null
 
 The layout used by the activity when using the camera as a scanner. May be replaced with your own.
+If the camera SDK is included, it will be defined to :::{cpp:var}R.layout.activity_main_alt
 :::
 
-:::{cpp:var} int cameraViewId = R.id.camera_scan_view
+:::{cpp:var} Integer cameraViewId = null
 
-The ID of the [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the
+If the camera SDK is included, it will be defined to :::{cpp:var}R.id.camera_scan_view
+It is the ID of the [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the
 `layoutIdCamera` layout.
 :::
 
@@ -72,14 +74,17 @@ The ID of the optional ImageButton on which to press to manually switch to camer
 The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
 :::
 
-:::{cpp:var} int scannerModeToggleViewId = R.id.scanner_switch_zxing
+:::{cpp:var} Integer scannerModeToggleViewId = null
 
-The ID of the optional ImageButton on which to press to toggle the zxing/zbar camera scan library.
+If the camera SDK is included, it will be defined to :::{cpp:var}R.id.scanner_switch_zxing.
+It is the ID of the optional ImageButton on which to press to toggle the zxing/zbar camera scan
+library.
 :::
 
-:::{cpp:var} int scannerModeTogglePauseId = R.id.scanner_switch_pause
+:::{cpp:var} Integer scannerModeTogglePauseId = 
 
-The ID of the optional toggle button on which to press to pause/unpause the scanner.
+If the camera SDK is included, it will be defined to :::{cpp:var}R.id.scanner_switch_pause.
+It is the ID of the optional toggle button on which to press to pause/unpause the scanner.
 :::
 
 :::{cpp:var} int keyboardOpenViewId = R.id.scanner_bt_keyboard
@@ -111,9 +116,11 @@ replaced.
 Initialized by the `onStart()` and `onResume()` methods.
 :::
 
-:::{cpp:var} CameraBarcodeScanViewScanner cameraScanner;
+:::{cpp:var} CameraScanner cameraScannerProvider = null;
 
-The instance of the camera scanner, can be used to access camera methods but should not be replaced.
+The optional instance of the camera scanner provider, is defined if the camera SDK is included.
+Can be used to access some methods of `CameraBarcodeScanViewScanner`. Should not be replaced.
+
 `CameraBarcodeScanViewScanner` is a simple provider-less implementation of the 
 [`Scanner` interface](scanner.md#the-scanner-interface).
 

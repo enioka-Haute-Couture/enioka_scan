@@ -20,7 +20,12 @@ Each artefact can be imported to your project as `com.enioka.scanner:<artefact>:
 ### `scanner`
 
 Core components of the library, **required** for it to work. It includes the scanner APIs, default
-scanning activity and service, and camera-as-a-scanner functionality.
+scanning activity and service.
+
+### `scanner-camera`
+
+Includes the `CAMERA_SCANNER` provider. It includes camera-as-a-scanner functionality, and
+default camera layout for scanner activity.
 
 ### `provider-cs-athesi-e5l`
 
@@ -152,7 +157,7 @@ devices.
 
 | Artefact                           | Provider name                    | Supported devices                                   | Tested devices                     | Device type   | External requirements                                          | Device compatible if                                                                                                              |
 |------------------------------------|----------------------------------|-----------------------------------------------------|------------------------------------|---------------|----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `scanner`                          | `CAMERA_SCANNER` (no provider)   | Any device with a camera                            | Smartphones, integrated devices... | Camera        |                                                                | Device has a camera                                                                                                               |
+| `scanner-camera`                   | `CAMERA_SCANNER` (no provider)   | Any device with a camera                            | Smartphones, integrated devices... | Camera        |                                                                | Device has a camera                                                                                                               |
 | `provider-cs-athesi-e5l`           | `AthesiE5LProvider`              | Athesi E5L                                          | Athesi E5L                         | Integrated    |                                                                | Device name is strictly `RD50TE`                                                                                                  |
 | `provider-cs-athesi-spa43`         | `AthesiHHTProvider`              | Athesi SPA43                                        | Athesi SPA43                       | Integrated    |                                                                | Device name is strictly `SPA43LTE`                                                                                                |
 | `provider-cs-bluebird`             | `BluebirdProvider`               | Bluebird integrated scanners                        | Bluebird EF500                     | Integrated    | Bluebird service (should be preinstalled on device)            | Intent `kr.co.bluebird.android.bbapi.action.BARCODE_OPEN` has a listener                                                          |

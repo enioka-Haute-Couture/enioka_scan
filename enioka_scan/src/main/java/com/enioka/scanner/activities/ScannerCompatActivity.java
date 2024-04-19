@@ -32,12 +32,10 @@ import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
-import com.enioka.scanner.camera.CameraBarcodeScanView;
-import com.enioka.scanner.camera.CameraReader;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
-import com.enioka.scanner.sdk.camera.CameraBarcodeScanViewScanner;
+import com.enioka.scanner.sdk.camera.CameraScanner;
 import com.enioka.scanner.service.ScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
@@ -58,6 +56,7 @@ import java.util.Set;
  */
 public class ScannerCompatActivity extends AppCompatActivity implements ScannerClient {
     protected final static String LOG_TAG = "ScannerActivity";
+    protected final static String CAMERA_SDK_PACKAGE = "com.enioka.scanner.sdk.camera";
     protected final static int PERMISSION_REQUEST_ID_CAMERA = 1790;
     protected final static int PERMISSION_REQUEST_ID_BT = 1792;
 
@@ -88,16 +87,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * The layout to use when using camera scanner.
      */
-    protected int layoutIdCamera = R.layout.activity_main_alt;
+    protected Integer layoutIdCamera = null;
     /**
      * Use {@link #cameraViewId} instead.
      */
     @Deprecated
     protected Integer zbarViewId = null;
     /**
-     * The ID of the {@link CameraBarcodeScanView} inside the {@link #layoutIdCamera} layout.
+     * The ID of the CameraBarcodeScanView inside the {@link #layoutIdCamera} layout.
      */
-    protected int cameraViewId = R.id.camera_scan_view;
+    protected Integer cameraViewId = null;
 
     /**
      * The ID of the ImageButton on which to press to manually switch to camera mode.
@@ -112,9 +111,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * The ID of the optional ImageButton on which to press to toggle the zxing/zbar camera scan library.
      */
-    protected int scannerModeToggleViewId = R.id.scanner_switch_zxing;
+    protected Integer scannerModeToggleViewId = null;
 
-    protected int scannerModeTogglePauseId = R.id.scanner_switch_pause;
+    protected Integer scannerModeTogglePauseId = null;
 
     protected int keyboardOpenViewId = R.id.scanner_bt_keyboard;
 
@@ -140,9 +139,14 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     private boolean serviceBound = false;
 
     /**
-     * Optional camera scanner
+     * Whether the camera scanner SDK is available.
      */
-    protected CameraBarcodeScanViewScanner cameraScanner;
+    private boolean hasCameraScannerSdk = false;
+
+    /**
+     * Optional camera scanner provider (if the camera scanner SDK is available).
+     */
+    protected CameraScanner cameraScannerProvider = null;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -182,6 +186,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         } else if (useBluetooth && !hasPermissionSet(this, PERMISSIONS_BT)) {
             requestPermissionSet(this, PERMISSIONS_BT, PERMISSION_REQUEST_ID_BT);
         }
+
+        // Check if the camera scanner SDK is available.
+        try {
+            cameraScannerProvider = (CameraScanner) Class.forName(CAMERA_SDK_PACKAGE + ".CameraProvider").newInstance();
+            hasCameraScannerSdk = true;
+            setCameraViewId();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            Log.i(LOG_TAG, "Could not instantiate camera provider", e);
+            hasCameraScannerSdk = false;
+        }
     }
 
     @Override
@@ -194,7 +208,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
-        if (goToCamera) {
+        if (goToCamera && hasCameraScannerSdk) {
             Log.i(LOG_TAG, "Resuming scanner activity in camera mode");
             initCamera();
             return;
@@ -229,9 +243,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (serviceBound) {
             scannerService.pause();
         }
-        if (cameraScanner != null) {
-            cameraScanner.disconnect();
-            cameraScanner = null;
+        if (cameraScannerProvider != null && cameraScannerProvider.isCameraScannerInitialized()) {
+            cameraScannerProvider.disconnect();
+            cameraScannerProvider.reset();
         }
         super.onPause();
     }
@@ -254,7 +268,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void setViewContent() {
-        if (enableScan && goToCamera && hasPermissionSet(this, PERMISSIONS_CAMERA)) {
+        if (enableScan && goToCamera && hasPermissionSet(this, PERMISSIONS_CAMERA) && hasCameraScannerSdk) {
             // Can only add/open a camera view if camera is allowed.
             setContentView(layoutIdCamera);
         } else {
@@ -349,6 +363,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (hasPermissionSet(this, PERMISSIONS_CAMERA)) {
             if (!activityStartedInCameraMode) {
                 // The view needs permissions BEFORE initializing. And it initializes as soon as the layout is set.
+                if (layoutIdCamera == null) {
+                    throw new IllegalStateException("Camera layout not set");
+                }
                 setContentView(layoutIdCamera);
             }
             initCameraScanner();
@@ -363,12 +380,30 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
     }
 
+    private void setCameraViewId() {
+        if (this.layoutIdCamera == null) {
+            this.layoutIdCamera = cameraScannerProvider.getLayoutIdCamera();
+        }
+
+        if (this.cameraViewId == null) {
+            this.cameraViewId = cameraScannerProvider.getCameraViewId();
+        }
+
+        if (this.scannerModeToggleViewId == null) {
+            this.scannerModeToggleViewId = cameraScannerProvider.getScannerToggleViewId();
+        }
+
+        if (this.scannerModeTogglePauseId == null) {
+            this.scannerModeTogglePauseId = cameraScannerProvider.getScannerTogglePauseId();
+        }
+    }
+
     private void initCameraScanner() {
-        if (cameraScanner != null) {
+        if (cameraScannerProvider != null && cameraScannerProvider.isCameraScannerInitialized()) {
             return;
         }
         // TODO: should be in camera constructor, not here...
-        CameraBarcodeScanView cameraView = findViewById(cameraViewId);
+        View cameraView = findViewById(cameraViewId);
         if (cameraView == null) {
             Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();
             return;
@@ -383,7 +418,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (symbologies.isEmpty()) {
             symbologies.add(BarcodeType.CODE128);
         }
-        cameraScanner = new CameraBarcodeScanViewScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)), new ScannerStatusCallbackProxy(this), symbologies);
+
+        cameraScannerProvider.getCameraScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)), new ScannerStatusCallbackProxy(this), symbologies);
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
@@ -445,7 +481,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     public void onScannerInitEnded(int scannerCount) {
         Log.i(LOG_TAG, "Activity can now use all received scanners (" + scannerCount + ")");
 
-        if (scannerCount == 0 && !laserModeOnly && enableScan) {
+        if (scannerCount == 0 && !laserModeOnly && enableScan && hasCameraScannerSdk) {
             // In that case try to connect to a camera.
             initCamera();
         }
@@ -499,9 +535,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         toggleTorch();
 
-        if (cameraScanner != null) {
+        if (cameraScannerProvider != null && cameraScannerProvider.isCameraScannerInitialized()) {
             flashlight.setOnClickListener(v -> {
-                cameraScanner.toggleIllumination();
+                cameraScannerProvider.toggleIllumination();
                 toggleTorch();
             });
         } else {
@@ -521,13 +557,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
-        if (!anyScannerSupportsIllumination() && cameraScanner == null) {
+        if (!anyScannerSupportsIllumination() && cameraScannerProvider != null && !cameraScannerProvider.isCameraScannerInitialized()) {
             flashlight.setVisibility(View.GONE);
         } else {
             flashlight.setVisibility(View.VISIBLE);
         }
 
-        boolean isOn = anyScannerHasIlluminationOn() || (cameraScanner != null && cameraScanner.isIlluminationOn());
+        boolean isOn = anyScannerHasIlluminationOn() || (cameraScannerProvider != null && cameraScannerProvider.isIlluminationOn());
         int iconId = isOn ? R.drawable.icn_flash_off_on : R.drawable.icn_flash_off;
 
         final int newColor = getResources().getColor(R.color.flashButtonColor);
@@ -597,8 +633,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * Display a "use camera" button to allow using camera input even when a laser is available.
      */
     private void displayCameraButton() {
-        if (findViewById(cameraToggleId) != null) {
-            findViewById(cameraToggleId).setOnClickListener(view -> initCamera());
+        View cameraButtonView = findViewById(cameraToggleId);
+        if (cameraButtonView != null) {
+            // Display the camera button if the camera scanner SDK is available.
+            if (hasCameraScannerSdk) {
+                cameraButtonView.setVisibility(View.VISIBLE);
+            } else {
+                cameraButtonView.setVisibility(View.GONE);
+                return;
+            }
+            cameraButtonView.setOnClickListener(view -> initCamera());
         }
     }
 
@@ -610,8 +654,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.i(LOG_TAG, "Changing reader mode");
-            CameraBarcodeScanView cameraView = findViewById(cameraViewId);
-            cameraView.setReaderMode(isChecked ? CameraReader.ZXING : CameraReader.ZBAR);
+            View cameraView = findViewById(cameraViewId);
+            cameraScannerProvider.setReaderMode(cameraView, isChecked);
         });
     }
 
@@ -623,11 +667,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.i(LOG_TAG, "Toggling camera pause");
-            CameraBarcodeScanView cameraView = findViewById(cameraViewId);
+            View cameraView = findViewById(cameraViewId);
             if (isChecked) {
-                cameraView.pauseCamera();
+                cameraScannerProvider.pauseCamera(cameraView);
             } else {
-                cameraView.resumeCamera();
+                cameraScannerProvider.resumeCamera(cameraView);
             }
         });
     }

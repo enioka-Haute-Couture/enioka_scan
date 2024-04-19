@@ -1,4 +1,4 @@
-package com.enioka.scanner.camera;
+package com.enioka.scanner.sdk.camera;
 
 /**
  * All the data needed for a frame analysis.

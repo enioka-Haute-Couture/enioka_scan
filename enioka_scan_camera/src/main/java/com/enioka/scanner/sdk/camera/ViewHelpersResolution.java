@@ -1,4 +1,4 @@
-package com.enioka.scanner.camera;
+package com.enioka.scanner.sdk.camera;
 
 import android.app.ActivityManager;
 import android.content.Context;

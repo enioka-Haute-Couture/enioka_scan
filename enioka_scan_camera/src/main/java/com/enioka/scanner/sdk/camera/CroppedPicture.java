@@ -1,4 +1,4 @@
-package com.enioka.scanner.camera;
+package com.enioka.scanner.sdk.camera;
 
 /**
  * Data that must be analysed by a {@link FrameAnalyser}. It must be already cropped and rotated.

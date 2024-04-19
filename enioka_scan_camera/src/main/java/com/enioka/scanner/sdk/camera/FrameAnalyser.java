@@ -1,4 +1,4 @@
-package com.enioka.scanner.camera;
+package com.enioka.scanner.sdk.camera;
 
 import android.os.Process;
 import android.util.Log;

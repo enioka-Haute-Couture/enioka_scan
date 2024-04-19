@@ -1,0 +1,50 @@
+apply plugin: 'scanner.published-library'
+
+description('A library that makes the integration of all barcode scanners easy in any Android application, avoiding vendor lock-in and lowering the cost of advanced scanner integration.')
+
+android {
+    compileSdk 34
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 28
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lint {
+        disable 'ExpiredTargetSdkVersion'
+    }
+    namespace 'com.enioka.scanner.sdk.camera'
+}
+
+ext {
+    mavenArtifactId = "scanner-camera"
+}
+
+
+dependencies {
+    //noinspection GradleCompatible
+    implementation project(':enioka_scan')
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+
+    // ZBAR & ZXING (Zebra Crossing) = camera. From Maven Central.
+    api('me.dm7.barcodescanner:zbar:1.9.8') {
+        transitive = false
+    }
+    api('me.dm7.barcodescanner:core:1.9.8') {
+        transitive = false
+    }
+    api 'com.google.zxing:core:3.5.1'
+
+    // Test things (useless for now)
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    androidTestImplementation project(path: ':enioka_scan_mock')
+    testImplementation 'junit:junit:4.13.2'
+}

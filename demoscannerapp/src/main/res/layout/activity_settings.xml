@@ -455,6 +455,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHoneywellOssSppScannerProvider" />
 
+            <!-- Zebra DW -->
+            <TextView
+                android:id="@+id/textViewAllowedZebraDwProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/zebradwprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHoneywellOssIntegratedScannerProvider" />
+
+            <CheckBox
+                android:id="@+id/checkAllowedZebraDwProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedZebraDwProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHoneywellOssIntegratedScannerProvider" />
+
             <!-- EXCLUDED PROVIDERS -->
 
             <TextView
@@ -467,7 +492,7 @@
                 android:text="@string/excluded_providers"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedHoneywellOssIntegratedScannerProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/checkAllowedZebraDwProvider" />
 
             <!-- Athesi HTT-->
             <TextView
@@ -695,6 +720,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssSppScannerProvider" />
 
+            <!-- Zebra Dw -->
+            <TextView
+                android:id="@+id/textViewExcludedZebraDwProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/zebradwprovider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssIntegratedScannerProvider" />
+
+            <CheckBox
+                android:id="@+id/checkExcludedZebraDwProvider"
+                android:layout_width="fill_parent"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedZebraDwProvider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssIntegratedScannerProvider" />
+
 
             <!-- Symbology selection-->
             <TextView
@@ -707,7 +757,7 @@
                 android:text="@string/symbology_selection"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHoneywellOssIntegratedScannerProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedZebraDwProvider" />
 
             <!-- CODE 128 -->
             <TextView

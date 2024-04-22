@@ -27,6 +27,7 @@
     <string name="zebraossattscannerprovider">ZebraOssAttScannerProvider</string>
     <string name="honeywellosssppscannerprovider">HoneywellOssSppScannerProvider</string>
     <string name="honeywellossintegratedscannerprovider">HoneywellOssIntegratedScannerProvider</string>
+    <string name="zebradwprovider">ZebraDwProvider</string>
 
     <string name="barcodeCode128">Code-128</string>
     <string name="barcodeCode39">Code-39</string>

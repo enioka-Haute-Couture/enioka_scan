@@ -10,6 +10,7 @@
         <item>bluebird.BluebirdProvider</item>
         <item>zebraoss.ZebraOssAttScannerProvider</item>
         <item>zebraoss.ZebraOssSppScannerProvider</item>
+        <item>zebra.dw.ZebraDwProvider</item>
     </string-array>
     <string-array name="providers_keys">
         <item>AthesiE5LProvider</item>
@@ -21,5 +22,6 @@
         <item>BluebirdProvider</item>
         <item>BT_ZebraOssATTProvider</item>
         <item>BT_ZebraOssSPPProvider</item>
+        <item>ZebraDwProvider</item>
     </string-array>
 </resources>

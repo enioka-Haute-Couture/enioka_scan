@@ -3,35 +3,44 @@ package com.enioka.scanner.demo;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.Switch;
 
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.data.BarcodeType;
-import com.enioka.scanner.sdk.athesi.RD50TE.AthesiRD50TEProvider;
-import com.enioka.scanner.sdk.athesi.SPA43LTE.AthesiSPA43LTEProvider;
-import com.enioka.scanner.sdk.bluebird.BluebirdProvider;
-import com.enioka.scanner.sdk.generalscan.GsSppScannerProvider;
-import com.enioka.scanner.sdk.honeywelloss.integrated.HoneywellOssIntegratedScannerProvider;
-import com.enioka.scanner.sdk.honeywelloss.spp.HoneywellOssSppScannerProvider;
-import com.enioka.scanner.sdk.proglove.ProgloveProvider;
-import com.enioka.scanner.sdk.zebraoss.ZebraOssAttScannerProvider;
-import com.enioka.scanner.sdk.zebraoss.ZebraOssSppScannerProvider;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity {
+    /**
+     * List of possible providers
+     */
+    protected String[] providersList = null;
+    /**
+     * List of possible providers keys
+     */
+    protected String[] providersKeysList = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
         final SharedPreferences preferences = this.getSharedPreferences("ScannerSearchPreferences", MODE_PRIVATE);
+
+        // Detect which SDK providers are included inside the demo app
+        providersList = getResources().getStringArray(R.array.providers);
+        providersKeysList = getResources().getStringArray(R.array.providers_keys);
+        List<String> includedProvidersSDK = detectIncludedProvidersSDK(providersList);
 
         final ScannerSearchOptions options = ScannerSearchOptions.defaultOptions();
         ((Switch) findViewById(R.id.switchWaitDisconnected)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_WAIT_DISCONNECTED_BOOLEAN, options.waitDisconnected));
@@ -43,26 +52,31 @@ public class SettingsActivity extends AppCompatActivity {
         ((Switch) findViewById(R.id.switchIntentDevices)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, options.allowIntentDevices));
 
         final Set<String> allowedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
-        ((CheckBox) findViewById(R.id.checkAllowedHHTProvider)).setChecked(allowedProviderKeys.contains(AthesiSPA43LTEProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedE5LProvider)).setChecked(allowedProviderKeys.contains(AthesiRD50TEProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedBluebirdProvider)).setChecked(allowedProviderKeys.contains(BluebirdProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedProgloveProvider)).setChecked(allowedProviderKeys.contains(ProgloveProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedGsSppScannerProvider)).setChecked(allowedProviderKeys.contains(GsSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedZebraOssSppScannerProvider)).setChecked(allowedProviderKeys.contains(ZebraOssSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedZebraOssAttScannerProvider)).setChecked(allowedProviderKeys.contains(ZebraOssAttScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedHoneywellOssSppScannerProvider)).setChecked(allowedProviderKeys.contains(HoneywellOssSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedHoneywellOssIntegratedScannerProvider)).setChecked(allowedProviderKeys.contains(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY));
-
         final Set<String> excludedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
-        ((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).setChecked(excludedProviderKeys.contains(AthesiSPA43LTEProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedE5LProvider)).setChecked(excludedProviderKeys.contains(AthesiRD50TEProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedBluebirdProvider)).setChecked(excludedProviderKeys.contains(BluebirdProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedProgloveProvider)).setChecked(excludedProviderKeys.contains(ProgloveProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedGsSppScannerProvider)).setChecked(excludedProviderKeys.contains(GsSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedZebraOssSppScannerProvider)).setChecked(excludedProviderKeys.contains(ZebraOssSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedZebraOssAttScannerProvider)).setChecked(excludedProviderKeys.contains(ZebraOssAttScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedHoneywellOssSppScannerProvider)).setChecked(excludedProviderKeys.contains(HoneywellOssSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedHoneywellOssIntegratedScannerProvider)).setChecked(excludedProviderKeys.contains(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY));
+
+        int idx = -1;
+        for (String provider : providersList) {
+            String[] splitProviders = provider.split("\\.");
+            String suffixProvider = splitProviders[splitProviders.length - 1];
+            idx += 1;
+
+            // Get the id of the checkboxes
+            int idAllowed = getId("checkAllowed" + suffixProvider);
+            int idExcluded = getId("checkExcluded" + suffixProvider);
+
+            if (!includedProvidersSDK.contains(suffixProvider)) {
+                findViewById(idAllowed).setVisibility(View.GONE);
+                findViewById(idExcluded).setVisibility(View.GONE);
+                findViewById(getId("textViewAllowed" + suffixProvider)).setVisibility(View.GONE);
+                findViewById(getId("textViewExcluded" + suffixProvider)).setVisibility(View.GONE);
+            } else {
+                // Get the provider key of the current provider
+                String providerKey = providersKeysList[idx];
+
+                ((CheckBox) findViewById(idAllowed)).setChecked(allowedProviderKeys.contains(providerKey));
+                ((CheckBox) findViewById(idExcluded)).setChecked(excludedProviderKeys.contains(providerKey));
+            }
+        }
 
         final Set<BarcodeType> symbologySelection = new HashSet<>();
         for(String symbology: preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName())) {
@@ -89,27 +103,31 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, ((Switch) findViewById(R.id.switchIntentDevices)).isChecked());
 
         final Set<String> allowedProviderKeys = new HashSet<>();
-        if (((CheckBox) findViewById(R.id.checkAllowedHHTProvider)).isChecked()) { allowedProviderKeys.add(AthesiSPA43LTEProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedE5LProvider)).isChecked()) { allowedProviderKeys.add(AthesiRD50TEProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedBluebirdProvider)).isChecked()) { allowedProviderKeys.add(BluebirdProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedProgloveProvider)).isChecked()) { allowedProviderKeys.add(ProgloveProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedGsSppScannerProvider)).isChecked()) { allowedProviderKeys.add(GsSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedZebraOssSppScannerProvider)).isChecked()) { allowedProviderKeys.add(ZebraOssSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedZebraOssAttScannerProvider)).isChecked()) { allowedProviderKeys.add(ZebraOssAttScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedHoneywellOssSppScannerProvider)).isChecked()) { allowedProviderKeys.add(HoneywellOssSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedHoneywellOssIntegratedScannerProvider)).isChecked()) { allowedProviderKeys.add(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY); }
-        editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys);
-
         final Set<String> excludedProviderKeys = new HashSet<>();
-        if (((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).isChecked()) { excludedProviderKeys.add(AthesiSPA43LTEProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedE5LProvider)).isChecked()) { excludedProviderKeys.add(AthesiRD50TEProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedBluebirdProvider)).isChecked()) { excludedProviderKeys.add(BluebirdProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedProgloveProvider)).isChecked()) { excludedProviderKeys.add(ProgloveProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedGsSppScannerProvider)).isChecked()) { excludedProviderKeys.add(GsSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedZebraOssSppScannerProvider)).isChecked()) { excludedProviderKeys.add(ZebraOssSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedZebraOssAttScannerProvider)).isChecked()) { excludedProviderKeys.add(ZebraOssAttScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedHoneywellOssSppScannerProvider)).isChecked()) { excludedProviderKeys.add(HoneywellOssSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedHoneywellOssIntegratedScannerProvider)).isChecked()) { excludedProviderKeys.add(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY); }
+
+        int idx = -1;
+        for (String provider : providersList) {
+            idx += 1;
+            String[] splitProviders = provider.split("\\.");
+            String suffixProvider = splitProviders[splitProviders.length - 1];
+
+            // Get the id of the checkboxes
+            int idAllowed = getId("checkAllowed" + suffixProvider);
+            int idExcluded = getId("checkExcluded" + suffixProvider);
+
+            if (!findViewById(idAllowed).isShown()) {
+                continue;
+            }
+
+            if (((CheckBox) findViewById(idAllowed)).isChecked()) {
+                allowedProviderKeys.add(providersKeysList[idx]);
+            }
+            if (((CheckBox) findViewById(idExcluded)).isChecked()) {
+                excludedProviderKeys.add(providersKeysList[idx]);
+            }
+        }
+
+        editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys);
         editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, excludedProviderKeys);
 
         final Set<String> symbologySelection = new HashSet<>();
@@ -124,5 +142,30 @@ public class SettingsActivity extends AppCompatActivity {
 
         editor.apply();
         finish();
+    }
+
+    /**
+     * Detects which providers are included in the SDK and returns them.
+     */
+    private List<String> detectIncludedProvidersSDK(String[] providersList) {
+        List<String> includedProviders = new ArrayList<>();
+
+        for (String p : providersList) {
+            try {
+                Class.forName("com.enioka.scanner.sdk." + p);
+                String[] splitProviders = p.split("\\.");
+                includedProviders.add(splitProviders[splitProviders.length - 1]);
+            } catch (ClassNotFoundException e) {
+                continue;
+            }
+        }
+        return includedProviders;
+    }
+
+    /**
+     * Returns the id of a resource by its name.
+     */
+    private int getId(String name) {
+        return getResources().getIdentifier(name, "id", getPackageName());
     }
 }

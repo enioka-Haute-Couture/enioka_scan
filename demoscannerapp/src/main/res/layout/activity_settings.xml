@@ -231,7 +231,7 @@
 
             <!-- Athesi HTT -->
             <TextView
-                android:id="@+id/textViewAllowedHHTProvider"
+                android:id="@+id/textViewAllowedAthesiSPA43LTEProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="48dp"
@@ -243,20 +243,20 @@
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProviders" />
 
             <CheckBox
-                android:id="@+id/checkAllowedHHTProvider"
+                android:id="@+id/checkAllowedAthesiSPA43LTEProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedHHTProvider"
+                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedAthesiSPA43LTEProvider"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProviders" />
 
             <!-- Athesi E5L -->
             <TextView
-                android:id="@+id/textViewAllowedE5LProvider"
+                android:id="@+id/textViewAllowedAthesiRD50TEProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="48dp"
@@ -265,19 +265,19 @@
                 android:text="@string/e5lprovider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHHTProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedAthesiSPA43LTEProvider" />
 
             <CheckBox
-                android:id="@+id/checkAllowedE5LProvider"
+                android:id="@+id/checkAllowedAthesiRD50TEProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedE5LProvider"
+                app:layout_constraintRight_toLeftOf="@+id/textViewAllowedAthesiRD50TEProvider"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedHHTProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedAthesiSPA43LTEProvider" />
 
             <!-- Bluebird -->
             <TextView
@@ -290,7 +290,7 @@
                 android:text="@string/bluebirdprovider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedE5LProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedAthesiRD50TEProvider" />
 
             <CheckBox
                 android:id="@+id/checkAllowedBluebirdProvider"
@@ -302,7 +302,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/textViewAllowedBluebirdProvider"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedE5LProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedAthesiRD50TEProvider" />
 
             <!-- Proglove -->
             <TextView
@@ -471,7 +471,7 @@
 
             <!-- Athesi HTT-->
             <TextView
-                android:id="@+id/textViewExcludedHHTProvider"
+                android:id="@+id/textViewExcludedAthesiSPA43LTEProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="48dp"
@@ -483,20 +483,20 @@
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedProviders" />
 
             <CheckBox
-                android:id="@+id/checkExcludedHHTProvider"
+                android:id="@+id/checkExcludedAthesiSPA43LTEProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedHHTProvider"
+                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedAthesiSPA43LTEProvider"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textViewExcludedProviders" />
 
             <!-- Athesi E5L -->
             <TextView
-                android:id="@+id/textViewExcludedE5LProvider"
+                android:id="@+id/textViewExcludedAthesiRD50TEProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="48dp"
@@ -505,19 +505,19 @@
                 android:text="@string/e5lprovider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHHTProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedAthesiSPA43LTEProvider" />
 
             <CheckBox
-                android:id="@+id/checkExcludedE5LProvider"
+                android:id="@+id/checkExcludedAthesiRD50TEProvider"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedE5LProvider"
+                app:layout_constraintRight_toLeftOf="@+id/textViewExcludedAthesiRD50TEProvider"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedHHTProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedAthesiSPA43LTEProvider" />
 
             <!-- Bluebird -->
             <TextView
@@ -530,7 +530,7 @@
                 android:text="@string/bluebirdprovider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedE5LProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedAthesiRD50TEProvider" />
 
             <CheckBox
                 android:id="@+id/checkExcludedBluebirdProvider"
@@ -542,7 +542,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintRight_toLeftOf="@+id/textViewExcludedBluebirdProvider"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedE5LProvider" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedAthesiRD50TEProvider" />
 
             <!-- Proglove -->
             <TextView

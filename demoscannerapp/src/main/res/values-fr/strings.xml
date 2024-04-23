@@ -19,16 +19,16 @@
     <string name="symbology_selection">Selection de la symbology (vide = EAN,128):</string>
     <string name="save">Enregistrer</string>
 
-    <string name="hhtprovider">AthesiHHTProvider</string>
-    <string name="e5lprovider">AthesiE5LProvider</string>
-    <string name="bluebirdprovider">BluebirdProvider</string>
-    <string name="progloveprovider">ProgloveProvider</string>
-    <string name="gssppscannerprovider">GsSppScannerProvider</string>
-    <string name="zebraosssppscannerprovider">ZebraOssSppScannerProvider</string>
-    <string name="zebraossattscannerprovider">ZebraOssAttScannerProvider</string>
-    <string name="honeywellosssppscannerprovider">HoneywellOssSppScannerProvider</string>
-    <string name="honeywellossintegratedscannerprovider">HoneywellOssIntegratedScannerProvider</string>
-    <string name="zebradwprovider">ZebraDwProvider</string>
+    <string name="hhtprovider">Athesi [SPA45…]</string>
+    <string name="e5lprovider">Athesi [E5L…]</string>
+    <string name="bluebirdprovider">Bluebird integrated [EF500…]</string>
+    <string name="progloveprovider">Proglove [Glove Mark 2…]</string>
+    <string name="gssppscannerprovider">GeneralScan BLE ring</string>
+    <string name="zebraosssppscannerprovider">Zebra BT Classic [RS5100…]</string>
+    <string name="zebraossattscannerprovider">Zebra BT Low Energy [RS5100…]</string>
+    <string name="honeywellosssppscannerprovider">HoneyWell BT [Voyager 1602…]</string>
+    <string name="honeywellossintegratedscannerprovider">HoneyWell integrated [EDA52…]</string>
+    <string name="zebradwprovider">Zebra DataWedge [TC25, TC27…]</string>
 
     <string name="barcodeCode128">Code-128</string>
     <string name="barcodeCode39">Code-39</string>

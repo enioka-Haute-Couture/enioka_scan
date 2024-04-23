@@ -1,6 +1,6 @@
 package com.enioka.scanner.sdk.zebraoss.parsers;
 
-import android.support.v4.util.Pair;
+import androidx.core.util.Pair;
 import android.util.Log;
 
 import com.enioka.scanner.sdk.zebraoss.data.ParamSend;

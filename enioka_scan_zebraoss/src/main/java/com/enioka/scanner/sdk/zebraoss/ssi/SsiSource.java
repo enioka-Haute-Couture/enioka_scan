@@ -1,6 +1,6 @@
 package com.enioka.scanner.sdk.zebraoss.ssi;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * Originator of a message, used both for SsiPackets (source-byte) or config (expected source-byte).

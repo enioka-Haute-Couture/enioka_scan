@@ -4,11 +4,11 @@ apply plugin: 'com.android.library'
 description 'Scanner provider for Athesi SPA43 device (SPA43LTE name).'
 
 android {
-    compileSdkVersion 33
+    compileSdk 34
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {

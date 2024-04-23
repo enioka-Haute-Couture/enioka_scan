@@ -11,7 +11,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;

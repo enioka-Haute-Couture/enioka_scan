@@ -1,7 +1,7 @@
 package com.enioka.scanner.api;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.enioka.scanner.api.callbacks.ScannerCommandCallback;
 import com.enioka.scanner.api.callbacks.ScannerDataCallback;

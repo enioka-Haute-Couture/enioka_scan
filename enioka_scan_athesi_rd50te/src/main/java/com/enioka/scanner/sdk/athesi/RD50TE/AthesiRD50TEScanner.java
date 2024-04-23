@@ -2,7 +2,7 @@ package com.enioka.scanner.sdk.athesi.RD50TE;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;

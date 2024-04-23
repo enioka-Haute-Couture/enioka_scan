@@ -2,7 +2,7 @@ package com.enioka.scanner.sdk.honeywelloss.spp;
 
 import android.content.Context;
 import android.os.Handler;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.enioka.scanner.api.Scanner;
 import com.enioka.scanner.api.ScannerLedColor;

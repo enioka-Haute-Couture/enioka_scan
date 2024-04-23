@@ -2,7 +2,7 @@ package com.enioka.scanner.sdk.zebra.dw;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import java.util.HashSet;

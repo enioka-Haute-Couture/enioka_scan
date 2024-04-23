@@ -4,11 +4,11 @@ apply plugin: 'com.android.library'
 description 'Athesi E5L scanner provider for the Athesi E5L device (RD50TE name).'
 
 android {
-    compileSdkVersion 33
+    compileSdk 34
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {

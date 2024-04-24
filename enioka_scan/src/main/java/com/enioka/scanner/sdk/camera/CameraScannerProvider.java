@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * The interface to implement by the camera scanner provider (via the camera scanner SDK).
  */
-public interface CameraScanner {
+public interface CameraScannerProvider {
     /**
      * Returns the ID of the camera view in the layout.
      */

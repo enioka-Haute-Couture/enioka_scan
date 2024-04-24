@@ -59,7 +59,7 @@ If the camera SDK is included, it will be defined to :::{cpp:var}R.layout.activi
 
 :::{cpp:var} Integer cameraViewId = null
 
-If the camera SDK is included, it will be defined to :::{cpp:var}R.id.camera_scan_view
+If the camera SDK is included, it will be set to :::{cpp:var}R.id.camera_scan_view
 It is the ID of the [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the
 `layoutIdCamera` layout.
 :::
@@ -76,15 +76,16 @@ The ID of the optional ImageButton on which to press to toggle the flashlight/il
 
 :::{cpp:var} Integer scannerModeToggleViewId = null
 
-If the camera SDK is included, it will be defined to :::{cpp:var}R.id.scanner_switch_zxing.
+If the camera SDK is included, it will be set to :::{cpp:var}R.id.scanner_switch_zxing.
 It is the ID of the optional ImageButton on which to press to toggle the zxing/zbar camera scan
 library.
 :::
 
 :::{cpp:var} Integer scannerModeTogglePauseId = 
 
-If the camera SDK is included, it will be defined to :::{cpp:var}R.id.scanner_switch_pause.
-It is the ID of the optional toggle button on which to press to pause/unpause the scanner.
+The ID of the optional toggle button on which to press to pause/unpause the scanner.
+If the camera SDK is included and it is not overwrite, it will be set by default to
+:::{cpp:var}R.id.scanner_switch_pause.
 :::
 
 :::{cpp:var} int keyboardOpenViewId = R.id.scanner_bt_keyboard
@@ -118,7 +119,7 @@ Initialized by the `onStart()` and `onResume()` methods.
 
 :::{cpp:var} CameraScanner cameraScannerProvider = null;
 
-The optional instance of the camera scanner provider, is defined if the camera SDK is included.
+The optional instance of the camera scanner provider, is set if the camera SDK is included.
 Can be used to access some methods of `CameraBarcodeScanViewScanner`. Should not be replaced.
 
 `CameraBarcodeScanViewScanner` is a simple provider-less implementation of the 

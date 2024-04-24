@@ -35,7 +35,7 @@ import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
-import com.enioka.scanner.sdk.camera.CameraScanner;
+import com.enioka.scanner.sdk.camera.CameraScannerProvider;
 import com.enioka.scanner.service.ScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
@@ -146,7 +146,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * Optional camera scanner provider (if the camera scanner SDK is available).
      */
-    protected CameraScanner cameraScannerProvider = null;
+    protected CameraScannerProvider cameraScannerProvider = null;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +189,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         // Check if the camera scanner SDK is available.
         try {
-            cameraScannerProvider = (CameraScanner) Class.forName(CAMERA_SDK_PACKAGE + ".CameraProvider").newInstance();
+            cameraScannerProvider = (CameraScannerProvider) Class.forName(CAMERA_SDK_PACKAGE + ".CameraProvider").newInstance();
             hasCameraScannerSdk = true;
             setCameraViewId();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {

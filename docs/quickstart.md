@@ -19,8 +19,8 @@ dependencies {
 }
 ```
 
-To use others devices or the smartphone's camera as a scanner, dependencies are required,
-you can check the [library dependencies and compatibility matrix](dependencies.md)
+Additional device-specific dependencies are required to enable support for actual scanners.
+You can check the [library dependencies and compatibility matrix](dependencies.md)
 for a detailed overview.
 
 ## Using the library

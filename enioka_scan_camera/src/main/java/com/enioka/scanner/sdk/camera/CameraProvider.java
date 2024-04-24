@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * Provider for integrated camera scanner functionality, implementing the CameraScanner interface.
  */
-public class CameraProvider implements CameraScanner {
+public class CameraProvider implements CameraScannerProvider {
     /**
      * Camera scanner
      */

@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
@@ -40,12 +41,17 @@ import com.enioka.scanner.service.ScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 import com.enioka.scanner.service.ScannerServiceBinderHelper;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Timer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A helper activity which implements all scan functions: laser, camera, HID.<br><br>Basic usage is trivial : just inherit this class, and that's all.<br>
@@ -147,6 +153,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * Optional camera scanner provider (if the camera scanner SDK is available).
      */
     protected CameraScannerProvider cameraScannerProvider = null;
+
+    /**
+     * Material card view for the scanner status.
+     */
+    private MaterialCardView scannerStatusCard;
+
+    /**
+     * Delay in milliseconds before resetting the scanner status card style.
+     */
+    private static final long STATUS_CARD_RESET_DELAY = 170;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -273,6 +289,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             setContentView(layoutIdCamera);
         } else {
             setContentView(layoutIdLaser);
+            scannerStatusCard = findViewById(R.id.scanner_card_last_scan);
         }
     }
 
@@ -420,6 +437,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
 
         cameraScannerProvider.getCameraScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)), new ScannerStatusCallbackProxy(this), symbologies);
+        // Set the content view to the camera layout
+        scannerStatusCard = findViewById(cameraScannerProvider.getMaterialCardViewId());
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
@@ -473,7 +492,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     public void onStatusChanged(final Scanner scanner, final ScannerStatusCallback.Status newStatus) {
         if (findViewById(R.id.scanner_text_scanner_status) != null) {
             TextView tv = findViewById(R.id.scanner_text_scanner_status);
-            tv.setText((scanner == null ? "" : (scanner.getProviderKey() + ": ")) + newStatus + " --- " + newStatus.getLocalizedMessage(this) + "\n" + tv.getText());
+            tv.setText((scanner == null ? "" : (scanner.getProviderKey() + ": ")) + newStatus + (tv.getText().length() != 0 ? "\n" : "") + tv.getText());
         }
     }
 
@@ -489,8 +508,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (scannerCount > 0) {
             displayTorch();
             displayToggleLedButton();
-            displayEnableScanButton();
-            displayDisableScanButton();
+            displaySwitchScanButton();
             displayBellButton();
         }
     }
@@ -507,18 +525,45 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
     @Override
     public void onData(List<Barcode> data) {
+        scannerStatusCard.setStrokeColor(ContextCompat.getColor(ScannerCompatActivity.this, R.color.doneItemColor));
+        scannerStatusCard.setStrokeWidth(4);
+
+        resetStatusCardStyle();
+
         StringBuilder res = new StringBuilder();
         for (Barcode b : data) {
             Log.d(LOG_TAG, "Received barcode from scanner: " + b.getBarcode() + " - " + b.getBarcodeType().code);
-            res.append(b.getBarcode()).append("\n").append(b.getBarcodeType().code).append("\n");
+            res.append("TYPE: ").append(b.getBarcodeType().code).append(" ").append(b.getBarcode());
         }
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(res.toString());
         }
+
+        // Disable the scannerSwitch when a barcode is found
+        MaterialSwitch scannerSwitch = (MaterialSwitch) findViewById(R.id.scanner_trigger_on);
+        if (scannerSwitch != null) {
+            scannerSwitch.setChecked(false);
+        }
+
         if (manualInputFragment != null) {
             manualInputFragment = null;
             scannerService.resume();
         }
+    }
+
+    /**
+     * Reset stroke color and width of the scanner status card after a delay.
+     */
+    private void resetStatusCardStyle() {
+        new Timer().schedule(new java.util.TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(() -> {
+                    scannerStatusCard.setStrokeColor(ContextCompat.getColor(ScannerCompatActivity.this, R.color.cardBackgroundColor));
+                    scannerStatusCard.setStrokeWidth(1);
+                });
+            }
+        }, TimeUnit.MILLISECONDS.toMillis(STATUS_CARD_RESET_DELAY));
     }
 
 
@@ -566,11 +611,19 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             flashlight.setVisibility(View.VISIBLE);
         }
 
-        boolean isOn = anyScannerHasIlluminationOn() || (cameraScannerProvider != null && cameraScannerProvider.isIlluminationOn());
-        int iconId = isOn ? R.drawable.icn_flash_off_on : R.drawable.icn_flash_off;
+        boolean isOn = (!goToCamera && anyScannerHasIlluminationOn()) || (cameraScannerProvider != null && cameraScannerProvider.isIlluminationOn());
 
-        final int newColor = getResources().getColor(R.color.flashButtonColor);
-        flashlight.setColorFilter(newColor, PorterDuff.Mode.SRC_ATOP);
+        int iconId;
+
+        // If we are in camera mode, the icon should be the camera flash icon.
+        // Otherwise, the icon should be the flashlight icon.
+        if (goToCamera) {
+            iconId = isOn ? R.drawable.flash : R.drawable.flash_off;
+        } else {
+            iconId = isOn ? R.drawable.flashlight : R.drawable.flashlight_off;
+
+        }
+
         flashlight.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), iconId));
     }
 
@@ -652,7 +705,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void displayCameraReaderToggle() {
-        final Switch toggle = findViewById(scannerModeToggleViewId);
+        final SwitchCompat toggle = findViewById(scannerModeToggleViewId);
         if (toggle == null) {
             return;
         }
@@ -665,7 +718,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void displayCameraPauseToggle() {
-        final Switch toggle = findViewById(scannerModeTogglePauseId);
+        final SwitchCompat toggle = findViewById(scannerModeTogglePauseId);
         if (toggle == null) {
             return;
         }
@@ -721,33 +774,27 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
     }
 
-    private void displayDisableScanButton() {
-        View scannerTriggerOff = findViewById(R.id.scanner_trigger_off);
+    private void displaySwitchScanButton() {
+        View scannerTriggerOff = findViewById(R.id.scanner_trigger_on);
 
         if (scannerTriggerOff != null) {
             scannerTriggerOff.setVisibility(View.VISIBLE);
-            scannerTriggerOff.setOnClickListener(view -> {
+
+            MaterialSwitch switchCompat = (MaterialSwitch) scannerTriggerOff;
+            switchCompat.setOnCheckedChangeListener((view, checked) -> {
                 for (final Scanner s : scannerService.getConnectedScanners()) {
-                    if (s.getTriggerSupport() != null)
-                        s.getTriggerSupport().releaseScanTrigger();
+                    if (s.getTriggerSupport() != null) {
+                        if (checked) {
+                            s.getTriggerSupport().pressScanTrigger();
+                        } else {
+                            s.getTriggerSupport().releaseScanTrigger();
+                        }
+                    }
                 }
             });
         }
     }
 
-    private void displayEnableScanButton() {
-        View scannerTriggerOnView = findViewById(R.id.scanner_trigger_on);
-
-        if (scannerTriggerOnView!= null) {
-            scannerTriggerOnView.setVisibility(View.VISIBLE);
-            scannerTriggerOnView.setOnClickListener(view -> {
-                for (final Scanner s : scannerService.getConnectedScanners()) {
-                    if (s.getTriggerSupport() != null)
-                        s.getTriggerSupport().pressScanTrigger();
-                }
-            });
-        }
-    }
 
     private void displayBellButton() {
         View scannerBellView = findViewById(R.id.scanner_bell);

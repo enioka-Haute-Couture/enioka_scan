@@ -3,20 +3,24 @@
     <string name="app_name">Test scanner</string>
 
     <string name="scanner_tester">Testeur de scanner</string>
-    <string name="test_scan">Tester la librairie de scan</string>
-    <string name="settings">Paramètres du scanner</string>
+    <string name="test_scan">Tester enioka scan</string>
+    <string name="settings">Paramètres</string>
+
+    <string name="github_button">GitHub</string>
 
     <string name="scanner_search_settings">Paramètres</string>
-    <string name="wait_disconnected">Attendre les scanners déconnectés:</string>
-    <string name="return_only_first">Premier connecté uniquement:</string>
-    <string name="use_bluetooth">Utiliser le Bluetooth:</string>
-    <string name="allow_initial_search">Autoriser la recherche initiale:</string>
-    <string name="allow_later_connections">Autoriser les connexions retardataires:</string>
-    <string name="allow_pairing_flow">Autoriser les séquences d\'appairage:</string>
-    <string name="allow_intent_devices">Autoriser les scanners fonctionnant par Intent:</string>
-    <string name="allowed_providers">Providers Autorisés (vide = tous):</string>
-    <string name="excluded_providers">Providers Exclus (vide = aucun):</string>
-    <string name="symbology_selection">Selection de la symbology (vide = EAN,128):</string>
+    <string name="scanner_general_settings">Général</string>
+    <string name="wait_disconnected">Attendre les scanners déconnectés</string>
+    <string name="return_only_first">Premier connecté uniquement</string>
+    <string name="use_bluetooth">Utiliser le Bluetooth</string>
+    <string name="allow_initial_search">Autoriser la recherche initiale</string>
+    <string name="allow_later_connections">Autoriser les connexions retardataires</string>
+    <string name="allow_pairing_flow">Autoriser les séquences d\'appairage</string>
+    <string name="allow_intent_devices">Autoriser les scanners fonctionnant par Intent</string>
+    <string name="allowed_providers">Providers Autorisés</string>
+    <string name="excluded_providers">Providers Exclus</string>
+    <string name="symbology_selection">Sélection de la symbologie</string>
+    <string name="symbology_selection_caption">vide = EAN,128</string>
     <string name="save">Enregistrer</string>
 
     <string name="AthesiHHTProvider">Athesi [SPA45…]</string>
@@ -37,4 +41,8 @@
     <string name="barcodeEan13">EAN13</string>
     <string name="barcodeQrCode">QRCode</string>
     <string name="barcodeAztec">Aztec</string>
+
+    <string name="toogle_provider_button_all">Tous</string>
+    <string name="toggle_provider_button_specific">Choisir</string>
+    <string name="toggle_provider_button_none">Aucun</string>
 </resources>

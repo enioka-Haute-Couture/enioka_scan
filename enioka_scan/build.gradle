@@ -34,6 +34,7 @@ dependencies {
     //noinspection GradleCompatible
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+    implementation 'com.google.android.material:material:1.11.0'
 
     // ZBAR & ZXING (Zebra Crossing) = camera. From Maven Central.
     api('me.dm7.barcodescanner:zbar:1.9.8') {

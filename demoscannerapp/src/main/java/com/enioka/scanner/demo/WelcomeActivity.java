@@ -4,18 +4,28 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.view.MenuItem;
 import android.view.View;
 
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WelcomeActivity extends AppCompatActivity {
     private List<String> availableProviders = new ArrayList<>();
+    protected MaterialButton bt1 = null;
+    protected MaterialButton bt4 = null;
+    protected FloatingActionButton bt5 = null;
+
+    protected MaterialToolbar toolbar = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,6 +33,15 @@ public class WelcomeActivity extends AppCompatActivity {
 
         LaserScanner.discoverProviders(this, () -> {});
         availableProviders = LaserScanner.getProviderCache();
+        bt1 = findViewById(R.id.bt_scanner);
+        //bt4 = findViewById(R.id.bt_tester);
+        bt5 = findViewById(R.id.bt_settings);
+        toolbar = findViewById(R.id.topAppBar);
+
+        bt1.setOnClickListener(this::onClickBt1);
+        //bt4.setOnClickListener(this::onClickBt4);
+        bt5.setOnClickListener(this::onClickBt5);
+        setSupportActionBar(toolbar);
     }
 
     // Scanner activity
@@ -60,5 +79,14 @@ public class WelcomeActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SettingsActivity.class);
         intent.putStringArrayListExtra("providers", (ArrayList<String>) availableProviders);
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.github_button) {
+            // Handle button click
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

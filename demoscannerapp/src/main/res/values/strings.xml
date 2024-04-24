@@ -3,19 +3,23 @@
 
     <string name="scanner_tester">Scanner tester</string>
     <string name="test_scan">Test scanner library</string>
-    <string name="settings">Scanner settings</string>
+    <string name="settings">Settings</string>
+
+    <string name="github_button">GitHub</string>
 
     <string name="scanner_search_settings">Settings</string>
-    <string name="wait_disconnected">Wait Disconnected:</string>
-    <string name="return_only_first">Return Only First:</string>
-    <string name="use_bluetooth">Use Bluetooth:</string>
-    <string name="allow_initial_search">Allow Initial Search:</string>
-    <string name="allow_later_connections">Allow Later Connections:</string>
-    <string name="allow_pairing_flow">Allow Pairing Flow:</string>
+    <string name="scanner_general_settings">General</string>
+    <string name="wait_disconnected">Wait Disconnected</string>
+    <string name="return_only_first">Return Only First</string>
+    <string name="use_bluetooth">Use Bluetooth</string>
+    <string name="allow_initial_search">Allow Initial Search</string>
+    <string name="allow_later_connections">Allow Later Connections</string>
+    <string name="allow_pairing_flow">Allow Pairing Flow</string>
     <string name="allow_intent_devices">Allow Intent Devices</string>
-    <string name="allowed_providers">Allowed Providers (empty = all):</string>
-    <string name="excluded_providers">Excluded Providers (empty = none):</string>
-    <string name="symbology_selection">Allowed Symbology (empty = EAN,128):</string>
+    <string name="allowed_providers">Allowed Providers</string>
+    <string name="excluded_providers">Excluded Providers</string>
+    <string name="symbology_selection">Allowed Symbology</string>
+    <string name="symbology_selection_caption">vide = EAN,128</string>
     <string name="save">Save</string>
 
     <string name="AthesiHHTProvider">Athesi [SPA45…]</string>
@@ -37,4 +41,7 @@
     <string name="barcodeQrCode">QRCode</string>
     <string name="barcodeAztec">Aztec</string>
 
+    <string name="toogle_provider_button_all">All</string>
+    <string name="toggle_provider_button_specific">Select</string>
+    <string name="toggle_provider_button_none">None</string>
 </resources>

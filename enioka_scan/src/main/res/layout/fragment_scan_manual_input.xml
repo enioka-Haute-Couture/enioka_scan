@@ -13,36 +13,41 @@
         android:id="@+id/scanner_manual_invite"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:text="@string/fragment_scan_manual_invite"
         android:textSize="16sp"
         android:textAlignment="center"/>
 
-    <AutoCompleteTextView
-        android:id="@+id/scanner_manual_input"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/scanner_manual_input_text_input_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
         android:layout_below="@id/scanner_manual_invite"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="25dp"
-        android:gravity="center"
         android:inputType="textCapCharacters|text"
         android:hint="@string/fragment_scan_manual_hint"
-        android:textSize="16sp"
-        android:drawableEnd="@drawable/ic_arrow_down_drop_circle_grey600_24dp"
-        android:drawableRight="@drawable/ic_arrow_down_drop_circle_grey600_24dp">
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
 
-        <requestFocus />
-    </AutoCompleteTextView>
-    <Button
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/scanner_manual_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/scanner_manual_invite"
+            android:layout_centerHorizontal="true"
+            android:gravity="center">
+
+            <requestFocus />
+        </com.google.android.material.textfield.MaterialAutoCompleteTextView>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/scanner_manual_bt_ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/scanner_manual_input"
+        android:layout_below="@id/scanner_manual_input_text_input_layout"
         android:layout_marginBottom="0px"
         android:layout_marginTop="40dp"
         android:background="?android:attr/selectableItemBackground"

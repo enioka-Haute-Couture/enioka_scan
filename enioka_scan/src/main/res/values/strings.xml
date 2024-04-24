@@ -30,16 +30,20 @@
     <string name="scanner_camera_no_camera">No fallback camera available on device. Please plugin your laser barcode scanner and restart application. Application will now crash.</string>
 
     <!-- Helper activities -->
+    <string name="activity_scan_barcode_state">Scanner state</string>
     <string name="activity_scan_barcode_value_placeholder">10AL9271B2I8</string>
     <string name="activity_scan_scanner_not_initialized">Scanner initialization not started</string>
     <string name="scanner_using_bt_keyboard">Using Bluetooth scanner or keyboard</string>
     <string name="activity_scan_no_compatible_sdk">There are no compatible scanners on this device</string>
     <string name="activity_scan_use_zxing">ZXing</string>
     <string name="activity_scan_pause_camera">Pause</string>
+    <string name="camera_mode_button">Camera</string>
 
     <!-- Helper manual scan fragment -->
     <string name="fragment_scan_manual_title">Manual input</string>
     <string name="fragment_scan_manual_invite">Please enter the barcode value, then select one item among the results</string>
     <string name="fragment_scan_manual_hint">0000000000</string>
     <string name="fragment_scan_manual_ok">Send</string>
+    <string name="keyboard_input">Input</string>
+    <string name="switch_enable_scan_text">enable scan</string>
 </resources>

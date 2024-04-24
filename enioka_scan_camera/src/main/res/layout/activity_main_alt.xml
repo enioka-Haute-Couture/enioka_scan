@@ -27,68 +27,97 @@
         app:targetStrokeWidth="5"
         app:useAdaptiveResolution="true" />
 
-    <TextView
-        android:id="@+id/scanner_text_last_scan"
-        android:layout_width="match_parent"
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_camera_last_scan"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        app:layout_constraintWidth_percent="0.95"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:cardBackgroundColor="@color/cardBackgroundColor"
+        app:cardCornerRadius="12dp">
+
+        <TextView
+            android:id="@+id/scanner_text_last_scan"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:ellipsize="none"
+            android:padding="8dp"
+            android:gravity="center"
+            android:text="@string/activity_scan_barcode_value_placeholder"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/scanner_card_scanner_status"
+        android:layout_width="0dp"
         android:layout_height="50dp"
-        android:background="#59ffffff"
-        android:gravity="center_horizontal|center_vertical"
-        android:text="@string/activity_scan_barcode_value_placeholder"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintWidth_percent="0.95"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        app:cardBackgroundColor="@color/cardBackgroundColor"
+        app:cardCornerRadius="12dp">
 
+        <TextView
+            android:id="@+id/scanner_text_scanner_status"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="5dp"
+            android:gravity="center"
+            android:text="@string/activity_scan_scanner_not_initialized"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-    <TextView
-        android:id="@+id/scanner_text_scanner_status"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="#59ffffff"
-        android:gravity="center_horizontal|top"
-        android:text="@string/activity_scan_scanner_not_initialized"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent" />
+    </com.google.android.material.card.MaterialCardView>
 
-    <ImageButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/scanner_flashlight"
         android:layout_width="wrap_content"
-        android:layout_height="45dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginRight="12dp"
-        android:background="@null"
-        android:src="@drawable/icn_flash_off"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:src="@drawable/lightbulb_off"
+        app:fabCustomSize="42dp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scanner_text_last_scan" />
+        app:layout_constraintTop_toBottomOf="@id/card_camera_last_scan"
+        android:contentDescription="flashlight" />
 
-    <ImageButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/scanner_bt_keyboard"
         android:layout_width="wrap_content"
-        android:layout_height="45dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginRight="12dp"
-        android:background="@null"
-        android:src="@drawable/icn_keyboard"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:src="@drawable/keyboard_fill"
+        app:fabCustomSize="42dp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scanner_flashlight" />
+        app:layout_constraintTop_toBottomOf="@id/scanner_flashlight"
+        android:contentDescription="keyboard" />
 
-    <Switch
+    <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/scanner_switch_zxing"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
         android:text="@string/activity_scan_use_zxing"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        app:thumbIcon="@drawable/camera2"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scanner_bt_keyboard" />
+        app:layout_constraintBottom_toTopOf="@id/scanner_switch_pause" />
 
-    <Switch
+    <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/scanner_switch_pause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
         android:text="@string/activity_scan_pause_camera"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        app:thumbIcon="@drawable/pause_fill"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scanner_switch_zxing" />
+        app:layout_constraintBottom_toTopOf="@id/scanner_card_scanner_status" />
 </androidx.constraintlayout.widget.ConstraintLayout>

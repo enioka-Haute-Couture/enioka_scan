@@ -22,6 +22,7 @@
     <string name="scanner_camera_no_camera">Aucune caméra disponible. Veuillez brancher votre lecteur laser. L\'application va s\'arrêter.</string>
     <string name="scanner_camera_open_error">Veuillez vérifier qu\'aucune autre application n\'utilise la caméra (comme ScanWedge, DataWedge…). Vérifiez aussi que la caméra fnction dans l\'application idoine.</string>
     <string name="scanner_camera_open_error_title">Impossible de se connecter à la caméra</string>
+    <string name="activity_scan_barcode_state">Scanner status</string>
     <string name="activity_scan_barcode_value_placeholder">10AL9271B2I8</string>
     <string name="activity_scan_scanner_not_initialized">Initialisation du scanner non commencée</string>
     <string name="app_name">EniokaScan</string>
@@ -35,4 +36,7 @@
     <string name="service_description">Service d\'assistance à la gestion des scanners</string>
     <string name="activity_scan_use_zxing">ZXing</string>
     <string name="activity_scan_pause_camera">Pause</string>
+    <string name="camera_mode_button">Camera</string>
+    <string name="keyboard_input">Entrée</string>
+    <string name="switch_enable_scan_text">Activer le scan</string>
 </resources>

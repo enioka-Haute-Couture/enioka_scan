@@ -38,6 +38,11 @@ public class CameraProvider implements CameraScannerProvider {
     }
 
     @Override
+    public int getMaterialCardViewId() {
+        return R.id.card_camera_last_scan;
+    }
+
+    @Override
     public void getCameraScanner(View cameraBarcodeScanView, ScannerDataCallbackProxy mHandler, final ScannerStatusCallbackProxy statusCallback, final Set<BarcodeType> symbologySelection) {
         this.cameraScanner = new CameraBarcodeScanViewScanner((CameraBarcodeScanView) cameraBarcodeScanView, mHandler, statusCallback, symbologySelection);
     }

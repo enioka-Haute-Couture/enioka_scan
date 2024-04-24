@@ -33,6 +33,11 @@ public interface CameraScannerProvider {
     public int getScannerTogglePauseId();
 
     /**
+     * Returns the ID of the material card view containing the last scanned barcode.
+     */
+    public int getMaterialCardViewId();
+
+    /**
      * Called to initialize the camera scanner with the given view and callbacks.
      */
     public void getCameraScanner(View cameraBarcodeScanView, ScannerDataCallbackProxy mHandler, final ScannerStatusCallbackProxy statusCallback, final Set<BarcodeType> symbologySelection);

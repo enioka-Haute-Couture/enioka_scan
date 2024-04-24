@@ -103,43 +103,46 @@ public class ZebraDwScanner extends IntentScanner<String> implements Scanner.Wit
                 return;
             }
 
+            currentlyActiveProfile = b.getString("PROFILE_NAME");
             String notificationType = b.getString(ZebraDwIntents.DW_NOTIFICATION_TYPE_EXTRA);
             if (notificationType != null) {
                 switch (notificationType) {
                     case ZebraDwIntents.DW_NOTIFICATION_CHANGE_STATUS:
                         String status = b.getString("STATUS");
-                        Log.d(LOG_TAG, "SCANNER_STATUS: status: " + status + ", profileName: " + b.getString("PROFILE_NAME"));
+                        Log.d(LOG_TAG, "SCANNER_STATUS: status: " + status + ", profileName: " + currentlyActiveProfile);
                         if (this.statusCb != null && status != null) {
                             this.statusCb.onStatusChanged(this, ZebraDwHelpers.getStatus(status));
                         }
                         break;
 
                     case ZebraDwIntents.DW_NOTIFICATION_CHANGE_PROFILE:
-                        Log.i(LOG_TAG, "PROFILE_SWITCH: profileName: " + b.getString("PROFILE_NAME") + ", profileEnabled: " + b.getBoolean("PROFILE_ENABLED"));
-                        currentlyActiveProfile = b.getString("PROFILE_NAME");
+                        Log.i(LOG_TAG, "PROFILE_SWITCH: profileName: " + currentlyActiveProfile + ", profileEnabled: " + b.getBoolean("PROFILE_ENABLED"));
                         if (currentConfig != null && profileName.equals(currentlyActiveProfile)) {
                             Log.d(LOG_TAG, "Correct profile, configuring symbologies");
                             configureSymbologies();
                         }
-                        if (!paused && !profileName.equals(currentlyActiveProfile)) {
-                            // DW will change the profile between activities and apps. We must check each time a switch is done.
-                            Log.d(LOG_TAG, "Incorrect profile " + currentlyActiveProfile + ", requesting profile change to " + profileName);
-                            switchToOurProfile();
-                        }
                         break;
 
                     case ZebraDwIntents.DW_NOTIFICATION_CHANGE_CONFIGURATION:
-                        Log.i(LOG_TAG, "CONFIGURATION_UPDATE: status: " + b.getString("STATUS") + ", profileName: " + b.getString("PROFILE_NAME"));
+                        Log.i(LOG_TAG, "CONFIGURATION_UPDATE: status: " + b.getString("STATUS") + ", profileName: " + currentlyActiveProfile);
                         break;
 
                     case ZebraDwIntents.DW_NOTIFICATION_CHANGE_WORKFLOW:
-                        Log.d(LOG_TAG, "WORKFLOW_STATUS: status: " + b.getString("STATUS") + ", profileName: " + b.getString("PROFILE_NAME"));
+                        Log.d(LOG_TAG, "WORKFLOW_STATUS: status: " + b.getString("STATUS") + ", profileName: " + currentlyActiveProfile);
                         break;
 
                     default:
-                        Log.d(LOG_TAG, "Other notification: " + notificationType + " - status: " + b.getString("STATUS") + ", profileName: " + b.getString("PROFILE_NAME"));
+                        Log.d(LOG_TAG, "Other notification: " + notificationType + " - status: " + b.getString("STATUS") + ", profileName: " + currentlyActiveProfile);
                         break;
                 }
+            }
+
+            if (currentlyActiveProfile != null && !profileName.equals(currentlyActiveProfile)) {
+                // DW will change the profile between activities and apps.
+                // Sometimes for some reason this may happen silently without a DW_NOTIFICATION_CHANGE_PROFILE.
+                // So we must check the active profile on *every notification* as long as our app is active (not paused).
+                Log.i(LOG_TAG, "Incorrect notification profile '" + currentlyActiveProfile + "', requesting profile change to '" + profileName + "'");
+                switchToOurProfile();
             }
         }
     }

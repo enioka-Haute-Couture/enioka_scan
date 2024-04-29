@@ -17,12 +17,12 @@ provider will simply not show up as compatible during use.
 
 Each artefact can be imported to your project as `com.enioka.scanner:<artefact>:<version>:aar`.
 
-### `core`
+### `enioka-scan-core`
 
 Core components of the library, **required** for it to work. It includes the scanner APIs, default
 scanning activity and service that manages the search and lifecycle of the scanners.
 
-### `scanner-camera`
+### `provider-cs-camera`
 
 Includes the `CAMERA_SCANNER` provider. It includes camera-as-a-scanner functionality, and
 default camera layout for the scanner activity.
@@ -157,8 +157,8 @@ devices.
 
 | Artefact                           | Provider name                    | Supported devices                                              | Tested devices                     | Device type   | External requirements                                          | Device compatible if                                                                                                              |
 |------------------------------------|----------------------------------|----------------------------------------------------------------|------------------------------------|---------------|----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `core`                             | `CORE` (no provider)             | Does not support any device alone, it required to use the lib. |                                    |               |                                                                |                                                                                                                                   |
-| `scanner-camera`                   | `CAMERA_SCANNER` (no provider)   | Any device with a camera                                       | Smartphones, integrated devices... | Camera        |                                                                | Device has a camera                                                                                                               |
+| `enioka-scan-core`                 | no provider                      | Does not support any device alone, it required to use the lib. |                                    |               |                                                                |                                                                                                                                   |
+| `provider-cs-camera`               | no provider                      | Any device with a camera                                       | Smartphones, integrated devices... | Camera        |                                                                | Device has a camera                                                                                                               |
 | `provider-cs-athesi-e5l`           | `AthesiE5LProvider`              | Athesi E5L                                                     | Athesi E5L                         | Integrated    |                                                                | Device name is strictly `RD50TE`                                                                                                  |
 | `provider-cs-athesi-spa43`         | `AthesiHHTProvider`              | Athesi SPA43                                                   | Athesi SPA43                       | Integrated    |                                                                | Device name is strictly `SPA43LTE`                                                                                                |
 | `provider-cs-bluebird`             | `BluebirdProvider`               | Bluebird integrated scanners                                   | Bluebird EF500                     | Integrated    | Bluebird service (should be preinstalled on device)            | Intent `kr.co.bluebird.android.bbapi.action.BARCODE_OPEN` has a listener                                                          |

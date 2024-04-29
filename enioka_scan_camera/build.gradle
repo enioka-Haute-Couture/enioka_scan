@@ -22,7 +22,7 @@ android {
 }
 
 ext {
-    mavenArtifactId = "scanner-camera"
+    mavenArtifactId = "provider-cs-camera"
 }
 
 

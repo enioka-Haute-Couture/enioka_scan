@@ -23,7 +23,7 @@ android {
 }
 
 ext {
-    mavenArtifactId = "provider-cs-honeywell-bt"
+    mavenArtifactId = "provider-os-honeywell-bt"
 }
 
 

@@ -23,7 +23,7 @@ android {
 }
 
 ext {
-    mavenArtifactId = "provider-cs-generalscan-bt"
+    mavenArtifactId = "provider-os-generalscan-bt"
 }
 
 

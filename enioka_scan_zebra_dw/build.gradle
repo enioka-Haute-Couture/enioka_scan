@@ -22,7 +22,7 @@ android {
 }
 
 ext {
-    mavenArtifactId = "provider-cs-zebra-dw"
+    mavenArtifactId = "provider-os-zebra-dw"
 }
 
 

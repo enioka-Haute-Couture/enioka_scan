@@ -23,7 +23,7 @@ android {
 }
 
 ext {
-    mavenArtifactId = "provider-cs-bluebird"
+    mavenArtifactId = "provider-os-bluebird"
 }
 
 

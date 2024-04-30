@@ -1,4 +1,4 @@
-package com.enioka.scanner.camera;
+package com.enioka.scanner.sdk.camera;
 
 import static com.enioka.scanner.helpers.Permissions.PERMISSIONS_CAMERA;
 import static com.enioka.scanner.helpers.Permissions.hasPermissionSet;

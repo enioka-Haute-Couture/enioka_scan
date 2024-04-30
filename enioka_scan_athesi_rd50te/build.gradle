@@ -23,7 +23,7 @@ android {
 }
 
 ext {
-    mavenArtifactId = "provider-cs-athesi-e5l"
+    mavenArtifactId = "provider-os-athesi-e5l"
 }
 
 

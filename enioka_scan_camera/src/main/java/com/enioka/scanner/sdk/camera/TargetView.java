@@ -1,4 +1,4 @@
-package com.enioka.scanner.camera;
+package com.enioka.scanner.sdk.camera;
 
 import android.content.Context;
 import android.content.res.TypedArray;

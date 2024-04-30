@@ -1,4 +1,5 @@
 [':enioka_scan',
+ ':enioka_scan_camera',
  'enioka_scan_mock',
  'enioka_scan_zebra_dw',
  'enioka_scan_athesi_spa43lte',

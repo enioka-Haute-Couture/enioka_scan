@@ -18,20 +18,17 @@ android {
     lint {
         disable 'ExpiredTargetSdkVersion'
     }
+    namespace 'com.enioka.scanner.sdk.camera'
 }
 
 ext {
-    mavenArtifactId = "enioka-scan-core"
+    mavenArtifactId = "provider-os-camera"
 }
 
-tasks.register('androidSourcesJar', Jar) {
-    archiveClassifier.set('sources')
-    from android.sourceSets.main.java.srcDirs
-    from android.sourceSets.main.kotlin.srcDirs
-}
 
 dependencies {
     //noinspection GradleCompatible
+    implementation project(':enioka_scan')
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
 

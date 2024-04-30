@@ -1,8 +1,10 @@
 # The camera scanner
 
-**enioka Scan** can still be used to manage barcodes scanned using the Android camera. For that, it
-exposes the `CameraBarcodeScanView` and a series of helper classes to handle compatibility with both
-Camera 1 and Camera 2 hardware APIs.
+**enioka Scan** can still be used to manage barcodes scanned using the Android camera, through
+`com.enioka.scanner.sdk.camera`, (check
+[library dependencies and compatibility matrix](dependencies.md)). For that, it exposes the
+`CameraBarcodeScanView` and a series of helper classes to handle compatiblity with both Camera 1
+and Camera 2 hardware APIs.
 
 This page regroups all information needed to control this special scanner at a deeper level.
 

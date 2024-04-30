@@ -19,9 +19,9 @@ dependencies {
 }
 ```
 
-To use the smartphone's camera as a scanner, this single dependency is enough. To use others devices,
-dependencies are required, you can check the
-[library dependencies and compatibility matrix](dependencies.md) for a detailed overview.
+Additional device-specific dependencies are required to enable support for actual scanners.
+You can check the [library dependencies and compatibility matrix](dependencies.md)
+for a detailed overview.
 
 ## Using the library
 
@@ -47,6 +47,9 @@ public class MyScanningActivity extends ScannerCompatActivity {
 This creates an activity with a very simple layout, which displays status messages from the scanners
 as well as scanning results and some utility buttons: triggers for the scanner, a toggle for 
 illumination, and a beep trigger.
+
+If the camera scanner SDK is included (`com.enioka.scanner.sdk.camera`), the default camera layout
+and view will also be available inside the activity.
 
 To use your own layouts with this activity, you can follow [this guide](guides/custom_layout.md).
 
@@ -113,6 +116,12 @@ help converting search parameters to and from those intent extras.
 :::
 
 ## Using the camera
+
+:::{warning}
+
+* `com.enioka.scanner.sdk.camera` dependencies are required to use the camera scanner, check
+  [library dependencies and compatibility matrix](dependencies.md).
+  :::
 
 When there is no laser scanner available, or when a button is clicked, the `ScannerCompatActivity` 
 activity will fallback to using the device camera (if any) to scan barcodes. This leverages two 

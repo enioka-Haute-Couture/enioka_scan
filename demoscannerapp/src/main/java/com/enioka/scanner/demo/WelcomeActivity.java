@@ -2,6 +2,7 @@ package com.enioka.scanner.demo;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -84,8 +85,8 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.github_button) {
-            // Handle button click
-            return true;
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/enioka-Haute-Couture/enioka_scan"));
+            startActivity(browserIntent);
         }
         return super.onOptionsItemSelected(item);
     }

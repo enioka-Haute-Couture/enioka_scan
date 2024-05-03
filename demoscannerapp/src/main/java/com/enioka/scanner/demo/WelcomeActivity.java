@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -43,6 +44,13 @@ public class WelcomeActivity extends AppCompatActivity {
         //bt4.setOnClickListener(this::onClickBt4);
         bt5.setOnClickListener(this::onClickBt5);
         setSupportActionBar(toolbar);
+    }
+
+    // Show the menu in the top action tool bar
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     // Scanner activity

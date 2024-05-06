@@ -39,4 +39,5 @@
     <string name="camera_mode_button">Camera</string>
     <string name="keyboard_input">Entrée</string>
     <string name="switch_enable_scan_text">Activer le scan</string>
+    <string name="open_link">Ouvrir le lien</string>
 </resources>

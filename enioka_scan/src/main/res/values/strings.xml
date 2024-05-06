@@ -46,4 +46,5 @@
     <string name="fragment_scan_manual_ok">Send</string>
     <string name="keyboard_input">Input</string>
     <string name="switch_enable_scan_text">enable scan</string>
+    <string name="open_link">Open link</string>
 </resources>

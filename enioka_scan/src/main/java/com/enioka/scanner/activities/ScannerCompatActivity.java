@@ -46,6 +46,7 @@ import com.enioka.scanner.service.ScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 import com.enioka.scanner.service.ScannerServiceBinderHelper;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
@@ -186,6 +187,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      */
     private Uri logFileUri = null;
 
+    /**
+     * The ID of the open link button.
+     */
+    protected int openLinkId = R.id.open_link;
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Activity lifecycle callbacks
@@ -272,6 +278,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (findViewById(R.id.scanner_text_scanner_status) != null) {
             ((TextView) findViewById(R.id.scanner_text_scanner_status)).setText(null);
         }
+
+        // Hide the open link button
+        findViewById(openLinkId).setVisibility(View.GONE);
 
         // Immediately set some buttons (which do no need to wait for scanners).
         displayCameraButton();
@@ -577,6 +586,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
             if (logFileUri != null) {
                 writeResultToLog(b);
+            }
+
+            // Open the URL in a browser if it is a QR code
+            if (b.getBarcodeType() == BarcodeType.QRCODE) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(b.getBarcode()));
+
+                findViewById(openLinkId).setVisibility(View.VISIBLE);
+                findViewById(openLinkId).setOnClickListener(v -> {
+                    // Pause camera or laser scanner
+                    startActivity(intent);
+                });
             }
         }
         if (findViewById(R.id.scanner_text_last_scan) != null) {

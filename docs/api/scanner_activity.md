@@ -128,6 +128,11 @@ Can be used to access some methods of `CameraBarcodeScanViewScanner`. Should not
 Initialized by the [`initCamera()`](#scannercompatactivity-methods) method.
 :::
 
+:::{cpp:var} int openLinkId = R.id.open_link;
+
+The ID of the of the optional button on which to press to open a link when a QRCode URL is scanned.
+:::
+
 ## `ScannerCompatActivity` methods
 
 :::{method} getServiceInitExtras() -> Bundle

@@ -77,6 +77,19 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/open_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="fitCenter"
+        android:text="@string/open_link"
+        android:visibility="gone"
+        app:icon="@drawable/open_link"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_camera_last_scan" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/scanner_flashlight"
         android:layout_width="wrap_content"

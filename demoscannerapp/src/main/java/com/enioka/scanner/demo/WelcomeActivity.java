@@ -36,12 +36,10 @@ public class WelcomeActivity extends AppCompatActivity {
         LaserScanner.discoverProviders(this, () -> {});
         availableProviders = LaserScanner.getProviderCache();
         bt1 = findViewById(R.id.bt_scanner);
-        //bt4 = findViewById(R.id.bt_tester);
         bt5 = findViewById(R.id.bt_settings);
         toolbar = findViewById(R.id.topAppBar);
 
         bt1.setOnClickListener(this::onClickBt1);
-        //bt4.setOnClickListener(this::onClickBt4);
         bt5.setOnClickListener(this::onClickBt5);
         setSupportActionBar(toolbar);
     }
@@ -73,13 +71,9 @@ public class WelcomeActivity extends AppCompatActivity {
         // add symbology
         final String[] symbologies = preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName()).toArray(new String[0]);
         intent.putExtra(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, symbologies);
+        // add logging intent extra
+        intent.putExtra(SettingsActivity.ENABLE_LOGGING_KEY, preferences.getBoolean(SettingsActivity.ENABLE_LOGGING_KEY, false));
 
-        startActivity(intent);
-    }
-
-    // Scanner Test activity
-    public void onClickBt4(View v) {
-        Intent intent = new Intent(this, ScannerTesterActivity.class);
         startActivity(intent);
     }
 

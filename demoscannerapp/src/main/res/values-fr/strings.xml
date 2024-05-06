@@ -17,6 +17,7 @@
     <string name="allow_later_connections">Autoriser les connexions retardataires</string>
     <string name="allow_pairing_flow">Autoriser les séquences d\'appairage</string>
     <string name="allow_intent_devices">Autoriser les scanners fonctionnant par Intent</string>
+    <string name="enable_log">Activation des logs</string>
     <string name="allowed_providers">Providers Autorisés</string>
     <string name="excluded_providers">Providers Exclus</string>
     <string name="symbology_selection">Sélection de la symbologie</string>

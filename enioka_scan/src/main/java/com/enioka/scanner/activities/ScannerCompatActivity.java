@@ -5,7 +5,9 @@ import static com.enioka.scanner.helpers.Permissions.PERMISSIONS_CAMERA;
 import static com.enioka.scanner.helpers.Permissions.hasPermissionSet;
 import static com.enioka.scanner.helpers.Permissions.requestPermissionSet;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,11 +15,14 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
@@ -44,7 +49,12 @@ import com.enioka.scanner.service.ScannerServiceBinderHelper;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
+import java.io.BufferedWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -65,6 +75,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected final static String CAMERA_SDK_PACKAGE = "com.enioka.scanner.sdk.camera";
     protected final static int PERMISSION_REQUEST_ID_CAMERA = 1790;
     protected final static int PERMISSION_REQUEST_ID_BT = 1792;
+    protected final static int PERMISSION_REQUEST_ID_WRITE = 124;
+    protected final static int WRITE_REQUEST_CODE = 123;
 
     /**
      * Don't start camera mode, even if no lasers are available
@@ -164,6 +176,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      */
     private static final long STATUS_CARD_RESET_DELAY = 170;
 
+    /**
+     * Define if the log is enabled or not.
+     */
+    protected boolean loggingEnabled = false;
+
+    /**
+     * The URI of the log file to write to.
+     */
+    private Uri logFileUri = null;
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Activity lifecycle callbacks
@@ -181,6 +203,18 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         // Ascending compatibility
         if (zbarViewId != null) {
             cameraViewId = zbarViewId;
+        }
+
+        // Get the intent extras
+        loggingEnabled = getIntent().getBooleanExtra("enableLogging", false);
+
+        // Init logging if enabled
+        if (loggingEnabled) {
+            if (hasPermissionSet(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE})) {
+                createLog();
+            } else {
+                requestPermissionSet(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_ID_WRITE);
+            }
         }
 
         // init fields
@@ -479,6 +513,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 }
                 break;
             }
+            case PERMISSION_REQUEST_ID_WRITE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    createLog();
+                }
+                break;
+            }
         }
     }
 
@@ -534,6 +574,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         for (Barcode b : data) {
             Log.d(LOG_TAG, "Received barcode from scanner: " + b.getBarcode() + " - " + b.getBarcodeType().code);
             res.append("TYPE: ").append(b.getBarcodeType().code).append(" ").append(b.getBarcode());
+
+            if (logFileUri != null) {
+                writeResultToLog(b);
+            }
         }
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(res.toString());
@@ -807,6 +851,58 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                         s.getBeepSupport().beepScanSuccessful();
                 }
             });
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Logger
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state);
+    }
+
+    private void createLog() {
+        if (!isExternalStorageWritable()) {
+            return;
+        }
+
+        String fileName = (new Date()).getTime() + "_scanner_test_log.csv";
+
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/csv");
+        intent.putExtra(Intent.EXTRA_TITLE, fileName);
+        startActivityForResult(intent, WRITE_REQUEST_CODE);
+    }
+
+    private synchronized void writeResultToLog(Barcode data) {
+        String dataLine = (new Date()).getTime() + "," + data.getBarcode() + "," + data.getBarcodeType().code;
+
+        try (OutputStream os = getContentResolver().openOutputStream(logFileUri, "wa")) {
+            if (os == null) {
+                return;
+            }
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, Charset.forName("UTF8")));
+            writer.write(dataLine, 0, dataLine.length());
+            writer.newLine();
+            writer.flush();
+            Log.d(LOG_TAG, dataLine);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == WRITE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            logFileUri = data.getData();
+            if (logFileUri != null) {
+                Log.i(LOG_TAG, "Log file will be written at: " + logFileUri.toString());
+            }
         }
     }
 }

@@ -16,6 +16,7 @@
     <string name="allow_later_connections">Allow Later Connections</string>
     <string name="allow_pairing_flow">Allow Pairing Flow</string>
     <string name="allow_intent_devices">Allow Intent Devices</string>
+    <string name="enable_log">Enable logging</string>
     <string name="allowed_providers">Allowed Providers</string>
     <string name="excluded_providers">Excluded Providers</string>
     <string name="symbology_selection">Allowed Symbology</string>

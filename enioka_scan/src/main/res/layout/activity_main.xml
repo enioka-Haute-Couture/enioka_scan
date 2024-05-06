@@ -80,21 +80,18 @@
             android:layout_height="55dp"
             android:layout_marginStart="12dp"
             android:text="@string/camera_mode_button"
-            style="@style/Widget.Material3.Button.TonalButton"
             app:icon="@drawable/camera_fill"
-            app:backgroundTint="@color/cardBackgroundColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/scanner_bt_keyboard"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/scanner_bt_keyboard"
-            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="wrap_content"
             android:layout_height="55dp"
             android:layout_marginEnd="12dp"
             android:layout_marginStart="12dp"
             android:text="@string/keyboard_input"
-            app:backgroundTint="@color/cardBackgroundColor"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             app:icon="@drawable/keyboard_fill" />
     </LinearLayout>
 

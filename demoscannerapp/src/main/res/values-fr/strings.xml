@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Test scanner</string>
+    <string name="app_name">enioka scan demo</string>
 
     <string name="scanner_tester">Testeur de scanner</string>
     <string name="test_scan">Tester enioka scan</string>

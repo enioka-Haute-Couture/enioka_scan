@@ -51,6 +51,7 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     private String cameraId;
     private CameraManager cameraManager;
 
+    private int concurrentCameraSessionInitAttempt = 0;
     private CameraCaptureSession captureSession;
     private CaptureRequest.Builder captureRequestBuilder;
     private CaptureRequest captureRequest;
@@ -569,7 +570,11 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int pixelFormat, int newWidth, int newHeight) {
         Log.i(TAG, "surface changed " + this.hashCode());
-        camPreviewSurfaceView.post(this::startPreview);
+
+        // Force a full re-init of the view to ensure resolution is up to date.
+        pauseCamera();
+        resumeCamera();
+        //camPreviewSurfaceView.post(this::startPreview);
     }
 
     @Override
@@ -650,8 +655,25 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             Log.d(TAG, "Camera device not ready yet");
             return;
         }
+
+        // Handling of the case where resolution was changed while init was ongoing
+        this.concurrentCameraSessionInitAttempt++;
+        if (this.concurrentCameraSessionInitAttempt > 1) {
+            Log.i(TAG, "A camera session is already being initialized, will re-init later");
+            Log.d(TAG, concurrentCameraSessionInitAttempt + " concurrent attempts");
+            return;
+        }
+
+        // This block needs to be AFTER the concurrent init check, because if an init is already in
+        // progress, pauseCamera() will not run and imageReader will not be null, but we still want to
+        // queue a re-init for later.
+        // If this block is reached, it means there is no ongoing initialization, so if imageReader is
+        // not null here, it cannot be due to pauseCamera() not running, so it is safe to return without
+        // initializing.
+        // Basically: a hack to deal with race conditions.
         if (this.imageReader != null) {
             Log.d(TAG, "Image reader already created");
+            this.concurrentCameraSessionInitAttempt--;
             return;
         }
 
@@ -756,6 +778,15 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
             }
 
             Log.i(TAG, "Camera repeating capture request was set up " + CameraBarcodeScanViewV2.this.hashCode());
+
+            // Handling of the case where resolution was changed while init was ongoing
+            concurrentCameraSessionInitAttempt--;
+            if (concurrentCameraSessionInitAttempt > 0) {
+                Log.i(TAG, "More recent initialization attempts were made, re-initializing capture session");
+                concurrentCameraSessionInitAttempt = 0;
+                pauseCamera();
+                resumeCamera();
+            }
         }
 
         @Override

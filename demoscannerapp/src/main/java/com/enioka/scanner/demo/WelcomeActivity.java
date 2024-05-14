@@ -6,15 +6,23 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 
+import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WelcomeActivity extends AppCompatActivity {
+    private List<String> availableProviders = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+
+        LaserScanner.discoverProviders(this, () -> {});
+        availableProviders = LaserScanner.getProviderCache();
     }
 
     // Scanner activity
@@ -34,7 +42,6 @@ public class WelcomeActivity extends AppCompatActivity {
         options.excludedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, options.excludedProviderKeys);
 
         options.toIntentExtras(intent);
-
         // add symbology
         final String[] symbologies = preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName()).toArray(new String[0]);
         intent.putExtra(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, symbologies);
@@ -51,6 +58,7 @@ public class WelcomeActivity extends AppCompatActivity {
     // Scanner settings activity
     public void onClickBt5(View v) {
         Intent intent = new Intent(this, SettingsActivity.class);
+        intent.putStringArrayListExtra("providers", (ArrayList<String>) availableProviders);
         startActivity(intent);
     }
 }

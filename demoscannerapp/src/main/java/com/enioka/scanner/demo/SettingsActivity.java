@@ -3,11 +3,14 @@ package com.enioka.scanner.demo;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
-import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.data.BarcodeType;
@@ -17,18 +20,13 @@ import com.enioka.scanner.service.ScannerServiceApi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity {
     /**
-     * List of possible providers
+     * List of available providers key
      */
-    protected String[] providersList = null;
-    /**
-     * List of possible providers keys
-     */
-    protected String[] providersKeysList = null;
+    protected String[] availableProvidersKey = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +34,6 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         final SharedPreferences preferences = this.getSharedPreferences("ScannerSearchPreferences", MODE_PRIVATE);
-
-        // Detect which SDK providers are included inside the demo app
-        providersList = getResources().getStringArray(R.array.providers);
-        providersKeysList = getResources().getStringArray(R.array.providers_keys);
-        List<String> includedProvidersSDK = detectIncludedProvidersSDK(providersList);
 
         final ScannerSearchOptions options = ScannerSearchOptions.defaultOptions();
         ((Switch) findViewById(R.id.switchWaitDisconnected)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_WAIT_DISCONNECTED_BOOLEAN, options.waitDisconnected));
@@ -54,30 +47,6 @@ public class SettingsActivity extends AppCompatActivity {
         final Set<String> allowedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
         final Set<String> excludedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
 
-        int idx = -1;
-        for (String provider : providersList) {
-            String[] splitProviders = provider.split("\\.");
-            String suffixProvider = splitProviders[splitProviders.length - 1];
-            idx += 1;
-
-            // Get the id of the checkboxes
-            int idAllowed = getId("checkAllowed" + suffixProvider);
-            int idExcluded = getId("checkExcluded" + suffixProvider);
-
-            if (!includedProvidersSDK.contains(suffixProvider)) {
-                findViewById(idAllowed).setVisibility(View.GONE);
-                findViewById(idExcluded).setVisibility(View.GONE);
-                findViewById(getId("textViewAllowed" + suffixProvider)).setVisibility(View.GONE);
-                findViewById(getId("textViewExcluded" + suffixProvider)).setVisibility(View.GONE);
-            } else {
-                // Get the provider key of the current provider
-                String providerKey = providersKeysList[idx];
-
-                ((CheckBox) findViewById(idAllowed)).setChecked(allowedProviderKeys.contains(providerKey));
-                ((CheckBox) findViewById(idExcluded)).setChecked(excludedProviderKeys.contains(providerKey));
-            }
-        }
-
         final Set<BarcodeType> symbologySelection = new HashSet<>();
         for(String symbology: preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName())) {
            symbologySelection.add(BarcodeType.valueOf(symbology));
@@ -89,6 +58,140 @@ public class SettingsActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.checkSelectEan13)).setChecked(symbologySelection.contains(BarcodeType.EAN13));
         ((CheckBox) findViewById(R.id.checkSelectQrCode)).setChecked(symbologySelection.contains(BarcodeType.QRCODE));
         ((CheckBox) findViewById(R.id.checkSelectAztec)).setChecked(symbologySelection.contains(BarcodeType.AZTEC));
+
+        // Get detected SDKs providers from the intent
+        ArrayList<String> availableProvidersIntent = getIntent().getStringArrayListExtra("providers");
+
+        if (availableProvidersIntent == null) {
+            availableProvidersKey = new String[0];
+        } else {
+            availableProvidersKey = availableProvidersIntent.toArray(new String[0]);
+        }
+
+        // Create the UI
+        int topViewIdAllowed = R.id.textViewAllowedProviders;
+        int topViewIdExcluded = R.id.textViewExcludedProviders;
+
+        for (String providerKey : availableProvidersKey) {
+
+            // Create the UI for the allowed providers
+            TextView textViewAllowed = generateTextView(providerKey, topViewIdAllowed);
+            textViewAllowed.setTag("allowed_text_" + providerKey);
+            CheckBox checkBoxAllowed = generateCheckBox(providerKey, topViewIdAllowed, textViewAllowed.getId());
+            checkBoxAllowed.setTag("allowed_check_" + providerKey);
+
+            if (allowedProviderKeys.contains(providerKey)) {
+                checkBoxAllowed.setChecked(true);
+            }
+
+            // Create the UI for the excluded providers
+            TextView textViewExcluded = generateTextView(providerKey, topViewIdExcluded);
+            textViewExcluded.setTag("excluded_text_" + providerKey);
+            CheckBox checkBoxExcluded = generateCheckBox(providerKey, topViewIdExcluded, textViewExcluded.getId());
+            checkBoxExcluded.setTag("excluded_check_" + providerKey);
+
+            if (excludedProviderKeys.contains(providerKey)) {
+                checkBoxExcluded.setChecked(true);
+            }
+
+            topViewIdAllowed = textViewAllowed.getId();
+            topViewIdExcluded = textViewExcluded.getId();
+        }
+
+        // Update the layout
+        updateConstraintLayout(topViewIdAllowed, topViewIdExcluded);
+    }
+
+    private void updateConstraintLayout(int topViewIdAllowed, int topViewIdExcluded) {
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone((ConstraintLayout) findViewById(R.id.constraintLayoutSettings));
+
+        // Init marginTop
+        int marginTop = getResources().getDimensionPixelSize(R.dimen.layout_margin_top_header_text);
+
+        // Set top bottom constraints
+        constraintSet.connect(R.id.textViewExcludedProviders, ConstraintSet.TOP, topViewIdAllowed, ConstraintSet.BOTTOM, marginTop);
+        constraintSet.connect(R.id.textSymbologySelection, ConstraintSet.TOP, topViewIdExcluded, ConstraintSet.BOTTOM, marginTop);
+
+        // Apply constraints
+        constraintSet.applyTo(findViewById(R.id.constraintLayoutSettings));
+    }
+
+    private TextView generateTextView(String providerKey, int topViewId) {
+        TextView textView = new TextView(this);
+        textView.setId(View.generateViewId());
+
+        // Add TextView to the parent layout
+        ViewGroup parentLayout = findViewById(R.id.constraintLayoutSettings);
+        parentLayout.addView(textView);
+
+        // Set layout parameters
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                getResources().getDimensionPixelSize(R.dimen.layout_height));
+
+        textView.setLayoutParams(layoutParams);
+
+        // Get the right text if the provider is known
+        int textResources = getResources().getIdentifier(providerKey, "string", this.getPackageName());
+
+        if (textResources != 0) {
+            textView.setText(textResources);
+        } else {
+            textView.setText(providerKey);
+        }
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone((ConstraintLayout) parentLayout);
+
+        // Set margins
+        int marginStart = getResources().getDimensionPixelSize(R.dimen.layout_margin_start_text);
+        int marginEnd = getResources().getDimensionPixelSize(R.dimen.layout_margin_end);
+        int marginTop = getResources().getDimensionPixelSize(R.dimen.layout_margin_top);
+
+        // Set constraints for the TextView
+        constraintSet.connect(textView.getId(), ConstraintSet.START, parentLayout.getId(), ConstraintSet.START, marginStart);
+        constraintSet.connect(textView.getId(), ConstraintSet.END, parentLayout.getId(), ConstraintSet.END, marginEnd);
+        constraintSet.connect(textView.getId(), ConstraintSet.TOP, topViewId, ConstraintSet.BOTTOM, marginTop);
+        constraintSet.applyTo((ConstraintLayout) parentLayout);
+
+        return textView;
+    }
+
+
+    private CheckBox generateCheckBox(String providerKey, int topViewId, int rightViewId) {
+        CheckBox checkBox = new CheckBox(this);
+        checkBox.setId(View.generateViewId());
+        ViewGroup parentLayout = findViewById(R.id.constraintLayoutSettings);
+
+        // Add CheckBox to the parent layout
+        parentLayout.addView(checkBox);
+
+        // Set layout parameters
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                getResources().getDimensionPixelSize(R.dimen.layout_height));
+
+        checkBox.setLayoutParams(layoutParams);
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone((ConstraintLayout) parentLayout);
+
+        // Set margins
+        int marginStart = getResources().getDimensionPixelSize(R.dimen.layout_margin_start_checkbox);
+        int marginEnd = getResources().getDimensionPixelSize(R.dimen.layout_margin_end);
+        int marginTop = getResources().getDimensionPixelSize(R.dimen.layout_margin_top);
+
+        // Set constraints for the CheckBox
+        constraintSet.connect(checkBox.getId(), ConstraintSet.START, parentLayout.getId(), ConstraintSet.START, marginStart);
+        constraintSet.connect(checkBox.getId(), ConstraintSet.END, parentLayout.getId(), ConstraintSet.END, marginEnd);
+        constraintSet.connect(checkBox.getId(), ConstraintSet.TOP, topViewId, ConstraintSet.BOTTOM, marginTop);
+        constraintSet.connect(checkBox.getId(), ConstraintSet.RIGHT, rightViewId, ConstraintSet.LEFT, 0);
+        constraintSet.applyTo((ConstraintLayout) parentLayout);
+
+        checkBox.setChecked(false);
+
+        return checkBox;
     }
 
     public void onClickSave(View v) {
@@ -105,25 +208,21 @@ public class SettingsActivity extends AppCompatActivity {
         final Set<String> allowedProviderKeys = new HashSet<>();
         final Set<String> excludedProviderKeys = new HashSet<>();
 
-        int idx = -1;
-        for (String provider : providersList) {
-            idx += 1;
-            String[] splitProviders = provider.split("\\.");
-            String suffixProvider = splitProviders[splitProviders.length - 1];
+        // Get parent ConstraintLayout
+        ConstraintLayout parentLayout = findViewById(R.id.constraintLayoutSettings);
 
-            // Get the id of the checkboxes
-            int idAllowed = getId("checkAllowed" + suffixProvider);
-            int idExcluded = getId("checkExcluded" + suffixProvider);
+        // Save the CheckBoxes state for allowed and excluded providers
+        for (String providerKey : availableProvidersKey) {
+            // Retrieve the CheckBoxes with tags
+            CheckBox checkBoxAllowed = parentLayout.findViewWithTag("allowed_check_" + providerKey);
+            CheckBox checkBoxExcluded = parentLayout.findViewWithTag("excluded_check_" + providerKey);
 
-            if (!findViewById(idAllowed).isShown()) {
-                continue;
+            if (checkBoxAllowed.isChecked()) {
+                allowedProviderKeys.add(providerKey);
             }
 
-            if (((CheckBox) findViewById(idAllowed)).isChecked()) {
-                allowedProviderKeys.add(providersKeysList[idx]);
-            }
-            if (((CheckBox) findViewById(idExcluded)).isChecked()) {
-                excludedProviderKeys.add(providersKeysList[idx]);
+            if (checkBoxExcluded.isChecked()) {
+                excludedProviderKeys.add(providerKey);
             }
         }
 
@@ -142,30 +241,5 @@ public class SettingsActivity extends AppCompatActivity {
 
         editor.apply();
         finish();
-    }
-
-    /**
-     * Detects which providers are included in the SDK and returns them.
-     */
-    private List<String> detectIncludedProvidersSDK(String[] providersList) {
-        List<String> includedProviders = new ArrayList<>();
-
-        for (String p : providersList) {
-            try {
-                Class.forName("com.enioka.scanner.sdk." + p);
-                String[] splitProviders = p.split("\\.");
-                includedProviders.add(splitProviders[splitProviders.length - 1]);
-            } catch (ClassNotFoundException e) {
-                continue;
-            }
-        }
-        return includedProviders;
-    }
-
-    /**
-     * Returns the id of a resource by its name.
-     */
-    private int getId(String name) {
-        return getResources().getIdentifier(name, "id", getPackageName());
     }
 }

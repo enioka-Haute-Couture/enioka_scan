@@ -8,6 +8,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -35,6 +36,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
     implementation 'com.google.android.material:material:1.11.0'
+    implementation "androidx.multidex:multidex:2.0.1"
+
 
     // ZBAR & ZXING (Zebra Crossing) = camera. From Maven Central.
     api('me.dm7.barcodescanner:zbar:1.9.8') {

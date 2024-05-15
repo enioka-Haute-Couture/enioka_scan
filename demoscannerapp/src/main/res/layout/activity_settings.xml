@@ -330,19 +330,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/dividerSettingsAllowedProvider" />
 
-            <!-- EXCLUDED PROVIDERS -->
-
-            <TextView
-                android:id="@+id/textViewExcludedProviders"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/excluded_providers"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProviders" />
 
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/toggleButtonProvider"
@@ -377,135 +364,22 @@
 
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
-            <!-- Athesi HTT -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkAllowedAthesiSPA43LTEProvider"
+            <TextView
+                android:id="@+id/textEmptyProviderList"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/hhtprovider"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:text="@string/empty_provider_list_caption"
+                android:textColor="@android:color/darker_gray"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/toggleButtonProvider" />
 
-            <!-- Athesi E5L -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkAllowedAthesiRD50TEProvider"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/e5lprovider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedAthesiSPA43LTEProvider" />
-
-            <!-- Bluebird -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkAllowedBluebirdProvider"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/bluebirdprovider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedAthesiRD50TEProvider" />
-
-            <!-- Proglove -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkAllowedProgloveProvider"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/progloveprovider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedBluebirdProvider" />
-
-            <!-- GeneralScan -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkAllowedGsSppScannerProvider"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/gssppscannerprovider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedProgloveProvider" />
-
-            <!-- Zebra OSS SPP -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkAllowedZebraOssSppScannerProvider"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/zebraosssppscannerprovider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedGsSppScannerProvider" />
-
-            <!-- Zebra OSS ATT -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkAllowedZebraOssAttScannerProvider"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/zebraossattscannerprovider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedZebraOssSppScannerProvider" />
-
-            <!-- Honeywell OSS SPP -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkAllowedHoneywellOssSppScannerProvider"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/honeywellosssppscannerprovider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedZebraOssAttScannerProvider" />
-
-            <!-- Honeywell OSS INTEGRATED -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkAllowedHoneywellOssIntegratedScannerProvider"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/honeywellossintegratedscannerprovider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedHoneywellOssSppScannerProvider" />
-
-            <!-- Zebra DW -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkAllowedZebraDwProvider"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/zebradwprovider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedHoneywellOssIntegratedScannerProvider" />
 
             <com.google.android.material.divider.MaterialDivider
                 android:id="@+id/dividerSettingsSymbology"
@@ -515,7 +389,7 @@
                 app:layout_constraintWidth_percent="0.90"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkAllowedZebraDwProvider"/>
+                app:layout_constraintTop_toBottomOf="@+id/textEmptyProviderList"/>
 
             <!-- Symbology selection-->
             <TextView
@@ -529,7 +403,8 @@
                 android:text="@string/symbology_selection"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedProviders" />
+                app:layout_constraintTop_toBottomOf="@+id/dividerSettingsSymbology" />
+
 
             <!-- CODE 128 -->
             <TextView

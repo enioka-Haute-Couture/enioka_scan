@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="layout_height">24dp</dimen>
-    <dimen name="layout_margin_start_text">48dp</dimen>
     <dimen name="layout_margin_start_checkbox">16dp</dimen>
     <dimen name="layout_margin_end">16dp</dimen>
-    <dimen name="layout_margin_top">10dp</dimen>
-    <dimen name="layout_margin_top_header_text">16dp</dimen>
+    <dimen name="layout_margin_top">12dp</dimen>
+    <dimen name="layout_margin_top_divider">16dp</dimen>
 </resources>

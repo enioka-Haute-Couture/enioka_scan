@@ -21,6 +21,7 @@
     <string name="allowed_providers">Providers Autorisés</string>
     <string name="excluded_providers">Providers Exclus</string>
     <string name="symbology_selection">Sélection de la symbologie</string>
+    <string name="empty_provider_list_caption">Aucun provider disponible</string>
     <string name="symbology_selection_caption">vide = EAN,128</string>
     <string name="save">Enregistrer</string>
 

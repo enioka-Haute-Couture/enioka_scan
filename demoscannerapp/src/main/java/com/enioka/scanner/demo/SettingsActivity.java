@@ -7,10 +7,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.TextView;
 
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.data.BarcodeType;
@@ -18,11 +18,13 @@ import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -44,7 +46,7 @@ public class SettingsActivity extends AppCompatActivity {
     /**
      * List of provider views ids
      */
-    protected List<Integer> providerViews = null;
+    protected List<Integer> providerViews = new ArrayList<>();
 
     /**
      * Save button
@@ -113,7 +115,6 @@ public class SettingsActivity extends AppCompatActivity {
 
         // Set the state of the segmented button
         segmentedButtonState = preferences.getInt(PREFS_KEY, 0);
-        setSegmentedButtonState();
 
         final Set<BarcodeType> symbologySelection = new HashSet<>();
         for(String symbology: preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName())) {
@@ -137,99 +138,58 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         // Create the UI
-        int topViewIdAllowed = R.id.textViewAllowedProviders;
-        int topViewIdExcluded = R.id.textViewExcludedProviders;
+        int topViewId = R.id.toggleButtonProvider;
 
         for (String providerKey : availableProvidersKey) {
 
             // Create the UI for the allowed providers
-            TextView textViewAllowed = generateTextView(providerKey, topViewIdAllowed);
-            textViewAllowed.setTag("allowed_text_" + providerKey);
-            CheckBox checkBoxAllowed = generateCheckBox(providerKey, topViewIdAllowed, textViewAllowed.getId());
-            checkBoxAllowed.setTag("allowed_check_" + providerKey);
+            CheckBox checkBox = generateCheckBox(providerKey, topViewId);
+            checkBox.setTag("checkbox_" + providerKey);
 
             if (allowedProviderKeys.contains(providerKey)) {
-                checkBoxAllowed.setChecked(true);
+                checkBox.setChecked(true);
             }
 
-            // Create the UI for the excluded providers
-            TextView textViewExcluded = generateTextView(providerKey, topViewIdExcluded);
-            textViewExcluded.setTag("excluded_text_" + providerKey);
-            CheckBox checkBoxExcluded = generateCheckBox(providerKey, topViewIdExcluded, textViewExcluded.getId());
-            checkBoxExcluded.setTag("excluded_check_" + providerKey);
-
-            if (excludedProviderKeys.contains(providerKey)) {
-                checkBoxExcluded.setChecked(true);
-            }
-
-            topViewIdAllowed = textViewAllowed.getId();
-            topViewIdExcluded = textViewExcluded.getId();
+            topViewId = checkBox.getId();
         }
 
-        // Update the layout
-        updateConstraintLayout(topViewIdAllowed, topViewIdExcluded);
+        if (availableProvidersKey.length == 0) {
+            // Hide the provider toggle button
+            findViewById(R.id.toggleButtonProvider).setVisibility(View.GONE);
+            findViewById(R.id.textEmptyProviderList).setVisibility(View.VISIBLE);
+        } else {
+            // Update the layout
+            updateConstraintLayout(topViewId);
+        }
+
+        // Set the state of the segmented button (default is all)
+        setSegmentedButtonState();
     }
 
-    private void updateConstraintLayout(int topViewIdAllowed, int topViewIdExcluded) {
+    private void updateConstraintLayout(int topViewId) {
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone((ConstraintLayout) findViewById(R.id.constraintLayoutSettings));
 
         // Init marginTop
-        int marginTop = getResources().getDimensionPixelSize(R.dimen.layout_margin_top_header_text);
+        int marginTop = getResources().getDimensionPixelSize(R.dimen.layout_margin_top_divider);
 
         // Set top bottom constraints
-        constraintSet.connect(R.id.textViewExcludedProviders, ConstraintSet.TOP, topViewIdAllowed, ConstraintSet.BOTTOM, marginTop);
-        constraintSet.connect(R.id.textSymbologySelection, ConstraintSet.TOP, topViewIdExcluded, ConstraintSet.BOTTOM, marginTop);
+        constraintSet.connect(R.id.dividerSettingsSymbology, ConstraintSet.TOP, topViewId, ConstraintSet.BOTTOM, marginTop);
 
         // Apply constraints
         constraintSet.applyTo(findViewById(R.id.constraintLayoutSettings));
     }
 
-    private TextView generateTextView(String providerKey, int topViewId) {
-        TextView textView = new TextView(this);
-        textView.setId(View.generateViewId());
 
-        // Add TextView to the parent layout
-        ViewGroup parentLayout = findViewById(R.id.constraintLayoutSettings);
-        parentLayout.addView(textView);
+    private CheckBox generateCheckBox(String providerKey, int topViewId) {
+        MaterialCheckBox checkBox = new MaterialCheckBox(this);
 
-        // Set layout parameters
-        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                getResources().getDimensionPixelSize(R.dimen.layout_height));
+        // Gen checkBox id
+        int checkBoxId = View.generateViewId();
 
-        textView.setLayoutParams(layoutParams);
+        checkBox.setId(checkBoxId);
+        providerViews.add(checkBoxId);
 
-        // Get the right text if the provider is known
-        int textResources = getResources().getIdentifier(providerKey, "string", this.getPackageName());
-
-        if (textResources != 0) {
-            textView.setText(textResources);
-        } else {
-            textView.setText(providerKey);
-        }
-
-        ConstraintSet constraintSet = new ConstraintSet();
-        constraintSet.clone((ConstraintLayout) parentLayout);
-
-        // Set margins
-        int marginStart = getResources().getDimensionPixelSize(R.dimen.layout_margin_start_text);
-        int marginEnd = getResources().getDimensionPixelSize(R.dimen.layout_margin_end);
-        int marginTop = getResources().getDimensionPixelSize(R.dimen.layout_margin_top);
-
-        // Set constraints for the TextView
-        constraintSet.connect(textView.getId(), ConstraintSet.START, parentLayout.getId(), ConstraintSet.START, marginStart);
-        constraintSet.connect(textView.getId(), ConstraintSet.END, parentLayout.getId(), ConstraintSet.END, marginEnd);
-        constraintSet.connect(textView.getId(), ConstraintSet.TOP, topViewId, ConstraintSet.BOTTOM, marginTop);
-        constraintSet.applyTo((ConstraintLayout) parentLayout);
-
-        return textView;
-    }
-
-
-    private CheckBox generateCheckBox(String providerKey, int topViewId, int rightViewId) {
-        CheckBox checkBox = new CheckBox(this);
-        checkBox.setId(View.generateViewId());
         ViewGroup parentLayout = findViewById(R.id.constraintLayoutSettings);
 
         // Add CheckBox to the parent layout
@@ -254,10 +214,20 @@ public class SettingsActivity extends AppCompatActivity {
         constraintSet.connect(checkBox.getId(), ConstraintSet.START, parentLayout.getId(), ConstraintSet.START, marginStart);
         constraintSet.connect(checkBox.getId(), ConstraintSet.END, parentLayout.getId(), ConstraintSet.END, marginEnd);
         constraintSet.connect(checkBox.getId(), ConstraintSet.TOP, topViewId, ConstraintSet.BOTTOM, marginTop);
-        constraintSet.connect(checkBox.getId(), ConstraintSet.RIGHT, rightViewId, ConstraintSet.LEFT, 0);
         constraintSet.applyTo((ConstraintLayout) parentLayout);
 
         checkBox.setChecked(false);
+
+        // Get the right text if the provider is known
+        int textResources = getResources().getIdentifier(providerKey, "string", this.getPackageName());
+
+        if (textResources != 0) {
+            // Set the custom text if available
+            checkBox.setText(textResources);
+        } else {
+            // Otherwise set to the provider key
+            checkBox.setText(providerKey);
+        }
 
         return checkBox;
     }
@@ -283,14 +253,16 @@ public class SettingsActivity extends AppCompatActivity {
         // Save the CheckBoxes state for allowed and excluded providers
         for (String providerKey : availableProvidersKey) {
             // Retrieve the CheckBoxes with tags
-            CheckBox checkBoxAllowed = parentLayout.findViewWithTag("allowed_check_" + providerKey);
-            CheckBox checkBoxExcluded = parentLayout.findViewWithTag("excluded_check_" + providerKey);
+            CheckBox checkBoxAllowed = parentLayout.findViewWithTag("checkbox_" + providerKey);
+
+            if (checkBoxAllowed == null) {
+                Log.w("SettingsActivity", "CheckBox not found for providerKey: " + providerKey);
+                continue;
+            }
 
             if (checkBoxAllowed.isChecked()) {
                 allowedProviderKeys.add(providerKey);
-            }
-
-            if (checkBoxExcluded.isChecked()) {
+            } else {
                 excludedProviderKeys.add(providerKey);
             }
         }
@@ -314,34 +286,6 @@ public class SettingsActivity extends AppCompatActivity {
         finish();
     }
 
-
-    /**
-     * Detects which providers are included in the SDK and returns them.
-     */
-    private List<String> detectIncludedProvidersSDK(String[] providersList) {
-        List<String> includedProviders = new ArrayList<>();
-        providerViews = new ArrayList<>();
-
-        for (String p : providersList) {
-            try {
-                String[] splitProviders = p.split("\\.");
-                String suffixProvider = splitProviders[splitProviders.length - 1];
-                providerViews.add(getId("checkAllowed" + suffixProvider));
-                Class.forName("com.enioka.scanner.sdk." + p);
-                includedProviders.add(suffixProvider);
-            } catch (ClassNotFoundException e) {
-                continue;
-            }
-        }
-        return includedProviders;
-    }
-
-    /**
-     * Returns the id of a resource by its name.
-     */
-    private int getId(String name) {
-        return getResources().getIdentifier(name, "id", getPackageName());
-    }
 
     /**
      * Bind toggle buttons

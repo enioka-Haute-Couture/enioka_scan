@@ -12,7 +12,6 @@
         android:hardwareAccelerated="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity" />
-        <activity android:name=".ScannerTesterActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".WelcomeActivity"
             android:exported="true">

@@ -51,6 +51,6 @@
         android:padding="0dp"
         android:paddingBottom="0px"
         android:text="@string/fragment_scan_manual_ok"
-        android:textColor="#009688"
+        android:textColor="@color/colorAccent"
         android:textSize="14sp" />
 </RelativeLayout>

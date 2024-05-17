@@ -87,10 +87,6 @@ public class SettingsActivity extends AppCompatActivity {
         buttonSave = findViewById(R.id.button_save);
         buttonSave.setOnClickListener(this::onClickSave);
 
-        // TopAppBar back button listener
-        topAppBar = findViewById(R.id.topAppBarSettings);
-        topAppBar.setNavigationOnClickListener(v -> finish());
-
         // Segmented toggle buttons
         bt_all = findViewById(R.id.button_all);
         bt_spec = findViewById(R.id.button_specific);

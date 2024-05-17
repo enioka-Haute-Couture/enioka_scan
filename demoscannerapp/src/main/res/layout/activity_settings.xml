@@ -14,8 +14,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:navigationIcon="@drawable/arrow_left"
-        app:navigationIconTint="@color/design_default_color_primary_variant"
         app:title="@string/scanner_search_settings"
         app:titleTextColor="@color/design_default_color_primary_variant"/>
 

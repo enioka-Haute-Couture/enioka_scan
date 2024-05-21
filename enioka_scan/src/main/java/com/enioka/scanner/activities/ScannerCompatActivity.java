@@ -263,6 +263,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             Log.i(LOG_TAG, "Could not instantiate camera provider", e);
             hasCameraScannerSdk = false;
+            // Disable switch to camera button
+            findViewById(cameraToggleId).setVisibility(View.GONE);
         }
     }
 

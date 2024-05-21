@@ -6,6 +6,7 @@ import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.BarcodeType;
 
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -13,29 +14,18 @@ import java.util.Set;
  */
 public interface CameraScannerProvider {
     /**
-     * Returns the ID of the camera view in the layout.
+     * Returns hashmap of the ID resources.
+     * Contains the following keys:
+     * - layout_id_camera: The ID of the layout containing the camera view.
+     * - camera_view_id: The ID of the camera view in the layout.
+     * - scanner_toggle_view_id: The ID of the view that toggles the scanner library reader.
+     * - scanner_toggle_pause_id: The ID of the view that toggles the pause of the scanner.
+     * - card_last_scan_id: ID of the card view that displays the last scan.
+     * - constraint_layout_id: The ID of the constraint layout inside the camera layout.
+     * - scanner_flashlight_id: The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
+     * - scanner_bt_keyboard_id: The ID of the optional ImageButton on which to press to manually switch to keyboard mode.
      */
-    public int getCameraViewId();
-
-    /**
-     * Returns the ID of the layout containing the camera view.
-     */
-    public int getLayoutIdCamera();
-
-    /**
-     * Returns the ID of the view that toggles the scanner library reader.
-     */
-    public int getScannerToggleViewId();
-
-    /**
-     * Returns the ID of the view that toggles the pause of the scanner.
-     */
-    public int getScannerTogglePauseId();
-
-    /**
-     * Returns the ID of the material card view containing the last scanned barcode.
-     */
-    public int getMaterialCardViewId();
+    public HashMap<String, Integer> getIdResources();
 
     /**
      * Called to initialize the camera scanner with the given view and callbacks.

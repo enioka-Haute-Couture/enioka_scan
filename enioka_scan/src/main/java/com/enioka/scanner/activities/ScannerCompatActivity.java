@@ -14,7 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.PorterDuff;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -22,13 +22,15 @@ import android.os.IBinder;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.core.app.ActivityCompat;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.Switch;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,7 +48,6 @@ import com.enioka.scanner.service.ScannerClient;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 import com.enioka.scanner.service.ScannerServiceBinderHelper;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
@@ -56,20 +57,20 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Timer;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
  * A helper activity which implements all scan functions: laser, camera, HID.<br><br>Basic usage is trivial : just inherit this class, and that's all.<br>
  * You may want to override {@link #onData(List)} to get barcode data, and {@link #onStatusChanged(Scanner, ScannerStatusCallback.Status)} to display status messages from the scanners.<br>
- * It is also useful to change  inside onCreate {@link #layoutIdLaser} and {@link #layoutIdCamera} to a layout ID (from R.id...) corresponding to your application.
+ * It is also useful to change  inside onCreate {@link #layoutIdLaser} and layout_id_camera inside {@link #cameraResources} to a layout ID (from R.id...) corresponding to your application.
  * By default, a basic test layout is provided.<br>
- * Also, {@link #cameraViewId} points to the camera view inside your camera layout.
+ * Also, camera_view_id {@link #cameraResources} points to the camera view inside your camera layout.
  */
 public class ScannerCompatActivity extends AppCompatActivity implements ScannerClient {
     protected final static String LOG_TAG = "ScannerActivity";
@@ -104,19 +105,23 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      */
     protected int layoutIdLaser = R.layout.activity_main;
     /**
-     * The layout to use when using camera scanner.
+     * Hashmap containing the ID resources from the camera scanner provider.
+     * Contains the following keys:
+     * - layout_id_camera: The ID of the layout containing the camera view.
+     * - camera_view_id: The ID of the camera view in the layout.
+     * - scanner_toggle_view_id: The ID of the view that toggles the scanner library reader.
+     * - scanner_toggle_pause_id: The ID of the view that toggles the pause of the scanner.
+     * - card_last_scan_id: ID of the card view that displays the last scan.
+     * - constraint_layout_id: The ID of the constraint layout inside the camera layout.
+     * - scanner_flashlight_id: The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
+     * - scanner_bt_keyboard_id: The ID of the optional ImageButton on which to press to manually switch to keyboard mode.
      */
-    protected Integer layoutIdCamera = null;
+    protected HashMap<String, Integer> cameraResources = null;
     /**
-     * Use {@link #cameraViewId} instead.
+     * Use camera_view_id inside the {@link #cameraResources} instead.
      */
     @Deprecated
     protected Integer zbarViewId = null;
-    /**
-     * The ID of the CameraBarcodeScanView inside the {@link #layoutIdCamera} layout.
-     */
-    protected Integer cameraViewId = null;
-
     /**
      * The ID of the ImageButton on which to press to manually switch to camera mode.
      */
@@ -126,13 +131,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
      */
     protected int flashlightViewId = R.id.scanner_flashlight;
-
-    /**
-     * The ID of the optional ImageButton on which to press to toggle the zxing/zbar camera scan library.
-     */
-    protected Integer scannerModeToggleViewId = null;
-
-    protected Integer scannerModeTogglePauseId = null;
 
     protected int keyboardOpenViewId = R.id.scanner_bt_keyboard;
 
@@ -183,6 +181,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected boolean loggingEnabled = false;
 
     /**
+     * Define if the fallback to camera is allowed.
+     */
+    protected boolean allowCameraFallback = false;
+
+    /**
      * The URI of the log file to write to.
      */
     private Uri logFileUri = null;
@@ -208,11 +211,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         // Ascending compatibility
         if (zbarViewId != null) {
-            cameraViewId = zbarViewId;
+            cameraResources.put("camera_view_id", zbarViewId);
         }
 
         // Get the intent extras
         loggingEnabled = getIntent().getBooleanExtra("enableLogging", false);
+        allowCameraFallback = getIntent().getBooleanExtra("allowCameraFallback", false);
 
         // Init logging if enabled
         if (loggingEnabled) {
@@ -327,11 +331,24 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void setViewContent() {
-        if (enableScan && goToCamera && hasPermissionSet(this, PERMISSIONS_CAMERA) && hasCameraScannerSdk) {
+        int orientation = getResources().getConfiguration().orientation;
+
+        if (cameraResources != null && enableScan && goToCamera && hasPermissionSet(this, PERMISSIONS_CAMERA) && hasCameraScannerSdk) {
             // Can only add/open a camera view if camera is allowed.
-            setContentView(layoutIdCamera);
+            Integer cameraLayoutId = cameraResources.get("layout_id_camera");
+
+            if (cameraLayoutId == null) {
+                throw new IllegalStateException("Camera layout not set");
+            }
+
+            setContentView(cameraLayoutId);
+            switchCameraOrientation(orientation == Configuration.ORIENTATION_PORTRAIT);
         } else {
             setContentView(layoutIdLaser);
+
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                switchLaserOrientation(false);
+            }
             scannerStatusCard = findViewById(R.id.scanner_card_last_scan);
         }
     }
@@ -423,10 +440,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (hasPermissionSet(this, PERMISSIONS_CAMERA)) {
             if (!activityStartedInCameraMode) {
                 // The view needs permissions BEFORE initializing. And it initializes as soon as the layout is set.
-                if (layoutIdCamera == null) {
+                Integer cameraLayoutId = cameraResources.get("layout_id_camera");
+                if (cameraLayoutId == null) {
                     throw new IllegalStateException("Camera layout not set");
                 }
-                setContentView(layoutIdCamera);
+                setContentView(cameraLayoutId);
             }
             initCameraScanner();
 
@@ -441,20 +459,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void setCameraViewId() {
-        if (this.layoutIdCamera == null) {
-            this.layoutIdCamera = cameraScannerProvider.getLayoutIdCamera();
-        }
-
-        if (this.cameraViewId == null) {
-            this.cameraViewId = cameraScannerProvider.getCameraViewId();
-        }
-
-        if (this.scannerModeToggleViewId == null) {
-            this.scannerModeToggleViewId = cameraScannerProvider.getScannerToggleViewId();
-        }
-
-        if (this.scannerModeTogglePauseId == null) {
-            this.scannerModeTogglePauseId = cameraScannerProvider.getScannerTogglePauseId();
+        if (cameraResources == null) {
+            cameraResources = cameraScannerProvider.getIdResources();
         }
     }
 
@@ -463,7 +469,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
         // TODO: should be in camera constructor, not here...
-        View cameraView = findViewById(cameraViewId);
+        Integer cameraViewId = cameraResources.get("camera_view_id");
+        View cameraView = cameraViewId != null ? findViewById(cameraViewId) : null;
         if (cameraView == null) {
             Toast.makeText(this, R.string.scanner_status_no_camera, Toast.LENGTH_SHORT).show();
             return;
@@ -481,7 +488,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         cameraScannerProvider.getCameraScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)), new ScannerStatusCallbackProxy(this), symbologies);
         // Set the content view to the camera layout
-        scannerStatusCard = findViewById(cameraScannerProvider.getMaterialCardViewId());
+        Integer cardLastScanId = cameraResources.get("card_last_scan_id");
+        scannerStatusCard = cardLastScanId != null ? findViewById(cardLastScanId) : null;
+
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
@@ -549,7 +558,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     public void onScannerInitEnded(int scannerCount) {
         Log.i(LOG_TAG, "Activity can now use all received scanners (" + scannerCount + ")");
 
-        if (scannerCount == 0 && !laserModeOnly && enableScan && hasCameraScannerSdk) {
+        if (scannerCount == 0 && !laserModeOnly && enableScan && hasCameraScannerSdk && allowCameraFallback) {
             // In that case try to connect to a camera.
             initCamera();
         }
@@ -559,6 +568,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             displayToggleLedButton();
             displaySwitchScanButton();
             displayBellButton();
+        } else {
+
         }
     }
 
@@ -574,10 +585,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
     @Override
     public void onData(List<Barcode> data) {
-        scannerStatusCard.setStrokeColor(ContextCompat.getColor(ScannerCompatActivity.this, R.color.doneItemColor));
-        scannerStatusCard.setStrokeWidth(4);
+        if (scannerStatusCard != null) {
+            scannerStatusCard.setStrokeColor(ContextCompat.getColor(ScannerCompatActivity.this, R.color.doneItemColor));
+            scannerStatusCard.setStrokeWidth(4);
 
-        resetStatusCardStyle();
+            resetStatusCardStyle();
+        }
 
         StringBuilder res = new StringBuilder();
         for (Barcode b : data) {
@@ -769,27 +782,31 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void displayCameraReaderToggle() {
-        final SwitchCompat toggle = findViewById(scannerModeToggleViewId);
+        Integer scannerToggleViewId = cameraResources.get("scanner_toggle_view_id");
+        final SwitchCompat toggle = scannerToggleViewId != null ? findViewById(scannerToggleViewId) : null;
         if (toggle == null) {
             return;
         }
 
         toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.i(LOG_TAG, "Changing reader mode");
-            View cameraView = findViewById(cameraViewId);
+            Integer cameraViewId = cameraResources.get("camera_view_id");
+            View cameraView = cameraViewId != null ? findViewById(cameraViewId) : null;
             cameraScannerProvider.setReaderMode(cameraView, isChecked);
         });
     }
 
     private void displayCameraPauseToggle() {
-        final SwitchCompat toggle = findViewById(scannerModeTogglePauseId);
+        Integer scannerToggleViewId = cameraResources.get("scanner_toggle_pause_id");
+        final SwitchCompat toggle = scannerToggleViewId != null ? findViewById(scannerToggleViewId) : null;
         if (toggle == null) {
             return;
         }
 
         toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             Log.i(LOG_TAG, "Toggling camera pause");
-            View cameraView = findViewById(cameraViewId);
+            Integer cameraViewId = cameraResources.get("camera_view_id");
+            View cameraView = cameraViewId != null ? findViewById(cameraViewId) : null;
             if (isChecked) {
                 cameraScannerProvider.pauseCamera(cameraView);
             } else {
@@ -923,6 +940,136 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             if (logFileUri != null) {
                 Log.i(LOG_TAG, "Log file will be written at: " + logFileUri.toString());
             }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Screen orientation
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        boolean switchCamera = enableScan && goToCamera && hasPermissionSet(this, PERMISSIONS_CAMERA) && hasCameraScannerSdk;
+        int orientation = getResources().getConfiguration().orientation;
+
+        if (switchCamera) {
+            switchCameraOrientation(orientation == Configuration.ORIENTATION_PORTRAIT);
+        } else {
+            switchLaserOrientation(orientation == Configuration.ORIENTATION_PORTRAIT);
+        }
+    }
+
+    private void switchCameraOrientation(boolean portrait) {
+        Integer constraintLayoutId = cameraResources.get("constraint_layout_id");
+        Integer scannerFlashlightId = cameraResources.get("scanner_flashlight_id");
+        Integer scannerBtKeyboardId = cameraResources.get("scanner_bt_keyboard_id");
+
+        if (constraintLayoutId == null || scannerFlashlightId == null || scannerBtKeyboardId == null) {
+            Log.w(LOG_TAG, "Cannot switch to landscape mode: missing resources");
+            return;
+        }
+
+        ConstraintLayout constraintLayout = findViewById(constraintLayoutId);
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(constraintLayout);
+        int margin = getResources().getDimensionPixelSize(R.dimen.layout_margin_border);
+
+        // Set left constraints
+        if (portrait) {
+            constraintSet.connect(scannerFlashlightId, ConstraintSet.RIGHT, constraintLayout.getId(), ConstraintSet.RIGHT, margin);
+            constraintSet.connect(scannerBtKeyboardId, ConstraintSet.RIGHT, constraintLayout.getId(), ConstraintSet.RIGHT, margin);
+        } else {
+            constraintSet.connect(scannerFlashlightId, ConstraintSet.LEFT, constraintLayout.getId(), ConstraintSet.LEFT, margin);
+            constraintSet.connect(scannerBtKeyboardId, ConstraintSet.LEFT, constraintLayout.getId(), ConstraintSet.LEFT, margin);
+
+        }
+
+        if (portrait) {
+            // Delete left constraints
+            constraintSet.clear(scannerFlashlightId, ConstraintSet.LEFT);
+            constraintSet.clear(scannerBtKeyboardId, ConstraintSet.LEFT);
+
+        } else {
+            // Delete right constraints
+            constraintSet.clear(scannerFlashlightId, ConstraintSet.RIGHT);
+            constraintSet.clear(scannerBtKeyboardId, ConstraintSet.RIGHT);
+        }
+
+        // Apply constraints
+        constraintSet.applyTo(constraintLayout);
+    }
+
+    public void switchLaserOrientation(boolean portrait) {
+        ConstraintLayout mainConstraintLayout = findViewById(R.id.constraint_layout);
+        LinearLayout linearLayout = findViewById(R.id.bottom_layout);
+        View scannerFlashlight = findViewById(flashlightViewId);
+        View scannerBell = findViewById(R.id.scanner_bell);
+        View scannerRedLed = findViewById(R.id.scanner_red_led);
+
+        if (portrait) {
+            // Move elements to main constraint layout
+            linearLayout.removeView(scannerFlashlight);
+            linearLayout.removeView(scannerBell);
+            linearLayout.removeView(scannerRedLed);
+
+            LinearLayout.LayoutParams oldParamsFlashLight = (LinearLayout.LayoutParams) scannerFlashlight.getLayoutParams();
+            LinearLayout.LayoutParams oldParamsBell = (LinearLayout.LayoutParams) scannerBell.getLayoutParams();
+            LinearLayout.LayoutParams oldParamsRedLed = (LinearLayout.LayoutParams) scannerRedLed.getLayoutParams();
+
+            ConstraintLayout.LayoutParams newParamsFlashLight = new ConstraintLayout.LayoutParams(oldParamsFlashLight.width, oldParamsFlashLight.height);
+            newParamsFlashLight.setMargins(oldParamsFlashLight.leftMargin, oldParamsFlashLight.topMargin, oldParamsFlashLight.rightMargin, oldParamsFlashLight.bottomMargin);
+
+            ConstraintLayout.LayoutParams newParamsBell = new ConstraintLayout.LayoutParams(oldParamsBell.width, oldParamsBell.height);
+            newParamsBell.setMargins(oldParamsBell.leftMargin, oldParamsBell.topMargin, oldParamsBell.rightMargin, oldParamsBell.bottomMargin);
+
+            ConstraintLayout.LayoutParams newParamsRedLed = new ConstraintLayout.LayoutParams(oldParamsRedLed.width, oldParamsRedLed.height);
+            newParamsRedLed.setMargins(oldParamsRedLed.leftMargin, oldParamsRedLed.topMargin, oldParamsRedLed.rightMargin, oldParamsRedLed.bottomMargin);
+
+            mainConstraintLayout.addView(scannerFlashlight, newParamsFlashLight);
+            mainConstraintLayout.addView(scannerBell, newParamsBell);
+            mainConstraintLayout.addView(scannerRedLed, newParamsRedLed);
+
+            // Apply constraints
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(mainConstraintLayout);
+
+            int margin = getResources().getDimensionPixelSize(R.dimen.layout_margin_border);
+
+            constraintSet.connect(scannerFlashlight.getId(), ConstraintSet.TOP, R.id.scanner_enable_text, ConstraintSet.BOTTOM, margin);
+            constraintSet.connect(scannerFlashlight.getId(), ConstraintSet.END, mainConstraintLayout.getId(), ConstraintSet.END, margin);
+
+            constraintSet.connect(scannerBell.getId(), ConstraintSet.TOP, scannerFlashlight.getId(), ConstraintSet.BOTTOM, margin);
+            constraintSet.connect(scannerBell.getId(), ConstraintSet.END, mainConstraintLayout.getId(), ConstraintSet.END, margin);
+
+            constraintSet.connect(scannerRedLed.getId(), ConstraintSet.TOP, scannerBell.getId(), ConstraintSet.BOTTOM, margin);
+            constraintSet.connect(scannerRedLed.getId(), ConstraintSet.END, mainConstraintLayout.getId(), ConstraintSet.END, margin);
+
+            constraintSet.applyTo(mainConstraintLayout);
+        } else {
+            // Move elements to linear layout
+            mainConstraintLayout.removeView(scannerFlashlight);
+            mainConstraintLayout.removeView(scannerBell);
+            mainConstraintLayout.removeView(scannerRedLed);
+
+            ConstraintLayout.LayoutParams oldParamsFlashLight = (ConstraintLayout.LayoutParams) scannerFlashlight.getLayoutParams();
+            ConstraintLayout.LayoutParams oldParamsBell = (ConstraintLayout.LayoutParams) scannerBell.getLayoutParams();
+            ConstraintLayout.LayoutParams oldParamsRedLed = (ConstraintLayout.LayoutParams) scannerRedLed.getLayoutParams();
+
+            LinearLayout.LayoutParams newParamsFlashLight = new LinearLayout.LayoutParams(oldParamsFlashLight.width, oldParamsFlashLight.height);
+            newParamsFlashLight.setMargins(0, oldParamsFlashLight.topMargin, oldParamsFlashLight.rightMargin, oldParamsFlashLight.bottomMargin);
+
+            LinearLayout.LayoutParams newParamsBell = new LinearLayout.LayoutParams(oldParamsBell.width, oldParamsBell.height);
+            newParamsBell.setMargins(0, oldParamsBell.topMargin, oldParamsBell.rightMargin, oldParamsBell.bottomMargin);
+
+            LinearLayout.LayoutParams newParamsRedLed = new LinearLayout.LayoutParams(oldParamsRedLed.width, oldParamsRedLed.height);
+            newParamsRedLed.setMargins(0, oldParamsRedLed.topMargin, oldParamsRedLed.rightMargin, oldParamsRedLed.bottomMargin);
+
+            linearLayout.addView(scannerFlashlight, newParamsFlashLight);
+            linearLayout.addView(scannerBell, newParamsBell);
+            linearLayout.addView(scannerRedLed, newParamsRedLed);
         }
     }
 }

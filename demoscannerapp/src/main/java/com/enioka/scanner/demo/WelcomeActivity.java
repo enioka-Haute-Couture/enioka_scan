@@ -2,13 +2,18 @@ package com.enioka.scanner.demo;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.enioka.scanner.LaserScanner;
 import com.enioka.scanner.api.ScannerSearchOptions;
@@ -31,17 +36,19 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        boolean landscape = this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+
         setContentView(R.layout.activity_welcome);
+
+        // Dynamically switch the layout based on the orientation
+        if (landscape) {
+            switchWelcomeActivity(false);
+        }
 
         LaserScanner.discoverProviders(this, () -> {});
         availableProviders = LaserScanner.getProviderCache();
-        bt1 = findViewById(R.id.bt_scanner);
-        bt5 = findViewById(R.id.bt_settings);
-        toolbar = findViewById(R.id.topAppBar);
-
-        bt1.setOnClickListener(this::onClickBt1);
-        bt5.setOnClickListener(this::onClickBt5);
-        setSupportActionBar(toolbar);
+        initViews();
     }
 
     // Show the menu in the top action tool bar
@@ -49,6 +56,16 @@ public class WelcomeActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    private void initViews() {
+        bt1 = findViewById(R.id.bt_scanner);
+        bt5 = findViewById(R.id.bt_settings);
+        toolbar = findViewById(R.id.topAppBar);
+
+        bt1.setOnClickListener(this::onClickBt1);
+        bt5.setOnClickListener(this::onClickBt5);
+        setSupportActionBar(toolbar);
     }
 
     // Scanner activity
@@ -91,5 +108,29 @@ public class WelcomeActivity extends AppCompatActivity {
             startActivity(browserIntent);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        switchWelcomeActivity(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT);
+    }
+
+    public void switchWelcomeActivity(boolean portrait) {
+        View welcome_card = findViewById(R.id.welcome_card);
+        View barcode_image = findViewById(R.id.barcode);
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) welcome_card.getLayoutParams();
+        LinearLayout.LayoutParams paramsBarcode = (LinearLayout.LayoutParams) barcode_image.getLayoutParams();
+
+        if (portrait) {
+            params.matchConstraintPercentWidth = 0.8f;
+            paramsBarcode.height = 90 * (int) getResources().getDisplayMetrics().density;
+        } else {
+            params.matchConstraintPercentWidth = 0.5f;
+            paramsBarcode.height = 100 * (int) getResources().getDisplayMetrics().density;
+        }
+        welcome_card.setLayoutParams(params);
+        barcode_image.setLayoutParams(paramsBarcode);
     }
 }

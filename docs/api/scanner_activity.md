@@ -48,20 +48,34 @@ service. **This does not affect scanner search options**.
 
 :::{cpp:var} int layoutIdLaser = R.layout.activity_main
 
-The layout used by the activity when using regular scanner devices. May be replaced with your own.
+The layout used by the activity when using regular scanner devices. May be replaced with
+your own.
 :::
 
-:::{cpp:var} Integer layoutIdCamera = null
+:::{cpp:var} HashMap<String, Integer> cameraResources = null;
 
-The layout used by the activity when using the camera as a scanner. May be replaced with your own.
-If the camera SDK is included, it will be defined to :::{cpp:var}R.layout.activity_main_alt
-:::
+The hashmap containing the IDs of the views used by the camera scanner. May be replaced with your
+own.
 
-:::{cpp:var} Integer cameraViewId = null
-
-If the camera SDK is included, it will be set to :::{cpp:var}R.id.camera_scan_view
-It is the ID of the [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the
-`layoutIdCamera` layout.
+If the camera SDK is included, it will be set to a map containing the following values:
+- layout_id_camera: The ID of the layout containing the camera view
+:::{cpp:var}R.layout.activity_main_alt:::.
+- camera_view_id: The ID of the camera view in the layout :::{cpp:var}R.id.camera_scan_view:::.
+  It is the ID of the [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the
+  `layout_id_camera` layout.
+  :::.
+- scanner_toggle_view_id: It is the ID of the optional ImageButton on which to press to toggle the 
+zxing/zbar camera scan library :::{cpp:var}R.id.scanner_switch_zxing:::.
+- scanner_toggle_pause_id: The ID of the optional toggle button on which to press to pause/unpause 
+the scanner :::{cpp:var}R.id.scanner_switch_pause:::.
+- card_last_scan_id: ID of the card view that displays the last scan
+:::{cpp:var}R.id.card_camera_last_scan:::.
+- constraint_layout_id: The ID of the constraint layout inside the camera layout
+:::{cpp:var}R.id.constraint_layout_main_activity:::.
+- scanner_flashlight_id: The ID of the optional ImageButton on which to press to toggle the
+flashlight/illumination :::{cpp:var}R.id.scanner_flashlight:::.
+- scanner_bt_keyboard_id: The ID of the optional ImageButton on which to press to manually switch to
+keyboard mode :::{cpp:var}R.id.scanner_bt_keyboard:::.
 :::
 
 :::{cpp:var} int cameraToggleId = R.id.scanner_bt_camera
@@ -72,20 +86,6 @@ The ID of the optional ImageButton on which to press to manually switch to camer
 :::{cpp:var} int flashlightViewId = R.id.scanner_flashlight
 
 The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
-:::
-
-:::{cpp:var} Integer scannerModeToggleViewId = null
-
-If the camera SDK is included, it will be set to :::{cpp:var}R.id.scanner_switch_zxing.
-It is the ID of the optional ImageButton on which to press to toggle the zxing/zbar camera scan
-library.
-:::
-
-:::{cpp:var} Integer scannerModeTogglePauseId = 
-
-The ID of the optional toggle button on which to press to pause/unpause the scanner.
-If the camera SDK is included and it is not overwrite, it will be set by default to
-:::{cpp:var}R.id.scanner_switch_pause.
 :::
 
 :::{cpp:var} int keyboardOpenViewId = R.id.scanner_bt_keyboard

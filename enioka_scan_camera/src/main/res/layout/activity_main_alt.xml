@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraint_layout_main_activity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.enioka.scanner.activities.ScannerCompatActivity">
@@ -30,10 +31,11 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_camera_last_scan"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="55dp"
-        app:layout_constraintWidth_percent="0.95"
         android:layout_marginTop="10dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

@@ -20,6 +20,7 @@
 
 
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/welcome_card"
         android:layout_width="0dp"
         app:layout_constraintWidth_percent="0.8"
         android:layout_height="wrap_content"
@@ -30,6 +31,7 @@
         app:cardBackgroundColor="@color/design_default_color_surface">
 
         <LinearLayout
+            android:id="@+id/welcome_card_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"

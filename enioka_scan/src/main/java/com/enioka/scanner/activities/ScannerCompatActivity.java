@@ -8,6 +8,8 @@ import static com.enioka.scanner.helpers.Permissions.requestPermissionSet;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -50,6 +52,7 @@ import com.enioka.scanner.service.ScannerServiceApi;
 import com.enioka.scanner.service.ScannerServiceBinderHelper;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.materialswitch.MaterialSwitch;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.BufferedWriter;
 import java.io.OutputStream;
@@ -356,6 +359,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             }
             scannerStatusCard = findViewById(R.id.scanner_card_last_scan);
         }
+        // Init last scan card button
+        InitCopyClipBoard();
     }
 
 
@@ -495,7 +500,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         // Set the content view to the camera layout
         Integer cardLastScanId = cameraResources.get("card_last_scan_id");
         scannerStatusCard = cardLastScanId != null ? findViewById(cardLastScanId) : null;
-
+        InitCopyClipBoard();
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
@@ -656,6 +661,25 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Button and input initialization
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Copy last scan text to clipboard when clicking on the scanner status card.
+     */
+    private void InitCopyClipBoard() {
+        // Setup clipboard copy button
+        scannerStatusCard.setOnClickListener(v -> {
+            TextView lastScan = findViewById(R.id.scanner_text_last_scan);
+
+            if (lastScan.getText().length() != 0) {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("barcode", lastScan.getText());
+                clipboard.setPrimaryClip(clip);
+
+                Snackbar snackbar = Snackbar.make(v, R.string.last_scan_clipboard, Snackbar.LENGTH_SHORT);
+                snackbar.show();
+            }
+        });
+    }
 
     /**
      * Display the torch button "on" or "off" is the device has capability.

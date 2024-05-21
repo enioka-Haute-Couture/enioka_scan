@@ -40,6 +40,7 @@
     <string name="keyboard_input">Entrée</string>
     <string name="switch_enable_scan_text">Activer le scan</string>
     <string name="open_link">Ouvrir le lien</string>
+    <string name="last_scan_clipboard">Dernier scan copié avec succès dans le presse-papiers !</string>
 
     <!-- Content description -->
     <string name="fab_flashlight">lumiere flash</string>

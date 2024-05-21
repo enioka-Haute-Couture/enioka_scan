@@ -48,7 +48,7 @@
                 android:scaleType="centerCrop"
                 android:layout_gravity="center"
                 android:background="@android:color/transparent"
-                android:contentDescription="barcode_svg" />
+                android:contentDescription="@string/barcode" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/bt_scanner"
@@ -71,6 +71,6 @@
         android:src="@drawable/baseline_settings_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:contentDescription="settings" />
+        android:contentDescription="@string/settings" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

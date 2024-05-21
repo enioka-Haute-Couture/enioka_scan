@@ -40,4 +40,11 @@
     <string name="keyboard_input">Entrée</string>
     <string name="switch_enable_scan_text">Activer le scan</string>
     <string name="open_link">Ouvrir le lien</string>
+
+    <!-- Content description -->
+    <string name="fab_flashlight">lumiere flash</string>
+    <string name="fab_keyboard">saisie manuelle du clavier</string>
+    <string name="fab_scanner_flashlight">activation de la lumiere du scanneur</string>
+    <string name="fab_scanner_bell">activation de la cloche</string>
+    <string name="fab_scanner_red_light">activation de la lumiere rouge du scanneur</string>
 </resources>

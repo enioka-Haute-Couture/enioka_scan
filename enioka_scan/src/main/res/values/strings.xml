@@ -47,4 +47,11 @@
     <string name="keyboard_input">Input</string>
     <string name="switch_enable_scan_text">enable scan</string>
     <string name="open_link">Open link</string>
+
+    <!-- Content description -->
+    <string name="fab_flashlight">flash light</string>
+    <string name="fab_keyboard">manual input keyboard</string>
+    <string name="fab_scanner_flashlight">scanner flashlight activation</string>
+    <string name="fab_scanner_bell">scanner bell activation</string>
+    <string name="fab_scanner_red_light">scanner red light activation</string>
 </resources>

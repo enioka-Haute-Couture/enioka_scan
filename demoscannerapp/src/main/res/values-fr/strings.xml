@@ -47,4 +47,7 @@
     <string name="toogle_provider_button_all">Tous</string>
     <string name="toggle_provider_button_specific">Choisir</string>
     <string name="toggle_provider_button_none">Aucun</string>
+
+    <string name="barcode">code-barre</string>
+    <string name="fab_settings">parametres</string>
 </resources>

@@ -46,4 +46,7 @@
     <string name="toogle_provider_button_all">All</string>
     <string name="toggle_provider_button_specific">Select</string>
     <string name="toggle_provider_button_none">None</string>
+
+    <string name="barcode">barcode</string>
+    <string name="fab_settings">settings</string>
 </resources>

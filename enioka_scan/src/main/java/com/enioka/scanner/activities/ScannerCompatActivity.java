@@ -54,6 +54,7 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
@@ -195,6 +196,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      */
     protected int openLinkId = R.id.open_link;
 
+    /**
+     * The String URL of the open link button.
+     */
+    private String openLinkUrl = null;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Activity lifecycle callbacks
@@ -601,15 +606,19 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 writeResultToLog(b);
             }
 
-            // Open the URL in a browser if it is a QR code
-            if (b.getBarcodeType() == BarcodeType.QRCODE) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(b.getBarcode()));
+            try {
+                // Check if content is an URL
+                openLinkUrl = new URL(b.getBarcode()).toURI().toString();
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(openLinkUrl));
 
                 findViewById(openLinkId).setVisibility(View.VISIBLE);
                 findViewById(openLinkId).setOnClickListener(v -> {
                     // Pause camera or laser scanner
                     startActivity(intent);
                 });
+            } catch (Exception ignored) {
+                // Not a URL
+                findViewById(openLinkId).setVisibility(View.GONE);
             }
         }
         if (findViewById(R.id.scanner_text_last_scan) != null) {

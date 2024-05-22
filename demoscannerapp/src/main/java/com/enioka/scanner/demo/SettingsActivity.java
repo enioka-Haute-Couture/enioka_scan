@@ -3,29 +3,31 @@ package com.enioka.scanner.demo;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.data.BarcodeType;
-import com.enioka.scanner.sdk.athesi.RD50TE.AthesiRD50TEProvider;
-import com.enioka.scanner.sdk.athesi.SPA43LTE.AthesiSPA43LTEProvider;
-import com.enioka.scanner.sdk.bluebird.BluebirdProvider;
-import com.enioka.scanner.sdk.generalscan.GsSppScannerProvider;
-import com.enioka.scanner.sdk.honeywelloss.integrated.HoneywellOssIntegratedScannerProvider;
-import com.enioka.scanner.sdk.honeywelloss.spp.HoneywellOssSppScannerProvider;
-import com.enioka.scanner.sdk.proglove.ProgloveProvider;
-import com.enioka.scanner.sdk.zebraoss.ZebraOssAttScannerProvider;
-import com.enioka.scanner.sdk.zebraoss.ZebraOssSppScannerProvider;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity {
+    /**
+     * List of available providers key
+     */
+    protected String[] availableProvidersKey = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,26 +45,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((Switch) findViewById(R.id.switchIntentDevices)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, options.allowIntentDevices));
 
         final Set<String> allowedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
-        ((CheckBox) findViewById(R.id.checkAllowedHHTProvider)).setChecked(allowedProviderKeys.contains(AthesiSPA43LTEProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedE5LProvider)).setChecked(allowedProviderKeys.contains(AthesiRD50TEProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedBluebirdProvider)).setChecked(allowedProviderKeys.contains(BluebirdProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedProgloveProvider)).setChecked(allowedProviderKeys.contains(ProgloveProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedGsSppScannerProvider)).setChecked(allowedProviderKeys.contains(GsSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedZebraOssSppScannerProvider)).setChecked(allowedProviderKeys.contains(ZebraOssSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedZebraOssAttScannerProvider)).setChecked(allowedProviderKeys.contains(ZebraOssAttScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedHoneywellOssSppScannerProvider)).setChecked(allowedProviderKeys.contains(HoneywellOssSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkAllowedHoneywellOssIntegratedScannerProvider)).setChecked(allowedProviderKeys.contains(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY));
-
         final Set<String> excludedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
-        ((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).setChecked(excludedProviderKeys.contains(AthesiSPA43LTEProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedE5LProvider)).setChecked(excludedProviderKeys.contains(AthesiRD50TEProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedBluebirdProvider)).setChecked(excludedProviderKeys.contains(BluebirdProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedProgloveProvider)).setChecked(excludedProviderKeys.contains(ProgloveProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedGsSppScannerProvider)).setChecked(excludedProviderKeys.contains(GsSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedZebraOssSppScannerProvider)).setChecked(excludedProviderKeys.contains(ZebraOssSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedZebraOssAttScannerProvider)).setChecked(excludedProviderKeys.contains(ZebraOssAttScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedHoneywellOssSppScannerProvider)).setChecked(excludedProviderKeys.contains(HoneywellOssSppScannerProvider.PROVIDER_KEY));
-        ((CheckBox) findViewById(R.id.checkExcludedHoneywellOssIntegratedScannerProvider)).setChecked(excludedProviderKeys.contains(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY));
 
         final Set<BarcodeType> symbologySelection = new HashSet<>();
         for(String symbology: preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName())) {
@@ -75,6 +58,140 @@ public class SettingsActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.checkSelectEan13)).setChecked(symbologySelection.contains(BarcodeType.EAN13));
         ((CheckBox) findViewById(R.id.checkSelectQrCode)).setChecked(symbologySelection.contains(BarcodeType.QRCODE));
         ((CheckBox) findViewById(R.id.checkSelectAztec)).setChecked(symbologySelection.contains(BarcodeType.AZTEC));
+
+        // Get detected SDKs providers from the intent
+        ArrayList<String> availableProvidersIntent = getIntent().getStringArrayListExtra("providers");
+
+        if (availableProvidersIntent == null) {
+            availableProvidersKey = new String[0];
+        } else {
+            availableProvidersKey = availableProvidersIntent.toArray(new String[0]);
+        }
+
+        // Create the UI
+        int topViewIdAllowed = R.id.textViewAllowedProviders;
+        int topViewIdExcluded = R.id.textViewExcludedProviders;
+
+        for (String providerKey : availableProvidersKey) {
+
+            // Create the UI for the allowed providers
+            TextView textViewAllowed = generateTextView(providerKey, topViewIdAllowed);
+            textViewAllowed.setTag("allowed_text_" + providerKey);
+            CheckBox checkBoxAllowed = generateCheckBox(providerKey, topViewIdAllowed, textViewAllowed.getId());
+            checkBoxAllowed.setTag("allowed_check_" + providerKey);
+
+            if (allowedProviderKeys.contains(providerKey)) {
+                checkBoxAllowed.setChecked(true);
+            }
+
+            // Create the UI for the excluded providers
+            TextView textViewExcluded = generateTextView(providerKey, topViewIdExcluded);
+            textViewExcluded.setTag("excluded_text_" + providerKey);
+            CheckBox checkBoxExcluded = generateCheckBox(providerKey, topViewIdExcluded, textViewExcluded.getId());
+            checkBoxExcluded.setTag("excluded_check_" + providerKey);
+
+            if (excludedProviderKeys.contains(providerKey)) {
+                checkBoxExcluded.setChecked(true);
+            }
+
+            topViewIdAllowed = textViewAllowed.getId();
+            topViewIdExcluded = textViewExcluded.getId();
+        }
+
+        // Update the layout
+        updateConstraintLayout(topViewIdAllowed, topViewIdExcluded);
+    }
+
+    private void updateConstraintLayout(int topViewIdAllowed, int topViewIdExcluded) {
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone((ConstraintLayout) findViewById(R.id.constraintLayoutSettings));
+
+        // Init marginTop
+        int marginTop = getResources().getDimensionPixelSize(R.dimen.layout_margin_top_header_text);
+
+        // Set top bottom constraints
+        constraintSet.connect(R.id.textViewExcludedProviders, ConstraintSet.TOP, topViewIdAllowed, ConstraintSet.BOTTOM, marginTop);
+        constraintSet.connect(R.id.textSymbologySelection, ConstraintSet.TOP, topViewIdExcluded, ConstraintSet.BOTTOM, marginTop);
+
+        // Apply constraints
+        constraintSet.applyTo(findViewById(R.id.constraintLayoutSettings));
+    }
+
+    private TextView generateTextView(String providerKey, int topViewId) {
+        TextView textView = new TextView(this);
+        textView.setId(View.generateViewId());
+
+        // Add TextView to the parent layout
+        ViewGroup parentLayout = findViewById(R.id.constraintLayoutSettings);
+        parentLayout.addView(textView);
+
+        // Set layout parameters
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                getResources().getDimensionPixelSize(R.dimen.layout_height));
+
+        textView.setLayoutParams(layoutParams);
+
+        // Get the right text if the provider is known
+        int textResources = getResources().getIdentifier(providerKey, "string", this.getPackageName());
+
+        if (textResources != 0) {
+            textView.setText(textResources);
+        } else {
+            textView.setText(providerKey);
+        }
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone((ConstraintLayout) parentLayout);
+
+        // Set margins
+        int marginStart = getResources().getDimensionPixelSize(R.dimen.layout_margin_start_text);
+        int marginEnd = getResources().getDimensionPixelSize(R.dimen.layout_margin_end);
+        int marginTop = getResources().getDimensionPixelSize(R.dimen.layout_margin_top);
+
+        // Set constraints for the TextView
+        constraintSet.connect(textView.getId(), ConstraintSet.START, parentLayout.getId(), ConstraintSet.START, marginStart);
+        constraintSet.connect(textView.getId(), ConstraintSet.END, parentLayout.getId(), ConstraintSet.END, marginEnd);
+        constraintSet.connect(textView.getId(), ConstraintSet.TOP, topViewId, ConstraintSet.BOTTOM, marginTop);
+        constraintSet.applyTo((ConstraintLayout) parentLayout);
+
+        return textView;
+    }
+
+
+    private CheckBox generateCheckBox(String providerKey, int topViewId, int rightViewId) {
+        CheckBox checkBox = new CheckBox(this);
+        checkBox.setId(View.generateViewId());
+        ViewGroup parentLayout = findViewById(R.id.constraintLayoutSettings);
+
+        // Add CheckBox to the parent layout
+        parentLayout.addView(checkBox);
+
+        // Set layout parameters
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                getResources().getDimensionPixelSize(R.dimen.layout_height));
+
+        checkBox.setLayoutParams(layoutParams);
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone((ConstraintLayout) parentLayout);
+
+        // Set margins
+        int marginStart = getResources().getDimensionPixelSize(R.dimen.layout_margin_start_checkbox);
+        int marginEnd = getResources().getDimensionPixelSize(R.dimen.layout_margin_end);
+        int marginTop = getResources().getDimensionPixelSize(R.dimen.layout_margin_top);
+
+        // Set constraints for the CheckBox
+        constraintSet.connect(checkBox.getId(), ConstraintSet.START, parentLayout.getId(), ConstraintSet.START, marginStart);
+        constraintSet.connect(checkBox.getId(), ConstraintSet.END, parentLayout.getId(), ConstraintSet.END, marginEnd);
+        constraintSet.connect(checkBox.getId(), ConstraintSet.TOP, topViewId, ConstraintSet.BOTTOM, marginTop);
+        constraintSet.connect(checkBox.getId(), ConstraintSet.RIGHT, rightViewId, ConstraintSet.LEFT, 0);
+        constraintSet.applyTo((ConstraintLayout) parentLayout);
+
+        checkBox.setChecked(false);
+
+        return checkBox;
     }
 
     public void onClickSave(View v) {
@@ -89,27 +206,27 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, ((Switch) findViewById(R.id.switchIntentDevices)).isChecked());
 
         final Set<String> allowedProviderKeys = new HashSet<>();
-        if (((CheckBox) findViewById(R.id.checkAllowedHHTProvider)).isChecked()) { allowedProviderKeys.add(AthesiSPA43LTEProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedE5LProvider)).isChecked()) { allowedProviderKeys.add(AthesiRD50TEProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedBluebirdProvider)).isChecked()) { allowedProviderKeys.add(BluebirdProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedProgloveProvider)).isChecked()) { allowedProviderKeys.add(ProgloveProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedGsSppScannerProvider)).isChecked()) { allowedProviderKeys.add(GsSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedZebraOssSppScannerProvider)).isChecked()) { allowedProviderKeys.add(ZebraOssSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedZebraOssAttScannerProvider)).isChecked()) { allowedProviderKeys.add(ZebraOssAttScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedHoneywellOssSppScannerProvider)).isChecked()) { allowedProviderKeys.add(HoneywellOssSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkAllowedHoneywellOssIntegratedScannerProvider)).isChecked()) { allowedProviderKeys.add(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY); }
-        editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys);
-
         final Set<String> excludedProviderKeys = new HashSet<>();
-        if (((CheckBox) findViewById(R.id.checkExcludedHHTProvider)).isChecked()) { excludedProviderKeys.add(AthesiSPA43LTEProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedE5LProvider)).isChecked()) { excludedProviderKeys.add(AthesiRD50TEProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedBluebirdProvider)).isChecked()) { excludedProviderKeys.add(BluebirdProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedProgloveProvider)).isChecked()) { excludedProviderKeys.add(ProgloveProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedGsSppScannerProvider)).isChecked()) { excludedProviderKeys.add(GsSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedZebraOssSppScannerProvider)).isChecked()) { excludedProviderKeys.add(ZebraOssSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedZebraOssAttScannerProvider)).isChecked()) { excludedProviderKeys.add(ZebraOssAttScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedHoneywellOssSppScannerProvider)).isChecked()) { excludedProviderKeys.add(HoneywellOssSppScannerProvider.PROVIDER_KEY); }
-        if (((CheckBox) findViewById(R.id.checkExcludedHoneywellOssIntegratedScannerProvider)).isChecked()) { excludedProviderKeys.add(HoneywellOssIntegratedScannerProvider.PROVIDER_KEY); }
+
+        // Get parent ConstraintLayout
+        ConstraintLayout parentLayout = findViewById(R.id.constraintLayoutSettings);
+
+        // Save the CheckBoxes state for allowed and excluded providers
+        for (String providerKey : availableProvidersKey) {
+            // Retrieve the CheckBoxes with tags
+            CheckBox checkBoxAllowed = parentLayout.findViewWithTag("allowed_check_" + providerKey);
+            CheckBox checkBoxExcluded = parentLayout.findViewWithTag("excluded_check_" + providerKey);
+
+            if (checkBoxAllowed.isChecked()) {
+                allowedProviderKeys.add(providerKey);
+            }
+
+            if (checkBoxExcluded.isChecked()) {
+                excludedProviderKeys.add(providerKey);
+            }
+        }
+
+        editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys);
         editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, excludedProviderKeys);
 
         final Set<String> symbologySelection = new HashSet<>();

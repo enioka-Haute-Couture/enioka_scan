@@ -28,10 +28,7 @@
             android:padding="8dp"
             android:gravity="center"
             android:text="@string/activity_scan_barcode_value_placeholder"
-            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            android:textStyle="bold"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
     </com.google.android.material.card.MaterialCardView>
 

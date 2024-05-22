@@ -29,6 +29,7 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -296,6 +297,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         // Hide the open link button
         findViewById(openLinkId).setVisibility(View.GONE);
 
+        // Set scanner card last scan to not clickable
+        scannerStatusCard.setClickable(false);
+
         // Immediately set some buttons (which do no need to wait for scanners).
         displayCameraButton();
         displayManualInputButton();
@@ -456,7 +460,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 if (cameraLayoutId == null) {
                     throw new IllegalStateException("Camera layout not set");
                 }
-                setContentView(cameraLayoutId);
+                setViewContent();
             }
             initCameraScanner();
 
@@ -488,6 +492,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
+        // Set the content view to the camera layout
+        Integer cardLastScanId = cameraResources.get("card_last_scan_id");
+        scannerStatusCard = cardLastScanId != null ? findViewById(cardLastScanId) : null;
+
         final Set<BarcodeType> symbologies = new HashSet<>();
         if (getIntent().getExtras() != null && getIntent().getExtras().getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION) != null) {
             for (final String symbology : Objects.requireNonNull(getIntent().getExtras().getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION))) {
@@ -499,14 +507,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
 
         cameraScannerProvider.getCameraScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)), new ScannerStatusCallbackProxy(this), symbologies);
-        // Set the content view to the camera layout
-        Integer cardLastScanId = cameraResources.get("card_last_scan_id");
-        scannerStatusCard = cardLastScanId != null ? findViewById(cardLastScanId) : null;
         InitCopyClipBoard();
 
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
         }
+
+        if (scannerStatusCard != null) {
+            scannerStatusCard.setClickable(false);
+        }
+
         displayTorch();
         displayManualInputButton();
         displayCameraReaderToggle();
@@ -598,6 +608,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     @Override
     public void onData(List<Barcode> data) {
         if (scannerStatusCard != null) {
+            scannerStatusCard.setClickable(true);
             scannerStatusCard.setStrokeColor(ContextCompat.getColor(ScannerCompatActivity.this, R.color.doneItemColor));
             scannerStatusCard.setStrokeWidth(4);
 
@@ -607,7 +618,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         StringBuilder res = new StringBuilder();
         for (Barcode b : data) {
             Log.d(LOG_TAG, "Received barcode from scanner: " + b.getBarcode() + " - " + b.getBarcodeType().code);
-            res.append("TYPE: ").append(b.getBarcodeType().code).append(" ").append(b.getBarcode());
+            res.append(buildBarcodeText(b.getBarcodeType().code, b.getBarcode()));
 
             if (logFileUri != null) {
                 writeResultToLog(b);
@@ -629,7 +640,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             }
         }
         if (findViewById(R.id.scanner_text_last_scan) != null) {
-            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(res.toString());
+            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(Html.fromHtml(res.toString()));
         }
 
         // Disable the scannerSwitch when a barcode is found
@@ -642,6 +653,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             manualInputFragment = null;
             scannerService.resume();
         }
+    }
+
+    /**
+     *  Build the text to display in the scanner status card.
+     */
+    private String buildBarcodeText(String barcodeType, String barcodeData) {
+        if (barcodeType.isEmpty() || barcodeData.isEmpty()) {
+            return "";
+        }
+
+        return "TYPE: <b><font color='grey'>" + barcodeType + "</font></b> <b>" + barcodeData + "</b>";
     }
 
     /**
@@ -674,13 +696,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
             if (lastScan.getText().length() != 0) {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("barcode", lastScan.getText());
+                String[] lastScanText = lastScan.getText().toString().split(" ");
+                ClipData clip = ClipData.newPlainText("barcode", lastScanText[lastScanText.length - 1]);
+
                 clipboard.setPrimaryClip(clip);
 
                 Snackbar snackbar = Snackbar.make(v, R.string.last_scan_clipboard, Snackbar.LENGTH_SHORT);
                 snackbar.show();
             }
         });
+        scannerStatusCard.setClickable(false);
     }
 
     /**

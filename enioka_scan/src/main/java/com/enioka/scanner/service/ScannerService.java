@@ -77,7 +77,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     private Set<BarcodeType> symbologySelection = defaultSymbology();
 
     public static Set<BarcodeType> defaultSymbology() {
-        return new HashSet<>(Arrays.asList(BarcodeType.EAN13, BarcodeType.CODE128));
+        return new HashSet<>(Arrays.asList(BarcodeType.CODE128, BarcodeType.CODE39, BarcodeType.DIS25, BarcodeType.INT25, BarcodeType.EAN13, BarcodeType.QRCODE, BarcodeType.AZTEC));
     }
 
     public static Set<String> defaultSymbologyByName() {

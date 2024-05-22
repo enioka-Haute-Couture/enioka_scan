@@ -5,6 +5,7 @@
     <color name="colorAccent">#FF4081</color>
     <color name="flashButtonColor">#C6D118</color>
     <color name="doneItemColor">#00b41b</color>
+    <color name="cardBackgroundDone">#A8FFB5</color>
     <color name="defaultItemColor">#808080</color>
     <color name="colorRed">#FF0000</color>
     <color name="defaultTextColor">#373737</color>

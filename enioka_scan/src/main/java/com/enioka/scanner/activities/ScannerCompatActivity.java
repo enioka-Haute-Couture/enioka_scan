@@ -290,9 +290,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (findViewById(R.id.scanner_text_last_scan) != null) {
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
         }
-        if (findViewById(R.id.scanner_text_scanner_status) != null) {
-            ((TextView) findViewById(R.id.scanner_text_scanner_status)).setText(null);
-        }
+
 
         // Hide the open link button
         findViewById(openLinkId).setVisibility(View.GONE);
@@ -465,8 +463,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             initCameraScanner();
 
             // Reinit text
-            if (findViewById(R.id.scanner_text_scanner_status) != null) {
-                TextView tv = findViewById(R.id.scanner_text_scanner_status);
+            if (findViewById(R.id.scanner_provider_text) != null) {
+                TextView tv = findViewById(R.id.scanner_provider_text);
+                tv.setText("");
+            }
+            if (findViewById(R.id.scanner_provider_status_text) != null) {
+                TextView tv = findViewById(R.id.scanner_provider_status_text);
                 tv.setText("");
             }
         } else {
@@ -570,9 +572,14 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     @SuppressLint("SetTextI18n") // Text is already localized, only special characters remain.
     @Override
     public void onStatusChanged(final Scanner scanner, final ScannerStatusCallback.Status newStatus) {
-        if (findViewById(R.id.scanner_text_scanner_status) != null) {
-            TextView tv = findViewById(R.id.scanner_text_scanner_status);
-            tv.setText((scanner == null ? "" : (scanner.getProviderKey() + ": ")) + newStatus + (tv.getText().length() != 0 ? "\n" : "") + tv.getText());
+        if (findViewById(R.id.scanner_provider_text) != null && findViewById(R.id.scanner_provider_status_text) != null && newStatus == Status.CONNECTED) {
+            TextView providerText = findViewById(R.id.scanner_provider_text);
+            TextView providerStatusText = findViewById(R.id.scanner_provider_status_text);
+            providerText.setText(scanner.getProviderKey());
+            providerStatusText.setText(newStatus.toString());
+
+            // Update visibility of the scanner status card
+            findViewById(R.id.scanner_provider_status_card).setVisibility(View.VISIBLE);
         }
     }
 

@@ -33,33 +33,47 @@
     </com.google.android.material.card.MaterialCardView>
 
     <TextView
-        android:id="@+id/scanner_text_scanner_status_title"
+        android:id="@+id/scanner_provider_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="6dp"
-        android:text="@string/activity_scan_barcode_state"
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:gravity="center"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_layout"
         app:layout_constraintTop_toBottomOf="@+id/scanner_card_last_scan"/>
 
-    <TextView
-        android:id="@+id/scanner_text_scanner_status"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="16dp"
-        android:text="@string/activity_scan_barcode_value_placeholder"
-        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-        android:textColor="@android:color/darker_gray"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/scanner_provider_status_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:visibility="gone"
+        android:gravity="center"
+        app:cardBackgroundColor="@color/cardBackgroundDone"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/scanner_trigger_on"
-        app:layout_constraintTop_toBottomOf="@+id/scanner_text_scanner_status_title"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_layout"/>
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scanner_provider_text">
+
+        <TextView
+            android:id="@+id/scanner_provider_status_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:gravity="center"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/bottom_layout"
+            app:layout_constraintTop_toBottomOf="@+id/scanner_card_last_scan"/>
+
+    </com.google.android.material.card.MaterialCardView>
+
 
     <LinearLayout
         android:id="@+id/bottom_layout"
@@ -111,13 +125,12 @@
         android:id="@+id/scanner_trigger_on"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:scaleType="fitCenter"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:visibility="visible"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.45"
+        app:layout_constraintTop_toBottomOf="@id/open_link"
         app:thumbIcon="@drawable/upc" />
 
     <TextView

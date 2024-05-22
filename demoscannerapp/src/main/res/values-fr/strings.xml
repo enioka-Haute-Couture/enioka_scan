@@ -3,23 +3,23 @@
     <string name="app_name">enioka scan demo</string>
 
     <string name="scanner_tester">Testeur de scanner</string>
-    <string name="test_scan">Tester enioka scan</string>
+    <string name="test_scan">Commencer à scanner</string>
     <string name="settings">Paramètres</string>
 
     <string name="github_button">GitHub</string>
 
     <string name="scanner_search_settings">Paramètres</string>
     <string name="scanner_general_settings">Général</string>
-    <string name="wait_disconnected">Attendre les scanners déconnectés</string>
-    <string name="return_only_first">Premier connecté uniquement</string>
-    <string name="use_bluetooth">Utiliser le Bluetooth</string>
-    <string name="allow_initial_search">Autoriser la recherche initiale</string>
-    <string name="allow_later_connections">Autoriser les connexions retardataires</string>
+    <string name="wait_disconnected">Attendre que les appareils occupés se déconnectent</string>
+    <string name="return_only_first">Utiliser le premier appareil disponible</string>
+    <string name="use_bluetooth">Utiliser le Bluetooth pour la recherche d\'appareils</string>
+    <string name="allow_initial_search">Autoriser la recherche initiale d\'appareils</string>
+    <string name="allow_later_connections">Autoriser les connexions d\'appareils retardataires</string>
     <string name="allow_pairing_flow">Autoriser les séquences d\'appairage</string>
     <string name="allow_intent_devices">Autoriser les scanners fonctionnant par Intent</string>
     <string name="enable_log">Activation des logs</string>
-    <string name="allowed_providers">Providers Autorisés</string>
-    <string name="excluded_providers">Providers Exclus</string>
+    <string name="allowed_providers">Providers autorisés</string>
+    <string name="excluded_providers">Providers exclus</string>
     <string name="symbology_selection">Sélection de la symbologie</string>
     <string name="empty_provider_list_caption">Aucun provider disponible</string>
     <string name="symbology_selection_caption">vide = EAN,128</string>

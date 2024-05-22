@@ -35,13 +35,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="15dp">
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp">
 
             <ImageView
                 android:id="@+id/barcode"
                 android:layout_width="150dp"
-                android:layout_height="100dp"
+                android:layout_height="90dp"
                 android:src="@drawable/upc"
                 app:tint="?attr/colorSecondary"
                 android:adjustViewBounds="true"
@@ -58,19 +58,28 @@
                 android:layout_gravity="center"
                 android:text="@string/test_scan" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/bt_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@string/settings"
+                android:layout_gravity="center"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                app:icon="@drawable/baseline_settings_24" />
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/bt_settings"
+        android:id="@+id/bug_report_button"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="@string/settings"
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="15dp"
-        android:src="@drawable/baseline_settings_24"
+        android:src="@drawable/bug"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:contentDescription="@string/settings" />
+        android:contentDescription="@string/bug_report" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -48,6 +48,7 @@
     <string name="keyboard_input">Input</string>
     <string name="switch_enable_scan_text">enable scan</string>
     <string name="open_link">Open link</string>
+    <string name="bug_report">Report bug</string>
 
     <!-- Content description -->
     <string name="fab_flashlight">flash light</string>

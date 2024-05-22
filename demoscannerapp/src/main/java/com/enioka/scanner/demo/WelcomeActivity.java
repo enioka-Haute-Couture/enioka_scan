@@ -29,8 +29,8 @@ import java.util.List;
 public class WelcomeActivity extends AppCompatActivity {
     private List<String> availableProviders = new ArrayList<>();
     protected MaterialButton bt1 = null;
-    protected MaterialButton bt4 = null;
-    protected FloatingActionButton bt5 = null;
+    protected FloatingActionButton bugReportBt = null;
+    protected MaterialButton bt5 = null;
 
     protected MaterialToolbar toolbar = null;
     @Override
@@ -62,9 +62,11 @@ public class WelcomeActivity extends AppCompatActivity {
         bt1 = findViewById(R.id.bt_scanner);
         bt5 = findViewById(R.id.bt_settings);
         toolbar = findViewById(R.id.topAppBar);
+        bugReportBt = findViewById(R.id.bug_report_button);
 
         bt1.setOnClickListener(this::onClickBt1);
         bt5.setOnClickListener(this::onClickBt5);
+        bugReportBt.setOnClickListener(this::onClickReportBug);
         setSupportActionBar(toolbar);
     }
 
@@ -99,6 +101,12 @@ public class WelcomeActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SettingsActivity.class);
         intent.putStringArrayListExtra("providers", (ArrayList<String>) availableProviders);
         startActivity(intent);
+    }
+
+    // Report bug function button
+    public void onClickReportBug(View v) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/enioka-Haute-Couture/enioka_scan/issues/new"));
+        startActivity(browserIntent);
     }
 
     @Override

@@ -2,20 +2,20 @@
     <string name="app_name">enioka scan demo</string>
 
     <string name="scanner_tester">Scanner tester</string>
-    <string name="test_scan">Test scanner library</string>
+    <string name="test_scan">Start scanning</string>
     <string name="settings">Settings</string>
 
     <string name="github_button">GitHub</string>
 
     <string name="scanner_search_settings">Settings</string>
     <string name="scanner_general_settings">General</string>
-    <string name="wait_disconnected">Wait Disconnected</string>
-    <string name="return_only_first">Return Only First</string>
-    <string name="use_bluetooth">Use Bluetooth</string>
-    <string name="allow_initial_search">Allow Initial Search</string>
-    <string name="allow_later_connections">Allow Later Connections</string>
-    <string name="allow_pairing_flow">Allow Pairing Flow</string>
-    <string name="allow_intent_devices">Allow Intent Devices</string>
+    <string name="wait_disconnected">Wait for busy devices to disconnect</string>
+    <string name="return_only_first">Use the first available device</string>
+    <string name="use_bluetooth">Use Bluetooth for device search</string>
+    <string name="allow_initial_search">Allow initial device search</string>
+    <string name="allow_later_connections">Allow later device connections</string>
+    <string name="allow_pairing_flow">Allow pairing flow</string>
+    <string name="allow_intent_devices">Allow intent devices</string>
     <string name="enable_log">Enable logging</string>
     <string name="allowed_providers">Allowed Providers</string>
     <string name="excluded_providers">Excluded Providers</string>

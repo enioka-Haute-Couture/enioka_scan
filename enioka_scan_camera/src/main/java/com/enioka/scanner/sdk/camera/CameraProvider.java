@@ -28,7 +28,7 @@ public class CameraProvider implements CameraScannerProvider {
         idResources.put("card_last_scan_id", R.id.card_camera_last_scan);
         idResources.put("constraint_layout_id", R.id.constraint_layout_main_activity);
         idResources.put("scanner_flashlight_id", R.id.scanner_flashlight);
-        idResources.put("scanner_bt_keyboard_id", R.id.scanner_bt_keyboard);
+        idResources.put("scanner_bt_provider_logs", R.id.scanner_bt_provider_logs);
 
         return idResources;
     }

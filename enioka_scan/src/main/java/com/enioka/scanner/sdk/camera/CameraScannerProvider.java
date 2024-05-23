@@ -23,7 +23,7 @@ public interface CameraScannerProvider {
      * - card_last_scan_id: ID of the card view that displays the last scan.
      * - constraint_layout_id: The ID of the constraint layout inside the camera layout.
      * - scanner_flashlight_id: The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
-     * - scanner_bt_keyboard_id: The ID of the optional ImageButton on which to press to manually switch to keyboard mode.
+     * - scanner_bt_provider_logs: The ID of the optional ImageButton on which to press to manually access available providers logs
      */
     public HashMap<String, Integer> getIdResources();
 

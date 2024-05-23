@@ -74,8 +74,8 @@ the scanner :::{cpp:var}R.id.scanner_switch_pause:::.
 :::{cpp:var}R.id.constraint_layout_main_activity:::.
 - scanner_flashlight_id: The ID of the optional ImageButton on which to press to toggle the
 flashlight/illumination :::{cpp:var}R.id.scanner_flashlight:::.
-- scanner_bt_keyboard_id: The ID of the optional ImageButton on which to press to manually switch to
-keyboard mode :::{cpp:var}R.id.scanner_bt_keyboard:::.
+- scanner_bt_provider_logs: The ID of the optional ImageButton on which to press to manually access
+available providers logs :::{cpp:var}R.id.scanner_bt_provider_logs:::.
 :::
 
 :::{cpp:var} int cameraToggleId = R.id.scanner_bt_camera

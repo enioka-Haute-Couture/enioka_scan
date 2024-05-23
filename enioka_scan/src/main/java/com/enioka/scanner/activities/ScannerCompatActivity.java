@@ -12,7 +12,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -119,7 +118,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * - card_last_scan_id: ID of the card view that displays the last scan.
      * - constraint_layout_id: The ID of the constraint layout inside the camera layout.
      * - scanner_flashlight_id: The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
-     * - scanner_bt_keyboard_id: The ID of the optional ImageButton on which to press to manually switch to keyboard mode.
+     * - scanner_bt_provider_logs: The ID of the optional ImageButton on which to press to manually access available providers logs
      */
     protected HashMap<String, Integer> cameraResources = null;
     /**
@@ -137,7 +136,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      */
     protected int flashlightViewId = R.id.scanner_flashlight;
 
-    protected int keyboardOpenViewId = R.id.scanner_bt_keyboard;
+    protected int providerLogOpenViewId = R.id.scanner_bt_provider_logs;
 
     /**
      * An optional fragment allowing to input a value with the soft keyboard (for cases when scanners do not work).
@@ -204,6 +203,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * The String URL of the open link button.
      */
     private String openLinkUrl = null;
+
+    /**
+     * Logs and status of all detected providers
+     */
+    private String providerLogs = "";
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Activity lifecycle callbacks
@@ -300,7 +304,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         // Immediately set some buttons (which do no need to wait for scanners).
         displayCameraButton();
-        displayManualInputButton();
+        displayManualProviderLogButton();
 
         // Register this activity on the scanner service (hooks onData) and ask it to hook possible scanners needing foreground control onto this activity.
         // If no scanners are available at all, this will still call onForegroundScannerInitEnded with 0 scanners, and the activity will launch the camera.
@@ -520,7 +524,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
 
         displayTorch();
-        displayManualInputButton();
+        displayManualProviderLogButton();
         displayCameraReaderToggle();
         displayCameraPauseToggle();
     }
@@ -580,6 +584,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
             // Update visibility of the scanner status card
             findViewById(R.id.scanner_provider_status_card).setVisibility(View.VISIBLE);
+        }
+
+        if (scanner != null && newStatus != null) {
+            providerLogs += scanner.getProviderKey() + " " + newStatus + "\n";
         }
     }
 
@@ -796,39 +804,19 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     /**
-     * Display a manual input (keyboard) button for manual input.
+     * Display a manual input button to launch an alert dialog that contains provider logs.
      */
-    private void displayManualInputButton() {
-        final View bt = findViewById(keyboardOpenViewId);
+    private void displayManualProviderLogButton() {
+        final View bt = findViewById(providerLogOpenViewId);
         if (bt == null) {
             return;
         }
 
         bt.setVisibility(View.VISIBLE);
 
-        bt.setOnClickListener(view -> {
-            // Pause camera or laser scanner during manual input.
-            scannerService.pause();
-
-            manualInputFragment = ManualInputFragment.newInstance();
-            manualInputFragment.setAutocompletionItems(autocompletionItems, threshold);
-            manualInputFragment.setDialogInterface(new DialogInterface() {
-                @Override
-                public void cancel() {
-                    if (serviceBound) {
-                        scannerService.resume();
-                    }
-                }
-
-                @Override
-                public void dismiss() {
-                    if (serviceBound) {
-                        scannerService.resume();
-                    }
-                }
-            });
-            manualInputFragment.show(getSupportFragmentManager(), "manual");
-        });
+        String providerLogTitle = getResources().getString(R.string.provider_log_dialog_title);
+        String textButton = getResources().getString(R.string.provider_log_dialog_close);
+        bt.setOnClickListener(view -> new ManualLogDialog().launchDialog(this, providerLogTitle, providerLogs, textButton));
     }
 
     /**
@@ -1031,7 +1019,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     private void switchCameraOrientation(boolean portrait) {
         Integer constraintLayoutId = cameraResources.get("constraint_layout_id");
         Integer scannerFlashlightId = cameraResources.get("scanner_flashlight_id");
-        Integer scannerBtKeyboardId = cameraResources.get("scanner_bt_keyboard_id");
+        Integer scannerBtKeyboardId = cameraResources.get("scanner_bt_provider_logs");
 
         if (constraintLayoutId == null || scannerFlashlightId == null || scannerBtKeyboardId == null) {
             Log.w(LOG_TAG, "Cannot switch to landscape mode: missing resources");

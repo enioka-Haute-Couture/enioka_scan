@@ -96,16 +96,16 @@
             android:layout_marginEnd="12dp"
             app:icon="@drawable/camera_fill"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/scanner_bt_keyboard"/>
+            app:layout_constraintEnd_toStartOf="@+id/scanner_bt_provider_logs"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/scanner_bt_keyboard"
+            android:id="@+id/scanner_bt_provider_logs"
             android:layout_width="wrap_content"
             android:layout_height="55dp"
             android:layout_marginEnd="12dp"
-            android:text="@string/keyboard_input"
+            android:text="@string/provider_log"
             style="@style/Widget.Material3.Button.OutlinedButton"
-            app:icon="@drawable/keyboard_fill" />
+            app:icon="@drawable/info" />
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton

@@ -42,6 +42,10 @@ public class SettingsActivity extends AppCompatActivity {
      * Enable logging preferences key
      */
     public static final String ENABLE_LOGGING_KEY = "enableLogging";
+    /**
+     * Allow camera fallback preferences key
+     */
+    public static final String ALLOW_CAMERA_FALLBACK_KEY = "allowCameraFallback";
 
     /**
      * List of provider views ids
@@ -106,6 +110,7 @@ public class SettingsActivity extends AppCompatActivity {
         ((MaterialSwitch) findViewById(R.id.switchPairingFlow)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, options.allowPairingFlow));
         ((MaterialSwitch) findViewById(R.id.switchIntentDevices)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, options.allowIntentDevices));
         ((MaterialSwitch) findViewById(R.id.switchEnableLogging)).setChecked(preferences.getBoolean(ENABLE_LOGGING_KEY, false));
+        ((MaterialSwitch) findViewById(R.id.switchAllowCameraFallback)).setChecked(preferences.getBoolean(ALLOW_CAMERA_FALLBACK_KEY, false));
 
         final Set<String> allowedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
 
@@ -239,6 +244,7 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_PAIRING_FLOW_BOOLEAN, ((MaterialSwitch) findViewById(R.id.switchPairingFlow)).isChecked());
         editor.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, ((MaterialSwitch) findViewById(R.id.switchIntentDevices)).isChecked());
         editor.putBoolean(ENABLE_LOGGING_KEY, ((MaterialSwitch) findViewById(R.id.switchEnableLogging)).isChecked());
+        editor.putBoolean(ALLOW_CAMERA_FALLBACK_KEY, ((MaterialSwitch) findViewById(R.id.switchAllowCameraFallback)).isChecked());
 
         final Set<String> allowedProviderKeys = new HashSet<>();
         final Set<String> excludedProviderKeys = new HashSet<>();

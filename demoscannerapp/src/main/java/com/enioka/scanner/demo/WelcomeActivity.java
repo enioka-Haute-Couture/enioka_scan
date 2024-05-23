@@ -92,6 +92,8 @@ public class WelcomeActivity extends AppCompatActivity {
         intent.putExtra(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, symbologies);
         // add logging intent extra
         intent.putExtra(SettingsActivity.ENABLE_LOGGING_KEY, preferences.getBoolean(SettingsActivity.ENABLE_LOGGING_KEY, false));
+        // add allow camera fallback intent extra
+        intent.putExtra(SettingsActivity.ALLOW_CAMERA_FALLBACK_KEY, preferences.getBoolean(SettingsActivity.ALLOW_CAMERA_FALLBACK_KEY, false));
 
         startActivity(intent);
     }

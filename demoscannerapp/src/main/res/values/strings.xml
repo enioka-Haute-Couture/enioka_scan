@@ -17,6 +17,7 @@
     <string name="allow_pairing_flow">Allow pairing flow</string>
     <string name="allow_intent_devices">Allow intent devices</string>
     <string name="enable_log">Enable logging</string>
+    <string name="allow_camera_fallback">Default to camera if no scanner is found</string>
     <string name="allowed_providers">Allowed Providers</string>
     <string name="excluded_providers">Excluded Providers</string>
     <string name="symbology_selection">Allowed Symbology</string>

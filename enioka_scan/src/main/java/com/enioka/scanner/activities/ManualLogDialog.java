@@ -11,7 +11,7 @@ import com.enioka.scanner.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class ManualLogDialog {
-    void launchDialog(Context context, String title, String logs, String textButton) {
+    static void launchDialog(Context context, String title, String logs, String textButton) {
         Drawable icon = ContextCompat.getDrawable(context, R.drawable.info);
 
         if (icon != null) {

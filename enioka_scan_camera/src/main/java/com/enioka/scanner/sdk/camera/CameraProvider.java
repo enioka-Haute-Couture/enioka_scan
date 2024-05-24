@@ -22,7 +22,7 @@ public class CameraProvider implements CameraScannerProvider {
     public HashMap<String, Integer> getIdResources() {
         HashMap<String, Integer> idResources = new HashMap<>();
         idResources.put("camera_view_id", R.id.camera_scan_view);
-        idResources.put("layout_id_camera", R.layout.activity_main_alt);
+        idResources.put("layout_id_camera", R.layout.activity_camera);
         idResources.put("scanner_toggle_view_id", R.id.scanner_switch_zxing);
         idResources.put("scanner_toggle_pause_id", R.id.scanner_switch_pause);
         idResources.put("card_last_scan_id", R.id.card_camera_last_scan);

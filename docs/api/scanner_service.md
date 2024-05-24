@@ -161,7 +161,7 @@ If true, bluetooth devices will be searched for compatible scanners.
 Corresponds to the `ScannerServiceApi.EXTRA_SEARCH_ALLOW_BT_BOOLEAN` extra.
 :::
 
-:::{cpp:var} boolean allowIntentDevices = false
+:::{cpp:var} boolean allowIntentDevices = true
 
 If true, providers using another application for controlling scanners will be allowed.
 This is important as most of the time, it is impossible to say if these apps are actually installed,
@@ -195,7 +195,7 @@ Mostly used to let bluetooth providers contact known devices during search.
 Corresponds to the `ScannerServiceApi.EXTRA_SEARCH_ALLOW_INITIAL_SEARCH_BOOLEAN` extra.
 :::
 
-:::{cpp:var} boolean allowPairingFlow = false
+:::{cpp:var} boolean allowPairingFlow = true
 
 If true, the providers which needs a pairing done by their own SDK (for example, BLE on-the-fly 
 pairing) will be allowed to do so.

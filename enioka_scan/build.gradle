@@ -8,6 +8,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        vectorDrawables.useSupportLibrary = true
         multiDexKeepProguard file('multidex.pro')
         multiDexEnabled true
     }

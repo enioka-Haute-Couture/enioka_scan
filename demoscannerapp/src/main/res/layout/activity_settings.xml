@@ -50,8 +50,9 @@
             <!-- WAIT DISCONNECTED -->
             <LinearLayout
                 android:id="@+id/linearLayoutWaitDisconnected"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
@@ -115,8 +116,9 @@
             <!-- BLUETOOTH -->
             <LinearLayout
                 android:id="@+id/linearLayoutBluetooth"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
@@ -147,8 +149,9 @@
             <!-- INITIAL SEARCH -->
             <LinearLayout
                 android:id="@+id/linearLayoutInitialSearch"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
@@ -179,8 +182,9 @@
             <!-- LATER CONNECTIONS -->
             <LinearLayout
                 android:id="@+id/linearLayoutLaterConnections"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
@@ -212,8 +216,9 @@
 
             <LinearLayout
                 android:id="@+id/linearLayoutPairingFlow"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
@@ -243,8 +248,9 @@
 
             <LinearLayout
                 android:id="@+id/linearLayoutIntentDevice"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
@@ -274,8 +280,9 @@
 
             <LinearLayout
                 android:id="@+id/linearLayoutEnableLogging"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
@@ -305,8 +312,9 @@
 
             <LinearLayout
                 android:id="@+id/linearLayoutAllowCameraFallback"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"

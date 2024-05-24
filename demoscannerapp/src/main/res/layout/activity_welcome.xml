@@ -42,7 +42,7 @@
                 android:id="@+id/barcode"
                 android:layout_width="150dp"
                 android:layout_height="90dp"
-                android:src="@drawable/upc"
+                app:srcCompat="@drawable/upc"
                 app:tint="?attr/colorSecondary"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
@@ -54,6 +54,7 @@
                 android:id="@+id/bt_scanner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
                 app:icon="@drawable/upc_scan"
                 android:layout_gravity="center"
                 android:text="@string/test_scan" />
@@ -77,7 +78,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="15dp"
         android:layout_marginBottom="15dp"
-        android:src="@drawable/bug"
+        app:srcCompat="@drawable/bug"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:contentDescription="@string/bug_report" />

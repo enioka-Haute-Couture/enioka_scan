@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="layout_margin_border">12dp</dimen>
+    <dimen name="min_text_size_last_scan">10sp</dimen>
 </resources>

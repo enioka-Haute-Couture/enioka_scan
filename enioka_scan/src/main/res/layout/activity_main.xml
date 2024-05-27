@@ -24,8 +24,11 @@
             android:id="@+id/scanner_text_last_scan"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:ellipsize="none"
-            android:padding="8dp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMaxTextSize="18sp"
+            app:autoSizeMinTextSize="10sp"
+            android:ellipsize="marquee"
+            android:padding="15dp"
             android:gravity="center"
             android:text="@string/activity_scan_barcode_value_placeholder"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />

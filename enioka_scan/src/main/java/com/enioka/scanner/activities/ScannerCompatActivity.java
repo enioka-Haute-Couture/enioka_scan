@@ -654,8 +654,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 findViewById(openLinkId).setVisibility(View.GONE);
             }
         }
-        if (findViewById(R.id.scanner_text_last_scan) != null) {
-            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(Html.fromHtml(res.toString()));
+
+        TextView textLastScan = findViewById(R.id.scanner_text_last_scan);
+        if (textLastScan != null) {
+            textLastScan.setText(Html.fromHtml(res.toString()));
+            resizeScannerLastText(textLastScan);
         }
 
         // Disable the scannerSwitch when a barcode is found
@@ -668,6 +671,29 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             manualInputFragment = null;
             scannerService.resume();
         }
+    }
+
+    /**
+     * Dynamically resize the last scan text view to fit the content.
+     * Called when a new data is received, or on orientation change.
+     */
+    private void resizeScannerLastText(TextView text) {
+        if (text == null) {
+            return;
+        }
+        // Set the last scan text
+        text.setSingleLine(false);
+
+        text.post(() -> {
+            float textSizeInSp = text.getTextSize() / getResources().getDisplayMetrics().scaledDensity;
+            float minTextSizeInSp = getResources().getDimension(R.dimen.min_text_size_last_scan) / getResources().getDisplayMetrics().scaledDensity;
+
+            // Activate marquee effect if the text size is the minimum size
+            if (textSizeInSp == minTextSizeInSp) {
+                text.setSingleLine(true);
+                text.setSelected(true);
+            }
+        });
     }
 
     /**
@@ -1015,5 +1041,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         } else {
             ViewSwitcher.switchLaserOrientation(this, view, flashlightViewId, orientation == Configuration.ORIENTATION_PORTRAIT);
         }
+
+        resizeScannerLastText((TextView) findViewById(R.id.scanner_text_last_scan));
     }
 }

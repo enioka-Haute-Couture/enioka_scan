@@ -1,0 +1,31 @@
+name: Android Build and Release
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up environment
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+      - name: Build APK debug
+        run: ./gradlew assembleDebug
+      - name: Build APK release
+        run: ./gradlew assembleRelease
+      - name: Upload debug apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: enioka_scan_demo_apks
+          path: | 
+            demoscannerapp/build/outputs/apk/debug/*.apk
+            demoscannerapp/build/outputs/apk/release/*.apk

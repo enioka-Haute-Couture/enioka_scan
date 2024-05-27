@@ -38,7 +38,6 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
 
     protected final static String LOG_TAG = "ScannerService";
 
-    private boolean startScannerSearchOnFirstBind = true;
     private boolean firstBind = true;
 
     /**
@@ -72,7 +71,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
     private ScannerSearchOptions scannerSearchOptions = ScannerSearchOptions.defaultOptions();
 
     /**
-     * Option to set wanted symbology. By default EAN13 and CODE128 is set
+     * Option to set wanted symbology. By default, all symbologies are enabled.
      */
     private Set<BarcodeType> symbologySelection = defaultSymbology();
 
@@ -113,17 +112,10 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         Log.i(LOG_TAG, "ScannerService is receiving a new bind request - onBind");
         scannerSearchOptions.fromIntentExtras(intent);
 
-        final Bundle extras = intent.getExtras();
-        if (extras != null) {
-            startScannerSearchOnFirstBind = extras.getBoolean(EXTRA_START_SEARCH_ON_SERVICE_BIND, startScannerSearchOnFirstBind);
-
-            // FIXME enable all symbology if null ?
-            String[] symbologySelectionArray = extras.getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION);
-            if (symbologySelectionArray != null && symbologySelectionArray.length > 0) {
-                symbologySelection = new HashSet<>();
-                for (String symbology : symbologySelectionArray) {
-                    symbologySelection.add(BarcodeType.valueOf(symbology));
-                }
+        if (scannerSearchOptions.symbologySelection != null) {
+            symbologySelection = new HashSet<>();
+            for (String symbology : scannerSearchOptions.symbologySelection) {
+                symbologySelection.add(BarcodeType.valueOf(symbology));
             }
         }
 
@@ -167,7 +159,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
         Log.i(LOG_TAG, "(re)starting provider discovery!");
         if (!LaserScanner.getProviderCache().isEmpty()) {
             Log.d(LOG_TAG, "Cached providers are used");
-            if (firstBind && startScannerSearchOnFirstBind) {
+            if (firstBind && scannerSearchOptions.startSearchOnServiceBind) {
                 this.initLaserScannerSearch();
             }
             return;
@@ -179,7 +171,7 @@ public class ScannerService extends Service implements ScannerConnectionHandler,
                 client.onProviderDiscoveryEnded();
             }
 
-            if (firstBind && startScannerSearchOnFirstBind) {
+            if (firstBind && scannerSearchOptions.startSearchOnServiceBind) {
                 this.initLaserScannerSearch();
             }
             firstBind = false;

@@ -986,7 +986,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
-        String fileName = (new Date()).getTime() + "_scanner_test_log.csv";
+        String fileName = "log_scanner_test_" + (new Date()).getTime() + ".csv";
 
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);

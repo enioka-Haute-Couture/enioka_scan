@@ -547,20 +547,29 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/checkSelectQrCode" />
 
-            <!-- SAVE -->
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_save"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="33dp"
-                android:layout_marginBottom="33dp"
-                android:text="@string/save"
+            <View
+                android:id="@+id/marginBottom"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/checkSelectAztec" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
+    <!-- SAVE -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="33dp"
+            android:layout_marginBottom="15dp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:text="@string/save"/>
+    </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

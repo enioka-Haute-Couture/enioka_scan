@@ -20,6 +20,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
@@ -187,6 +189,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected boolean allowCameraFallback = false;
 
     /**
+     * Define if the activity should go back to the scanner view or main view.
+     */
+    private boolean backScannerView = true;
+
+    /**
      * The URI of the log file to write to.
      */
     private Uri logFileUri = null;
@@ -218,6 +225,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         // Set content immediately - that way our callbacks can draw on the layout.
         setViewContent();
+        linkBackCallback();
 
         // Ascending compatibility
         if (zbarViewId != null) {
@@ -292,6 +300,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
         }
 
+        if (findViewById(R.id.scanner_provider_status_card) != null) {
+            findViewById(R.id.scanner_provider_status_card).setVisibility(View.GONE);
+        }
+
+        if (findViewById(R.id.scanner_provider_text) != null) {
+            ((TextView) findViewById(R.id.scanner_provider_text)).setText("");
+        }
+
+        if (findViewById(R.id.scanner_provider_status_text) != null) {
+            ((TextView) findViewById(R.id.scanner_provider_status_text)).setText("");
+        }
 
         // Hide the open link button
         findViewById(openLinkId).setVisibility(View.GONE);
@@ -576,19 +595,32 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     @SuppressLint("SetTextI18n") // Text is already localized, only special characters remain.
     @Override
     public void onStatusChanged(final Scanner scanner, final ScannerStatusCallback.Status newStatus) {
-        if (findViewById(R.id.scanner_provider_text) != null && findViewById(R.id.scanner_provider_status_text) != null && newStatus == Status.CONNECTED) {
-            TextView providerText = findViewById(R.id.scanner_provider_text);
-            TextView providerStatusText = findViewById(R.id.scanner_provider_status_text);
-            providerText.setText(scanner.getProviderKey());
+        if (scanner != null && newStatus != null) {
+            providerLogs += scanner.getProviderKey() + " " + newStatus + "\n";
+        }
+
+        TextView providerText = findViewById(R.id.scanner_provider_text);
+        TextView providerStatusText = findViewById(R.id.scanner_provider_status_text);
+
+        if (scanner != null && providerText != null && providerStatusText != null && (newStatus == Status.CONNECTED || newStatus == Status.READY)) {
+            if (goToCamera && newStatus == Status.READY) {
+                return;
+            }
+
+            String connectedProvider = providerText.getText().toString();
+
+            // Update text list of connect providers
+            if (!connectedProvider.contains(scanner.getProviderKey())) {
+                providerText.setText(connectedProvider + (connectedProvider.isEmpty() ? "" : "\n") + scanner.getProviderKey());
+            }
+
+            // Set status
             providerStatusText.setText(newStatus.toString());
 
             // Update visibility of the scanner status card
             findViewById(R.id.scanner_provider_status_card).setVisibility(View.VISIBLE);
         }
 
-        if (scanner != null && newStatus != null) {
-            providerLogs += scanner.getProviderKey() + " " + newStatus + "\n";
-        }
     }
 
     @Override
@@ -598,6 +630,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (scannerCount == 0 && !laserModeOnly && enableScan && hasCameraScannerSdk && allowCameraFallback) {
             // In that case try to connect to a camera.
             initCamera();
+            backScannerView = false;
         }
 
         if (scannerCount > 0) {
@@ -726,6 +759,40 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Button and input initialization
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     *
+     */
+    private void linkBackCallback() {
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Get name of current view
+
+                if (backScannerView && goToCamera) {
+                    goToCamera = false;
+
+                    Log.i(LOG_TAG, "Scanner activity is being reset, going back to scanner view " + this.hashCode());
+                    if (serviceBound) {
+                        scannerService.pause();
+                    }
+
+                    if (cameraScannerProvider != null && cameraScannerProvider.isCameraScannerInitialized()) {
+                        cameraScannerProvider.disconnect();
+                        cameraScannerProvider.reset();
+                    }
+
+                    setViewContent();
+                    onResume();
+                } else {
+                    finish();
+                }
+            }
+        };
+
+        // Add the callback to the activity's lifecycle
+        getOnBackPressedDispatcher().addCallback(this, callback);
+    }
 
     /**
      * Copy last scan text to clipboard when clicking on the scanner status card.

@@ -68,6 +68,11 @@ public interface CameraScannerProvider {
     public boolean isIlluminationOn();
 
     /**
+     * Sets the preview ratio mode of the camera scanner.
+     */
+    public void setPreviewRatioMode(View cameraView, int previewRatioMode);
+
+    /**
      * Sets the reader engine of the camera scanner.
      */
     public void setReaderMode(View cameraView, boolean readerMode);

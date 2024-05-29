@@ -17,7 +17,7 @@ import com.enioka.scanner.R;
  */
 class CameraPreviewSurfaceView extends SurfaceView {
     private final Callback parent;
-    private final boolean respectCameraRatio;
+    private boolean respectCameraRatio;
 
     interface Callback extends SurfaceHolder.Callback {
         Point getCurrentCameraResolution();
@@ -27,12 +27,15 @@ class CameraPreviewSurfaceView extends SurfaceView {
         int getDeviceOrientationRelativeToDeviceNaturalOrientation();
     }
 
-    public CameraPreviewSurfaceView(Context context, TypedArray styledAttributes, Callback parent) {
+    public CameraPreviewSurfaceView(Context context, int aspectRatioMode, Callback parent) {
         super(context);
         this.parent = parent;
 
-        int rm = styledAttributes.getInt(R.styleable.CameraBarcodeScanView_previewRatioMode, 0);
-        respectCameraRatio = rm == 1;
+        respectCameraRatio = aspectRatioMode == 1;
+    }
+
+    protected void setPreviewRatioMode(int respectCameraRatio) {
+        this.respectCameraRatio = respectCameraRatio == 1;
     }
 
     @Override

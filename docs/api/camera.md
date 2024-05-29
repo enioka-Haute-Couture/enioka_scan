@@ -17,6 +17,18 @@ the device's properties.
 For most users, this is the class they will interact with if they need to interact with the Camera
 hardware and not just the [`Scanner` instance](scanner.md#the-scanner-interface).
 
+:::{method} setPreviewRatioMode(int mode) -> void
+
+Change the preview aspect ratio mode of the camera. This change will not take effect until the next
+view refresh. You can force a refresh by pausing and resuming the camera.
+
+:param int mode: The mode to use for filling the camera preview. Can be one of the following values:
+    - `0`: `fillAvailableSpace` (default): The preview will fill the available space, by squashing
+        or stretching the preview if needed.
+    - `1`: `fitToPicture`: The preview will be scaled to fit the picture, with black bars on the
+        sides if needed. The aspect ratio of the preview will be kept.
+:::
+
 :::{method} setReaderMode(CameraReader readerMode) -> void
 
 Change the library used to read barcodes from the camera feed.

@@ -66,6 +66,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     protected SurfaceView camPreviewSurfaceView;
     protected TargetView targetView;
     protected final TypedArray styledAttributes;
+    protected int aspectRatioMode;
 
 
     public CameraBarcodeScanViewBase(@NonNull Context context) {
@@ -97,6 +98,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
         this.resolution.minResolutionY = styledAttributes.getInteger(R.styleable.CameraBarcodeScanView_minResolutionY, 720);
         this.resolution.maxResolutionY = styledAttributes.getInteger(R.styleable.CameraBarcodeScanView_maxResolutionY, 1080);
         this.resolution.maxDistortionRatio = styledAttributes.getFloat(R.styleable.CameraBarcodeScanView_maxDistortionRatio, 0.3f);
+        this.aspectRatioMode = styledAttributes.getInt(R.styleable.CameraBarcodeScanView_previewRatioMode, 0);
         initLayout();
     }
 
@@ -133,6 +135,20 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Public API, various setters
     ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public void setPreviewRatioMode(int mode) {
+        // If preview ratio mode is not defined, use the default value
+        if (mode == -1) {
+            return;
+        }
+
+        if (this.camPreviewSurfaceView == null) {
+            aspectRatioMode = mode;
+            return;
+        }
+
+        ((CameraPreviewSurfaceView) this.camPreviewSurfaceView).setPreviewRatioMode(mode);
+    }
 
     public void setReaderMode(CameraReader readerMode) {
         this.readerMode = readerMode;
@@ -230,7 +246,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
 
         // The view holding the preview. This will in turn (camHolder.addCallback) call setUpCamera.
         if (this.camPreviewSurfaceView == null) {
-            camPreviewSurfaceView = new CameraPreviewSurfaceView(getContext(), styledAttributes, this);
+            camPreviewSurfaceView = new CameraPreviewSurfaceView(getContext(), aspectRatioMode, this);
             FrameLayout.LayoutParams prms = this.generateDefaultLayoutParams();
             prms.gravity = Gravity.CENTER;
             camPreviewSurfaceView.setLayoutParams(prms);

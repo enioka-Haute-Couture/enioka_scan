@@ -124,6 +124,13 @@ public class CameraBarcodeScanView extends FrameLayout {
         void handleScanResult(String result, BarcodeType type);
     }
 
+    /**
+     * Set the camera preview ratio mode.
+     */
+    public void setPreviewRatioMode(int mode) {
+        this.proxiedView.setPreviewRatioMode(mode);
+    }
+
     public void setReaderMode(CameraReader readerMode) {
         this.proxiedView.setReaderMode(readerMode);
     }

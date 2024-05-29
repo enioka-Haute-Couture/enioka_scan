@@ -35,7 +35,9 @@
     <string name="activity_scan_scanner_not_initialized">Scanner initialization not started</string>
     <string name="scanner_using_bt_keyboard">Using Bluetooth scanner or keyboard</string>
     <string name="activity_scan_no_compatible_sdk">There are no compatible scanners on this device</string>
-    <string name="activity_scan_use_zxing">ZXing</string>
+    <string name="activity_scan_use_zxing">ZXing / Zbar</string>
+    <string name="snack_message_zxing">Using ZXing camera reader !</string>
+    <string name="snack_message_zbar">Using ZBar camera reader !</string>
     <string name="activity_scan_pause_camera">Pause</string>
     <string name="camera_mode_button">Camera</string>
     <string name="last_scan_clipboard">Last scan successfully copied to clipboard !</string>

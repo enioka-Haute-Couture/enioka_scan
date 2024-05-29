@@ -153,23 +153,47 @@
         app:layout_constraintTop_toBottomOf="@id/scanner_flashlight"
         android:contentDescription="@string/fab_provider_logs" />
 
+    <TextView
+        android:id="@+id/scanner_zxing_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/activity_scan_use_zxing"
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/text_background"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        app:layout_constraintRight_toLeftOf="@id/scanner_switch_zxing"
+        app:layout_constraintBottom_toBottomOf="@id/scanner_switch_zxing" />
+
     <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/scanner_switch_zxing"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
-        android:text="@string/activity_scan_use_zxing"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         app:thumbIcon="@drawable/camera2"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@id/scanner_switch_pause" />
+
+    <TextView
+        android:id="@+id/scanner_pause_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/activity_scan_pause_camera"
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/text_background"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        app:layout_constraintRight_toLeftOf="@id/scanner_switch_pause"
+        app:layout_constraintBottom_toBottomOf="@id/scanner_switch_pause" />
 
     <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/scanner_switch_pause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
-        android:text="@string/activity_scan_pause_camera"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         app:thumbIcon="@drawable/pause_fill"
         app:layout_constraintRight_toRightOf="parent"

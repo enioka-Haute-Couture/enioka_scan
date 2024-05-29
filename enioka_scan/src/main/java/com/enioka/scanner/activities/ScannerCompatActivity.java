@@ -941,6 +941,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             Integer cameraViewId = cameraResources.get("camera_view_id");
             View cameraView = cameraViewId != null ? findViewById(cameraViewId) : null;
             cameraScannerProvider.setReaderMode(cameraView, isChecked);
+
+            // Show snackbar message informing the user of the change
+            Snackbar.make(buttonView, isChecked ? R.string.snack_message_zxing : R.string.snack_message_zbar, Snackbar.LENGTH_SHORT).show();
         });
     }
 

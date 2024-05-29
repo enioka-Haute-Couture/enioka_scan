@@ -202,6 +202,20 @@ public class CameraBarcodeScanView extends FrameLayout {
     }
 
     /**
+     * Set the top position (in y axis) of the target rectangle.
+     */
+    public void setTargetPosition(float y) {
+        this.proxiedView.setTargetPosition(y);
+    }
+
+    /**
+     * Set the dimension of the target rectangle.
+     */
+    public void setTargetDimension(float width, float height) {
+        this.proxiedView.setTargetDimension(width, height);
+    }
+
+    /**
      * Get the JPEG data of the image used in the latest successful scan.
      *
      * @return a byte[] of JPEG data, or null if there is no previous scan data.

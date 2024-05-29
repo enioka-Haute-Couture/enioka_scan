@@ -319,6 +319,58 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     }
 
     /**
+     * Set the top position (in y axis) of the target rectangle.
+     * Automatically refreshes the autofocus zone.
+     */
+    public void setTargetPosition(float y) {
+        float newTop = y;
+        float newBottom = y + cropRect.height();
+
+        if (newTop < 0 || newBottom > camPreviewSurfaceView.getHeight()) {
+            Log.i(TAG, "Targeting rectangle moved outside the preview surface, ignoring");
+            return;
+        }
+
+        cropRect.top = (int) newTop;
+        cropRect.bottom = (int) newBottom;
+
+        final FrameLayout.LayoutParams prms = (LayoutParams) targetView.getLayoutParams();
+        prms.topMargin = cropRect.top;
+        targetView.setLayoutParams(prms);
+    }
+
+    /**
+     * Set the dimensions of the target rectangle.
+     */
+    public void setTargetDimension(float width, float height) {
+        cropRect.left = (int) (camPreviewSurfaceView.getMeasuredWidth() / 2 - width / 2);
+        cropRect.right = (int) (camPreviewSurfaceView.getMeasuredWidth() / 2 + width / 2);
+
+        int newTop = cropRect.top + cropRect.height() / 2 - (int) (height / 2);
+
+        if (newTop < 0) {
+            newTop = 0;
+        }
+
+        int newBottom = newTop + (int) height;
+
+        if (newBottom > camPreviewSurfaceView.getHeight()) {
+            newBottom = camPreviewSurfaceView.getHeight();
+            Log.i(TAG, "Dimension of targeting rectangle is too large, ignoring");
+        }
+
+        cropRect.top = newTop;
+        cropRect.bottom = newBottom;
+
+        final FrameLayout.LayoutParams prms = (LayoutParams) targetView.getLayoutParams();
+        prms.height = (int) height;
+        prms.width = (int) width;
+        prms.setMargins(cropRect.left, cropRect.top, 0, 0);
+
+        targetView.setLayoutParams(prms);
+    }
+
+    /**
      * Adds the targeting view to layout. Must be called after computeCropRectangle was called. Separate from computeCropRectangle
      * because: we want to add this view last, in order to put it on top. (and we need to calculate the crop rectangle early).
      */

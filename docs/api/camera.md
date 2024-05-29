@@ -88,11 +88,20 @@ Pauses the camera's capture.
 Resumes the camera's capture.
 :::
 
-:::{methode} orientationChanged() -> void
+:::{method} orientationChanged() -> void
 
 Notifies the view that the orientation of the device has changed by calling
 `setDisplayOrientation()` with the correct clockwise rotation of the camera preview, depending on
 the device's orientation.
+
+:::{method} setTargetPosition(float y) -> void
+
+Set the top target's vertical position on the preview (y coordinate).
+:::
+
+:::{method} setTargetDimension(float width, float height) -> void
+
+Set the target's dimensions on the preview.
 :::
 
 :::{method} getLatestSuccessfulScanJpeg() -> byte[]

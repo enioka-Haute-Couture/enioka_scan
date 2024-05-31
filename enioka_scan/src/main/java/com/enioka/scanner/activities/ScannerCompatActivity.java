@@ -58,6 +58,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -1064,7 +1065,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             return;
         }
 
-        String fileName = "log_scanner_test_" + (new Date()).getTime() + ".csv";
+        String fileName = "scans_scanner_test_" + (new Date()).getTime() + ".csv";
 
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -1074,7 +1075,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private synchronized void writeResultToLog(Barcode data) {
-        String dataLine = (new Date()).getTime() + "," + data.getBarcode() + "," + data.getBarcodeType().code;
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String dataLine = formatter.format(new Date()) + "," + data.getBarcode() + "," + data.getBarcodeType().code;
 
         try (OutputStream os = getContentResolver().openOutputStream(logFileUri, "wa")) {
             if (os == null) {

@@ -34,7 +34,7 @@
     <string name="fragment_scan_manual_title">Saisie manuelle</string>
     <string name="activity_scan_no_compatible_sdk">Aucun scanner compatible n\'est disponible sur cet appareil</string>
     <string name="service_description">Service d\'assistance à la gestion des scanners</string>
-    <string name="activity_scan_use_zxing">ZXing / Zbar</string>
+    <string name="activity_scan_use_zxing">Zbar / ZXing</string>
     <string name="snack_message_zxing">Utilisation du lecteur ZXing !</string>
     <string name="snack_message_zbar">Utilisation du lecteur ZBar !</string>
     <string name="activity_scan_pause_camera">Pause</string>

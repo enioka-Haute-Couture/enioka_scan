@@ -17,7 +17,7 @@
     <string name="allow_later_connections">Autoriser les connexions d\'appareils retardataires</string>
     <string name="allow_pairing_flow">Autoriser les séquences d\'appairage</string>
     <string name="allow_intent_devices">Autoriser les scanners fonctionnant par Intent</string>
-    <string name="enable_log">Activation des logs</string>
+    <string name="enable_log">Activation de l\'historique des scans</string>
     <string name="allow_camera_fallback">Activation par défaut de l\'appareil photo si aucun scanneur n\'est trouvé</string>
     <string name="enable_keep_aspect_ratio">Conserver le rapport hauteur/largeur de la caméra (remplir l\'espace disponible par défaut)</string>
     <string name="allowed_providers">Providers autorisés</string>

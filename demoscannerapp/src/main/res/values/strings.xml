@@ -16,14 +16,14 @@
     <string name="allow_later_connections">Allow later device connections</string>
     <string name="allow_pairing_flow">Allow pairing flow</string>
     <string name="allow_intent_devices">Allow intent devices</string>
-    <string name="enable_log">Enable logging</string>
+    <string name="enable_log">Enable scan history</string>
     <string name="allow_camera_fallback">Default to camera if no scanner is found</string>
     <string name="enable_keep_aspect_ratio">Maintain camera aspect ratio (fill all available space by default)</string>
     <string name="allowed_providers">Allowed Providers</string>
     <string name="excluded_providers">Excluded Providers</string>
     <string name="symbology_selection">Allowed Symbology</string>
     <string name="empty_provider_list_caption">No provider available</string>
-    <string name="symbology_selection_caption">vide = EAN,128</string>
+    <string name="symbology_selection_caption">empty = EAN,128</string>
     <string name="save">Save</string>
 
     <string name="AthesiHHTProvider">Athesi [SPA45…]</string>

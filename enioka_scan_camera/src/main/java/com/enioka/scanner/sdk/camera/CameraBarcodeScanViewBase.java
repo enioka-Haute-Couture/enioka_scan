@@ -371,14 +371,16 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     }
 
     public void resetTargetPosition() {
-        final boolean saveAllowTargetDrag = allowTargetDrag;
-        allowTargetDrag = false;
-        computeCropRectangle();
-        allowTargetDrag = saveAllowTargetDrag;
+        if (targetView != null) {
+            final boolean saveAllowTargetDrag = allowTargetDrag;
+            allowTargetDrag = false;
+            computeCropRectangle();
+            allowTargetDrag = saveAllowTargetDrag;
 
-        final FrameLayout.LayoutParams prms = (LayoutParams) targetView.getLayoutParams();
-        prms.topMargin = cropRect.top;
-        targetView.setLayoutParams(prms);
+            final FrameLayout.LayoutParams prms = (LayoutParams) targetView.getLayoutParams();
+            prms.topMargin = cropRect.top;
+            targetView.setLayoutParams(prms);
+        }
     }
 
     /**

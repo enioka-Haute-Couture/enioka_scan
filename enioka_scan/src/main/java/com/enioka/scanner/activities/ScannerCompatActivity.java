@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -690,6 +691,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 findViewById(openLinkId).setOnClickListener(v -> {
                     // Pause camera or laser scanner
                     startActivity(intent);
+                    findViewById(openLinkId).setVisibility(View.GONE);
                 });
             } catch (Exception ignored) {
                 // Not a URL
@@ -1117,7 +1119,33 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         View view = findViewById(flashlightViewId).getRootView();
 
         if (switchCamera) {
-            ViewSwitcher.switchCameraOrientation(this, view, cameraResources, orientation == Configuration.ORIENTATION_PORTRAIT);
+            CharSequence lastScanChar = ((TextView) findViewById(R.id.scanner_text_last_scan)).getText();
+
+            String lastScan = lastScanChar.length() != 0 ? Html.toHtml((Spanned) lastScanChar) : "";
+            boolean showOpenLink = findViewById(openLinkId).getVisibility() == View.VISIBLE;
+
+            // Disconnect and reset the camera scanner provider
+            cameraScannerProvider.disconnect();
+            cameraScannerProvider.reset();
+
+            // Set the content view to the camera layout
+            setViewContent();
+
+            // Reinit the camera
+            initCamera();
+            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(Html.fromHtml(lastScan));
+
+            if (showOpenLink) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(openLinkUrl));
+                findViewById(openLinkId).setVisibility(View.VISIBLE);
+                findViewById(openLinkId).setOnClickListener(v -> {
+                    // Pause camera or laser scanner
+                    startActivity(intent);
+                    findViewById(openLinkId).setVisibility(View.GONE);
+                });
+            }
+            // TODO: we may improve this by not reloading the camera view
+            //ViewSwitcher.switchCameraOrientation(this, view, cameraResources, orientation == Configuration.ORIENTATION_PORTRAIT);
         } else {
             ViewSwitcher.switchLaserOrientation(this, view, flashlightViewId, orientation == Configuration.ORIENTATION_PORTRAIT);
         }

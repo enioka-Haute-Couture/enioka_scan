@@ -421,6 +421,21 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
         setCameraParameters(prms);
     }
 
+    /**
+     * Some scanner devices get trouble with the camera when the orientation changes.
+     * This method should be called when the orientation changes.
+     * Mainly used for devices that are using CameraBarcodeScanViewV1 API.
+     */
+    @Override
+    public void orientationChanged() {
+        if (this.cam == null) {
+            Log.w(VIEW_LOG_TAG, "orientationChanged: No camera instance, make sure camera was properly initialized and `cleanup()` or `closeCamera()` were not called previously");
+            return;
+        }
+
+        this.cam.setDisplayOrientation(getCameraDisplayOrientation());
+    }
+
     // torch
     ////////////////////////////////////////////////////////////////////////////////////////////////
 

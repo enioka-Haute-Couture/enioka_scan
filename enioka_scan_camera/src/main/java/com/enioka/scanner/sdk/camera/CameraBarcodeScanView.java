@@ -193,6 +193,15 @@ public class CameraBarcodeScanView extends FrameLayout {
     }
 
     /**
+     * Some scanner devices get trouble with the camera when the orientation changes.
+     * This method should be called when the orientation changes.
+     * Mainly used for devices that are using CameraBarcodeScanViewV1 API.
+     */
+    public void orientationChanged() {
+        this.proxiedView.orientationChanged();
+    }
+
+    /**
      * Get the JPEG data of the image used in the latest successful scan.
      *
      * @return a byte[] of JPEG data, or null if there is no previous scan data.

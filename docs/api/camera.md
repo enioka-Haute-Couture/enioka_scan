@@ -88,6 +88,13 @@ Pauses the camera's capture.
 Resumes the camera's capture.
 :::
 
+:::{methode} orientationChanged() -> void
+
+Notifies the view that the orientation of the device has changed by calling
+`setDisplayOrientation()` with the correct clockwise rotation of the camera preview, depending on
+the device's orientation.
+:::
+
 :::{method} getLatestSuccessfulScanJpeg() -> byte[]
 
 :returns: The JPEG data of the image used in the latest successful scan, or null if there is no

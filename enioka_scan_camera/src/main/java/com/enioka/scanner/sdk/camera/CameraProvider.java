@@ -103,4 +103,13 @@ public class CameraProvider implements CameraScannerProvider {
             throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
         }
     }
+
+    @Override
+    public void orientationChanged(View cameraView) {
+        if (cameraView instanceof CameraBarcodeScanView) {
+            ((CameraBarcodeScanView) cameraView).orientationChanged();
+        } else {
+            throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
+        }
+    }
 }

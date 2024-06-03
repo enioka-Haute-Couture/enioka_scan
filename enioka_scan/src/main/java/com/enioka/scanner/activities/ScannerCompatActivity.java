@@ -1119,33 +1119,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         View view = findViewById(flashlightViewId).getRootView();
 
         if (switchCamera) {
-            CharSequence lastScanChar = ((TextView) findViewById(R.id.scanner_text_last_scan)).getText();
+            Integer cameraViewId = cameraResources.get("camera_view_id");
 
-            String lastScan = lastScanChar.length() != 0 ? Html.toHtml((Spanned) lastScanChar) : "";
-            boolean showOpenLink = findViewById(openLinkId).getVisibility() == View.VISIBLE;
-
-            // Disconnect and reset the camera scanner provider
-            cameraScannerProvider.disconnect();
-            cameraScannerProvider.reset();
-
-            // Set the content view to the camera layout
-            setViewContent();
-
-            // Reinit the camera
-            initCamera();
-            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(Html.fromHtml(lastScan));
-
-            if (showOpenLink) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(openLinkUrl));
-                findViewById(openLinkId).setVisibility(View.VISIBLE);
-                findViewById(openLinkId).setOnClickListener(v -> {
-                    // Pause camera or laser scanner
-                    startActivity(intent);
-                    findViewById(openLinkId).setVisibility(View.GONE);
-                });
+            if (cameraViewId != null && cameraScannerProvider != null) {
+                cameraScannerProvider.orientationChanged(findViewById(cameraViewId));
             }
-            // TODO: we may improve this by not reloading the camera view
-            //ViewSwitcher.switchCameraOrientation(this, view, cameraResources, orientation == Configuration.ORIENTATION_PORTRAIT);
+
+            ViewSwitcher.switchCameraOrientation(this, view, cameraResources, orientation == Configuration.ORIENTATION_PORTRAIT);
         } else {
             ViewSwitcher.switchLaserOrientation(this, view, flashlightViewId, orientation == Configuration.ORIENTATION_PORTRAIT);
         }

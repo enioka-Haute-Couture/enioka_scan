@@ -49,7 +49,6 @@ class CameraPreviewSurfaceView extends SurfaceView {
 
         if (parent.getCurrentCameraResolution() == null || !respectCameraRatio) {
             setMeasuredDimension(parentImposedWidthPx, parentImposedHeightPx);
-            parent.resetTargetPosition();
         } else {
             float dataRatio = ((float) parent.getCurrentCameraResolution().x) / parent.getCurrentCameraResolution().y;
 
@@ -68,5 +67,6 @@ class CameraPreviewSurfaceView extends SurfaceView {
                 setMeasuredDimension((int) (parentImposedHeightPx * dataRatio), parentImposedHeightPx);
             }
         }
+        parent.resetTargetPosition();
     }
 }

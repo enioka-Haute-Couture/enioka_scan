@@ -76,4 +76,11 @@ public interface CameraScannerProvider {
      * Sets the reader engine of the camera scanner.
      */
     public void setReaderMode(View cameraView, boolean readerMode);
+
+    /**
+     * Some scanner devices get trouble with the camera when the orientation changes.
+     * This method should be called when the orientation changes.
+     * Mainly used for devices that are using CameraBarcodeScanViewV1 API.
+     */
+    public void orientationChanged(View cameraView);
 }

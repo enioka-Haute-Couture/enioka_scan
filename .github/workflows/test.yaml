@@ -53,10 +53,3 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: adb uninstall com.enioka.scanner.sdk.mock.test; adb uninstall com.enioka.scanner.service; ./gradlew connectedCheck --stacktrace
-
-      - name: Upload stacktrace
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: stacktrace
-          path: /home/runner/work/enioka_scan/enioka_scan/enioka_scan/build/reports/androidTests/connected/debug/

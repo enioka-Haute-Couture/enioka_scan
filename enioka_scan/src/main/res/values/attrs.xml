@@ -16,8 +16,9 @@
         <attr name="targetStrokeWidth" format="integer" />
         <attr name="targetIsFixed" format="boolean" />
         <attr name="previewRatioMode" format="enum">
-            <enum name="fillAvailableSpace" value="0" />
-            <enum name="fitToPicture" value="1" />
+            <enum name="fillWithStretch" value="0" />
+            <enum name="fillWithBlackBars" value="1" />
+            <enum name="fillWithCrop" value="2" />
         </attr>
         <attr name="useAdaptiveResolution" format="boolean" />
         <attr name="storePreferredResolution" format="boolean" />

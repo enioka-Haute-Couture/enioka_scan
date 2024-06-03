@@ -17,7 +17,7 @@ import com.enioka.scanner.R;
  */
 class CameraPreviewSurfaceView extends SurfaceView {
     private final Callback parent;
-    private boolean respectCameraRatio;
+    private int aspectRatioMode;
 
     interface Callback extends SurfaceHolder.Callback {
         Point getCurrentCameraResolution();
@@ -29,15 +29,30 @@ class CameraPreviewSurfaceView extends SurfaceView {
         void resetTargetPosition();
     }
 
+    public enum AspectRatioMode {
+        FILL_WITH_STRETCH(0),
+        FILL_WITH_BLACK_BARS(1),
+        FILL_WITH_CROP(2);
+
+        private final int value;
+
+        AspectRatioMode(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
+
     public CameraPreviewSurfaceView(Context context, int aspectRatioMode, Callback parent) {
         super(context);
         this.parent = parent;
-
-        respectCameraRatio = aspectRatioMode == 1;
+        this.aspectRatioMode = aspectRatioMode;
     }
 
     protected void setPreviewRatioMode(int respectCameraRatio) {
-        this.respectCameraRatio = respectCameraRatio == 1;
+        this.aspectRatioMode = respectCameraRatio;
     }
 
     @Override
@@ -47,7 +62,7 @@ class CameraPreviewSurfaceView extends SurfaceView {
         int parentImposedWidthPx = MeasureSpec.getSize(widthMeasureSpec);
         int parentImposedHeightPx = MeasureSpec.getSize(heightMeasureSpec);
 
-        if (parent.getCurrentCameraResolution() == null || !respectCameraRatio) {
+        if (parent.getCurrentCameraResolution() == null || aspectRatioMode == AspectRatioMode.FILL_WITH_STRETCH.getValue()) {
             setMeasuredDimension(parentImposedWidthPx, parentImposedHeightPx);
         } else {
             float dataRatio = ((float) parent.getCurrentCameraResolution().x) / parent.getCurrentCameraResolution().y;
@@ -62,9 +77,15 @@ class CameraPreviewSurfaceView extends SurfaceView {
 
             // We try to fit the whole camera buffer onto the surface
             if (parentImposedWidthPx < parentImposedHeightPx * dataRatio) {
-                setMeasuredDimension(parentImposedWidthPx, (int) (parentImposedWidthPx / dataRatio));
-            } else {
+                if (aspectRatioMode == AspectRatioMode.FILL_WITH_BLACK_BARS.value) {
+                    setMeasuredDimension(parentImposedWidthPx, (int) (parentImposedWidthPx / dataRatio));
+                } else if (aspectRatioMode == AspectRatioMode.FILL_WITH_CROP.value) {
+                    setMeasuredDimension((int) (parentImposedHeightPx * dataRatio), parentImposedHeightPx);
+                }
+            } else if (aspectRatioMode == AspectRatioMode.FILL_WITH_BLACK_BARS.value) {
                 setMeasuredDimension((int) (parentImposedHeightPx * dataRatio), parentImposedHeightPx);
+            } else if (aspectRatioMode == AspectRatioMode.FILL_WITH_CROP.value) {
+                setMeasuredDimension(parentImposedWidthPx, (int) (parentImposedWidthPx / dataRatio));
             }
         }
         parent.resetTargetPosition();

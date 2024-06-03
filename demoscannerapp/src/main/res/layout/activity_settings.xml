@@ -342,37 +342,59 @@
                     android:layout_marginEnd="16dp"/>
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/linearLayoutEnableKeepAspectRatio"
+            <TextView
+                android:id="@+id/textViewAspectRatioMode"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_width="0dp"
-                android:layout_weight="9"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:text="@string/choose_aspect_ratio_mode"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="@color/defaultTextColor"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayoutAllowCameraFallback">
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutAllowCameraFallback"/>
 
-                <TextView
-                    android:id="@+id/textViewEnableKeepAspectRatio"
-                    android:layout_width="0dp"
-                    android:layout_weight="9"
-                    android:layout_height="wrap_content"
-                    android:text="@string/enable_keep_aspect_ratio"
-                    android:textAppearance="?attr/textAppearanceBody2"
-                    android:textColor="@color/defaultTextColor"
-                    android:layout_marginStart="16dp"/>
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleButtonAspectRatio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                app:singleSelection="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAspectRatioMode">
 
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchEnableKeepAspectRatio"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_fill_stretch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"/>
-            </LinearLayout>
+                    android:textAppearance="?attr/textAppearanceCaption"
+                    app:iconGravity="textStart"
+                    app:icon="@drawable/stretch"
+                    style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_fill_black_bars"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceCaption"
+                    app:iconGravity="textStart"
+                    app:icon="@drawable/black_bars"
+                    style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_fill_crop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceCaption"
+                    app:iconGravity="textStart"
+                    app:icon="@drawable/crop"
+                    style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+            </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <com.google.android.material.divider.MaterialDivider
                 android:id="@+id/dividerSettingsAllowedProvider"
@@ -382,7 +404,7 @@
                 app:layout_constraintWidth_percent="0.90"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayoutEnableKeepAspectRatio"/>
+                app:layout_constraintTop_toBottomOf="@+id/toggleButtonAspectRatio"/>
 
             <!-- ALLOWED PROVIDERS -->
 

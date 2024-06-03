@@ -95,7 +95,7 @@ public class WelcomeActivity extends AppCompatActivity {
         // add allow camera fallback intent extra
         intent.putExtra(SettingsActivity.ALLOW_CAMERA_FALLBACK_KEY, preferences.getBoolean(SettingsActivity.ALLOW_CAMERA_FALLBACK_KEY, false));
         // add enable keep aspect ratio intent extra
-        intent.putExtra(SettingsActivity.ENABLE_KEEP_ASPECT_RATIO_KEY, preferences.getBoolean(SettingsActivity.ENABLE_KEEP_ASPECT_RATIO_KEY, false) ? 1 : 0);
+        intent.putExtra(SettingsActivity.ENABLE_KEEP_ASPECT_RATIO_KEY, preferences.getInt(SettingsActivity.ENABLE_KEEP_ASPECT_RATIO_KEY, 0));
 
         startActivity(intent);
     }

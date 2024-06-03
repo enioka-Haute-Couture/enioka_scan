@@ -67,24 +67,44 @@ public class SettingsActivity extends AppCompatActivity {
     protected MaterialToolbar topAppBar;
 
     /**
-     * Select all segmented button
+     * Select all segmented providers button
      */
     protected MaterialButton bt_all;
 
     /**
-     * Select specific segmented button
+     * Select specific segmented providers button
      */
     protected MaterialButton bt_spec;
 
     /**
-     * Select none segmented button
+     * Select none segmented providers button
      */
     protected MaterialButton bt_none;
 
     /**
-     * SegmentedButtons state
+     * SegmentedButtons providers state
      */
-    protected int segmentedButtonState = 0;
+    protected int segmentedButtonProvidersState = 0;
+
+    /**
+     * Select stretch segmented aspect ratio mode button
+     */
+    protected MaterialButton bt_stretch;
+
+    /**
+     * Select black bars segmented aspect ratio mode button
+     */
+    protected MaterialButton bt_black_bars;
+
+    /**
+     * Select crop segmented aspect ratio mode button
+     */
+    protected MaterialButton bt_crop;
+
+    /**
+     * SegmentedButtons aspect ratio mode state
+     */
+    protected int aspectRatioMode = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,13 +115,19 @@ public class SettingsActivity extends AppCompatActivity {
         buttonSave = findViewById(R.id.button_save);
         buttonSave.setOnClickListener(this::onClickSave);
 
-        // Segmented toggle buttons
+        // Segmented providers toggle buttons
         bt_all = findViewById(R.id.button_all);
         bt_spec = findViewById(R.id.button_specific);
         bt_none = findViewById(R.id.button_none);
 
+        // Segmented aspect ratio mode toggle buttons
+        bt_stretch = findViewById(R.id.button_fill_stretch);
+        bt_black_bars = findViewById(R.id.button_fill_black_bars);
+        bt_crop = findViewById(R.id.button_fill_crop);
+
         // Add listener to segmented toggle buttons
-        bindToggleButton();
+        bindToggleButtonProviders();
+        bindToggleButtonAspectRatioMode();
 
         final SharedPreferences preferences = this.getSharedPreferences("ScannerSearchPreferences", MODE_PRIVATE);
 
@@ -115,12 +141,12 @@ public class SettingsActivity extends AppCompatActivity {
         ((MaterialSwitch) findViewById(R.id.switchIntentDevices)).setChecked(preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, options.allowIntentDevices));
         ((MaterialSwitch) findViewById(R.id.switchEnableLogging)).setChecked(preferences.getBoolean(ENABLE_LOGGING_KEY, false));
         ((MaterialSwitch) findViewById(R.id.switchAllowCameraFallback)).setChecked(preferences.getBoolean(ALLOW_CAMERA_FALLBACK_KEY, false));
-        ((MaterialSwitch) findViewById(R.id.switchEnableKeepAspectRatio)).setChecked(preferences.getBoolean(ENABLE_KEEP_ASPECT_RATIO_KEY, false));
 
         final Set<String> allowedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
 
         // Set the state of the segmented button
-        segmentedButtonState = preferences.getInt(PREFS_KEY, 0);
+        segmentedButtonProvidersState = preferences.getInt(PREFS_KEY, 0);
+        aspectRatioMode = preferences.getInt(ENABLE_KEEP_ASPECT_RATIO_KEY, 0);
 
         final Set<BarcodeType> symbologySelection = new HashSet<>();
         for(String symbology: preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName())) {
@@ -169,7 +195,8 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         // Set the state of the segmented button (default is all)
-        setSegmentedButtonState();
+        setSegmentedButtonState(true);
+        setSegmentedButtonState(false);
     }
 
     private void updateConstraintLayout(int topViewId) {
@@ -250,7 +277,6 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, ((MaterialSwitch) findViewById(R.id.switchIntentDevices)).isChecked());
         editor.putBoolean(ENABLE_LOGGING_KEY, ((MaterialSwitch) findViewById(R.id.switchEnableLogging)).isChecked());
         editor.putBoolean(ALLOW_CAMERA_FALLBACK_KEY, ((MaterialSwitch) findViewById(R.id.switchAllowCameraFallback)).isChecked());
-        editor.putBoolean(ENABLE_KEEP_ASPECT_RATIO_KEY, ((MaterialSwitch) findViewById(R.id.switchEnableKeepAspectRatio)).isChecked());
 
         final Set<String> allowedProviderKeys = new HashSet<>();
         final Set<String> excludedProviderKeys = new HashSet<>();
@@ -278,7 +304,8 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, allowedProviderKeys);
         editor.putStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, excludedProviderKeys);
 
-        editor.putInt(PREFS_KEY, segmentedButtonState);
+        editor.putInt(PREFS_KEY, segmentedButtonProvidersState);
+        editor.putInt(ENABLE_KEEP_ASPECT_RATIO_KEY, aspectRatioMode);
 
         final Set<String> symbologySelection = new HashSet<>();
         if (((CheckBox) findViewById(R.id.checkSelectCode128)).isChecked()) { symbologySelection.add(BarcodeType.CODE128.name()); }
@@ -298,7 +325,7 @@ public class SettingsActivity extends AppCompatActivity {
     /**
      * Bind toggle buttons
      */
-    private void bindToggleButton() {
+    private void bindToggleButtonProviders() {
         bt_all.setOnClickListener(v -> {
             if (bt_all.isChecked()) {
                 bt_all.setIcon(ContextCompat.getDrawable(this, R.drawable.check_all));
@@ -311,7 +338,7 @@ public class SettingsActivity extends AppCompatActivity {
                     findViewById(providerViewId).setEnabled(false);
                 }
 
-                segmentedButtonState = 0;
+                segmentedButtonProvidersState = 0;
             }
         });
         bt_spec.setOnClickListener(v -> {
@@ -325,7 +352,7 @@ public class SettingsActivity extends AppCompatActivity {
                     findViewById(providerViewId).setEnabled(true);
                 }
 
-                segmentedButtonState = 1;
+                segmentedButtonProvidersState = 1;
             }
         });
         bt_none.setOnClickListener(v -> {
@@ -340,30 +367,71 @@ public class SettingsActivity extends AppCompatActivity {
                     findViewById(providerViewId).setEnabled(false);
                 }
 
-                segmentedButtonState = 2;
+                segmentedButtonProvidersState = 2;
             }
         });
     }
 
     /**
+     * Bind toggle button aspect ratio mode
+     */
+
+    private void bindToggleButtonAspectRatioMode() {
+        bt_stretch.setOnClickListener(v -> {
+            if (bt_stretch.isChecked()) {
+                bt_stretch.setText(R.string.fill_stretch);
+                bt_black_bars.setText(null);
+                bt_crop.setText(null);
+
+                aspectRatioMode = 0;
+            }
+        });
+        bt_black_bars.setOnClickListener(v -> {
+            if (bt_black_bars.isChecked()) {
+                bt_black_bars.setText(R.string.fill_black_bars);
+                bt_stretch.setText(null);
+                bt_crop.setText(null);
+
+                aspectRatioMode = 1;
+            }
+        });
+        bt_crop.setOnClickListener(v -> {
+            if (bt_crop.isChecked()) {
+                bt_crop.setText(R.string.fill_crop);
+                bt_stretch.setText(null);
+                bt_black_bars.setText(null);
+
+                aspectRatioMode = 2;
+            }
+        });
+    }
+
+
+    /**
      * Set the state of segmented button
      */
-    private void setSegmentedButtonState() {
-        switch (segmentedButtonState) {
+    private void setSegmentedButtonState(boolean isProvider) {
+        MaterialButton bt_1 = isProvider ? bt_all : bt_stretch;
+        MaterialButton bt_2 = isProvider ? bt_spec : bt_black_bars;
+        MaterialButton bt_3 = isProvider ? bt_none : bt_crop;
+
+        int buttonState = isProvider ? segmentedButtonProvidersState : aspectRatioMode;
+
+        switch (buttonState) {
             case 0:
-                bt_all.performClick();
-                bt_spec.setChecked(false);
-                bt_none.setChecked(false);
+                bt_1.performClick();
+                bt_2.setChecked(false);
+                bt_3.setChecked(false);
                 break;
             case 1:
-                bt_all.setChecked(false);
-                bt_spec.performClick();
-                bt_none.setChecked(false);
+                bt_1.setChecked(false);
+                bt_2.performClick();
+                bt_3.setChecked(false);
                 break;
             case 2:
-                bt_all.setChecked(false);
-                bt_spec.setChecked(false);
-                bt_none.performClick();
+                bt_1.setChecked(false);
+                bt_2.setChecked(false);
+                bt_3.performClick();
                 break;
         }
     }

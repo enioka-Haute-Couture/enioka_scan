@@ -177,3 +177,18 @@ devices.
 | `provider-os-zebra-dw`             | `ZebraDwProvider`                | Any device compatible with Zebra Datawedge                      | Zebra TC25, Zebra TC27             | Integrated    | Zebra Datawedge service (should be preinstalled on device)     | Application package `com.symbol.datawedge` exists                                                                                 |
 
 :::
+
+## Known issues
+
+### `Zebra TC-25`
+
+The Zebra TC-25 device may experience issues with the camera preview, which may not display
+correctly on screen orientation changes. One solution is to call `orientationChanged()`, when
+switching between portrait and landscape modes, on the `CameraBarcodeScanView` instance. Sometimes,
+the camera may be corrupted, and the preview will not display correctly. 
+
+### `Honeywell EDA52`
+
+The Honeywell EDA52 device may experience issues with the camera scanner, which may not be able to
+detect barcodes at all. This is probably due to some internal services not allowing the camera to
+be used correctly by the library. On the other hand, the integrated scanner works correctly.

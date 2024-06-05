@@ -36,7 +36,7 @@ public class ScannerSearchOptions {
     /**
      * If true, providers using another application for controlling scanners will be allowed. This is important as most of the time, it is impossible to say if these apps are actually installed, and therefore it is impossible to detect the presence of an actual laser scanner or not.
      */
-    public boolean allowIntentDevices = false;
+    public boolean allowIntentDevices = true;
 
     /**
      * If true, some providers may retrieve scanners after initial search.
@@ -51,7 +51,7 @@ public class ScannerSearchOptions {
     /**
      * If true, the providers which need a pairing done by their own SDKs (like a BLE on the fly pairing) will be allowed to do so.
      */
-    public boolean allowPairingFlow = false;
+    public boolean allowPairingFlow = true;
 
     /**
      * Restrict search to this list of providers. Ignored if null or empty.

@@ -515,6 +515,16 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         }
     }
 
+    /**
+     * Some scanner devices get trouble with the camera when the orientation changes.
+     * This method should be called when the orientation changes.
+     * Mainly used for devices that are using CameraBarcodeScanViewV1 API.
+     */
+    @Override
+    public void orientationChanged() {
+        // Do nothing;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Background thread for handling camera-related events
     ///////////////////////////////////////////////////////////////////////////

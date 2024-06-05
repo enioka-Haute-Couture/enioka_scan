@@ -124,6 +124,13 @@ public class CameraBarcodeScanView extends FrameLayout {
         void handleScanResult(String result, BarcodeType type);
     }
 
+    /**
+     * Set the camera preview ratio mode.
+     */
+    public void setPreviewRatioMode(int mode) {
+        this.proxiedView.setPreviewRatioMode(mode);
+    }
+
     public void setReaderMode(CameraReader readerMode) {
         this.proxiedView.setReaderMode(readerMode);
     }
@@ -183,6 +190,15 @@ public class CameraBarcodeScanView extends FrameLayout {
      */
     public void resetTargetPosition() {
         this.proxiedView.resetTargetPosition();
+    }
+
+    /**
+     * Some scanner devices get trouble with the camera when the orientation changes.
+     * This method should be called when the orientation changes.
+     * Mainly used for devices that are using CameraBarcodeScanViewV1 API.
+     */
+    public void orientationChanged() {
+        this.proxiedView.orientationChanged();
     }
 
     /**

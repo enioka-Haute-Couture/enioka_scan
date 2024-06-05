@@ -6,6 +6,7 @@ import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.BarcodeType;
 
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -18,23 +19,18 @@ public class CameraProvider implements CameraScannerProvider {
     protected CameraBarcodeScanViewScanner cameraScanner;
 
     @Override
-    public int getCameraViewId() {
-        return R.id.camera_scan_view;
-    }
+    public HashMap<String, Integer> getIdResources() {
+        HashMap<String, Integer> idResources = new HashMap<>();
+        idResources.put("camera_view_id", R.id.camera_scan_view);
+        idResources.put("layout_id_camera", R.layout.activity_camera);
+        idResources.put("scanner_toggle_view_id", R.id.scanner_switch_zxing);
+        idResources.put("scanner_toggle_pause_id", R.id.scanner_switch_pause);
+        idResources.put("card_last_scan_id", R.id.card_camera_last_scan);
+        idResources.put("constraint_layout_id", R.id.constraint_layout_main_activity);
+        idResources.put("scanner_flashlight_id", R.id.scanner_flashlight);
+        idResources.put("scanner_bt_provider_logs", R.id.scanner_bt_provider_logs);
 
-    @Override
-    public int getLayoutIdCamera() {
-        return R.layout.activity_main_alt;
-    }
-
-    @Override
-    public int getScannerToggleViewId() {
-        return R.id.scanner_switch_zxing;
-    }
-
-    @Override
-    public int getScannerTogglePauseId() {
-        return R.id.scanner_switch_pause;
+        return idResources;
     }
 
     @Override
@@ -91,9 +87,27 @@ public class CameraProvider implements CameraScannerProvider {
     }
 
     @Override
+    public void setPreviewRatioMode(View cameraView, int previewRatioMode) {
+        if (cameraView instanceof CameraBarcodeScanView) {
+            ((CameraBarcodeScanView) cameraView).setPreviewRatioMode(previewRatioMode);
+        } else {
+            throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
+        }
+    }
+
+    @Override
     public void setReaderMode(View cameraView, boolean readerMode) {
         if (cameraView instanceof CameraBarcodeScanView) {
             ((CameraBarcodeScanView) cameraView).setReaderMode(readerMode ? CameraReader.ZXING : CameraReader.ZBAR);
+        } else {
+            throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
+        }
+    }
+
+    @Override
+    public void orientationChanged(View cameraView) {
+        if (cameraView instanceof CameraBarcodeScanView) {
+            ((CameraBarcodeScanView) cameraView).orientationChanged();
         } else {
             throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
         }

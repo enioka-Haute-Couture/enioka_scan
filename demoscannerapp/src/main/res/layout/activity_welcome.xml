@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,36 +7,80 @@
     android:layout_height="match_parent"
     tools:context="com.enioka.scanner.demo.WelcomeActivity">
 
-    <Button
-        android:id="@+id/bt_scanner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:onClick="onClickBt1"
-        android:text="@string/test_scan"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimaryInverse"
+        android:theme="@style/ThemeOverlay.Material3.ActionBar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/menu_main"
+        app:titleTextColor="@color/design_default_color_primary_variant"
+        app:title="@string/app_name" />
 
-    <Button
-        android:id="@+id/bt_tester"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:onClick="onClickBt4"
-        android:text="@string/scanner_tester"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/bt_scanner" />
 
-    <Button
-        android:id="@+id/bt_settings"
-        android:layout_width="wrap_content"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/welcome_card"
+        android:layout_width="0dp"
+        app:layout_constraintWidth_percent="0.8"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:onClick="onClickBt5"
-        android:text="@string/settings"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/bt_tester" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topAppBar"
+        app:cardBackgroundColor="@color/design_default_color_surface">
+
+        <LinearLayout
+            android:id="@+id/welcome_card_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:id="@+id/barcode"
+                android:layout_width="150dp"
+                android:layout_height="90dp"
+                app:srcCompat="@drawable/upc"
+                app:tint="?attr/colorSecondary"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/barcode" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/bt_scanner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                app:icon="@drawable/upc_scan"
+                android:layout_gravity="center"
+                android:text="@string/test_scan" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/bt_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="@string/settings"
+                android:layout_gravity="center"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                app:icon="@drawable/baseline_settings_24" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/bug_report_button"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        app:srcCompat="@drawable/bug"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:contentDescription="@string/bug_report" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

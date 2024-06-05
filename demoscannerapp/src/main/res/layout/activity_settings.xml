@@ -6,215 +6,383 @@
     android:layout_height="match_parent"
     tools:context="com.enioka.scanner.demo.SettingsActivity">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/topAppBarSettings"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimaryInverse"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:title="@string/scanner_search_settings"
+        app:titleTextColor="@color/design_default_color_primary_variant"/>
+
     <ScrollView
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topAppBarSettings">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayoutSettings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:paddingBottom="33dp"
             android:orientation="vertical">
 
-            <!-- TITLE -->
-
             <TextView
-                android:id="@+id/textViewTitle"
+                android:id="@+id/textViewGeneralSettings"
                 android:layout_width="fill_parent"
-                android:layout_height="37dp"
+                android:layout_height="24dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/scanner_search_settings"
-                android:textSize="24sp"
+                android:layout_marginBottom="24dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="@string/scanner_general_settings"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
 
             <!-- WAIT DISCONNECTED -->
-
-            <TextView
-                android:id="@+id/textViewWaitDisconnected"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="22dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/wait_disconnected"
-                app:layout_constraintEnd_toEndOf="parent"
+            <LinearLayout
+                android:id="@+id/linearLayoutWaitDisconnected"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewTitle" />
+                app:layout_constraintTop_toBottomOf="@+id/textViewGeneralSettings">
 
-            <Switch
-                android:id="@+id/switchWaitDisconnected"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="22dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintLeft_toRightOf="@+id/textViewWaitDisconnected"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewTitle" />
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/textViewWaitDisconnected"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="9"
+                    android:text="@string/wait_disconnected"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/defaultTextColor"
+                    android:layout_marginStart="16dp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchWaitDisconnected"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
 
             <!-- RETURN ONLY FIRST -->
-
-            <TextView
-                android:id="@+id/textViewReturnOnlyFirst"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="22dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/return_only_first"
-                app:layout_constraintEnd_toEndOf="parent"
+            <LinearLayout
+                android:id="@+id/linearLayoutReturnOnlyFirst"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewWaitDisconnected" />
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutWaitDisconnected">
 
-            <Switch
-                android:id="@+id/switchReturnOnlyFirst"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="22dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintLeft_toRightOf="@+id/textViewReturnOnlyFirst"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewWaitDisconnected" />
+                <TextView
+                    android:id="@+id/textViewReturnOnlyFirst"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="9"
+                    android:text="@string/return_only_first"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/defaultTextColor"
+                    android:layout_marginStart="16dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchReturnOnlyFirst"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
 
             <!-- BLUETOOTH -->
-
-            <TextView
-                android:id="@+id/textViewBluetooth"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="22dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/use_bluetooth"
-                app:layout_constraintEnd_toEndOf="parent"
+            <LinearLayout
+                android:id="@+id/linearLayoutBluetooth"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewReturnOnlyFirst" />
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutReturnOnlyFirst">
 
-            <Switch
-                android:id="@+id/switchBluetooth"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="22dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintLeft_toRightOf="@+id/textViewBluetooth"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewReturnOnlyFirst" />
+                <TextView
+                    android:id="@+id/textViewBluetooth"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="9"
+                    android:text="@string/use_bluetooth"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/defaultTextColor"
+                    android:layout_marginStart="16dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchBluetooth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
 
             <!-- INITIAL SEARCH -->
-
-            <TextView
-                android:id="@+id/textViewInitialSearch"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/allow_initial_search"
-                app:layout_constraintEnd_toEndOf="parent"
+            <LinearLayout
+                android:id="@+id/linearLayoutInitialSearch"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewBluetooth" />
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutBluetooth">
 
-            <Switch
-                android:id="@+id/switchInitialSearch"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintLeft_toRightOf="@+id/textViewInitialSearch"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewBluetooth" />
+                <TextView
+                    android:id="@+id/textViewInitialSearch"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="9"
+                    android:text="@string/allow_initial_search"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/defaultTextColor"
+                    android:layout_marginStart="16dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchInitialSearch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
 
             <!-- LATER CONNECTIONS -->
-
-            <TextView
-                android:id="@+id/textViewLaterConnections"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/allow_later_connections"
-                app:layout_constraintEnd_toEndOf="parent"
+            <LinearLayout
+                android:id="@+id/linearLayoutLaterConnections"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewInitialSearch" />
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutInitialSearch">
 
-            <Switch
-                android:id="@+id/switchLaterConnections"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintLeft_toRightOf="@+id/textViewLaterConnections"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewInitialSearch" />
+                <TextView
+                    android:id="@+id/textViewLaterConnections"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="9"
+                    android:text="@string/allow_later_connections"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/defaultTextColor"
+                    android:layout_marginStart="16dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchLaterConnections"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
 
             <!-- PAIRING FLOW -->
 
-            <TextView
-                android:id="@+id/textViewPairingFlow"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/allow_pairing_flow"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewLaterConnections" />
-
-            <Switch
-                android:id="@+id/switchPairingFlow"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintLeft_toRightOf="@+id/textViewPairingFlow"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewLaterConnections" />
-
-            <TextView
-                android:id="@+id/textIntentDevices"
-                android:layout_width="fill_parent"
+            <LinearLayout
+                android:id="@+id/linearLayoutPairingFlow"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="65dp"
-                android:lines="2"
-                android:text="@string/allow_intent_devices"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_width="0dp"
+                android:layout_weight="9"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewPairingFlow" />
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutLaterConnections">
 
-            <Switch
-                android:id="@+id/switchIntentDevices"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintLeft_toRightOf="@+id/textIntentDevices"
+                <TextView
+                    android:id="@+id/textViewPairingFlow"
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_weight="9"
+                    android:text="@string/allow_pairing_flow"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/defaultTextColor"
+                    android:layout_marginStart="16dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchPairingFlow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutIntentDevice"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewPairingFlow" />
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutPairingFlow">
+
+                <TextView
+                    android:id="@+id/textViewIntentDevices"
+                    android:layout_width="0dp"
+                    android:layout_weight="9"
+                    android:layout_height="wrap_content"
+                    android:text="@string/allow_intent_devices"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/defaultTextColor"
+                    android:layout_marginStart="16dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchIntentDevices"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutEnableLogging"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutIntentDevice">
+
+                <TextView
+                    android:id="@+id/textViewEnableLoging"
+                    android:layout_width="0dp"
+                    android:layout_weight="9"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_log"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/defaultTextColor"
+                    android:layout_marginStart="16dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchEnableLogging"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutAllowCameraFallback"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutEnableLogging">
+
+                <TextView
+                    android:id="@+id/textViewAllowCameraFallback"
+                    android:layout_width="0dp"
+                    android:layout_weight="9"
+                    android:layout_height="wrap_content"
+                    android:text="@string/allow_camera_fallback"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/defaultTextColor"
+                    android:layout_marginStart="16dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchAllowCameraFallback"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayoutEnableKeepAspectRatio"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="9"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutAllowCameraFallback">
+
+                <TextView
+                    android:id="@+id/textViewEnableKeepAspectRatio"
+                    android:layout_width="0dp"
+                    android:layout_weight="9"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_keep_aspect_ratio"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/defaultTextColor"
+                    android:layout_marginStart="16dp"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchEnableKeepAspectRatio"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
+            </LinearLayout>
+
+            <com.google.android.material.divider.MaterialDivider
+                android:id="@+id/dividerSettingsAllowedProvider"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintWidth_percent="0.90"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayoutEnableKeepAspectRatio"/>
 
             <!-- ALLOWED PROVIDERS -->
 
@@ -225,25 +393,72 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 android:text="@string/allowed_providers"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textIntentDevices" />
+                app:layout_constraintTop_toBottomOf="@+id/dividerSettingsAllowedProvider" />
 
-            <!-- EXCLUDED PROVIDERS -->
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleButtonProvider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:singleSelection="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProviders">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/toogle_provider_button_all"
+                    style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_specific"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/toggle_provider_button_specific"
+                    style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_none"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/toggle_provider_button_none"
+                    style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+            </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <TextView
-                android:id="@+id/textViewExcludedProviders"
+                android:id="@+id/textEmptyProviderList"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/excluded_providers"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:text="@string/empty_provider_list_caption"
+                android:textColor="@android:color/darker_gray"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProviders" />
+                app:layout_constraintTop_toBottomOf="@+id/toggleButtonProvider" />
 
+
+            <com.google.android.material.divider.MaterialDivider
+                android:id="@+id/dividerSettingsSymbology"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintWidth_percent="0.90"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textEmptyProviderList"/>
 
             <!-- Symbology selection-->
             <TextView
@@ -253,201 +468,140 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:text="@string/symbology_selection"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewExcludedProviders" />
+                app:layout_constraintTop_toBottomOf="@+id/dividerSettingsSymbology" />
+
 
             <!-- CODE 128 -->
             <TextView
-                android:id="@+id/textViewSelectCode128"
+                android:id="@+id/textSymbologySelectionCaption"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
-                android:layout_marginStart="48dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeCode128"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="12dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                android:text="@string/symbology_selection_caption"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textSymbologySelection" />
 
-            <CheckBox
+            <!-- CODE 128 -->
+            <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/checkSelectCode128"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="12dp"
                 android:layout_marginEnd="16dp"
+                android:text="@string/barcodeCode128"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewSelectCode128"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textSymbologySelection" />
+                app:layout_constraintTop_toBottomOf="@+id/textSymbologySelectionCaption" />
 
             <!-- CODE 39 -->
-            <TextView
-                android:id="@+id/textViewSelectCode39"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="48dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeCode39"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectCode128" />
-
-            <CheckBox
+            <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/checkSelectCode39"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="12dp"
                 android:layout_marginEnd="16dp"
+                android:text="@string/barcodeCode39"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewSelectCode39"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectCode128" />
+                app:layout_constraintTop_toBottomOf="@+id/checkSelectCode128" />
 
             <!-- CODE DIS25 -->
-            <TextView
-                android:id="@+id/textViewSelectDis25"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="48dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeDis25"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectCode39" />
-
-            <CheckBox
+            <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/checkSelectDis25"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
+                android:text="@string/barcodeDis25"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewSelectDis25"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectCode39" />
+                app:layout_constraintTop_toBottomOf="@+id/checkSelectCode39" />
 
             <!-- CODE INT 25 -->
-            <TextView
-                android:id="@+id/textViewSelectInt25"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="48dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeInt25"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectDis25" />
-
-            <CheckBox
+            <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/checkSelectInt25"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
+                android:text="@string/barcodeInt25"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewSelectInt25"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectDis25" />
+                app:layout_constraintTop_toBottomOf="@+id/checkSelectDis25" />
 
             <!-- CODE EAN13 -->
-            <TextView
-                android:id="@+id/textViewSelectEan13"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="48dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeEan13"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectInt25" />
-
-            <CheckBox
+            <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/checkSelectEan13"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
+                android:text="@string/barcodeEan13"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewSelectEan13"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectInt25" />
+                app:layout_constraintTop_toBottomOf="@+id/checkSelectInt25" />
 
             <!-- CODE QrCode -->
-            <TextView
-                android:id="@+id/textViewSelectQrCode"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="48dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeQrCode"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectEan13" />
-
-            <CheckBox
+            <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/checkSelectQrCode"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
+                android:text="@string/barcodeQrCode"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewSelectQrCode"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectEan13" />
+                app:layout_constraintTop_toBottomOf="@+id/checkSelectEan13" />
 
             <!-- CODE AZTEC -->
-            <TextView
-                android:id="@+id/textViewSelectAztec"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="48dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeAztec"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectQrCode" />
-
-            <CheckBox
+            <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/checkSelectAztec"
                 android:layout_width="fill_parent"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/textViewSelectAztec"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectQrCode" />
-
-            <!-- SAVE -->
-
-            <Button
-                android:id="@+id/button_save"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="33dp"
-                android:layout_marginBottom="33dp"
-                android:onClick="onClickSave"
-                android:text="@string/save"
+                android:text="@string/barcodeAztec"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textViewSelectAztec" />
+                app:layout_constraintTop_toBottomOf="@+id/checkSelectQrCode" />
 
+            <View
+                android:id="@+id/marginBottom"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/checkSelectAztec" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
+    <!-- SAVE -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="33dp"
+            android:layout_marginBottom="15dp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:text="@string/save"/>
+    </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

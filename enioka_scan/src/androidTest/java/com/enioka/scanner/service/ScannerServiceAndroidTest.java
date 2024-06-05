@@ -63,10 +63,10 @@ public class ScannerServiceAndroidTest {
         options.useBlueTooth = false;
         options.allowedProviderKeys = new HashSet<>();
         options.allowedProviderKeys.add(MockProvider.PROVIDER_KEY);
+        options.startSearchOnServiceBind = false;
 
         final Intent serviceIntent = new Intent(ctx, ScannerService.class);
         options.toIntentExtras(serviceIntent);
-        serviceIntent.putExtra(ScannerServiceApi.EXTRA_START_SEARCH_ON_SERVICE_BIND, false);
         ctx.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         // Wait for binding with ScannerService

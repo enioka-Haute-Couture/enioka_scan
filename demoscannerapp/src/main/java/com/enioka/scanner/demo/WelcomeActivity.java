@@ -85,14 +85,12 @@ public class WelcomeActivity extends AppCompatActivity {
         options.allowIntentDevices = preferences.getBoolean(ScannerServiceApi.EXTRA_SEARCH_ALLOW_INTENT_BOOLEAN, options.allowIntentDevices);
         options.allowedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, options.allowedProviderKeys);
         options.excludedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_EXCLUDED_PROVIDERS_STRING_ARRAY, options.excludedProviderKeys);
+        options.symbologySelection = preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName());
 
         options.toIntentExtras(intent);
-        // add symbology
-        final String[] symbologies = preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName()).toArray(new String[0]);
-        intent.putExtra(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, symbologies);
-        // add logging intent extra
+
+        // Add extra settings for scanner activity (logging and camera fallback)
         intent.putExtra(SettingsActivity.ENABLE_LOGGING_KEY, preferences.getBoolean(SettingsActivity.ENABLE_LOGGING_KEY, false));
-        // add allow camera fallback intent extra
         intent.putExtra(SettingsActivity.ALLOW_CAMERA_FALLBACK_KEY, preferences.getBoolean(SettingsActivity.ALLOW_CAMERA_FALLBACK_KEY, false));
         // add enable keep aspect ratio intent extra
         intent.putExtra(SettingsActivity.ENABLE_KEEP_ASPECT_RATIO_KEY, preferences.getBoolean(SettingsActivity.ENABLE_KEEP_ASPECT_RATIO_KEY, false) ? 1 : 0);

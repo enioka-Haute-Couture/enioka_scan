@@ -83,4 +83,14 @@ public interface CameraScannerProvider {
      * Mainly used for devices that are using CameraBarcodeScanViewV1 API.
      */
     public void orientationChanged(View cameraView);
+
+    /**
+     * Set the top position (in y axis) of the target rectangle.
+     */
+    public void setTargetPosition(View cameraView, float y);
+
+    /**
+     * Set the dimension of the target rectangle.
+     */
+    public void setTargetDimension(View cameraView, float width, float height);
 }

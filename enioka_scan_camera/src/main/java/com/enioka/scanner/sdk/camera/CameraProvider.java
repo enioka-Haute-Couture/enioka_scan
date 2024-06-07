@@ -112,4 +112,22 @@ public class CameraProvider implements CameraScannerProvider {
             throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
         }
     }
+
+    @Override
+    public void setTargetPosition(View cameraView, float y) {
+        if (cameraView instanceof CameraBarcodeScanView) {
+            ((CameraBarcodeScanView) cameraView).setTargetPosition(y);
+        } else {
+            throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
+        }
+    }
+
+    @Override
+    public void setTargetDimension(View cameraView, float width, float height) {
+        if (cameraView instanceof CameraBarcodeScanView) {
+            ((CameraBarcodeScanView) cameraView).setTargetDimension(width, height);
+        } else {
+            throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
+        }
+    }
 }

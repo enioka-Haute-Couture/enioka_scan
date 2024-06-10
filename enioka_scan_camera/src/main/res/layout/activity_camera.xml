@@ -19,7 +19,7 @@
         app:maxDistortionRatio="0.3"
         app:minResolutionY="720"
         app:maxResolutionY="1080"
-        app:previewRatioMode="fillWithStretch"
+        app:previewRatioMode="fillWithCrop"
         app:readerMode="Auto"
         app:storePreferredResolution="false"
         app:targetColorActive="@color/colorRed"

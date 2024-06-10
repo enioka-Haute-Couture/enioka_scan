@@ -30,9 +30,9 @@ class CameraPreviewSurfaceView extends SurfaceView {
     }
 
     public enum AspectRatioMode {
-        FILL_WITH_STRETCH(0),
+        FILL_WITH_CROP(0),
         FILL_WITH_BLACK_BARS(1),
-        FILL_WITH_CROP(2);
+        FILL_WITH_STRETCH(2);
 
         private final int value;
 

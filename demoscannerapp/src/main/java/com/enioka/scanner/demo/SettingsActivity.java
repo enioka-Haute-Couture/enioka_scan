@@ -377,11 +377,11 @@ public class SettingsActivity extends AppCompatActivity {
      */
 
     private void bindToggleButtonAspectRatioMode() {
-        bt_stretch.setOnClickListener(v -> {
-            if (bt_stretch.isChecked()) {
-                bt_stretch.setText(R.string.fill_stretch);
+        bt_crop.setOnClickListener(v -> {
+            if (bt_crop.isChecked()) {
+                bt_crop.setText(R.string.fill_crop);
+                bt_stretch.setText(null);
                 bt_black_bars.setText(null);
-                bt_crop.setText(null);
 
                 aspectRatioMode = 0;
             }
@@ -395,11 +395,11 @@ public class SettingsActivity extends AppCompatActivity {
                 aspectRatioMode = 1;
             }
         });
-        bt_crop.setOnClickListener(v -> {
-            if (bt_crop.isChecked()) {
-                bt_crop.setText(R.string.fill_crop);
-                bt_stretch.setText(null);
+        bt_stretch.setOnClickListener(v -> {
+            if (bt_stretch.isChecked()) {
+                bt_stretch.setText(R.string.fill_stretch);
                 bt_black_bars.setText(null);
+                bt_crop.setText(null);
 
                 aspectRatioMode = 2;
             }
@@ -411,9 +411,9 @@ public class SettingsActivity extends AppCompatActivity {
      * Set the state of segmented button
      */
     private void setSegmentedButtonState(boolean isProvider) {
-        MaterialButton bt_1 = isProvider ? bt_all : bt_stretch;
+        MaterialButton bt_1 = isProvider ? bt_all : bt_crop;
         MaterialButton bt_2 = isProvider ? bt_spec : bt_black_bars;
-        MaterialButton bt_3 = isProvider ? bt_none : bt_crop;
+        MaterialButton bt_3 = isProvider ? bt_none : bt_stretch;
 
         int buttonState = isProvider ? segmentedButtonProvidersState : aspectRatioMode;
 

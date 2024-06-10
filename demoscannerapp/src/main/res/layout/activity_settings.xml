@@ -368,12 +368,12 @@
                 app:layout_constraintTop_toBottomOf="@+id/textViewAspectRatioMode">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_fill_stretch"
+                    android:id="@+id/button_fill_crop"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceCaption"
                     app:iconGravity="textStart"
-                    app:icon="@drawable/stretch"
+                    app:icon="@drawable/crop"
                     style="@style/Widget.Material3.Button.OutlinedButton"/>
 
                 <com.google.android.material.button.MaterialButton
@@ -386,12 +386,12 @@
                     style="@style/Widget.Material3.Button.OutlinedButton"/>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_fill_crop"
+                    android:id="@+id/button_fill_stretch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceCaption"
                     app:iconGravity="textStart"
-                    app:icon="@drawable/crop"
+                    app:icon="@drawable/stretch"
                     style="@style/Widget.Material3.Button.OutlinedButton"/>
 
             </com.google.android.material.button.MaterialButtonToggleGroup>

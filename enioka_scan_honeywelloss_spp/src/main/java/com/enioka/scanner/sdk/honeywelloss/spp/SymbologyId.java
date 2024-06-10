@@ -128,7 +128,7 @@ public final class SymbologyId {
             return BarcodeType.CODE128;
         if (symbologyString.equals("CODE39"))
             return BarcodeType.CODE39;
-        if (symbologyString.equals("D25"))
+        if (symbologyString.equals("D25") || symbologyString.equals("S25"))
             return BarcodeType.DIS25;
         if (symbologyString.equals("I25"))
             return BarcodeType.INT25;
@@ -138,6 +138,52 @@ public final class SymbologyId {
             return BarcodeType.QRCODE;
         if (symbologyString.equals("AZTEC_CODE"))
             return BarcodeType.AZTEC;
+        if (symbologyString.equals("KOREA_POST"))
+            return BarcodeType.KOREA_POST;
+        if (symbologyString.equals("AUS_POST"))
+            return BarcodeType.AUS_POST;
+        if (symbologyString.equals("BRITISH_POST"))
+            return BarcodeType.BRITISH_POST;
+        if (symbologyString.equals("CANADIAN_POST"))
+            return BarcodeType.CANADIAN_POST;
+        if (symbologyString.equals("EAN8"))
+            return BarcodeType.EAN8;
+        if (symbologyString.equals("UPCE"))
+            return BarcodeType.UPCE;
+        if (symbologyString.equals("HAN_XIN_CODE"))
+            return BarcodeType.HAN_XIN;
+        if (symbologyString.equals("GS1_128"))
+            return BarcodeType.GS1_128;
+        if (symbologyString.equals("JAPAN_POST"))
+            return BarcodeType.JAPAN_POST;
+        if (symbologyString.equals("KIX_POST"))
+            return BarcodeType.DUTCH_POST;
+        if (symbologyString.equals("CHINA_POST"))
+            return BarcodeType.CHINA_POST;
+        if (symbologyString.equals("GRID_MATRIX"))
+            return BarcodeType.GRID_MATRIX;
+        if (symbologyString.equals("CODABAR"))
+            return BarcodeType.CODABAR;
+        if (symbologyString.equals("UPCA"))
+            return BarcodeType.UPCA;
+        if (symbologyString.equals("MSI"))
+            return BarcodeType.MSI;
+        if (symbologyString.equals("CODE11"))
+            return BarcodeType.CODE11;
+        if (symbologyString.equals("CODE93"))
+            return BarcodeType.CODE93;
+        if (symbologyString.equals("PDF417"))
+            return BarcodeType.PDF417;
+        if (symbologyString.equals("DATAMATRIX"))
+            return BarcodeType.DATAMATRIX;
+        if (symbologyString.equals("MAXICODE"))
+            return BarcodeType.MAXICODE;
+        if (symbologyString.equals("GS1_DATABAR"))
+            return BarcodeType.GS1_DATABAR;
+        if (symbologyString.equals("GS1_DATABAR_LIMITED"))
+            return BarcodeType.GS1_DATABAR_LIMITED;
+        if (symbologyString.equals("GS1_DATABAR_EXPANDED"))
+            return BarcodeType.GS1_DATABAR_EXPANDED;
         return BarcodeType.UNKNOWN;
     }
 }

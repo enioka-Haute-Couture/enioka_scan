@@ -1,6 +1,7 @@
 package com.enioka.scanner.sdk.honeywelloss.spp.parsers;
 
 import com.enioka.scanner.data.BarcodeType;
+import com.enioka.scanner.sdk.honeywelloss.spp.SymbologyId;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,11 +10,9 @@ public class HoneywellOssDataTranslator {
     private final static Map<Byte, BarcodeType> sdk2Api = new HashMap<>();
 
     static {
-        sdk2Api.put((byte) 0x6a, BarcodeType.CODE128);
-        sdk2Api.put((byte) 0x62, BarcodeType.CODE39);
-        sdk2Api.put((byte) 0x66, BarcodeType.DIS25);
-        sdk2Api.put((byte) 0x65, BarcodeType.INT25);
-        sdk2Api.put((byte) 0x64, BarcodeType.EAN13);
+        for (Integer key: SymbologyId.honeywellIdMap.keySet()) {
+            sdk2Api.put(key.byteValue(), SymbologyId.toBarcodeType(SymbologyId.honeywellIdMap.get(key)));
+        }
     }
 
     public static BarcodeType sdk2Api(Byte symbology) {

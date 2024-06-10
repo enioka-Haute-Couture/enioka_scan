@@ -29,10 +29,23 @@ class ZXingFrameAnalyser extends FrameAnalyser {
     static {
         barcodeTypeZXing2Lib = new HashMap<>();
         barcodeTypeZXing2Lib.put(BarcodeFormat.CODE_39, BarcodeType.CODE39);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.CODE_93, BarcodeType.CODE93);
         barcodeTypeZXing2Lib.put(BarcodeFormat.CODE_128, BarcodeType.CODE128);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.CODABAR, BarcodeType.CODABAR);
         barcodeTypeZXing2Lib.put(BarcodeFormat.ITF, BarcodeType.INT25);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.UPC_A, BarcodeType.UPCA);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.UPC_E, BarcodeType.UPCE);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.EAN_8, BarcodeType.EAN8);
         barcodeTypeZXing2Lib.put(BarcodeFormat.EAN_13, BarcodeType.EAN13);
+        // To be tested
+        barcodeTypeZXing2Lib.put(BarcodeFormat.UPC_EAN_EXTENSION, BarcodeType.EAN13);
         barcodeTypeZXing2Lib.put(BarcodeFormat.QR_CODE, BarcodeType.QRCODE);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.DATA_MATRIX, BarcodeType.DATAMATRIX);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.AZTEC, BarcodeType.AZTEC);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.PDF_417, BarcodeType.PDF417);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.MAXICODE, BarcodeType.MAXICODE);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.RSS_14, BarcodeType.GS1_DATABAR);
+        barcodeTypeZXing2Lib.put(BarcodeFormat.RSS_EXPANDED, BarcodeType.GS1_DATABAR_EXPANDED);
 
         barcodeTypeLib1ZXing = new HashMap<>();
         for (Map.Entry<BarcodeFormat, BarcodeType> entry : barcodeTypeZXing2Lib.entrySet()) {

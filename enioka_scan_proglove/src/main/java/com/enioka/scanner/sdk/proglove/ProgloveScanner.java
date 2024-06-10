@@ -45,11 +45,43 @@ public class ProgloveScanner extends IntentScanner<String> implements Scanner.Wi
         broadcastIntentFilters.add("com.proglove.api.BARCODE");
         broadcastIntentFilters.add("com.proglove.api.SCANNER_STATE");
 
+        // Full list https://developers.proglove.com/insight-mobile/android/latest/Symbologies.html
         sdk2Api.put("CODE 128", BarcodeType.CODE128);
         sdk2Api.put("CODE 39", BarcodeType.CODE39);
+        sdk2Api.put("CODABAR", BarcodeType.CODABAR);
         sdk2Api.put("D25", BarcodeType.DIS25);
         sdk2Api.put("ITF", BarcodeType.INT25);
+        sdk2Api.put("CODE 93", BarcodeType.CODE93);
+        sdk2Api.put("UPCA", BarcodeType.UPCA);
+        sdk2Api.put("UPCE 3", BarcodeType.UPCE);
+        sdk2Api.put("EAN-8", BarcodeType.EAN8);
         sdk2Api.put("EAN-13", BarcodeType.EAN13);
+        sdk2Api.put("CODE 11", BarcodeType.CODE11);
+        sdk2Api.put("MSI", BarcodeType.MSI);
+        sdk2Api.put("GS1-128", BarcodeType.GS1_128);
+        // Need to be tested
+        sdk2Api.put("UPCE1", BarcodeType.UPCE);
+        sdk2Api.put("PDF-417", BarcodeType.PDF417);
+        sdk2Api.put("CODE 39 FULL ASCII", BarcodeType.CODE39);
+        // Need to be  tested
+        sdk2Api.put("NW7", BarcodeType.CODABAR);
+        // Need to be  tested
+        sdk2Api.put("ISBT-128", BarcodeType.CODE128);
+        sdk2Api.put("DATA MATRIX", BarcodeType.DATAMATRIX);
+        sdk2Api.put("QR CODE", BarcodeType.QRCODE);
+        // Need to be  tested
+        sdk2Api.put("ISBT-128 CONCAT.", BarcodeType.CODE128);
+        sdk2Api.put("POSTAL (JAPAN)", BarcodeType.JAPAN_POST);
+        sdk2Api.put("POSTAL (AUSTRALIA)", BarcodeType.AUS_POST);
+        sdk2Api.put("POSTAL (DUTCH)", BarcodeType.DUTCH_POST);
+        sdk2Api.put("MAXICODE", BarcodeType.MAXICODE);
+        sdk2Api.put("POSTBAR (CA)", BarcodeType.CANADIAN_POST);
+        sdk2Api.put("POSTAL (UK)", BarcodeType.BRITISH_POST);
+        sdk2Api.put("AZTEC CODE", BarcodeType.AZTEC);
+        sdk2Api.put("AZTEC RUNE CODE", BarcodeType.AZTEC_RUNE);
+        sdk2Api.put("GS1 DATABAR-14", BarcodeType.GS1_DATABAR);
+        sdk2Api.put("GS1 DATABAR LIMITED", BarcodeType.GS1_DATABAR_LIMITED);
+        sdk2Api.put("GS1 DATABAR EXPANDED", BarcodeType.GS1_DATABAR_EXPANDED);
     }
 
     @Override

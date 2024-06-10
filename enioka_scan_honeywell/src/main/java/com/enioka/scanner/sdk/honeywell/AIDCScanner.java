@@ -2,7 +2,7 @@ package com.enioka.scanner.sdk.honeywell;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
@@ -52,15 +52,61 @@ public class AIDCScanner implements Scanner, BarcodeReader.BarcodeListener {
         aidc2Api.put("d", BarcodeType.EAN13);
         aidc2Api.put("s", BarcodeType.QRCODE);
         aidc2Api.put("z", BarcodeType.AZTEC);
+        aidc2Api.put("A", BarcodeType.AUS_POST);
+        aidc2Api.put("B", BarcodeType.BRITISH_POST);
+        aidc2Api.put("C", BarcodeType.CANADIAN_POST);
+        aidc2Api.put("D", BarcodeType.EAN8);
+        aidc2Api.put("E", BarcodeType.UPCE);
+        aidc2Api.put("H", BarcodeType.HAN_XIN);
+        aidc2Api.put("J", BarcodeType.JAPAN_POST);
+        aidc2Api.put("K", BarcodeType.DUTCH_POST);
+        aidc2Api.put("Q", BarcodeType.CHINA_POST);
+        aidc2Api.put("a", BarcodeType.CODABAR);
+        aidc2Api.put("c", BarcodeType.UPCA);
+        aidc2Api.put("g", BarcodeType.MSI);
+        aidc2Api.put("h", BarcodeType.CODE11);
+        aidc2Api.put("i", BarcodeType.CODE93);
+        aidc2Api.put("r", BarcodeType.PDF417);
+        aidc2Api.put("w", BarcodeType.DATAMATRIX);
+        aidc2Api.put("x", BarcodeType.MAXICODE);
+        aidc2Api.put("y", BarcodeType.GS1_DATABAR);
+        aidc2Api.put("{", BarcodeType.GS1_DATABAR_LIMITED);
+        aidc2Api.put("|", BarcodeType.GS1_128);
+        aidc2Api.put("}", BarcodeType.GS1_DATABAR_EXPANDED);
+        aidc2Api.put("?", BarcodeType.KOREA_POST);
 
         api2aidc.put(BarcodeType.CODE128, BarcodeReader.PROPERTY_CODE_128_ENABLED);
         api2aidc.put(BarcodeType.INT25, BarcodeReader.PROPERTY_INTERLEAVED_25_ENABLED);
         api2aidc.put(BarcodeType.DIS25, BarcodeReader.PROPERTY_STANDARD_25_ENABLED);
         api2aidc.put(BarcodeType.CODE39, BarcodeReader.PROPERTY_CODE_39_ENABLED);
         api2aidc.put(BarcodeType.EAN13, BarcodeReader.PROPERTY_EAN_13_ENABLED);
-//        api2aidc.put(BarcodeType.QRCODE, BarcodeReader.?);
-//        api2aidc.put(BarcodeType.AZTEC, BarcodeReader.?);
-
+        api2aidc.put(BarcodeType.QRCODE, BarcodeReader.PROPERTY_QR_CODE_ENABLED);
+        api2aidc.put(BarcodeType.AZTEC, BarcodeReader.PROPERTY_AZTEC_ENABLED);
+        api2aidc.put(BarcodeType.CHINA_POST, BarcodeReader.PROPERTY_CHINA_POST_ENABLED);
+        api2aidc.put(BarcodeType.CODABAR, BarcodeReader.PROPERTY_CODABAR_ENABLED);
+        api2aidc.put(BarcodeType.CODE11, BarcodeReader.PROPERTY_CODE_11_ENABLED);
+        api2aidc.put(BarcodeType.CODE93, BarcodeReader.PROPERTY_CODE_93_ENABLED);
+        api2aidc.put(BarcodeType.DATAMATRIX, BarcodeReader.PROPERTY_DATAMATRIX_ENABLED);
+        api2aidc.put(BarcodeType.EAN8, BarcodeReader.PROPERTY_EAN_8_ENABLED);
+        api2aidc.put(BarcodeType.MAXICODE, BarcodeReader.PROPERTY_MAXICODE_ENABLED);
+        api2aidc.put(BarcodeType.PDF417, BarcodeReader.PROPERTY_PDF_417_ENABLED);
+        api2aidc.put(BarcodeType.UPCE, BarcodeReader.PROPERTY_UPC_E_ENABLED);
+        api2aidc.put(BarcodeType.KOREA_POST, BarcodeReader.PROPERTY_KOREAN_POST_ENABLED);
+        // To be tested
+        api2aidc.put(BarcodeType.BRITISH_POST, BarcodeReader.POSTAL_2D_MODE_BPO);
+        api2aidc.put(BarcodeType.GS1_128, BarcodeReader.PROPERTY_GS1_128_ENABLED);
+        api2aidc.put(BarcodeType.MSI, BarcodeReader.PROPERTY_MSI_ENABLED);
+        api2aidc.put(BarcodeType.UPCA, BarcodeReader.PROPERTY_UPC_A_ENABLE);
+        // To be tested
+        api2aidc.put(BarcodeType.GS1_DATABAR, BarcodeReader.PROPERTY_RSS_ENABLED);
+        api2aidc.put(BarcodeType.GS1_DATABAR_LIMITED, BarcodeReader.PROPERTY_RSS_LIMITED_ENABLED);
+        api2aidc.put(BarcodeType.GS1_DATABAR_EXPANDED, BarcodeReader.PROPERTY_RSS_EXPANDED_ENABLED);
+        api2aidc.put(BarcodeType.AUS_POST, BarcodeReader.POSTAL_2D_MODE_AUSTRALIA);
+        api2aidc.put(BarcodeType.DUTCH_POST, BarcodeReader.POSTAL_2D_MODE_DUTCH);
+        api2aidc.put(BarcodeType.CANADIAN_POST, BarcodeReader.POSTAL_2D_MODE_CANADA);
+        api2aidc.put(BarcodeType.JAPAN_POST, BarcodeReader.POSTAL_2D_MODE_JAPAN);
+        api2aidc.put(BarcodeType.CODE39_FULL_ASCII, BarcodeReader.PROPERTY_CODE_39_FULL_ASCII_ENABLED);
+        api2aidc.put(BarcodeType.HAN_XIN, BarcodeReader.PROPERTY_HAX_XIN_ENABLED);
     }
 
     AIDCScanner(AidcManager manager) {

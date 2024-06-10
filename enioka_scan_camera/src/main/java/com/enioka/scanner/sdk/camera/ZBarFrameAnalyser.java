@@ -27,9 +27,21 @@ class ZBarFrameAnalyser extends FrameAnalyser {
     static {
         barcodeTypeZBar2Lib = new HashMap<>();
         barcodeTypeZBar2Lib.put(Symbol.CODE39, BarcodeType.CODE39);
+        barcodeTypeZBar2Lib.put(Symbol.CODE93, BarcodeType.CODE93);
         barcodeTypeZBar2Lib.put(Symbol.CODE128, BarcodeType.CODE128);
+        barcodeTypeZBar2Lib.put(Symbol.DATABAR_EXP, BarcodeType.GS1_DATABAR_EXPANDED);
+        barcodeTypeZBar2Lib.put(Symbol.DATABAR, BarcodeType.GS1_DATABAR);
         barcodeTypeZBar2Lib.put(Symbol.I25, BarcodeType.INT25);
+        barcodeTypeZBar2Lib.put(Symbol.EAN8, BarcodeType.EAN8);
         barcodeTypeZBar2Lib.put(Symbol.EAN13, BarcodeType.EAN13);
+        barcodeTypeZBar2Lib.put(Symbol.UPCA, BarcodeType.UPCA);
+        barcodeTypeZBar2Lib.put(Symbol.UPCE, BarcodeType.UPCE);
+        barcodeTypeZBar2Lib.put(Symbol.QRCODE, BarcodeType.QRCODE);
+        barcodeTypeZBar2Lib.put(Symbol.PDF417, BarcodeType.PDF417);
+        // To be confirmed
+        barcodeTypeZBar2Lib.put(Symbol.ISBN13, BarcodeType.EAN13);
+        barcodeTypeZBar2Lib.put(Symbol.ISBN10, BarcodeType.ISBN10);
+        barcodeTypeZBar2Lib.put(Symbol.CODABAR, BarcodeType.CODABAR);
 
         barcodeTypeLib1ZBar = new HashMap<>();
         for (Map.Entry<Integer, BarcodeType> entry : barcodeTypeZBar2Lib.entrySet()) {

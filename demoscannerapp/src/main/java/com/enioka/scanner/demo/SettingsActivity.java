@@ -146,7 +146,13 @@ public class SettingsActivity extends AppCompatActivity {
 
         // Set the state of the segmented button
         segmentedButtonProvidersState = preferences.getInt(PREFS_KEY, 0);
-        aspectRatioMode = preferences.getInt(ENABLE_KEEP_ASPECT_RATIO_KEY, 0);
+
+        // On previous version, the key was a boolean
+        try {
+            aspectRatioMode = preferences.getInt(ENABLE_KEEP_ASPECT_RATIO_KEY, 0);
+        } catch (ClassCastException e) {
+            aspectRatioMode = 0;
+        }
 
         final Set<BarcodeType> symbologySelection = new HashSet<>();
         for(String symbology: preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName())) {

@@ -24,7 +24,8 @@
     <string name="excluded_providers">Providers exclus</string>
     <string name="symbology_selection">Sélection de la symbologie</string>
     <string name="empty_provider_list_caption">Aucun provider disponible</string>
-    <string name="symbology_selection_caption">vide = EAN,128</string>
+    <string name="symbology_selection_caption">vide = tous</string>
+
     <string name="save">Enregistrer</string>
 
     <string name="AthesiHHTProvider">Athesi [SPA45…]</string>
@@ -49,6 +50,9 @@
     <string name="toogle_provider_button_all">Tous</string>
     <string name="toggle_provider_button_specific">Choisir</string>
     <string name="toggle_provider_button_none">Aucun</string>
+
+    <string name="expand_provider">étendre ou réduire la liste des providers</string>
+    <string name="expand_symbology">étendre ou réduire la liste des symboles</string>
 
     <string name="barcode">code-barre</string>
     <string name="fab_settings">parametres</string>

@@ -388,16 +388,28 @@
 
             <TextView
                 android:id="@+id/textViewAllowedProviders"
-                android:layout_width="fill_parent"
+                android:layout_width="240dp"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 android:text="@string/allowed_providers"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/dividerSettingsAllowedProvider" />
+
+            <ImageButton
+                android:id="@+id/button_expand_provider_selection"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:layout_marginEnd="@dimen/layout_margin_end"
+                app:srcCompat="@drawable/arrow_down_to_up_provider"
+                app:tint="?attr/colorPrimary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/textViewAllowedProviders"
+                android:contentDescription="@string/expand_provider" />
 
 
             <com.google.android.material.button.MaterialButtonToggleGroup
@@ -405,6 +417,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:visibility="gone"
                 app:singleSelection="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -463,19 +476,42 @@
             <!-- Symbology selection-->
             <TextView
                 android:id="@+id/textSymbologySelection"
-                android:layout_width="fill_parent"
+                android:layout_width="240dp"
                 android:layout_height="24dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:text="@string/symbology_selection"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/dividerSettingsSymbology" />
 
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggleButtonSymbology"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:visibility="gone"
+                app:singleSelection="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textSymbologySelectionCaption">
 
-            <!-- CODE 128 -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_all_symbology"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/toogle_provider_button_all"
+                    style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_specific_symbology"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/toggle_provider_button_specific"
+                    style="@style/Widget.Material3.Button.OutlinedButton"/>
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
             <TextView
                 android:id="@+id/textSymbologySelectionCaption"
                 android:layout_width="fill_parent"
@@ -488,96 +524,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textSymbologySelection" />
 
-            <!-- CODE 128 -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkSelectCode128"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeCode128"
+            <ImageButton
+                android:id="@+id/button_expand_symbology_selection"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:layout_marginEnd="@dimen/layout_margin_end"
+                app:srcCompat="@drawable/arrow_down_to_up_symbology"
+                app:tint="?attr/colorPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textSymbologySelectionCaption" />
-
-            <!-- CODE 39 -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkSelectCode39"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeCode39"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkSelectCode128" />
-
-            <!-- CODE DIS25 -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkSelectDis25"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeDis25"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkSelectCode39" />
-
-            <!-- CODE INT 25 -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkSelectInt25"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeInt25"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkSelectDis25" />
-
-            <!-- CODE EAN13 -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkSelectEan13"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeEan13"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkSelectInt25" />
-
-            <!-- CODE QrCode -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkSelectQrCode"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeQrCode"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkSelectEan13" />
-
-            <!-- CODE AZTEC -->
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/checkSelectAztec"
-                android:layout_width="fill_parent"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/barcodeAztec"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkSelectQrCode" />
+                app:layout_constraintBottom_toTopOf="@+id/textSymbologySelectionCaption"
+                android:contentDescription="@string/expand_symbology" />
 
             <View
                 android:id="@+id/marginBottom"
@@ -585,7 +543,7 @@
                 android:layout_height="40dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/checkSelectAztec" />
+                app:layout_constraintTop_toBottomOf="@+id/textSymbologySelectionCaption" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 

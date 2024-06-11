@@ -6,17 +6,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
 
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 
 import com.enioka.scanner.api.ScannerSearchOptions;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.service.ScannerService;
 import com.enioka.scanner.service.ScannerServiceApi;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -37,6 +38,10 @@ public class SettingsActivity extends AppCompatActivity {
      * Segmented button preferences keys
      */
     protected static final String PREFS_KEY = "segmentedButton";
+    /**
+     * Symbology segmented button preferences keys
+     */
+    protected static final String SYMBOLOGY_STATE_KEY = "segmentedSymbologyButton";
 
     /**
      * Enable logging preferences key
@@ -62,11 +67,6 @@ public class SettingsActivity extends AppCompatActivity {
     protected MaterialButton buttonSave;
 
     /**
-     * topAppBar
-     */
-    protected MaterialToolbar topAppBar;
-
-    /**
      * Select all segmented button
      */
     protected MaterialButton bt_all;
@@ -86,6 +86,35 @@ public class SettingsActivity extends AppCompatActivity {
      */
     protected int segmentedButtonState = 0;
 
+    /**
+     * SegmentedButtons state
+     */
+    protected int segmentedSymbologyState = 0;
+    /**
+     * Select all segmented button symbology
+     */
+    protected MaterialButton bt_all_symbology;
+    /**
+     * Select specific segmented button symbology
+     */
+    protected MaterialButton bt_spec_symbology;
+
+    /**
+     * Symbology selection expanded state
+     */
+    private boolean isSymbologyExpanded = false;
+    /**
+     * Provider selection expanded state
+     */
+    private boolean isProviderExpanded = false;
+    /**
+     * Animated vector drawables for the expand buttons
+     */
+    private AnimatedVectorDrawableCompat animProvider = null;
+    private AnimatedVectorDrawableCompat animProviderReverse = null;
+    private AnimatedVectorDrawableCompat animSymbology = null;
+    private AnimatedVectorDrawableCompat animSymbologyReverse = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,8 +129,15 @@ public class SettingsActivity extends AppCompatActivity {
         bt_spec = findViewById(R.id.button_specific);
         bt_none = findViewById(R.id.button_none);
 
+        // Segmented toggle buttons for symbology
+        bt_all_symbology = findViewById(R.id.button_all_symbology);
+        bt_spec_symbology = findViewById(R.id.button_specific_symbology);
+
         // Add listener to segmented toggle buttons
         bindToggleButton();
+
+        // Add listener to segmented toggle buttons for symbology
+        mapSymbologyButton();
 
         final SharedPreferences preferences = this.getSharedPreferences("ScannerSearchPreferences", MODE_PRIVATE);
 
@@ -119,20 +155,13 @@ public class SettingsActivity extends AppCompatActivity {
 
         final Set<String> allowedProviderKeys = preferences.getStringSet(ScannerServiceApi.EXTRA_SEARCH_ALLOWED_PROVIDERS_STRING_ARRAY, Collections.emptySet());
 
-        // Set the state of the segmented button
         segmentedButtonState = preferences.getInt(PREFS_KEY, 0);
+        segmentedSymbologyState = preferences.getInt(SYMBOLOGY_STATE_KEY, 0);
 
         final Set<BarcodeType> symbologySelection = new HashSet<>();
         for(String symbology: preferences.getStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, ScannerService.defaultSymbologyByName())) {
            symbologySelection.add(BarcodeType.valueOf(symbology));
         }
-        ((CheckBox) findViewById(R.id.checkSelectCode128)).setChecked(symbologySelection.contains(BarcodeType.CODE128));
-        ((CheckBox) findViewById(R.id.checkSelectCode39)).setChecked(symbologySelection.contains(BarcodeType.CODE39));
-        ((CheckBox) findViewById(R.id.checkSelectDis25)).setChecked(symbologySelection.contains(BarcodeType.DIS25));
-        ((CheckBox) findViewById(R.id.checkSelectInt25)).setChecked(symbologySelection.contains(BarcodeType.INT25));
-        ((CheckBox) findViewById(R.id.checkSelectEan13)).setChecked(symbologySelection.contains(BarcodeType.EAN13));
-        ((CheckBox) findViewById(R.id.checkSelectQrCode)).setChecked(symbologySelection.contains(BarcodeType.QRCODE));
-        ((CheckBox) findViewById(R.id.checkSelectAztec)).setChecked(symbologySelection.contains(BarcodeType.AZTEC));
 
         // Get detected SDKs providers from the intent
         ArrayList<String> availableProvidersIntent = getIntent().getStringArrayListExtra("providers");
@@ -143,13 +172,123 @@ public class SettingsActivity extends AppCompatActivity {
             availableProvidersKey = availableProvidersIntent.toArray(new String[0]);
         }
 
+        // Generate the provider / symbology list in the UI
+        genProviderList(availableProvidersKey, allowedProviderKeys);
+        genSymbologyList(symbologySelection);
+
+        animProviderReverse = AnimatedVectorDrawableCompat.create(this, R.drawable.arrow_up_to_down_provider);
+        animSymbologyReverse = AnimatedVectorDrawableCompat.create(this, R.drawable.arrow_up_to_down_symbology);
+        animProvider = AnimatedVectorDrawableCompat.create(this, R.drawable.arrow_down_to_up_provider);
+        animSymbology = AnimatedVectorDrawableCompat.create(this, R.drawable.arrow_down_to_up_symbology);
+
+        // Set the listener for the expand buttons
+        findViewById(R.id.button_expand_provider_selection).setOnClickListener(this::onClickExpandProvider);
+        findViewById(R.id.button_expand_symbology_selection).setOnClickListener(this::onClickExpandSymbology);
+
+        // Set the state of the segmented button (default is all)
+        setSegmentedButtonState();
+
+        // Set the state of the segmented button for symbology (default is all)
+        setSymbologySegmentedButtonState();
+    }
+
+    /**
+     * Expand or collapse the symbology selection
+     */
+    private void onClickExpandSymbology(View v) {
+        (findViewById(R.id.toggleButtonSymbology)).setVisibility(isSymbologyExpanded ? View.GONE : View.VISIBLE);
+
+        // Get parent ConstraintLayout
+        ConstraintLayout parentLayout = findViewById(R.id.constraintLayoutSettings);
+
+        for (BarcodeType symbology : BarcodeType.values()) {
+            if (symbology == BarcodeType.UNKNOWN) {
+                continue;
+            }
+            CheckBox checkBox = parentLayout.findViewWithTag("checkbox_" + symbology.name());
+
+            if (checkBox == null) {
+                Log.w("SettingsActivity", "CheckBox not found for symbology: " + symbology.name());
+                continue;
+            }
+
+            if (isSymbologyExpanded) {
+                checkBox.setVisibility(View.GONE);
+            } else {
+                checkBox.setVisibility(View.VISIBLE);
+            }
+        }
+        ((ImageButton) v).setImageDrawable(isSymbologyExpanded ? animSymbologyReverse : animSymbology);
+        ((AnimatedVectorDrawableCompat) ((ImageButton) v).getDrawable()).start();
+
+        isSymbologyExpanded = !isSymbologyExpanded;
+    }
+
+    /**
+     * Expand or collapse the provider selection
+     */
+    private void onClickExpandProvider(View v) {
+        (findViewById(R.id.toggleButtonProvider)).setVisibility(isProviderExpanded ? View.GONE : View.VISIBLE);
+
+        // Get parent ConstraintLayout
+        ConstraintLayout parentLayout = findViewById(R.id.constraintLayoutSettings);
+
+        for (String providerKey : availableProvidersKey) {
+            CheckBox checkBox = parentLayout.findViewWithTag("checkbox_" + providerKey);
+
+            if (checkBox == null) {
+                Log.w("SettingsActivity", "CheckBox not found for providerKey: " + providerKey);
+                continue;
+            }
+
+            if (isProviderExpanded) {
+                checkBox.setVisibility(View.GONE);
+            } else {
+                checkBox.setVisibility(View.VISIBLE);
+            }
+        }
+        ((ImageButton) v).setImageDrawable(isProviderExpanded ? animProviderReverse : animProvider);
+        ((AnimatedVectorDrawableCompat) ((ImageButton) v).getDrawable()).start();
+
+        isProviderExpanded = !isProviderExpanded;
+    }
+
+    /**
+     * Gen the symbology list
+     */
+    private void genSymbologyList(Set<BarcodeType> symbologySelection) {
+        int topViewId = R.id.toggleButtonSymbology;
+
+        for (BarcodeType symbology : BarcodeType.values()) {
+            if (symbology == BarcodeType.UNKNOWN) {
+                continue;
+            }
+
+            // Create the UI for the allowed symbologies
+            CheckBox checkBox = generateCheckBox(symbology.name(), topViewId, false);
+            checkBox.setTag("checkbox_" + symbology.name());
+
+            if (symbologySelection.contains(symbology)) {
+                checkBox.setChecked(true);
+            }
+
+            topViewId = checkBox.getId();
+        }
+
+        updateConstraintLayout(topViewId, R.id.marginBottom);
+    }
+
+    /**
+     * Gen the provider list
+     */
+    private void genProviderList(String[] availableProvidersKey, Set<String> allowedProviderKeys) {
         // Create the UI
         int topViewId = R.id.toggleButtonProvider;
 
         for (String providerKey : availableProvidersKey) {
 
             // Create the UI for the allowed providers
-            CheckBox checkBox = generateCheckBox(providerKey, topViewId);
+            CheckBox checkBox = generateCheckBox(providerKey, topViewId, true);
             checkBox.setTag("checkbox_" + providerKey);
 
             if (allowedProviderKeys.contains(providerKey)) {
@@ -165,14 +304,11 @@ public class SettingsActivity extends AppCompatActivity {
             findViewById(R.id.textEmptyProviderList).setVisibility(View.VISIBLE);
         } else {
             // Update the layout
-            updateConstraintLayout(topViewId);
+            updateConstraintLayout(topViewId, R.id.dividerSettingsSymbology);
         }
-
-        // Set the state of the segmented button (default is all)
-        setSegmentedButtonState();
     }
 
-    private void updateConstraintLayout(int topViewId) {
+    private void updateConstraintLayout(int topViewId, int bottomViewId) {
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone((ConstraintLayout) findViewById(R.id.constraintLayoutSettings));
 
@@ -180,21 +316,24 @@ public class SettingsActivity extends AppCompatActivity {
         int marginTop = getResources().getDimensionPixelSize(R.dimen.layout_margin_top_divider);
 
         // Set top bottom constraints
-        constraintSet.connect(R.id.dividerSettingsSymbology, ConstraintSet.TOP, topViewId, ConstraintSet.BOTTOM, marginTop);
+        constraintSet.connect(bottomViewId, ConstraintSet.TOP, topViewId, ConstraintSet.BOTTOM, marginTop);
 
         // Apply constraints
         constraintSet.applyTo(findViewById(R.id.constraintLayoutSettings));
     }
 
 
-    private CheckBox generateCheckBox(String providerKey, int topViewId) {
+    private CheckBox generateCheckBox(String label, int topViewId, boolean provider) {
         MaterialCheckBox checkBox = new MaterialCheckBox(this);
 
         // Gen checkBox id
         int checkBoxId = View.generateViewId();
 
         checkBox.setId(checkBoxId);
-        providerViews.add(checkBoxId);
+
+        if (provider) {
+            providerViews.add(checkBoxId);
+        }
 
         ViewGroup parentLayout = findViewById(R.id.constraintLayoutSettings);
 
@@ -223,16 +362,17 @@ public class SettingsActivity extends AppCompatActivity {
         constraintSet.applyTo((ConstraintLayout) parentLayout);
 
         checkBox.setChecked(false);
+        checkBox.setVisibility(View.GONE);
 
-        // Get the right text if the provider is known
-        int textResources = getResources().getIdentifier(providerKey, "string", this.getPackageName());
+        // Get the right text if the label is known
+        int textResources = getResources().getIdentifier(label, "string", this.getPackageName());
 
         if (textResources != 0) {
             // Set the custom text if available
             checkBox.setText(textResources);
         } else {
             // Otherwise set to the provider key
-            checkBox.setText(providerKey);
+            checkBox.setText(label);
         }
 
         return checkBox;
@@ -280,14 +420,17 @@ public class SettingsActivity extends AppCompatActivity {
 
         editor.putInt(PREFS_KEY, segmentedButtonState);
 
+        editor.putInt(SYMBOLOGY_STATE_KEY, segmentedSymbologyState);
+
         final Set<String> symbologySelection = new HashSet<>();
-        if (((CheckBox) findViewById(R.id.checkSelectCode128)).isChecked()) { symbologySelection.add(BarcodeType.CODE128.name()); }
-        if (((CheckBox) findViewById(R.id.checkSelectCode39)).isChecked()) { symbologySelection.add(BarcodeType.CODE39.name()); }
-        if (((CheckBox) findViewById(R.id.checkSelectDis25)).isChecked()) { symbologySelection.add(BarcodeType.DIS25.name()); }
-        if (((CheckBox) findViewById(R.id.checkSelectInt25)).isChecked()) { symbologySelection.add(BarcodeType.INT25.name()); }
-        if (((CheckBox) findViewById(R.id.checkSelectEan13)).isChecked()) { symbologySelection.add(BarcodeType.EAN13.name()); }
-        if (((CheckBox) findViewById(R.id.checkSelectQrCode)).isChecked()) { symbologySelection.add(BarcodeType.QRCODE.name()); }
-        if (((CheckBox) findViewById(R.id.checkSelectAztec)).isChecked()) { symbologySelection.add(BarcodeType.AZTEC.name()); }
+
+        for (BarcodeType symbology : BarcodeType.values()) {
+            CheckBox checkBox = parentLayout.findViewWithTag("checkbox_" + symbology.name());
+            if (checkBox != null && checkBox.isChecked()) {
+                symbologySelection.add(symbology.name());
+            }
+        }
+
         editor.putStringSet(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION, symbologySelection);
 
         editor.apply();
@@ -366,5 +509,58 @@ public class SettingsActivity extends AppCompatActivity {
                 bt_none.performClick();
                 break;
         }
+    }
+
+    /**
+     * Set the state of the symbology segmented button
+     */
+    private void setSymbologySegmentedButtonState() {
+        switch (segmentedSymbologyState) {
+            case 0:
+                bt_all_symbology.performClick();
+                bt_spec_symbology.setChecked(false);
+                break;
+            case 1:
+                bt_all_symbology.setChecked(false);
+                bt_spec_symbology.performClick();
+                break;
+        }
+    }
+
+    /**
+     * Map the symbology button
+     */
+    private void mapSymbologyButton() {
+        ConstraintLayout parentLayout = findViewById(R.id.constraintLayoutSettings);
+
+        bt_all_symbology.setOnClickListener(v -> {
+            if (bt_all_symbology.isChecked()) {
+                bt_all_symbology.setIcon(ContextCompat.getDrawable(this, R.drawable.check_all));
+                bt_spec_symbology.setIcon(null);
+
+                for (BarcodeType symbology : BarcodeType.values()) {
+                    CheckBox checkBox = parentLayout.findViewWithTag("checkbox_" + symbology.name());
+                    if (checkBox != null) {
+                        checkBox.setChecked(true);
+                        checkBox.setEnabled(false);
+                    }
+                }
+                segmentedSymbologyState = 0;
+            }
+        });
+        bt_spec_symbology.setOnClickListener(v -> {
+            if (bt_spec_symbology.isChecked()) {
+                bt_spec_symbology.setIcon(ContextCompat.getDrawable(this, R.drawable.search));
+                bt_all_symbology.setIcon(null);
+
+                for (BarcodeType symbology : BarcodeType.values()) {
+                    CheckBox checkBox = parentLayout.findViewWithTag("checkbox_" + symbology.name());
+                    if (checkBox != null) {
+                        checkBox.setEnabled(true);
+                    }
+                }
+                segmentedSymbologyState = 1;
+            }
+        });
     }
 }

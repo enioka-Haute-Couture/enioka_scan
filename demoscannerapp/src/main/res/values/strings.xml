@@ -23,7 +23,7 @@
     <string name="excluded_providers">Excluded Providers</string>
     <string name="symbology_selection">Allowed Symbology</string>
     <string name="empty_provider_list_caption">No provider available</string>
-    <string name="symbology_selection_caption">empty = EAN,128</string>
+    <string name="symbology_selection_caption">empty = all</string>
     <string name="save">Save</string>
 
     <string name="AthesiHHTProvider">Athesi [SPA45…]</string>
@@ -48,6 +48,9 @@
     <string name="toogle_provider_button_all">All</string>
     <string name="toggle_provider_button_specific">Select</string>
     <string name="toggle_provider_button_none">None</string>
+
+    <string name="expand_provider">expand or shrink provider list</string>
+    <string name="expand_symbology">expand or shrink symbology list</string>
 
     <string name="barcode">barcode</string>
     <string name="fab_settings">settings</string>

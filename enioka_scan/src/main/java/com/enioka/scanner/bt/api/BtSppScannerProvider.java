@@ -6,7 +6,7 @@ import com.enioka.scanner.api.Scanner;
  * A specialized form of {@link com.enioka.scanner.api.ScannerProvider} for Bluetooth Serial Port Profile scanners.<br>
  * Implementations are all thread-safe.
  */
-public interface BtSppScannerProvider {
+public interface BtSppScannerProvider extends BarcodePairing {
     /**
      * Tests whether a scanner is compatible with the provider. Must return under 50ms.
      *

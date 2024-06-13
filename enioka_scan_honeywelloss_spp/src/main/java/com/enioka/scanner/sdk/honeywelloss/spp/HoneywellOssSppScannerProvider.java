@@ -9,7 +9,7 @@ import com.enioka.scanner.sdk.honeywelloss.spp.commands.GetFirmware;
 import com.enioka.scanner.sdk.honeywelloss.spp.data.FirmwareVersion;
 import com.enioka.scanner.sdk.honeywelloss.spp.parsers.HoneywellOssParser;
 
-public class HoneywellOssSppScannerProvider implements BtSppScannerProvider {
+public class HoneywellOssSppScannerProvider extends HoneyWellOssSppPairing implements BtSppScannerProvider {
     public static final String PROVIDER_KEY = "BT_HoneywellOssSppProvider";
 
     private final ScannerDataParser inputHandler = new HoneywellOssParser();

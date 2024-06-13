@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
 /**
  * Provider for the BT Zebra SDK.
  */
-public class BtZebraProvider implements ScannerProvider {
+public class BtZebraProvider extends BtZebraPairing implements ScannerProvider {
     private static final String LOG_TAG = "BtZebraProvider";
     public static final String PROVIDER_KEY = "BtZebraProvider";
 

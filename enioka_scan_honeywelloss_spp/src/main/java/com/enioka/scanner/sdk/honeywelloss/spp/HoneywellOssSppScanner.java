@@ -2,6 +2,7 @@ package com.enioka.scanner.sdk.honeywelloss.spp;
 
 import android.content.Context;
 import android.os.Handler;
+
 import androidx.annotation.Nullable;
 
 import com.enioka.scanner.api.Scanner;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-class HoneywellOssSppScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.WithBeepSupport, Scanner.WithLedSupport {
+public class HoneywellOssSppScanner extends  HoneyWellOssSppPairing implements Scanner, Scanner.WithTriggerSupport, Scanner.WithBeepSupport, Scanner.WithLedSupport {
     private ScannerDataCallbackProxy dataCallback = null;
     private final BluetoothScanner btScanner;
 

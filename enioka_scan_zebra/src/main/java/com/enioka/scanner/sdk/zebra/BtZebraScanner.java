@@ -1,7 +1,12 @@
 package com.enioka.scanner.sdk.zebra;
 
+import static com.enioka.scanner.helpers.Common.findMacAddress;
+import static com.enioka.scanner.helpers.Common.buildBarcode;
+
 import android.content.Context;
 import androidx.annotation.Nullable;
+
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.Xml;
 
@@ -14,6 +19,7 @@ import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
+import com.google.zxing.WriterException;
 import com.zebra.scannercontrol.DCSSDKDefs;
 import com.zebra.scannercontrol.SDKHandler;
 
@@ -29,7 +35,7 @@ import java.util.Set;
 /**
  * Scanner provider for external BT Zebra (Symbol, Motorola...) devices.
  */
-class BtZebraScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithIlluminationSupport, Scanner.WithLedSupport {
+class BtZebraScanner extends BtZebraPairing implements Scanner, Scanner.WithBeepSupport, Scanner.WithIlluminationSupport, Scanner.WithLedSupport {
     private static final String LOG_TAG = "BtZebraProvider";
 
     private static final int BEEP_HIGH_SHORT_1 = 0;

@@ -1,6 +1,10 @@
 package com.enioka.scanner.api;
 
 import android.content.Context;
+import android.content.Intent;
+import android.nfc.NfcAdapter;
+import android.provider.Settings;
+
 import androidx.annotation.Nullable;
 
 import com.enioka.scanner.api.callbacks.ScannerCommandCallback;
@@ -11,6 +15,7 @@ import com.enioka.scanner.api.proxies.ScannerCommandCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerInitCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
+import com.enioka.scanner.bt.api.BarcodePairing;
 import com.enioka.scanner.data.BarcodeType;
 
 import java.util.Map;
@@ -19,7 +24,7 @@ import java.util.Set;
 /**
  * The interface to implement by a laser scanner provider.
  */
-public interface Scanner {
+public interface Scanner extends BarcodePairing {
     enum Mode {
         /**
          * The scanner stops after one successful read. It must be rearmed.
@@ -175,6 +180,18 @@ public interface Scanner {
     default @Nullable WithInventorySupport getInventorySupport() {
         if (this instanceof WithInventorySupport) {
             return (WithInventorySupport) this;
+        }
+        return null;
+    }
+
+
+    /**
+     * Casts the current scanner to the WithNfcPairingSupport interface if the feature is supported.
+     * @return `this` if the feature is supported, or `null` if the feature is not supported.
+     */
+    default @Nullable WithNfcPairingSupport getBarcodeNfcSupport() {
+        if (this instanceof WithNfcPairingSupport) {
+            return (WithNfcPairingSupport) this;
         }
         return null;
     }

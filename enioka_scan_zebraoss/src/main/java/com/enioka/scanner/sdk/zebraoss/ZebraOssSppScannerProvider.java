@@ -7,9 +7,13 @@ import com.enioka.scanner.bt.api.ScannerDataParser;
 import com.enioka.scanner.sdk.zebraoss.commands.CapabilitiesRequest;
 import com.enioka.scanner.sdk.zebraoss.data.CapabilitiesReply;
 
-public class ZebraOssSppScannerProvider implements BtSppScannerProvider {
+public class ZebraOssSppScannerProvider extends ZebraOssPairing implements BtSppScannerProvider {
     public static final String PROVIDER_KEY = "BT_ZebraOssSPPProvider";
     private final ScannerDataParser inputHandler = new SsiOverSppParser();
+
+    public ZebraOssSppScannerProvider() {
+        super(PROVIDER_KEY);
+    }
 
     @Override
     public void canManageDevice(final BluetoothScanner device, final ManagementCallback callback) {

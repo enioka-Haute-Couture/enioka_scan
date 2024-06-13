@@ -32,6 +32,13 @@ public final class Permissions {
     };
 
     /**
+     * Internet-related permissions
+     */
+    public static final String[] PERMISSIONS_INTERNET = new String[]{
+            Manifest.permission.INTERNET,
+    };
+
+    /**
      * Request a set of permissions if they are not already granted.
      * @param ctx The calling activity
      * @param permissions The list of permissions to request if any is missing

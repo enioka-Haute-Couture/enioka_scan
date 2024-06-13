@@ -2,6 +2,7 @@ package com.enioka.scanner.sdk.zebraoss;
 
 import android.content.Context;
 import androidx.annotation.Nullable;
+
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
@@ -40,7 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
-class ZebraOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.WithBeepSupport, Scanner.WithLedSupport, Scanner.WithInventorySupport {
+class ZebraOssScanner extends ZebraOssPairing implements Scanner, Scanner.WithTriggerSupport, Scanner.WithBeepSupport, Scanner.WithLedSupport, Scanner.WithInventorySupport {
     private static final String LOG_TAG = "SsiParser";
 
     private ScannerDataCallbackProxy dataCallback = null;
@@ -49,6 +50,7 @@ class ZebraOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.Wi
     private final String providerKey;
 
     ZebraOssScanner(final String providerKey, BluetoothScanner btScanner) {
+        super(providerKey);
         this.providerKey = providerKey;
         this.btScanner = btScanner;
     }
@@ -201,6 +203,8 @@ class ZebraOssScanner implements Scanner, Scanner.WithTriggerSupport, Scanner.Wi
     public Map<String, String> getStatus() {
         return new HashMap<>(statusCache);
     }
+
+
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

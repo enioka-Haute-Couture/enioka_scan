@@ -73,6 +73,11 @@ class ZXingFrameAnalyser extends FrameAnalyser {
             return;
         }
         symbologies.add(zXingSymbology);
+
+        if (this.scanner == null) {
+            initScanner();
+        }
+
         this.scanner.setHints(hints);
     }
 

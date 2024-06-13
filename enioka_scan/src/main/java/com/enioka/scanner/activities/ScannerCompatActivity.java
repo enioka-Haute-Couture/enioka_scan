@@ -2,6 +2,7 @@ package com.enioka.scanner.activities;
 
 import static com.enioka.scanner.helpers.Permissions.PERMISSIONS_BT;
 import static com.enioka.scanner.helpers.Permissions.PERMISSIONS_CAMERA;
+import static com.enioka.scanner.helpers.Permissions.PERMISSIONS_INTERNET;
 import static com.enioka.scanner.helpers.Permissions.hasPermissionSet;
 import static com.enioka.scanner.helpers.Permissions.requestPermissionSet;
 
@@ -16,6 +17,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -29,10 +31,10 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Html;
-import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +44,8 @@ import com.enioka.scanner.api.ScannerLedColor;
 import com.enioka.scanner.api.callbacks.ScannerStatusCallback;
 import com.enioka.scanner.api.proxies.ScannerDataCallbackProxy;
 import com.enioka.scanner.api.proxies.ScannerStatusCallbackProxy;
+import com.enioka.scanner.bt.api.BluetoothScanner;
+import com.enioka.scanner.bt.api.BtSppScannerProvider;
 import com.enioka.scanner.data.Barcode;
 import com.enioka.scanner.data.BarcodeType;
 import com.enioka.scanner.helpers.Common;
@@ -57,6 +61,8 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
@@ -84,6 +90,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected final static int PERMISSION_REQUEST_ID_BT = 1792;
     protected final static int PERMISSION_REQUEST_ID_WRITE = 124;
     protected final static int WRITE_REQUEST_CODE = 123;
+    protected final static int PERMISSION_REQUEST_ID_INTERNET = 125;
 
     /**
      * Don't start camera mode, even if no lasers are available
@@ -260,6 +267,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     @Override
     protected void onStart() {
         super.onStart();
+
+
         Log.d(LOG_TAG, "Scanner activity is starting " + this.hashCode());
 
         if (!enableScan) {
@@ -594,6 +603,12 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 }
                 break;
             }
+            case PERMISSION_REQUEST_ID_INTERNET: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    displayManualPairingBarcodeButton();
+                }
+                break;
+            }
         }
     }
 
@@ -648,8 +663,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             displayToggleLedButton();
             displaySwitchScanButton();
             displayBellButton();
+            displayManualPairingBarcodeButton();
         } else {
-
+            displayManualPairingBarcodeButton();
         }
     }
 
@@ -675,6 +691,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         StringBuilder res = new StringBuilder();
         for (Barcode b : data) {
+
             Log.d(LOG_TAG, "Received barcode from scanner: " + b.getBarcode() + " - " + b.getBarcodeType().code);
             res.append(buildBarcodeText(b.getBarcodeType().code, b.getBarcode()));
 
@@ -905,6 +922,76 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             }
         }
         return false;
+    }
+
+    protected boolean anyScannerHasBarcodeParing() {
+        if (scannerService == null) {
+            return true;
+        }
+        for (final Scanner s : scannerService.getConnectedScanners()) {
+            if (s.getBarcodePairingSupport() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void displayManualPairingBarcodeButton() {
+        final ImageButton pairingBarcodeButton = findViewById(R.id.pairing_barcode);
+
+        if (pairingBarcodeButton == null) {
+            return;
+        }
+
+        if (!anyScannerHasBarcodeParing()) {
+            pairingBarcodeButton.setVisibility(View.VISIBLE);
+        } else {
+            pairingBarcodeButton.setVisibility(View.VISIBLE);
+        }
+
+        if (!hasPermissionSet(this, PERMISSIONS_INTERNET)) {
+            requestPermissionSet(this, PERMISSIONS_INTERNET, PERMISSION_REQUEST_ID_INTERNET);
+        }
+
+        try {
+            // find if class exists
+            Class<?> zebraDw = Class.forName("com.enioka.scanner.sdk.zebraoss.ZebraOssSppScannerProvider");
+            Constructor<?> constructor = zebraDw.getDeclaredConstructor();
+            Object test = constructor.newInstance();
+
+            pairingBarcodeButton.setOnClickListener(v -> {
+
+                Bitmap result = Objects.requireNonNull(((BtSppScannerProvider) test).getBarcodePairingSupport()).getPairingBarcode();
+                ImageView imageView = new ImageView(this);
+                imageView.setImageBitmap(result);
+                ManualPairingBarcodeDialog.launchDialog(this, imageView);
+                // Open dialog to display the barcode
+            });
+
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
+                 NoSuchMethodException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+
+        for (final Scanner s : scannerService.getConnectedScanners()) {
+//            if (s.getBarcodePairingSupport() != null) {
+//                pairingBarcodeButton.setOnClickListener(v -> {
+//
+//                    Bitmap result = s.getBarcodePairingSupport().getPairingBarcode();
+//                    ImageView imageView = new ImageView(this);
+//                    imageView.setImageBitmap(result);
+//                    ManualPairingBarcodeDialog.launchDialog(this, imageView);
+//                    // Open dialog to display the barcode
+//                });
+//            }
+//              if (s.getBarcodeNfcSupport() != null) {
+//                  pairingBarcodeButton.setOnClickListener(v -> {
+//                      if (!s.getBarcodeNfcSupport().isNfcEnabled(this)) {
+//                          s.getBarcodeNfcSupport().askNfcActivation(this);
+//                      }
+//                  });
+//              }
+        }
     }
 
     /**

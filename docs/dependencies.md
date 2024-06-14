@@ -192,3 +192,10 @@ the camera may be corrupted, and the preview will not display correctly.
 The Honeywell EDA52 device may experience issues with the camera scanner, which may not be able to
 detect barcodes at all. This is probably due to some internal services not allowing the camera to
 be used correctly by the library. On the other hand, the integrated scanner works correctly.
+
+### `Athesia SPA43LTE`
+
+The Athesia SPA43LTE device may experience a crash with the camera, when trying to access it using
+the button on the demo app. The camera API used is the legacy Camera of `android.hardware`.
+When the camera is instantiated automatically (when it is the only provider available),
+this crash does not occur.

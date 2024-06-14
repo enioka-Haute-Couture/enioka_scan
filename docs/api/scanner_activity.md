@@ -80,33 +80,17 @@ available providers logs :::{cpp:var}R.id.scanner_bt_provider_logs:::.
 
 :::{cpp:var} int cameraToggleId = R.id.scanner_bt_camera
 
-The ID of the optional ImageButton on which to press to manually switch to camera mode.
+The ID of the optional MaterialButton on which to press to manually switch to camera mode.
 :::
 
 :::{cpp:var} int flashlightViewId = R.id.scanner_flashlight
 
-The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
+The ID of the optional MaterialButton on which to press to toggle the flashlight/illumination.
 :::
 
-:::{cpp:var} int keyboardOpenViewId = R.id.scanner_bt_keyboard
+:::{cpp:var} int providerLogOpenViewId = R.id.scanner_bt_provider_logs;
 
-The ID of the optional toggle button on which to display the manual input fragment.
-:::
-
-:::{cpp:var} ManualInputFragment manualInputFragment;
-
-An optional fragment allowing to input a value with the soft keyboard (for cases when scanners do 
-not work).
-:::
-
-:::{cpp:var} List<ManualInputItem> autocompletionItems = new ArrayList<>()
-
-Auto completion items for manual input (with manualInputFragment).
-:::
-
-:::{cpp:var} int threshold = 5
-
-How many characters should be entered before auto-completion starts.
+The ID of the optional MaterialButton on which to press to launch the manual provider logs dialog.
 :::
 
 :::{cpp:var} ScannerServiceApi scannerService;
@@ -138,6 +122,26 @@ Initialized by the [`initCamera()`](#scannercompatactivity-methods) method.
 The ID of the optional card view that displays the last scan.
 :::
 
+:::{cpp:var} boolean loggingEnabled = false;
+
+If true, the activity will log all scanner service events to the define log file.
+:::
+
+:::{cpp:var} boolean allowCameraFallback = false;
+
+If true, the activity will switch to camera mode if no scanner is found after the first search.
+:::
+
+:::{cpp:var} int previewRatioMode = -1;
+
+The preview aspect ratio mode of the camera. Can be one of the following values:
+- `0`: `fillAvailableSpace` (default): The preview will fill the available space, by squashing or
+  stretching the preview if needed.
+- `1`: `fitToPicture`: The preview will be scaled to fit the picture, with black bars on the sides
+  if needed. The aspect ratio of the preview will be kept.
+- `-1`: The preview aspect ratio mode is not set. The default value will be used.
+:::
+
 :::{cpp:var} int openLinkId = R.id.open_link;
 
 The ID of the of the optional button on which to press to open a link when a QRCode URL is scanned.
@@ -156,23 +160,6 @@ symbologies will be used.
 :returns: The [search options](scanner_service.md#the-scannersearchoptions-class) that will be used 
     when starting the service. These options may be overriden by intent extras when launching the
     activity.
-:::
-
-:::{method} setAutocompletion(List<String> autocompletion, int threshold) -> void
-
-**Inserts** the given autocompletion strings into the `autocompletionItems` and updates the 
-autocompletion threshold.
-
-:param List<String> autocompletion: The autocompletion items to add.
-:param int threshold: The new threshold.
-:::
-
-:::{method} setAutocompletionItems(List<ManualInputItem> items, int threshold) -> void
-
-**Replaces** `autocompletionItems` with the given list and updates the autocompletion threshold.
-
-:param List<String> autocompletion: The autocompletion items to use.
-:param int threshold: The new threshold.
 :::
 
 :::{method} initCamera() -> void

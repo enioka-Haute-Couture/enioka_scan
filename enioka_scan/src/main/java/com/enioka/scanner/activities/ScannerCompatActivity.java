@@ -29,7 +29,6 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Html;
-import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -60,7 +59,6 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -126,31 +124,19 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     @Deprecated
     protected Integer zbarViewId = null;
     /**
-     * The ID of the ImageButton on which to press to manually switch to camera mode.
+     * The ID of the MaterialButton on which to press to manually switch to camera mode.
      */
     protected int cameraToggleId = R.id.scanner_bt_camera;
 
     /**
-     * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
+     * The ID of the optional MaterialButton on which to press to toggle the flashlight/illumination.
      */
     protected int flashlightViewId = R.id.scanner_flashlight;
 
+    /**
+     * The ID of the optional MaterialButton on which to press to launch the manual provider log dialog.
+     */
     protected int providerLogOpenViewId = R.id.scanner_bt_provider_logs;
-
-    /**
-     * An optional fragment allowing to input a value with the soft keyboard (for cases when scanners do not work).
-     */
-    protected ManualInputFragment manualInputFragment;
-
-    /**
-     * Auto completion items for manual input (with manualInputFragment).
-     */
-    protected List<ManualInputItem> autocompletionItems = new ArrayList<>();
-
-    /**
-     * How many characters should be entered before auto-completion starts.
-     */
-    protected int threshold = 5;
 
     /**
      * Actual access to the scanners.
@@ -434,25 +420,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Configuration hooks
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @SuppressWarnings("unused")
-    public void setAutocompletion(List<String> autocompletion, int threshold) {
-        for (String item : autocompletion) {
-            this.autocompletionItems.add(new ManualInputItem(item, false));
-        }
-        this.threshold = threshold;
-    }
-
-    @SuppressWarnings("unused")
-    public void setAutocompletionItems(List<ManualInputItem> items, int threshold) {
-        this.autocompletionItems = items;
-        this.threshold = threshold;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // Camera
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -643,8 +610,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             displayToggleLedButton();
             displaySwitchScanButton();
             displayBellButton();
-        } else {
-
         }
     }
 
@@ -695,11 +660,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         MaterialSwitch scannerSwitch = (MaterialSwitch) findViewById(R.id.scanner_trigger_on);
         if (scannerSwitch != null) {
             scannerSwitch.setChecked(false);
-        }
-
-        if (manualInputFragment != null) {
-            manualInputFragment = null;
-            scannerService.resume();
         }
     }
 

@@ -151,10 +151,12 @@ If true, the activity will switch to camera mode if no scanner is found after th
 :::{cpp:var} int previewRatioMode = -1;
 
 The preview aspect ratio mode of the camera. Can be one of the following values:
-- `0`: `fillAvailableSpace` (default): The preview will fill the available space, by squashing or
-  stretching the preview if needed.
-- `1`: `fitToPicture`: The preview will be scaled to fit the picture, with black bars on the sides
-  if needed. The aspect ratio of the preview will be kept.
+- `0`: `fillWithCrop` (default): The preview will be scaled to fit the picture, cropping the
+  sides if needed. The aspect ratio of the preview will be kept.
+- `1`: `fillWithBlackBars`: The preview will be scaled to fit the picture, with black bars on the
+  sides if needed. The aspect ratio of the preview will be kept.
+- `2`: `fillWithStretch`: The preview will fill the available space, by squashing or stretching
+  the preview if needed. The aspect ratio of the preview can be altered.
 - `-1`: The preview aspect ratio mode is not set. The default value will be used.
 :::
 

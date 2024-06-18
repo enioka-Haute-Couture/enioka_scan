@@ -107,6 +107,13 @@ for (final Scanner s : scannerService.getConnectedScanners()) {
 }
 ```
 
+### The `WithBarcodePairingSupport` interface
+
+See the [BarcodePairing](barcode_pairing.md) documentation for more information.
+
+:::{method} Scanner.getBarcodePairingSupport() -> WithBarcodePairingSupport
+:::
+
 ### The `WithBeepSupport` interface
 
 :::{method} Scanner.getBeepSupport() -> WithBeepSupport

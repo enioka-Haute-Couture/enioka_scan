@@ -32,7 +32,7 @@ import koamtac.kdc.sdk.KDCErrorListener;
 import koamtac.kdc.sdk.KDCReader;
 import koamtac.kdc.sdk.KDCSymbology;
 
-class KoamtacScanner implements Scanner, Scanner.WithBeepSupport, Scanner.WithLedSupport, KDCBarcodeDataReceivedListener, KDCConnectionListener, KDCErrorListener {
+class KoamtacScanner extends KoamtacPairing implements Scanner, Scanner.WithBeepSupport, Scanner.WithLedSupport, KDCBarcodeDataReceivedListener, KDCConnectionListener, KDCErrorListener {
     private static final String LOG_TAG = "KoamtacScanner";
 
     private KDCReader scanner;

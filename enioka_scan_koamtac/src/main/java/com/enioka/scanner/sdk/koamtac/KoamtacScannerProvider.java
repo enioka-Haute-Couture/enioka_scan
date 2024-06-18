@@ -14,7 +14,7 @@ import java.util.List;
 
 import koamtac.kdc.sdk.KDCReader;
 
-public class KoamtacScannerProvider implements ScannerProvider {
+public class KoamtacScannerProvider extends KoamtacPairing implements ScannerProvider {
     private static final String LOG_TAG = "KoamtacScannerProvider";
     public static final String PROVIDER_KEY = "Koamtac";
 

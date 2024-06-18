@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-class GsSppScanner implements Scanner, Scanner.WithBeepSupport {
+class GsSppScanner extends GsSppPairing implements Scanner, Scanner.WithBeepSupport {
     private ScannerDataCallbackProxy dataCallback = null;
     private final BluetoothScanner btScanner;
 

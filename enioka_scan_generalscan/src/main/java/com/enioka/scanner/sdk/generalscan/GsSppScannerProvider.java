@@ -12,7 +12,7 @@ import com.enioka.scanner.sdk.generalscan.commands.GetDeviceId;
 import com.enioka.scanner.sdk.generalscan.commands.OpenRead;
 import com.enioka.scanner.sdk.generalscan.data.DeviceId;
 
-public class GsSppScannerProvider implements BtSppScannerProvider {
+public class GsSppScannerProvider extends GsSppPairing implements BtSppScannerProvider {
     public static final String PROVIDER_KEY = "BT_GeneralScanProvider";
 
     @Override

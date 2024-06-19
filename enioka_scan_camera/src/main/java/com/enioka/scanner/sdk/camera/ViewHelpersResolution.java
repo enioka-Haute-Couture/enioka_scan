@@ -48,6 +48,9 @@ class ViewHelpersResolution {
             forbiddenRezs = new HashSet<>(0);
         }
 
+        Point suitableResolution = new Point(0, 0);
+        int suitableResolutionWidth = -1;
+
         // First simply list resolutions (debug display & sorted res list creation)
         List<Point> allRatioPreviewResolutions = new ArrayList<>();
         for (Point resolution : bag.supportedPreviewResolutions) {
@@ -71,6 +74,13 @@ class ViewHelpersResolution {
 
             if (resolutionWidth < bag.minResolutionY) {
                 Log.d(TAG, "\t\tResolution is removed - it is lower than the minimum resolution configured in the view (" + bag.minResolutionY + ")");
+
+                // If we have no other choice, we will use it.
+                if (resolutionWidth > suitableResolutionWidth) {
+                    suitableResolution = resolution;
+                    suitableResolutionWidth = resolutionWidth;
+                }
+
                 continue;
             }
 
@@ -121,6 +131,11 @@ class ViewHelpersResolution {
                     previewResolution = resolution;
                 }
             }
+        }
+
+        if (previewResolution == null && suitableResolutionWidth != -1) {
+            Log.w(TAG, "No suitable preview resolution found. Using the highest resolution available.");
+            previewResolution = suitableResolution;
         }
 
         if (previewResolution == null) {

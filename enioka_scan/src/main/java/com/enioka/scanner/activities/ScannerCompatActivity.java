@@ -302,28 +302,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
         Log.i(LOG_TAG, "Resuming scanner activity - scanners will be (re)connected");
 
-        // Reset data fields
-        if (findViewById(R.id.scanner_text_last_scan) != null) {
-            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
+        // Reset scanner trigger switch
+        MaterialSwitch scannerSwitch = findViewById(R.id.scanner_trigger_on);
+        if (scannerSwitch != null) {
+            scannerSwitch.setChecked(false);
         }
-
-        if (findViewById(R.id.scanner_provider_status_card) != null) {
-            findViewById(R.id.scanner_provider_status_card).setVisibility(View.GONE);
-        }
-
-        if (findViewById(R.id.scanner_provider_text) != null) {
-            ((TextView) findViewById(R.id.scanner_provider_text)).setText("");
-        }
-
-        if (findViewById(R.id.scanner_provider_status_text) != null) {
-            ((TextView) findViewById(R.id.scanner_provider_status_text)).setText("");
-        }
-
-        // Hide the open link button
-        findViewById(openLinkId).setVisibility(View.GONE);
-
-        // Set scanner card last scan to not clickable
-        scannerStatusCard.setClickable(false);
 
         // Immediately set some buttons (which do no need to wait for scanners).
         displayCameraButton();
@@ -612,7 +595,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         TextView providerText = findViewById(R.id.scanner_provider_text);
         TextView providerStatusText = findViewById(R.id.scanner_provider_status_text);
 
-        if (scanner != null && providerText != null && providerStatusText != null && (newStatus == Status.CONNECTED || newStatus == Status.READY)) {
+        if (scanner != null && providerText != null && providerStatusText != null && (newStatus == Status.CONNECTED || newStatus == Status.READY || newStatus == Status.DISCONNECTED || newStatus == Status.FAILURE)) {
             if (goToCamera && newStatus == Status.READY) {
                 return;
             }
@@ -628,7 +611,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             providerStatusText.setText(newStatus.toString());
 
             // Update visibility of the scanner status card
-            findViewById(R.id.scanner_provider_status_card).setVisibility(View.VISIBLE);
+            MaterialCardView scannerStatusCard = findViewById(R.id.scanner_provider_status_card);
+            if (newStatus == Status.FAILURE || newStatus == Status.DISCONNECTED) {
+                scannerStatusCard.setCardBackgroundColor(getResources().getColor(R.color.cardBackgroundError));
+            } else {
+                scannerStatusCard.setCardBackgroundColor(getResources().getColor(R.color.cardBackgroundDone));
+            }
+            scannerStatusCard.setVisibility(View.VISIBLE);
         }
 
     }

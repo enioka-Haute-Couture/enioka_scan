@@ -593,6 +593,11 @@ class CameraBarcodeScanViewV2 extends CameraBarcodeScanViewBase<Image> {
         closeCamera();
     }
 
+    @Override
+    public void resetSurface() {
+        // Do nothing
+    }
+
 
     ///////////////////////////////////////////////////////////////////////////
     // CameraDevice.StateCallback

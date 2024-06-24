@@ -185,6 +185,10 @@ public class CameraBarcodeScanView extends FrameLayout {
         this.proxiedView.resumeCamera();
     }
 
+    public void resetSurface() {
+        this.proxiedView.resetSurface();
+    }
+
     /**
      * Reset the vertical position of the target. Also resets the associated preferences.
      */

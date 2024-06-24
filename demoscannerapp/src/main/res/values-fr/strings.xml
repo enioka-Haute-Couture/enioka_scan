@@ -19,7 +19,10 @@
     <string name="allow_intent_devices">Autoriser les scanners fonctionnant par Intent</string>
     <string name="enable_log">Activation de l\'historique des scans</string>
     <string name="allow_camera_fallback">Activation par défaut de l\'appareil photo si aucun scanneur n\'est trouvé</string>
-    <string name="enable_keep_aspect_ratio">Conserver le rapport hauteur/largeur de la caméra (remplir l\'espace disponible par défaut)</string>
+    <string name="choose_aspect_ratio_mode">Choisissez le mode de rapport hauteur/largeur de la caméra. Préservez les proportions en ajoutant des barres noires ou en recadrant la vue. Remplissez tout l\'écran en étirant l\'aperçu.</string>
+    <string name="fill_stretch">extensible</string>
+    <string name="fill_black_bars">barres-noires</string>
+    <string name="fill_crop">recadrage</string>
     <string name="allowed_providers">Providers autorisés</string>
     <string name="excluded_providers">Providers exclus</string>
     <string name="symbology_selection">Sélection de la symbologie</string>

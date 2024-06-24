@@ -23,10 +23,31 @@ Change the preview aspect ratio mode of the camera. This change will not take ef
 view refresh. You can force a refresh by pausing and resuming the camera.
 
 :param int mode: The mode to use for filling the camera preview. Can be one of the following values:
-    - `0`: `fillAvailableSpace` (default): The preview will fill the available space, by squashing
-        or stretching the preview if needed.
-    - `1`: `fitToPicture`: The preview will be scaled to fit the picture, with black bars on the
+    - `0`: `fillWithCrop` (default): The preview will be scaled to fit the picture, cropping the
         sides if needed. The aspect ratio of the preview will be kept.
+    - `1`: `fillWithBlackBars`: The preview will be scaled to fit the picture, with black bars on the
+        sides if needed. The aspect ratio of the preview will be kept.
+    - `2`: `fillWithStretch`: The preview will fill the available space, by squashing or stretching
+        the preview if needed. The aspect ratio of the preview can be altered.
+
+.. image:: ./pictures/crop.png
+:width: 400
+:alt: fillWithCrop
+
+Example of a preview with the `fillWithCrop` mode.
+
+.. image:: ./pictures/black_bars.png
+:width: 400
+:alt: fillWithBlackBars
+
+Example of a preview with the `fillWithBlackBars` mode.
+
+.. image:: ./pictures/stretch.png
+:width: 400
+:alt: fillWithStretch
+
+Example of a preview with the `fillWithStretch` mode.
+
 :::
 
 :::{method} setReaderMode(CameraReader readerMode) -> void
@@ -128,7 +149,7 @@ the attributes to your needs:
     app:maxDistortionRatio="0.3"
     app:minResolutionY="720"
     app:maxResolutionY="1080"
-    app:previewRatioMode="fillAvailableSpace"
+    app:previewRatioMode="fillWithCrop"
     app:readerMode="Auto"
     app:storePreferredResolution="false"
     app:targetColorActive="@color/colorRed"
@@ -162,6 +183,17 @@ decreased by adaptive resolution when trying to improve performance.
 :::{method} app:maxResolutionY
 
 The maximum vertical resolution of the camera preview, useful to limit performance costs.
+:::
+
+:::{method} app:previewRatioMode
+
+The mode to use for filling the camera preview. Can be one of the following values:
+    - `0`: `fillWithCrop` (default)
+        sides if needed. The aspect ratio of the preview will be kept.
+    - `1`: `fillWithBlackBars`
+        sides if needed. The aspect ratio of the preview will be kept.
+    - `2`: `fillWithStretch`
+        the preview if needed.o of the preview will be kept.
 :::
 
 :::{method} app:readerMode

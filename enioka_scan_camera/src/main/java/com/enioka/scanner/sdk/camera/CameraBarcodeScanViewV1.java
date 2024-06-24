@@ -37,6 +37,8 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     protected boolean scanningStarted = true;
 
     private int previewBufferSize;
+    private boolean isSurfaceCreated = false;
+    private SurfaceHolder cameraSurfaceHolder;
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -469,6 +471,8 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
         super.surfaceCreated(surfaceHolder);
+        cameraSurfaceHolder = surfaceHolder;
+        isSurfaceCreated = true;
 
         Log.d(TAG, "Preview surface created, camera will be initialized soon");
 
@@ -497,8 +501,20 @@ class CameraBarcodeScanViewV1 extends CameraBarcodeScanViewBase<byte[]> implemen
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.i(TAG, "surface destroyed");
+        isSurfaceCreated = false;
         cleanUp();
     }
+
+    @Override
+    public void resetSurface() {
+        if (isSurfaceCreated) {
+            // Camera is already initialized, just reset the preview
+            // When locking the screen on old Android device, the surface is not destroyed by
+            // the Android lifecycle. We have to reset the camera preview after the cleanup.
+            surfaceCreated(cameraSurfaceHolder);
+        }
+    }
+
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 

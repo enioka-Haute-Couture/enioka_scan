@@ -189,6 +189,8 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
 
     public abstract void orientationChanged();
 
+    public abstract void resetSurface();
+
     /**
      * Indicate if the torch mode is handled or not
      *

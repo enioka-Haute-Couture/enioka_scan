@@ -33,6 +33,9 @@ public class CameraBarcodeScanViewScanner implements Scanner, Scanner.WithBeepSu
         this.dataDb = mHandler;
         this.scanner = cameraBarcodeScanView;
 
+        // Reset camera in case the surface was not destroyed by Android lifecycle
+        scanner.resetSurface();
+
         scanner.setResultHandler(this);
         scanner.setTorch(false);
         for(BarcodeType symbology: symbologySelection) {

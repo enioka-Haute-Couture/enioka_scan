@@ -216,6 +216,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      */
     private String providerLogs = "";
 
+    private List<String> connectedProviders = new ArrayList<>();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Activity lifecycle callbacks
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -479,14 +481,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             initCameraScanner();
 
             // Reinit text
-            if (findViewById(R.id.scanner_provider_text) != null) {
-                TextView tv = findViewById(R.id.scanner_provider_text);
-                tv.setText("");
-            }
-            if (findViewById(R.id.scanner_provider_status_text) != null) {
-                TextView tv = findViewById(R.id.scanner_provider_status_text);
-                tv.setText("");
-            }
+            resetProviderStatusCard(true);
         } else {
             requestPermissionSet(this, PERMISSIONS_CAMERA, PERMISSION_REQUEST_ID_CAMERA);
         }
@@ -601,31 +596,25 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         TextView providerText = findViewById(R.id.scanner_provider_text);
         TextView providerStatusText = findViewById(R.id.scanner_provider_status_text);
 
-        if (scanner != null && providerText != null && providerStatusText != null && (newStatus == Status.CONNECTED || newStatus == Status.READY || newStatus == Status.DISCONNECTED || newStatus == Status.FAILURE)) {
-            if (goToCamera && newStatus == Status.READY) {
-                return;
+        if (scanner != null && providerText != null && providerStatusText != null && (newStatus == Status.CONNECTED || newStatus == Status.DISCONNECTED)) {
+            String provider = scanner.getProviderKey();
+
+            if (newStatus == Status.CONNECTED) {
+                // Save currently connected provider
+                if (!connectedProviders.contains(provider)) {
+                    connectedProviders.add(provider);
+                }
+            } else if (connectedProviders.contains(provider)) {
+                connectedProviders.remove(provider);
+
+                // No connected providers left
+                if (connectedProviders.isEmpty()) {
+                    resetProviderStatusCard(false);
+                    return;
+                }
             }
-
-            String connectedProvider = providerText.getText().toString();
-
-            // Update text list of connect providers
-            if (!connectedProvider.contains(scanner.getProviderKey())) {
-                providerText.setText(connectedProvider + (connectedProvider.isEmpty() ? "" : "\n") + scanner.getProviderKey());
-            }
-
-            // Set status
-            providerStatusText.setText(newStatus.toString());
-
-            // Update visibility of the scanner status card
-            MaterialCardView scannerStatusCard = findViewById(R.id.scanner_provider_status_card);
-            if (newStatus == Status.FAILURE || newStatus == Status.DISCONNECTED) {
-                scannerStatusCard.setCardBackgroundColor(getResources().getColor(R.color.cardBackgroundError));
-            } else {
-                scannerStatusCard.setCardBackgroundColor(getResources().getColor(R.color.cardBackgroundDone));
-            }
-            scannerStatusCard.setVisibility(View.VISIBLE);
+            updateProviderStatusCard();
         }
-
     }
 
     @Override
@@ -743,6 +732,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                     }
 
                     setViewContent();
+
+                    // Set some UI state
+                    updateProviderStatusCard();
+
                     onResume();
                 } else {
                     finish();
@@ -1087,5 +1080,51 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
 
         return symbologies;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // UI state
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void updateProviderStatusCard() {
+        TextView providerText = findViewById(R.id.scanner_provider_text);
+        TextView providerStatusText = findViewById(R.id.scanner_provider_status_text);
+
+        StringBuilder textConnectedProviders = new StringBuilder();
+
+        if (!goToCamera) {
+            for (String provider : connectedProviders) {
+                textConnectedProviders.append((textConnectedProviders.length() == 0) ? "" : "\n").append(provider);
+            }
+        } else {
+            textConnectedProviders.append(connectedProviders.get(connectedProviders.size() - 1));
+        }
+
+        // Update connected providers text
+        providerText.setText(textConnectedProviders.toString());
+
+        // Set status
+        providerStatusText.setText(Status.CONNECTED.toString());
+
+        // Update visibility of the scanner status card
+        MaterialCardView scannerStatusCard = findViewById(R.id.scanner_provider_status_card);
+        scannerStatusCard.setCardBackgroundColor(getResources().getColor(R.color.cardBackgroundDone));
+        scannerStatusCard.setVisibility(View.VISIBLE);
+    }
+
+    private void resetProviderStatusCard(boolean showCard) {
+        MaterialCardView scannerStatusCard = findViewById(R.id.scanner_provider_status_card);
+        scannerStatusCard.setVisibility(showCard ? View.VISIBLE : View.GONE);
+
+        TextView providerText = findViewById(R.id.scanner_provider_text);
+        TextView providerStatusText = findViewById(R.id.scanner_provider_status_text);
+
+        if (providerText != null) {
+            providerText.setText("");
+        }
+
+        if (providerStatusText != null) {
+            providerStatusText.setText("");
+        }
     }
 }

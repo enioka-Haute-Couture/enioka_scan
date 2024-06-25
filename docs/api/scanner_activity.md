@@ -117,6 +117,11 @@ replaced.
 Initialized by the `onStart()` and `onResume()` methods.
 :::
 
+:::{cpp:var} boolean hasCameraScannerSdk = false;
+
+If true, the camera SDK is included in the application.
+:::
+
 :::{cpp:var} CameraScanner cameraScannerProvider = null;
 
 The optional instance of the camera scanner provider, is set if the camera SDK is included.
@@ -128,9 +133,20 @@ Can be used to access some methods of `CameraBarcodeScanViewScanner`. Should not
 Initialized by the [`initCamera()`](#scannercompatactivity-methods) method.
 :::
 
+:::{cpp:var} int scannerStatusCardViewId = R.id.scanner_card_last_scan;
+
+The ID of the optional card view that displays the last scan.
+:::
+
 :::{cpp:var} int openLinkId = R.id.open_link;
 
 The ID of the of the optional button on which to press to open a link when a QRCode URL is scanned.
+:::
+
+:::{cpp:var} Set<BarcodeType> enabledSymbologies = null;
+
+The set of enabled barcode symbologies, send through the intent extras. If not set, the default
+symbologies will be used.
 :::
 
 ## `ScannerCompatActivity` methods
@@ -164,6 +180,14 @@ autocompletion threshold.
 Switches the activity to camera mode. After this method is called, `goToCamera` is set to true.
 :::
 
+:::{method} buildBarcodeText(String barcodeType, String barcodeData) -> String
+
+Builds the text to display in the last scan card. By default, it will display the barcode type and
+data, with an HTML formatting.
+
+:returns: The formatted text.
+:::
+
 :::{method} anyScannerSupportsIllumination() -> boolean
 
 Checks whether any available scanner supports Illumination.
@@ -172,6 +196,16 @@ Checks whether any available scanner supports Illumination.
 :::{method} anyScannerHasIlluminationOn() -> boolean
 
 Checks whether any available scanner has Illumination toggled on.
+:::
+
+:::{method} displayOpenLinkButton(String url) -> void
+
+Displays and binds the open link button to the given URL.
+:::
+
+:::{method} writeResultToLog(Barcode data) -> void
+
+Writes the barcode data to the log file, if log path file is defined.
 :::
 
 :::{seealso}

@@ -15,6 +15,11 @@ public final class SymbologyId {
     /**
      * Map associating a honeywell ID (in ASCII hexadecimal value) to its corresponding symbology.
      */
+    private static final Map<String, BarcodeType> honeywell2Lib;
+
+    /**
+     * Map associating a honeywell ID (in ASCII hexadecimal value) to its corresponding symbology.
+     */
     public static final Map<Integer, String> honeywellIdMap = Collections.unmodifiableMap(new HashMap<Integer, String>(){{
         put(0x2C, "INFOMAIL"); //,
         put(0x2E, "DOTCODE"); //.
@@ -114,76 +119,53 @@ public final class SymbologyId {
         put(0x7A, "AZTEC_CODE"); //z
     }});
 
+    static {
+        honeywell2Lib = new HashMap<>();
+        honeywell2Lib.put("CODE128", BarcodeType.CODE128);
+        honeywell2Lib.put("CODE39", BarcodeType.CODE39);
+        honeywell2Lib.put("D25", BarcodeType.DIS25);
+        honeywell2Lib.put("S25", BarcodeType.DIS25);
+        honeywell2Lib.put("I25", BarcodeType.INT25);
+        honeywell2Lib.put("EAN13", BarcodeType.EAN13);
+        honeywell2Lib.put("UPC/EAN", BarcodeType.EAN13);
+        honeywell2Lib.put("EAN13_ISBN", BarcodeType.EAN13);
+        honeywell2Lib.put("QRCODE", BarcodeType.QRCODE);
+        honeywell2Lib.put("AZTEC_CODE", BarcodeType.AZTEC);
+        honeywell2Lib.put("KOREA_POST", BarcodeType.KOREA_POST);
+        honeywell2Lib.put("AUS_POST", BarcodeType.AUS_POST);
+        honeywell2Lib.put("BRITISH_POST", BarcodeType.BRITISH_POST);
+        honeywell2Lib.put("CANADIAN_POST", BarcodeType.CANADIAN_POST);
+        honeywell2Lib.put("EAN8", BarcodeType.EAN8);
+        honeywell2Lib.put("UPCE", BarcodeType.UPCE);
+        honeywell2Lib.put("HAN_XIN_CODE", BarcodeType.HAN_XIN);
+        honeywell2Lib.put("GS1_128", BarcodeType.GS1_128);
+        honeywell2Lib.put("JAPAN_POST", BarcodeType.JAPAN_POST);
+        honeywell2Lib.put("KIX_POST", BarcodeType.DUTCH_POST);
+        honeywell2Lib.put("CHINA_POST", BarcodeType.CHINA_POST);
+        honeywell2Lib.put("GRID_MATRIX", BarcodeType.GRID_MATRIX);
+        honeywell2Lib.put("CODABAR", BarcodeType.CODABAR);
+        honeywell2Lib.put("UPCA", BarcodeType.UPCA);
+        honeywell2Lib.put("MSI", BarcodeType.MSI);
+        honeywell2Lib.put("CODE11", BarcodeType.CODE11);
+        honeywell2Lib.put("CODE93", BarcodeType.CODE93);
+        honeywell2Lib.put("PDF417", BarcodeType.PDF417);
+        honeywell2Lib.put("DATAMATRIX", BarcodeType.DATAMATRIX);
+        honeywell2Lib.put("MAXICODE", BarcodeType.MAXICODE);
+        honeywell2Lib.put("GS1_DATABAR", BarcodeType.GS1_DATABAR);
+        honeywell2Lib.put("GS1_DATABAR_LIMITED", BarcodeType.GS1_DATABAR_LIMITED);
+        honeywell2Lib.put("GS1_DATABAR_EXPANDED", BarcodeType.GS1_DATABAR_EXPANDED);
+    }
+
     /**
      * Converts a string returned by one of the ID maps above into one of the available BarcodeTypes.
      * Defaults to the UNKNOWN type if no corresponding type exists.
-     * FIXME: Fill-in missing types to BarcodeType and make maps return a type directly.
      * @param symbologyString The string returned by one of the ID maps.
      * @return The corresponding BarcodeType.
      */
     public static BarcodeType toBarcodeType(@Nullable final String symbologyString) {
-        if (symbologyString == null)
-            return BarcodeType.UNKNOWN;
-        if (symbologyString.equals("CODE128"))
-            return BarcodeType.CODE128;
-        if (symbologyString.equals("CODE39"))
-            return BarcodeType.CODE39;
-        if (symbologyString.equals("D25") || symbologyString.equals("S25"))
-            return BarcodeType.DIS25;
-        if (symbologyString.equals("I25"))
-            return BarcodeType.INT25;
-        if (symbologyString.equals("EAN13") || symbologyString.equals("UPC/EAN") || symbologyString.equals("EAN13_ISBN"))
-            return BarcodeType.EAN13;
-        if (symbologyString.equals("QRCODE"))
-            return BarcodeType.QRCODE;
-        if (symbologyString.equals("AZTEC_CODE"))
-            return BarcodeType.AZTEC;
-        if (symbologyString.equals("KOREA_POST"))
-            return BarcodeType.KOREA_POST;
-        if (symbologyString.equals("AUS_POST"))
-            return BarcodeType.AUS_POST;
-        if (symbologyString.equals("BRITISH_POST"))
-            return BarcodeType.BRITISH_POST;
-        if (symbologyString.equals("CANADIAN_POST"))
-            return BarcodeType.CANADIAN_POST;
-        if (symbologyString.equals("EAN8"))
-            return BarcodeType.EAN8;
-        if (symbologyString.equals("UPCE"))
-            return BarcodeType.UPCE;
-        if (symbologyString.equals("HAN_XIN_CODE"))
-            return BarcodeType.HAN_XIN;
-        if (symbologyString.equals("GS1_128"))
-            return BarcodeType.GS1_128;
-        if (symbologyString.equals("JAPAN_POST"))
-            return BarcodeType.JAPAN_POST;
-        if (symbologyString.equals("KIX_POST"))
-            return BarcodeType.DUTCH_POST;
-        if (symbologyString.equals("CHINA_POST"))
-            return BarcodeType.CHINA_POST;
-        if (symbologyString.equals("GRID_MATRIX"))
-            return BarcodeType.GRID_MATRIX;
-        if (symbologyString.equals("CODABAR"))
-            return BarcodeType.CODABAR;
-        if (symbologyString.equals("UPCA"))
-            return BarcodeType.UPCA;
-        if (symbologyString.equals("MSI"))
-            return BarcodeType.MSI;
-        if (symbologyString.equals("CODE11"))
-            return BarcodeType.CODE11;
-        if (symbologyString.equals("CODE93"))
-            return BarcodeType.CODE93;
-        if (symbologyString.equals("PDF417"))
-            return BarcodeType.PDF417;
-        if (symbologyString.equals("DATAMATRIX"))
-            return BarcodeType.DATAMATRIX;
-        if (symbologyString.equals("MAXICODE"))
-            return BarcodeType.MAXICODE;
-        if (symbologyString.equals("GS1_DATABAR"))
-            return BarcodeType.GS1_DATABAR;
-        if (symbologyString.equals("GS1_DATABAR_LIMITED"))
-            return BarcodeType.GS1_DATABAR_LIMITED;
-        if (symbologyString.equals("GS1_DATABAR_EXPANDED"))
-            return BarcodeType.GS1_DATABAR_EXPANDED;
+        if (honeywell2Lib.containsKey(symbologyString)) {
+            return honeywell2Lib.get(symbologyString);
+        }
         return BarcodeType.UNKNOWN;
     }
 }

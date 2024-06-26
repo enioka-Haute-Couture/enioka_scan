@@ -4,9 +4,6 @@ package com.enioka.scanner.data;
  * The different symbologies allowed by this library.
  */
 public enum BarcodeType {
-    /**
-     * Code 128 (standard, not GS1-128 or other variants)
-     */
     CODE11("CODE11"), // CODE 11
     CODE39("CODE39"), // CODE 39
     CODE39_FULL_ASCII("CODE39-FULL_ASCII"), // CODE 39 FULL ASCII

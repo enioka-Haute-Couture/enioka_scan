@@ -67,8 +67,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Timer;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A helper activity which implements all scan functions: laser, camera, HID.<br><br>Basic usage is trivial : just inherit this class, and that's all.<br>
@@ -163,7 +161,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * Whether the camera scanner SDK is available.
      */
-    private boolean hasCameraScannerSdk = false;
+    protected boolean hasCameraScannerSdk = false;
 
     /**
      * Optional camera scanner provider (if the camera scanner SDK is available).
@@ -173,12 +171,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * Material card view for the scanner status.
      */
-    private MaterialCardView scannerStatusCard;
-
-    /**
-     * Delay in milliseconds before resetting the scanner status card style.
-     */
-    private static final long STATUS_CARD_RESET_DELAY = 170;
+    protected int scannerStatusCardViewId = R.id.scanner_card_last_scan;
 
     /**
      * Define if the log is enabled or not.
@@ -208,6 +201,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * The ID of the open link button.
      */
     protected int openLinkId = R.id.open_link;
+    /**
+     * The HashSet of enabled symbologies
+     */
+    protected Set<BarcodeType> enabledSymbologies = null;
 
     /**
      * The String URL of the open link button.
@@ -283,6 +280,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             // Disable switch to camera button
             findViewById(cameraToggleId).setVisibility(View.GONE);
         }
+
+        enabledSymbologies = getEnabledSymbologies();
     }
 
     @Override
@@ -367,6 +366,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
             View view = findViewById(flashlightViewId).getRootView();
             ViewSwitcher.switchCameraOrientation(this, view, cameraResources, orientation == Configuration.ORIENTATION_PORTRAIT);
+
+            Integer cardLastScanId = cameraResources.get("card_last_scan_id");
+            if (cardLastScanId != null) {
+                scannerStatusCardViewId = cardLastScanId;
+            }
         } else {
             setContentView(layoutIdLaser);
 
@@ -374,7 +378,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
                 View view = findViewById(flashlightViewId).getRootView();
                 ViewSwitcher.switchLaserOrientation(this, view, flashlightViewId, false);
             }
-            scannerStatusCard = findViewById(R.id.scanner_card_last_scan);
         }
         // Init last scan card button
         InitCopyClipBoard();
@@ -509,7 +512,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         // Set the content view to the camera layout
         Integer cardLastScanId = cameraResources.get("card_last_scan_id");
-        scannerStatusCard = cardLastScanId != null ? findViewById(cardLastScanId) : null;
+        if (cardLastScanId != null) {
+            scannerStatusCardViewId = cardLastScanId;
+        }
 
         final Set<BarcodeType> symbologies = new HashSet<>();
         if (getIntent().getExtras() != null && getIntent().getExtras().getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION) != null) {
@@ -531,6 +536,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
         }
 
+        MaterialCardView scannerStatusCard = findViewById(scannerStatusCardViewId);
         if (scannerStatusCard != null) {
             scannerStatusCard.setClickable(false);
         }
@@ -654,14 +660,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
     @Override
     public void onData(List<Barcode> data) {
-        if (scannerStatusCard != null) {
-            scannerStatusCard.setClickable(true);
-            scannerStatusCard.setStrokeColor(ContextCompat.getColor(ScannerCompatActivity.this, R.color.doneItemColor));
-            scannerStatusCard.setStrokeWidth(4);
-
-            resetStatusCardStyle();
-        }
-
         StringBuilder res = new StringBuilder();
         for (Barcode b : data) {
             Log.d(LOG_TAG, "Received barcode from scanner: " + b.getBarcode() + " - " + b.getBarcodeType().code);
@@ -691,7 +689,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         TextView textLastScan = findViewById(R.id.scanner_text_last_scan);
         if (textLastScan != null) {
             textLastScan.setText(Html.fromHtml(res.toString()));
-            resizeScannerLastText(textLastScan);
         }
 
         // Disable the scannerSwitch when a barcode is found
@@ -706,53 +703,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
     }
 
-    /**
-     * Dynamically resize the last scan text view to fit the content.
-     * Called when a new data is received, or on orientation change.
-     */
-    private void resizeScannerLastText(TextView text) {
-        if (text == null) {
-            return;
-        }
-        // Set the last scan text
-        text.setSingleLine(false);
-
-        text.post(() -> {
-            float textSizeInSp = text.getTextSize() / getResources().getDisplayMetrics().scaledDensity;
-            float minTextSizeInSp = getResources().getDimension(R.dimen.min_text_size_last_scan) / getResources().getDisplayMetrics().scaledDensity;
-
-            // Activate marquee effect if the text size is the minimum size
-            if (textSizeInSp == minTextSizeInSp) {
-                text.setSingleLine(true);
-                text.setSelected(true);
-            }
-        });
-    }
 
     /**
      *  Build the text to display in the scanner status card.
      */
-    private String buildBarcodeText(String barcodeType, String barcodeData) {
+    protected String buildBarcodeText(String barcodeType, String barcodeData) {
         if (barcodeType.isEmpty() || barcodeData.isEmpty()) {
             return "";
         }
 
         return "TYPE: <b><font color='grey'>" + barcodeType + "</font></b> <b>" + barcodeData + "</b>";
-    }
-
-    /**
-     * Reset stroke color and width of the scanner status card after a delay.
-     */
-    private void resetStatusCardStyle() {
-        new Timer().schedule(new java.util.TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(() -> {
-                    scannerStatusCard.setStrokeColor(ContextCompat.getColor(ScannerCompatActivity.this, R.color.cardBackgroundColor));
-                    scannerStatusCard.setStrokeWidth(1);
-                });
-            }
-        }, TimeUnit.MILLISECONDS.toMillis(STATUS_CARD_RESET_DELAY));
     }
 
 
@@ -798,22 +758,26 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * Copy last scan text to clipboard when clicking on the scanner status card.
      */
     private void InitCopyClipBoard() {
-        // Setup clipboard copy button
-        scannerStatusCard.setOnClickListener(v -> {
-            TextView lastScan = findViewById(R.id.scanner_text_last_scan);
+        MaterialCardView scannerStatusCard = findViewById(scannerStatusCardViewId);
 
-            if (lastScan.getText().length() != 0) {
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                String[] lastScanText = lastScan.getText().toString().split(" ");
-                ClipData clip = ClipData.newPlainText("barcode", lastScanText[lastScanText.length - 1]);
+        if (scannerStatusCard != null) {
+            // Setup clipboard copy button
+            scannerStatusCard.setOnClickListener(v -> {
+                TextView lastScan = findViewById(R.id.scanner_text_last_scan);
 
-                clipboard.setPrimaryClip(clip);
+                if (lastScan.getText().length() != 0) {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    String[] lastScanText = lastScan.getText().toString().split(" ");
+                    ClipData clip = ClipData.newPlainText("barcode", lastScanText[lastScanText.length - 1]);
 
-                Snackbar snackbar = Snackbar.make(v, R.string.last_scan_clipboard, Snackbar.LENGTH_SHORT);
-                snackbar.show();
-            }
-        });
-        scannerStatusCard.setClickable(false);
+                    clipboard.setPrimaryClip(clip);
+
+                    Snackbar snackbar = Snackbar.make(v, R.string.last_scan_clipboard, Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                }
+            });
+            scannerStatusCard.setClickable(false);
+        }
     }
 
     /**
@@ -1042,6 +1006,16 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
     }
 
+    protected void displayOpenLinkButton(String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        findViewById(openLinkId).setVisibility(View.VISIBLE);
+        findViewById(openLinkId).setOnClickListener(v -> {
+            // Pause camera or laser scanner
+            startActivity(intent);
+            findViewById(openLinkId).setVisibility(View.GONE);
+        });
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Logger
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1065,7 +1039,11 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         startActivityForResult(intent, WRITE_REQUEST_CODE);
     }
 
-    private synchronized void writeResultToLog(Barcode data) {
+    protected synchronized void writeResultToLog(Barcode data) {
+        if (logFileUri == null) {
+            Log.i(LOG_TAG, "Log file URI is null, cannot write data to log file");
+        }
+
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String dataLine = formatter.format(new Date()) + "," + data.getBarcode() + "," + data.getBarcodeType().code;
 
@@ -1096,29 +1074,18 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Screen orientation
+    // Miscellaneous
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    private Set<BarcodeType> getEnabledSymbologies() {
+        Set<BarcodeType> symbologies = new HashSet<>();
 
-        boolean switchCamera = enableScan && goToCamera && hasPermissionSet(this, PERMISSIONS_CAMERA) && hasCameraScannerSdk;
-        int orientation = getResources().getConfiguration().orientation;
-        View view = findViewById(flashlightViewId).getRootView();
-
-        if (switchCamera) {
-            Integer cameraViewId = cameraResources.get("camera_view_id");
-
-            if (cameraViewId != null && cameraScannerProvider != null) {
-                cameraScannerProvider.orientationChanged(findViewById(cameraViewId));
+        if (getIntent().getExtras() != null && getIntent().getExtras().getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION) != null) {
+            for (final String symbology : Objects.requireNonNull(getIntent().getExtras().getStringArray(ScannerServiceApi.EXTRA_SYMBOLOGY_SELECTION))) {
+                symbologies.add(BarcodeType.valueOf(symbology));
             }
-
-            ViewSwitcher.switchCameraOrientation(this, view, cameraResources, orientation == Configuration.ORIENTATION_PORTRAIT);
-        } else {
-            ViewSwitcher.switchLaserOrientation(this, view, flashlightViewId, orientation == Configuration.ORIENTATION_PORTRAIT);
         }
 
-        resizeScannerLastText((TextView) findViewById(R.id.scanner_text_last_scan));
+        return symbologies;
     }
 }

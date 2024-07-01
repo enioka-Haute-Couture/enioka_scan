@@ -236,6 +236,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         // Ascending compatibility
         if (zbarViewId != null) {
+            cameraResources = new HashMap<>();
             cameraResources.put("camera_view_id", zbarViewId);
         }
 

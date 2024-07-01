@@ -1,7 +1,10 @@
 package com.enioka.scanner.demo;
 
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -534,29 +537,35 @@ public class SettingsActivity extends AppCompatActivity {
     private void bindToggleButtonAspectRatioMode() {
         btCrop.setOnClickListener(v -> {
             if (btCrop.isChecked()) {
+                EspressoSemaphore.increment();
                 btCrop.setText(R.string.fill_crop);
                 btStretch.setText(null);
                 btBlackBars.setText(null);
 
                 aspectRatioMode = 0;
+                EspressoSemaphore.decrement();
             }
         });
         btBlackBars.setOnClickListener(v -> {
             if (btBlackBars.isChecked()) {
+                EspressoSemaphore.increment();
                 btBlackBars.setText(R.string.fill_black_bars);
                 btStretch.setText(null);
                 btCrop.setText(null);
 
                 aspectRatioMode = 1;
+                EspressoSemaphore.decrement();
             }
         });
         btStretch.setOnClickListener(v -> {
             if (btStretch.isChecked()) {
+                EspressoSemaphore.increment();
                 btStretch.setText(R.string.fill_stretch);
                 btBlackBars.setText(null);
                 btCrop.setText(null);
 
                 aspectRatioMode = 2;
+                EspressoSemaphore.decrement();
             }
         });
     }

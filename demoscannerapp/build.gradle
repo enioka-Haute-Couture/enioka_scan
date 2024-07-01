@@ -28,6 +28,9 @@ android {
     lint {
         disable 'ExpiredTargetSdkVersion'
     }
+    testOptions {
+        animationsDisabled = true
+    }
     namespace 'com.enioka.scanner.demo'
 }
 
@@ -64,6 +67,7 @@ dependencies {
     implementation project(':enioka_scan_honeywelloss_spp')
     implementation project(':enioka_scan_zebraoss')
     implementation project(':enioka_scan_proglove');
+    implementation 'androidx.test.espresso:espresso-idling-resource:3.6.1'
 
     // Android stuff
 

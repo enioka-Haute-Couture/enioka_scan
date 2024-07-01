@@ -3,7 +3,6 @@ package com.enioka.scanner.demo;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
-import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.intent.Intents.intended;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent;
@@ -17,6 +16,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 
 import android.app.UiAutomation;
+import android.os.SystemClock;
 import android.view.View;
 
 import org.hamcrest.Description;
@@ -221,26 +221,7 @@ public class DemoAppWelcomeTest {
 
         try (ActivityScenario<SettingsActivity> activityScenario = ActivityScenario.launch(SettingsActivity.class)) {
             // Portrait mode
-            onView(withId(R.id.button_fill_crop)).perform(scrollTo()).perform(click()).check(matches(withText(R.string.fill_crop)));
-            activityScenario.onActivity(activity -> {
-                activity.buttonSave.setVisibility(View.GONE);
-                assertEquals(activity.aspectRatioMode, 0);
-            });
-
-            onView(withId(R.id.button_fill_black_bars)).perform(click()).check(matches(withText(R.string.fill_black_bars)));
-            activityScenario.onActivity(activity -> {
-                assertEquals(activity.aspectRatioMode, 1);
-            });
-
-            onView(withId(R.id.button_fill_stretch)).perform(click()).check(matches(withText(R.string.fill_stretch)));
-            activityScenario.onActivity(activity -> {
-                assertEquals(activity.aspectRatioMode, 2);
-            });
-
-            // Landscape mode
-            uiAutomation.setRotation(UiAutomation.ROTATION_FREEZE_90);
-
-            onView(withId(R.id.button_fill_crop)).perform(scrollTo()).perform(click()).check(matches(withText(R.string.fill_crop)));
+            onView(withId(R.id.button_fill_crop)).perform(scrollTo()).perform(scrollTo()).perform(click()).check(matches(withText(R.string.fill_crop)));
             activityScenario.onActivity(activity -> {
                 activity.buttonSave.setVisibility(View.GONE);
                 assertEquals(activity.aspectRatioMode, 0);
@@ -252,6 +233,28 @@ public class DemoAppWelcomeTest {
             });
 
             onView(withId(R.id.button_fill_stretch)).perform(scrollTo()).perform(click()).check(matches(withText(R.string.fill_stretch)));
+            activityScenario.onActivity(activity -> {
+                assertEquals(activity.aspectRatioMode, 2);
+            });
+
+            // Landscape mode
+            uiAutomation.setRotation(UiAutomation.ROTATION_FREEZE_90);
+            SystemClock.sleep(200);
+
+            onView(withId(R.id.button_fill_crop)).perform(scrollTo()).perform(click());
+            onView(withId(R.id.button_fill_crop)).check(matches(withText(R.string.fill_crop)));
+            activityScenario.onActivity(activity -> {
+                assertEquals(activity.aspectRatioMode, 0);
+            });
+
+            onView(withId(R.id.button_fill_black_bars)).perform(scrollTo()).perform(click());
+            onView(withId(R.id.button_fill_black_bars)).check(matches(withText(R.string.fill_black_bars)));
+            activityScenario.onActivity(activity -> {
+                assertEquals(activity.aspectRatioMode, 1);
+            });
+
+            onView(withId(R.id.button_fill_stretch)).perform(scrollTo()).perform(click());
+            onView(withId(R.id.button_fill_stretch)).check(matches(withText(R.string.fill_stretch)));
             activityScenario.onActivity(activity -> {
                 assertEquals(activity.aspectRatioMode, 2);
             });

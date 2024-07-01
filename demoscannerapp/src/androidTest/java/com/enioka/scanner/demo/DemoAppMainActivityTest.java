@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.allOf;
 
 import android.Manifest;
 import android.app.UiAutomation;
+import android.os.SystemClock;
 
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
@@ -137,6 +138,8 @@ public class DemoAppMainActivityTest {
         // Landscape mode
         UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         uiAutomation.setRotation(UiAutomation.ROTATION_FREEZE_90);
+
+        SystemClock.sleep(200);
 
         onView(withId(com.enioka.scanner.sdk.camera.R.id.scanner_zxing_text)).check(matches(withText(com.enioka.scanner.R.string.activity_scan_use_zxing)));
 

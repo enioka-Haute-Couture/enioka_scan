@@ -28,6 +28,9 @@ android {
     lint {
         disable 'ExpiredTargetSdkVersion'
     }
+    testOptions {
+        animationsDisabled = true
+    }
     namespace 'com.enioka.scanner.demo'
 }
 

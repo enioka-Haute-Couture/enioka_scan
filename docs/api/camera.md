@@ -30,19 +30,19 @@ view refresh. You can force a refresh by pausing and resuming the camera.
     - `2`: `fillWithStretch`: The preview will fill the available space, by squashing or stretching
         the preview if needed. The aspect ratio of the preview can be altered.
 
-.. image:: ./pictures/crop.png
+.. image:: /pictures/crop.png
 :width: 400
 :alt: fillWithCrop
 
 Example of a preview with the `fillWithCrop` mode.
 
-.. image:: ./pictures/black_bars.png
+.. image:: /pictures/black_bars.png
 :width: 400
 :alt: fillWithBlackBars
 
 Example of a preview with the `fillWithBlackBars` mode.
 
-.. image:: ./pictures/stretch.png
+.. image:: /pictures/stretch.png
 :width: 400
 :alt: fillWithStretch
 
@@ -107,6 +107,11 @@ Pauses the camera's capture.
 :::{method} resumeCamera() -> void
 
 Resumes the camera's capture.
+:::
+
+:::{method} resetTargetPosition() -> void
+
+Reset the vertical position of the target. Also resets the associated preferences.
 :::
 
 :::{method} orientationChanged() -> void
@@ -226,4 +231,109 @@ on the preview.
 :::{method} app:targetStrokeWidth
 
 The thickness of the target's lines.
+:::
+
+## The CameraScannerProvider API
+
+The `CameraScannerProvider` is the entry point to the camera scanner API. It is used to create and
+control the camera scanner service, and to access the camera scanner view. As the camera scanner is
+part of the `com.enioka.scanner.sdk.camera` package, it is not directly accessible from the main
+library.
+
+### The `CameraScannerProvider` interface
+
+:::{method} getIdResource() -> HashMap<String, Integer>
+
+:returns: A map containing the IDs of the views used by the camera scanner. May be replaced with
+your own.
+
+Contains the following keys:
+- layout_id_camera: The ID of the layout containing the camera view.
+- camera_view_id: The ID of the camera view in the layout.
+- scanner_toggle_view_id: The ID of the view that toggles the scanner library reader.
+- scanner_toggle_pause_id: The ID of the view that toggles the pause of the scanner.
+- card_last_scan_id: ID of the card view that displays the last scan.
+- constraint_layout_id: The ID of the constraint layout inside the camera layout.
+- scanner_flashlight_id: The ID of the optional ImageButton on which to press to toggle the
+flashlight/illumination.
+- scanner_bt_provider_logs: The ID of the optional ImageButton on which to press to manually access 
+available providers logs
+:::
+
+:::{method} getCameraScanner(Context ctx, ScannerConnectionHandler handler, ScannerSearchOptions options) -> void
+
+Called to initialize the camera scanner with the given view and callbacks.
+:::
+
+:::{method} isCameraScannerInitialized() -> boolean
+
+:returns: true if the camera scanner is initialized, false otherwise.
+:::
+
+:::{method} reset() -> void
+
+Resets the camera scanner.
+:::
+
+:::{method} toggleIllumination() -> void
+
+Toggles the camera's illumination.
+:::
+
+:::{method} disconnect() -> void
+
+Disconnects the camera scanner.
+:::
+
+:::{method} pauseCamera() -> void
+
+Pauses the camera scanner.
+:::
+
+:::{method} resumeCamera() -> void
+
+Resumes the camera scanner.
+:::
+
+:::{method} isIlluminationOn() -> boolean
+
+:returns: true if the camera's illumination is on, false otherwise.
+:::
+
+:::{method} setPreviewRatioMode(View cameraView, int previewRatioMode) -> void
+
+See [setPreviewRatioMode](camera.md#the-camerabarcodescanview-class) for more information.
+:::
+
+:::{method} setReaderMode(View cameraView, boolean readerMode) -> void
+
+:param View cameraView: The camera view to change the reader mode of.
+:param boolean readerMode: false for ZBar, true for ZXing.
+
+Change the library used to read barcodes from the camera feed.
+:::
+
+:::{method} orientationChanged(View cameraView) -> void
+
+:param View cameraView: The camera view to notify of the orientation change.
+
+Notifies the view that the orientation of the device has changed by calling `setDisplayOrientation()`
+with the correct clockwise rotation of the camera preview, depending on the device's orientation.
+:::
+
+:::{method} setTargetPosition(View cameraView, float y) -> void
+
+:param View cameraView: The camera view to change the target position of.
+:param float y: The top target's vertical position on the preview (y coordinate).
+
+Set the top target's vertical position on the preview.
+:::
+
+:::{method} setTargetDimension(View cameraView, float width, float height) -> void
+
+:param View cameraView: The camera view to change the target dimensions of.
+:param float width: The target's width.
+:param float height: The target's height.
+
+Set the target's dimensions on the preview.
 :::

@@ -13,13 +13,17 @@ public class MyScanningActivity extends ScannerCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate();
         layoutIdLaser = R.layout.activity_parcel_scan_laser;
-        layoutIdCamera = R.layout.activity_parcel_scan_camera;
+        cameraResources = new HashMap<>() {{
+            put("layout_id_camera", R.layout.activity_parcel_scan_camera);
+            put("camera_view_id", R.id.camera_scan_view);
+        }};
     }
 }
 ```
 
-Here, `layoutIdLaser` is the layout used when handling laser scanner devices, and `layoutIdCamera`
-is the layout used when using the device's camera as a scanner.
+Here, `layoutIdLaser` is the layout used when handling laser scanner devices, and `cameraResources`
+is a hashmap containing the IDs of the views used by the camera scanner, such as the camera layout,
+the layout used when using the device's camera as a scanner.
 
 To ensure activity is able to properly switch to the camera when needed, you should include the
 following view block in the `<layout>.xml` file used by `layoutIdCamera`:
@@ -34,13 +38,14 @@ following view block in the `<layout>.xml` file used by `layoutIdCamera`:
     app:readerMode="Auto"
     app:storePreferredResolution="false"
     app:targetColor="@color/colorRed"
+    app:targetColorPaused="@color/defaultItemColor"
     app:targetIsFixed="false"
     app:targetStrokeWidth="5"
     app:useAdaptiveResolution="true"  />
 ```
 
-Should you choose a different ID for this view, remember to also change the value of `cameraViewId`
-in the activity.
+Should you choose a different ID for this view, remember to also change the value of the
+`cameraViewId` key in the `cameraResources` hashmap.
 
 :::{seealso}
 

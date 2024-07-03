@@ -128,14 +128,14 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * The ID of the ImageButton on which to press to manually switch to camera mode.
      */
-    protected int cameraToggleId = R.id.scanner_bt_camera;
+    protected int cameraToggleId = R.id.scannerBtCamera;
 
     /**
      * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
      */
-    protected int flashlightViewId = R.id.scanner_flashlight;
+    protected int flashlightViewId = R.id.scannerFlashlight;
 
-    protected int providerLogOpenViewId = R.id.scanner_bt_provider_logs;
+    protected int providerLogOpenViewId = R.id.scannerBtProviderLogs;
 
     /**
      * An optional fragment allowing to input a value with the soft keyboard (for cases when scanners do not work).
@@ -171,7 +171,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * Material card view for the scanner status.
      */
-    protected int scannerStatusCardViewId = R.id.scanner_card_last_scan;
+    protected int scannerStatusCardViewId = R.id.scannerCardLastScan;
 
     /**
      * Define if the log is enabled or not.
@@ -200,7 +200,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     /**
      * The ID of the open link button.
      */
-    protected int openLinkId = R.id.open_link;
+    protected int openLinkId = R.id.openLink;
     /**
      * The HashSet of enabled symbologies
      */
@@ -304,7 +304,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         Log.i(LOG_TAG, "Resuming scanner activity - scanners will be (re)connected");
 
         // Reset scanner trigger switch
-        MaterialSwitch scannerSwitch = findViewById(R.id.scanner_trigger_on);
+        MaterialSwitch scannerSwitch = findViewById(R.id.scannerTriggerOn);
         if (scannerSwitch != null) {
             scannerSwitch.setChecked(false);
         }
@@ -527,8 +527,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         InitCopyClipBoard();
 
-        if (findViewById(R.id.scanner_text_last_scan) != null) {
-            ((TextView) findViewById(R.id.scanner_text_last_scan)).setText(null);
+        if (findViewById(R.id.scannerTextLastScan) != null) {
+            ((TextView) findViewById(R.id.scannerTextLastScan)).setText(null);
         }
 
         MaterialCardView scannerStatusCard = findViewById(scannerStatusCardViewId);
@@ -593,8 +593,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             providerLogs += scanner.getProviderKey() + " " + newStatus + "\n";
         }
 
-        TextView providerText = findViewById(R.id.scanner_provider_text);
-        TextView providerStatusText = findViewById(R.id.scanner_provider_status_text);
+        TextView providerText = findViewById(R.id.scannerProviderText);
+        TextView providerStatusText = findViewById(R.id.scannerProviderStatusText);
 
         if (scanner != null && providerText != null && providerStatusText != null && (newStatus == Status.CONNECTED || newStatus == Status.DISCONNECTED)) {
             String provider = scanner.getProviderKey();
@@ -675,13 +675,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             }
         }
 
-        TextView textLastScan = findViewById(R.id.scanner_text_last_scan);
+        TextView textLastScan = findViewById(R.id.scannerTextLastScan);
         if (textLastScan != null) {
             textLastScan.setText(Html.fromHtml(res.toString()));
         }
 
         // Disable the scannerSwitch when a barcode is found
-        MaterialSwitch scannerSwitch = (MaterialSwitch) findViewById(R.id.scanner_trigger_on);
+        MaterialSwitch scannerSwitch = (MaterialSwitch) findViewById(R.id.scannerTriggerOn);
         if (scannerSwitch != null) {
             scannerSwitch.setChecked(false);
         }
@@ -756,7 +756,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         if (scannerStatusCard != null) {
             // Setup clipboard copy button
             scannerStatusCard.setOnClickListener(v -> {
-                TextView lastScan = findViewById(R.id.scanner_text_last_scan);
+                TextView lastScan = findViewById(R.id.scannerTextLastScan);
 
                 if (lastScan.getText().length() != 0) {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -927,10 +927,10 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
     private void displayToggleLedButton() {
         // Button present in layout?
-        if (findViewById(R.id.scanner_red_led) == null) {
+        if (findViewById(R.id.scannerRedLed) == null) {
             return;
         }
-        View v = findViewById(R.id.scanner_red_led);
+        View v = findViewById(R.id.scannerRedLed);
 
         // Check if we should display the button
         boolean anySupport = false;
@@ -964,7 +964,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     }
 
     private void displaySwitchScanButton() {
-        View scannerTriggerOff = findViewById(R.id.scanner_trigger_on);
+        View scannerTriggerOff = findViewById(R.id.scannerTriggerOn);
 
         if (scannerTriggerOff != null) {
             scannerTriggerOff.setVisibility(View.VISIBLE);
@@ -986,7 +986,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
 
     private void displayBellButton() {
-        View scannerBellView = findViewById(R.id.scanner_bell);
+        View scannerBellView = findViewById(R.id.scannerBell);
 
         if (scannerBellView != null) {
             scannerBellView.setVisibility(View.VISIBLE);
@@ -1087,8 +1087,8 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void updateProviderStatusCard() {
-        TextView providerText = findViewById(R.id.scanner_provider_text);
-        TextView providerStatusText = findViewById(R.id.scanner_provider_status_text);
+        TextView providerText = findViewById(R.id.scannerProviderText);
+        TextView providerStatusText = findViewById(R.id.scannerProviderStatusText);
 
         StringBuilder textConnectedProviders = new StringBuilder();
 
@@ -1107,17 +1107,17 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         providerStatusText.setText(Status.CONNECTED.toString());
 
         // Update visibility of the scanner status card
-        MaterialCardView scannerStatusCard = findViewById(R.id.scanner_provider_status_card);
+        MaterialCardView scannerStatusCard = findViewById(R.id.scannerProviderStatusCard);
         scannerStatusCard.setCardBackgroundColor(getResources().getColor(R.color.cardBackgroundDone));
         scannerStatusCard.setVisibility(View.VISIBLE);
     }
 
     private void resetProviderStatusCard(boolean showCard) {
-        MaterialCardView scannerStatusCard = findViewById(R.id.scanner_provider_status_card);
+        MaterialCardView scannerStatusCard = findViewById(R.id.scannerProviderStatusCard);
         scannerStatusCard.setVisibility(showCard ? View.VISIBLE : View.GONE);
 
-        TextView providerText = findViewById(R.id.scanner_provider_text);
-        TextView providerStatusText = findViewById(R.id.scanner_provider_status_text);
+        TextView providerText = findViewById(R.id.scannerProviderText);
+        TextView providerStatusText = findViewById(R.id.scannerProviderStatusText);
 
         if (providerText != null) {
             providerText.setText("");

@@ -60,35 +60,35 @@ own.
 If the camera SDK is included, it will be set to a map containing the following values:
 - layout_id_camera: The ID of the layout containing the camera view
 :::{cpp:var}R.layout.activity_main_alt:::.
-- camera_view_id: The ID of the camera view in the layout :::{cpp:var}R.id.camera_scan_view:::.
+- camera_view_id: The ID of the camera view in the layout :::{cpp:var}R.id.cameraScanView:::.
   It is the ID of the [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the
   `layout_id_camera` layout.
   :::.
 - scanner_toggle_view_id: It is the ID of the optional ImageButton on which to press to toggle the 
-zxing/zbar camera scan library :::{cpp:var}R.id.scanner_switch_zxing:::.
+zxing/zbar camera scan library :::{cpp:var}R.id.scannerSwitchZxing:::.
 - scanner_toggle_pause_id: The ID of the optional toggle button on which to press to pause/unpause 
-the scanner :::{cpp:var}R.id.scanner_switch_pause:::.
+the scanner :::{cpp:var}R.id.scannerSwitchPause:::.
 - card_last_scan_id: ID of the card view that displays the last scan
-:::{cpp:var}R.id.card_camera_last_scan:::.
+:::{cpp:var}R.id.cardCameraLastScan:::.
 - constraint_layout_id: The ID of the constraint layout inside the camera layout
-:::{cpp:var}R.id.constraint_layout_main_activity:::.
+:::{cpp:var}R.id.constraintLayoutMainActivity:::.
 - scanner_flashlight_id: The ID of the optional ImageButton on which to press to toggle the
-flashlight/illumination :::{cpp:var}R.id.scanner_flashlight:::.
+flashlight/illumination :::{cpp:var}R.id.scannerFlashlight:::.
 - scanner_bt_provider_logs: The ID of the optional ImageButton on which to press to manually access
-available providers logs :::{cpp:var}R.id.scanner_bt_provider_logs:::.
+available providers logs :::{cpp:var}R.id.scannerBtProviderLogs:::.
 :::
 
-:::{cpp:var} int cameraToggleId = R.id.scanner_bt_camera
+:::{cpp:var} int cameraToggleId = R.id.scannerBtCamera
 
 The ID of the optional ImageButton on which to press to manually switch to camera mode.
 :::
 
-:::{cpp:var} int flashlightViewId = R.id.scanner_flashlight
+:::{cpp:var} int flashlightViewId = R.id.scannerFlashlight
 
 The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
 :::
 
-:::{cpp:var} int keyboardOpenViewId = R.id.scanner_bt_keyboard
+:::{cpp:var} int keyboardOpenViewId = R.id.scannerBtKeyboard
 
 The ID of the optional toggle button on which to display the manual input fragment.
 :::
@@ -133,12 +133,12 @@ Can be used to access some methods of `CameraBarcodeScanViewScanner`. Should not
 Initialized by the [`initCamera()`](#scannercompatactivity-methods) method.
 :::
 
-:::{cpp:var} int scannerStatusCardViewId = R.id.scanner_card_last_scan;
+:::{cpp:var} int scannerStatusCardViewId = R.id.scannerCardLastScan;
 
 The ID of the optional card view that displays the last scan.
 :::
 
-:::{cpp:var} int openLinkId = R.id.open_link;
+:::{cpp:var} int openLinkId = R.id.openLink;
 
 The ID of the of the optional button on which to press to open a link when a QRCode URL is scanned.
 :::

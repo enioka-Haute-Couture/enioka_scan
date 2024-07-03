@@ -60,11 +60,11 @@ public class ViewSwitcher {
 
     public static void switchLaserOrientation(Context context, View view, int flashlightViewId, boolean portrait) {
         ConstraintLayout mainConstraintLayout = view.findViewById(R.id.constraint_layout);
-        LinearLayout linearLayout = view.findViewById(R.id.bottom_layout);
+        LinearLayout linearLayout = view.findViewById(R.id.bottomLayout);
         View scannerFlashlight = view.findViewById(flashlightViewId);
-        View scannerBell = view.findViewById(R.id.scanner_bell);
-        View scannerRedLed = view.findViewById(R.id.scanner_red_led);
-        View buttonLogProvider = view.findViewById(R.id.scanner_bt_provider_logs);
+        View scannerBell = view.findViewById(R.id.scannerBell);
+        View scannerRedLed = view.findViewById(R.id.scannerRedLed);
+        View buttonLogProvider = view.findViewById(R.id.scannerBtProviderLogs);
 
         if (portrait) {
             // Move elements to main constraint layout
@@ -95,7 +95,7 @@ public class ViewSwitcher {
 
             int margin = context.getResources().getDimensionPixelSize(R.dimen.layout_margin_border);
 
-            constraintSet.connect(scannerFlashlight.getId(), ConstraintSet.TOP, R.id.scanner_enable_text, ConstraintSet.BOTTOM, margin);
+            constraintSet.connect(scannerFlashlight.getId(), ConstraintSet.TOP, R.id.scannerEnableText, ConstraintSet.BOTTOM, margin);
             constraintSet.connect(scannerFlashlight.getId(), ConstraintSet.END, mainConstraintLayout.getId(), ConstraintSet.END, margin);
 
             constraintSet.connect(scannerBell.getId(), ConstraintSet.TOP, scannerFlashlight.getId(), ConstraintSet.BOTTOM, margin);

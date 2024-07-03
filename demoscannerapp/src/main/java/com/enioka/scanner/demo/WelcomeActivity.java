@@ -59,10 +59,10 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        bt1 = findViewById(R.id.bt_scanner);
-        bt5 = findViewById(R.id.bt_settings);
+        bt1 = findViewById(R.id.btScanner);
+        bt5 = findViewById(R.id.btSettings);
         toolbar = findViewById(R.id.topAppBar);
-        bugReportBt = findViewById(R.id.bug_report_button);
+        bugReportBt = findViewById(R.id.bugReportButton);
 
         bt1.setOnClickListener(this::onClickBt1);
         bt5.setOnClickListener(this::onClickBt5);
@@ -128,7 +128,7 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     public void switchWelcomeActivity(boolean portrait) {
-        View welcome_card = findViewById(R.id.welcome_card);
+        View welcome_card = findViewById(R.id.welcomeCard);
         View barcode_image = findViewById(R.id.barcode);
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) welcome_card.getLayoutParams();
         LinearLayout.LayoutParams paramsBarcode = (LinearLayout.LayoutParams) barcode_image.getLayoutParams();

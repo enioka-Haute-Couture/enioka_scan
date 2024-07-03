@@ -13,29 +13,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup ruby
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.x"
-
-      - name: Setup fastlane
-        run: |
-          cd enioka_scan
-          bundle install
-          cd ..
+          ruby-version: "3.0.2"
+          bundler-cache: true
 
       - name: Restore json key # make sure that you restore the key in the correct directory (ref. fastlane/Appfile)
-        run: |
-          cd enioka_scan
-          cd fastlane
-          echo "${{ secrets.GOOGLE_API_PUB_JSON }}" | base64 --decode > service-account.json
-          cd ../..
+        run: echo "${{ secrets.GOOGLE_API_PUB_JSON_BASE64 }}" | base64 --decode >  ${{ github.workspace }}/service-account.json
 
       - name: Restore keystore # make sure that you restore the key in the correct directory (same as app/gradle.properties)
-        run: |
-          cd enioka_scan/app
-          echo "${{ secrets.SIGN_KEY }}" > myKeystore.keystore.asc
-          gpg -d --passphrase ${{ secrets.SIGN_PASSWORD }} --batch myKeystore.keystore.asc > myKeystore.keystore
-          cd ../..
+        run: echo "${{ secrets.GOOGLE_KEYSTORE_BASE64 }}" | base64 --decode > ${{ github.workspace }}/demoscannerapp/debug.keystore
 
       - name: Set up environment
         uses: actions/setup-java@v4
@@ -46,7 +33,10 @@ jobs:
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Upload app to Play Store (Internal track)
-        run: |
-          cd enioka_scan
-          bundle exec fastlane internal
+      - name: Fastlane build and upload
+        run: bundle exec fastlane internal
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_KEYSTORE_PASSWORD }}
+          SIGNKEY_PASSWORD: ${{ secrets.GOOGLE_SIGNKEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.GOOGLE_SIGNKEY_ALIAS }}
+

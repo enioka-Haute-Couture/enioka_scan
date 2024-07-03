@@ -5,15 +5,29 @@ android {
     defaultConfig {
         applicationId "com.enioka.scanner.demoscannerapp"
         minSdkVersion 19
-        targetSdkVersion 28
-        versionCode 1
+        targetSdkVersion 33
+        versionCode 3
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
+    }
+    signingConfigs {
+        debug {
+            storeFile file("debug.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("SIGNKEY_PASSWORD")
+        }
+        release {
+            storeFile file("debug.keystore")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("SIGNKEY_PASSWORD")
+        }
     }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -21,6 +35,7 @@ android {
             applicationIdSuffix ".release"
         }
         debug {
+            signingConfig signingConfigs.debug
             debuggable true
             applicationIdSuffix ".debug"
         }

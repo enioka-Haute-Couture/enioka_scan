@@ -23,11 +23,15 @@ platform :android do
 
         # Generate AAB file
         gradle(
-        task: "bundle",
-        build_type: "Release"
+            task: "demoscannerapp:bundle",
+            build_type: "Release"
         )
 
         # Upload the AAB to play store (internal track)
-        upload_to_play_store(track: 'internal', validate_only: true)
+        upload_to_play_store(
+            package_name: "com.enioka.scanner.demoscannerapp.release",
+            track: 'internal',
+            release_status: "draft"
+        )
     end
 end

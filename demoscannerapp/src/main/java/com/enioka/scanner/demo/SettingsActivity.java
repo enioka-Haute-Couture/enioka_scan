@@ -69,17 +69,17 @@ public class SettingsActivity extends AppCompatActivity {
     /**
      * Select all segmented button
      */
-    protected MaterialButton bt_all;
+    protected MaterialButton btAll;
 
     /**
      * Select specific segmented providers button
      */
-    protected MaterialButton bt_spec;
+    protected MaterialButton btSpec;
 
     /**
      * Select none segmented providers button
      */
-    protected MaterialButton bt_none;
+    protected MaterialButton btNone;
 
     /**
      * SegmentedButtons providers state
@@ -89,17 +89,17 @@ public class SettingsActivity extends AppCompatActivity {
     /**
      * Select stretch segmented aspect ratio mode button
      */
-    protected MaterialButton bt_stretch;
+    protected MaterialButton btStretch;
 
     /**
      * Select black bars segmented aspect ratio mode button
      */
-    protected MaterialButton bt_black_bars;
+    protected MaterialButton btBlackBars;
 
     /**
      * Select crop segmented aspect ratio mode button
      */
-    protected MaterialButton bt_crop;
+    protected MaterialButton btCrop;
 
     /**
      * SegmentedButtons aspect ratio mode state
@@ -114,16 +114,16 @@ public class SettingsActivity extends AppCompatActivity {
     /**
      * Select all segmented button symbology
      */
-    protected MaterialButton bt_all_symbology;
+    protected MaterialButton btAllSymbology;
     /**
      * Select specific segmented button symbology
      */
-    protected MaterialButton bt_spec_symbology;
+    protected MaterialButton btSpecSymbology;
 
     /**
      * Select none segmented button symbology
      */
-    protected MaterialButton bt_none_symbology;
+    protected MaterialButton btNoneSymbology;
     /**
      * Symbology selection expanded state
      */
@@ -146,23 +146,23 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         // Setup save button listener
-        buttonSave = findViewById(R.id.button_save);
+        buttonSave = findViewById(R.id.buttonSave);
         buttonSave.setOnClickListener(this::onClickSave);
 
         // Segmented providers toggle buttons
-        bt_all = findViewById(R.id.button_all);
-        bt_spec = findViewById(R.id.button_specific);
-        bt_none = findViewById(R.id.button_none);
+        btAll = findViewById(R.id.buttonAll);
+        btSpec = findViewById(R.id.buttonSpecific);
+        btNone = findViewById(R.id.buttonNone);
 
         // Segmented aspect ratio mode toggle buttons
-        bt_stretch = findViewById(R.id.button_fill_stretch);
-        bt_black_bars = findViewById(R.id.button_fill_black_bars);
-        bt_crop = findViewById(R.id.button_fill_crop);
+        btStretch = findViewById(R.id.buttonFillStretch);
+        btBlackBars = findViewById(R.id.buttonFillBlackBars);
+        btCrop = findViewById(R.id.buttonFillCrop);
 
         // Segmented toggle buttons for symbology
-        bt_all_symbology = findViewById(R.id.button_all_symbology);
-        bt_spec_symbology = findViewById(R.id.button_specific_symbology);
-        bt_none_symbology = findViewById(R.id.button_none_symbology);
+        btAllSymbology = findViewById(R.id.buttonAllSymbology);
+        btSpecSymbology = findViewById(R.id.buttonSpecificSymbology);
+        btNoneSymbology = findViewById(R.id.buttonNoneSymbology);
 
         // Add listener to segmented toggle buttons
         bindToggleButtonAspectRatioMode();
@@ -221,8 +221,8 @@ public class SettingsActivity extends AppCompatActivity {
         animSymbology = AnimatedVectorDrawableCompat.create(this, R.drawable.arrow_down_to_up_symbology);
 
         // Set the listener for the expand buttons
-        findViewById(R.id.button_expand_provider_selection).setOnClickListener(this::onClickExpandProvider);
-        findViewById(R.id.button_expand_symbology_selection).setOnClickListener(this::onClickExpandSymbology);
+        findViewById(R.id.buttonExpandProviderSelection).setOnClickListener(this::onClickExpandProvider);
+        findViewById(R.id.buttonExpandSymbologySelection).setOnClickListener(this::onClickExpandSymbology);
     }
 
     /**
@@ -481,11 +481,11 @@ public class SettingsActivity extends AppCompatActivity {
      * Bind toggle buttons
      */
     private void bindToggleButtonProviders() {
-        bt_all.setOnClickListener(v -> {
-            if (bt_all.isChecked()) {
-                bt_all.setIcon(ContextCompat.getDrawable(this, R.drawable.check_all));
-                bt_spec.setIcon(null);
-                bt_none.setIcon(null);
+        btAll.setOnClickListener(v -> {
+            if (btAll.isChecked()) {
+                btAll.setIcon(ContextCompat.getDrawable(this, R.drawable.check_all));
+                btSpec.setIcon(null);
+                btNone.setIcon(null);
 
                 for (int providerViewId : providerViews) {
                     // Force check and disable
@@ -496,11 +496,11 @@ public class SettingsActivity extends AppCompatActivity {
                 segmentedButtonProvidersState = 0;
             }
         });
-        bt_spec.setOnClickListener(v -> {
-            if (bt_spec.isChecked()) {
-                bt_spec.setIcon(ContextCompat.getDrawable(this, R.drawable.search));
-                bt_all.setIcon(null);
-                bt_none.setIcon(null);
+        btSpec.setOnClickListener(v -> {
+            if (btSpec.isChecked()) {
+                btSpec.setIcon(ContextCompat.getDrawable(this, R.drawable.search));
+                btAll.setIcon(null);
+                btNone.setIcon(null);
 
                 for (int providerViewId : providerViews) {
                     // Force enable
@@ -510,11 +510,11 @@ public class SettingsActivity extends AppCompatActivity {
                 segmentedButtonProvidersState = 1;
             }
         });
-        bt_none.setOnClickListener(v -> {
-            if (bt_none.isChecked()) {
-                bt_none.setIcon(ContextCompat.getDrawable(this, R.drawable.cross));
-                bt_spec.setIcon(null);
-                bt_all.setIcon(null);
+        btNone.setOnClickListener(v -> {
+            if (btNone.isChecked()) {
+                btNone.setIcon(ContextCompat.getDrawable(this, R.drawable.cross));
+                btSpec.setIcon(null);
+                btAll.setIcon(null);
 
                 for (int providerViewId : providerViews) {
                     // Force uncheck and disable
@@ -532,29 +532,29 @@ public class SettingsActivity extends AppCompatActivity {
      */
 
     private void bindToggleButtonAspectRatioMode() {
-        bt_crop.setOnClickListener(v -> {
-            if (bt_crop.isChecked()) {
-                bt_crop.setText(R.string.fill_crop);
-                bt_stretch.setText(null);
-                bt_black_bars.setText(null);
+        btCrop.setOnClickListener(v -> {
+            if (btCrop.isChecked()) {
+                btCrop.setText(R.string.fill_crop);
+                btStretch.setText(null);
+                btBlackBars.setText(null);
 
                 aspectRatioMode = 0;
             }
         });
-        bt_black_bars.setOnClickListener(v -> {
-            if (bt_black_bars.isChecked()) {
-                bt_black_bars.setText(R.string.fill_black_bars);
-                bt_stretch.setText(null);
-                bt_crop.setText(null);
+        btBlackBars.setOnClickListener(v -> {
+            if (btBlackBars.isChecked()) {
+                btBlackBars.setText(R.string.fill_black_bars);
+                btStretch.setText(null);
+                btCrop.setText(null);
 
                 aspectRatioMode = 1;
             }
         });
-        bt_stretch.setOnClickListener(v -> {
-            if (bt_stretch.isChecked()) {
-                bt_stretch.setText(R.string.fill_stretch);
-                bt_black_bars.setText(null);
-                bt_crop.setText(null);
+        btStretch.setOnClickListener(v -> {
+            if (btStretch.isChecked()) {
+                btStretch.setText(R.string.fill_stretch);
+                btBlackBars.setText(null);
+                btCrop.setText(null);
 
                 aspectRatioMode = 2;
             }
@@ -567,11 +567,11 @@ public class SettingsActivity extends AppCompatActivity {
     private void bindToggleButtonSymbology() {
         ConstraintLayout parentLayout = findViewById(R.id.constraintLayoutSettings);
 
-        bt_all_symbology.setOnClickListener(v -> {
-            if (bt_all_symbology.isChecked()) {
-                bt_all_symbology.setIcon(ContextCompat.getDrawable(this, R.drawable.check_all));
-                bt_spec_symbology.setIcon(null);
-                bt_none_symbology.setIcon(null);
+        btAllSymbology.setOnClickListener(v -> {
+            if (btAllSymbology.isChecked()) {
+                btAllSymbology.setIcon(ContextCompat.getDrawable(this, R.drawable.check_all));
+                btSpecSymbology.setIcon(null);
+                btNoneSymbology.setIcon(null);
 
                 for (BarcodeType symbology : BarcodeType.values()) {
                     CheckBox checkBox = parentLayout.findViewWithTag("checkbox_" + symbology.name());
@@ -583,11 +583,11 @@ public class SettingsActivity extends AppCompatActivity {
                 segmentedSymbologyState = 0;
             }
         });
-        bt_spec_symbology.setOnClickListener(v -> {
-            if (bt_spec_symbology.isChecked()) {
-                bt_spec_symbology.setIcon(ContextCompat.getDrawable(this, R.drawable.search));
-                bt_all_symbology.setIcon(null);
-                bt_none_symbology.setIcon(null);
+        btSpecSymbology.setOnClickListener(v -> {
+            if (btSpecSymbology.isChecked()) {
+                btSpecSymbology.setIcon(ContextCompat.getDrawable(this, R.drawable.search));
+                btAllSymbology.setIcon(null);
+                btNoneSymbology.setIcon(null);
 
                 for (BarcodeType symbology : BarcodeType.values()) {
                     CheckBox checkBox = parentLayout.findViewWithTag("checkbox_" + symbology.name());
@@ -598,11 +598,11 @@ public class SettingsActivity extends AppCompatActivity {
                 segmentedSymbologyState = 1;
             }
         });
-        bt_none_symbology.setOnClickListener(v -> {
-            if (bt_none_symbology.isChecked()) {
-                bt_all_symbology.setIcon(null);
-                bt_spec_symbology.setIcon(null);
-                bt_none_symbology.setIcon(ContextCompat.getDrawable(this, R.drawable.cross));
+        btNoneSymbology.setOnClickListener(v -> {
+            if (btNoneSymbology.isChecked()) {
+                btAllSymbology.setIcon(null);
+                btSpecSymbology.setIcon(null);
+                btNoneSymbology.setIcon(ContextCompat.getDrawable(this, R.drawable.cross));
 
                 for (BarcodeType symbology : BarcodeType.values()) {
                     CheckBox checkBox = parentLayout.findViewWithTag("checkbox_" + symbology.name());
@@ -620,9 +620,9 @@ public class SettingsActivity extends AppCompatActivity {
      * Set the state of segmented button for provider and aspect ratio mode
      */
     private void setSegmentedButtonState(boolean isProvider) {
-        MaterialButton bt_1 = isProvider ? bt_all : bt_crop;
-        MaterialButton bt_2 = isProvider ? bt_spec : bt_black_bars;
-        MaterialButton bt_3 = isProvider ? bt_none : bt_stretch;
+        MaterialButton bt_1 = isProvider ? btAll : btCrop;
+        MaterialButton bt_2 = isProvider ? btSpec : btBlackBars;
+        MaterialButton bt_3 = isProvider ? btNone : btStretch;
 
         int buttonState = isProvider ? segmentedButtonProvidersState : aspectRatioMode;
 
@@ -651,19 +651,19 @@ public class SettingsActivity extends AppCompatActivity {
     private void setSymbologySegmentedButtonState() {
         switch (segmentedSymbologyState) {
             case 0:
-                bt_all_symbology.performClick();
-                bt_spec_symbology.setChecked(false);
-                bt_none_symbology.setChecked(false);
+                btAllSymbology.performClick();
+                btSpecSymbology.setChecked(false);
+                btNoneSymbology.setChecked(false);
                 break;
             case 1:
-                bt_all_symbology.setChecked(false);
-                bt_spec_symbology.performClick();
-                bt_none_symbology.setChecked(false);
+                btAllSymbology.setChecked(false);
+                btSpecSymbology.performClick();
+                btNoneSymbology.setChecked(false);
                 break;
             case 2:
-                bt_all_symbology.setChecked(false);
-                bt_spec_symbology.setChecked(false);
-                bt_none_symbology.performClick();
+                btAllSymbology.setChecked(false);
+                btSpecSymbology.setChecked(false);
+                btNoneSymbology.performClick();
                 break;
         }
     }

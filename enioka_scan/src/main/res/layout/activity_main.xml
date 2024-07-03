@@ -8,7 +8,7 @@
     tools:context=".activities.ScannerCompatActivity">
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/scanner_card_last_scan"
+        android:id="@+id/scannerCardLastScan"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_marginTop="10dp"
@@ -21,7 +21,7 @@
         app:cardCornerRadius="12dp">
 
         <TextView
-            android:id="@+id/scanner_text_last_scan"
+            android:id="@+id/scannerTextLastScan"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:autoSizeTextType="uniform"
@@ -36,7 +36,7 @@
     </com.google.android.material.card.MaterialCardView>
 
     <TextView
-        android:id="@+id/scanner_provider_text"
+        android:id="@+id/scannerProviderText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
@@ -46,11 +46,11 @@
         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
         android:gravity="center"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_layout"
-        app:layout_constraintTop_toBottomOf="@+id/scanner_card_last_scan"/>
+        app:layout_constraintBottom_toTopOf="@+id/bottomLayout"
+        app:layout_constraintTop_toBottomOf="@+id/scannerCardLastScan"/>
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/scanner_provider_status_card"
+        android:id="@+id/scannerProviderStatusCard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
@@ -59,10 +59,10 @@
         app:cardBackgroundColor="@color/cardBackgroundDone"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scanner_provider_text">
+        app:layout_constraintTop_toBottomOf="@+id/scannerProviderText">
 
         <TextView
-            android:id="@+id/scanner_provider_status_text"
+            android:id="@+id/scannerProviderStatusText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -72,14 +72,14 @@
             android:textAppearance="@style/TextAppearance.Material3.BodySmall"
             android:gravity="center"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/bottom_layout"
-            app:layout_constraintTop_toBottomOf="@+id/scanner_card_last_scan"/>
+            app:layout_constraintBottom_toTopOf="@+id/bottomLayout"
+            app:layout_constraintTop_toBottomOf="@+id/scannerCardLastScan"/>
 
     </com.google.android.material.card.MaterialCardView>
 
 
     <LinearLayout
-        android:id="@+id/bottom_layout"
+        android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -91,7 +91,7 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/scanner_bt_camera"
+            android:id="@+id/scannerBtCamera"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="55dp"
@@ -99,10 +99,10 @@
             android:layout_marginEnd="12dp"
             app:icon="@drawable/camera_fill"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/scanner_bt_provider_logs"/>
+            app:layout_constraintEnd_toStartOf="@+id/scannerBtProviderLogs"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/scanner_bt_provider_logs"
+            android:id="@+id/scannerBtProviderLogs"
             android:layout_width="wrap_content"
             android:layout_height="55dp"
             android:layout_marginEnd="12dp"
@@ -112,7 +112,7 @@
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/open_link"
+        android:id="@+id/openLink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
@@ -122,10 +122,10 @@
         android:visibility="gone"
         app:icon="@drawable/open_link"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scanner_card_last_scan" />
+        app:layout_constraintTop_toBottomOf="@id/scannerCardLastScan" />
 
     <com.google.android.material.materialswitch.MaterialSwitch
-        android:id="@+id/scanner_trigger_on"
+        android:id="@+id/scannerTriggerOn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -133,11 +133,11 @@
         android:scaleType="fitCenter"
         android:visibility="visible"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/open_link"
+        app:layout_constraintTop_toBottomOf="@id/openLink"
         app:thumbIcon="@drawable/upc" />
 
     <TextView
-        android:id="@+id/scanner_enable_text"
+        android:id="@+id/scannerEnableText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
@@ -145,22 +145,22 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         android:visibility="visible"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scanner_trigger_on" />
+        app:layout_constraintTop_toBottomOf="@id/scannerTriggerOn" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/scanner_flashlight"
+        android:id="@+id/scannerFlashlight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
         app:fabCustomSize="48dp"
         android:visibility="gone"
         app:srcCompat="@drawable/flashlight_off"
-        app:layout_constraintTop_toBottomOf="@+id/scanner_enable_text"
+        app:layout_constraintTop_toBottomOf="@+id/scannerEnableText"
         app:layout_constraintEnd_toEndOf="parent"
         android:contentDescription="@string/fab_scanner_flashlight" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/scanner_bell"
+        android:id="@+id/scannerBell"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
@@ -168,19 +168,19 @@
         android:visibility="gone"
         app:srcCompat="@drawable/bell"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scanner_flashlight"
+        app:layout_constraintTop_toBottomOf="@id/scannerFlashlight"
         app:tint="@android:color/black"
         android:contentDescription="@string/fab_scanner_bell" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/scanner_red_led"
+        android:id="@+id/scannerRedLed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
         android:visibility="gone"
         app:srcCompat="@drawable/lightbulb"
         app:fabCustomSize="48dp"
-        app:layout_constraintTop_toBottomOf="@+id/scanner_bell"
+        app:layout_constraintTop_toBottomOf="@+id/scannerBell"
         app:layout_constraintEnd_toEndOf="parent"
         android:contentDescription="@string/fab_scanner_red_light" />
 

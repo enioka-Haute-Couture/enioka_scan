@@ -8,7 +8,7 @@
     tools:context="com.enioka.scanner.activities.ScannerCompatActivity">
 
     <com.enioka.scanner.sdk.camera.CameraBarcodeScanView
-        android:id="@+id/camera_scan_view"
+        android:id="@+id/cameraScanView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:forceCameraApiVersion="Auto"
@@ -30,7 +30,7 @@
 
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_camera_last_scan"
+        android:id="@+id/cardCameraLastScan"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_marginTop="10dp"
@@ -43,7 +43,7 @@
         app:cardCornerRadius="12dp">
 
         <TextView
-            android:id="@+id/scanner_text_last_scan"
+            android:id="@+id/scannerTextLastScan"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:autoSizeTextType="uniform"
@@ -60,7 +60,7 @@
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/scanner_card_scanner_status"
+        android:id="@+id/scannerCardScannerStatus"
         android:layout_width="0dp"
         android:layout_height="50dp"
         app:layout_constraintWidth_percent="0.95"
@@ -78,7 +78,7 @@
             android:gravity="center">
 
             <TextView
-                android:id="@+id/scanner_provider_text"
+                android:id="@+id/scannerProviderText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -87,10 +87,10 @@
                 android:gravity="center"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintBottom_toTopOf="@+id/bottom_layout"
-                app:layout_constraintTop_toBottomOf="@+id/scanner_card_last_scan"/>
+                app:layout_constraintTop_toBottomOf="@+id/scannerCardLastScan"/>
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/scanner_provider_status_card"
+                android:id="@+id/scannerProviderStatusCard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -98,10 +98,10 @@
                 app:cardBackgroundColor="@color/cardBackgroundDone"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/scanner_provider_text">
+                app:layout_constraintTop_toBottomOf="@+id/scannerProviderText">
 
                 <TextView
-                    android:id="@+id/scanner_provider_status_text"
+                    android:id="@+id/scannerProviderStatusText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -111,15 +111,15 @@
                     android:textAppearance="@style/TextAppearance.Material3.BodySmall"
                     android:gravity="center"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintBottom_toTopOf="@+id/bottom_layout"
-                    app:layout_constraintTop_toBottomOf="@+id/scanner_card_last_scan"/>
+                    app:layout_constraintBottom_toTopOf="@+id/bottomLayout"
+                    app:layout_constraintTop_toBottomOf="@+id/scannerCardLastScan"/>
 
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/open_link"
+        android:id="@+id/openLink"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
@@ -129,32 +129,32 @@
         android:visibility="gone"
         app:icon="@drawable/open_link"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_camera_last_scan" />
+        app:layout_constraintTop_toBottomOf="@id/cardCameraLastScan" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/scanner_flashlight"
+        android:id="@+id/scannerFlashlight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
         app:srcCompat="@drawable/lightbulb_off"
         app:fabCustomSize="48dp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_camera_last_scan"
+        app:layout_constraintTop_toBottomOf="@id/cardCameraLastScan"
         android:contentDescription="@string/fab_flashlight" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/scanner_bt_provider_logs"
+        android:id="@+id/scannerBtProviderLogs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
         app:srcCompat="@drawable/info"
         app:fabCustomSize="48dp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scanner_flashlight"
+        app:layout_constraintTop_toBottomOf="@id/scannerFlashlight"
         android:contentDescription="@string/fab_provider_logs" />
 
     <TextView
-        android:id="@+id/scanner_zxing_text"
+        android:id="@+id/scannerZxingText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/activity_scan_use_zxing"
@@ -163,21 +163,21 @@
         android:layout_marginEnd="8dp"
         android:background="@drawable/text_background"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-        app:layout_constraintRight_toLeftOf="@id/scanner_switch_zxing"
-        app:layout_constraintBottom_toBottomOf="@id/scanner_switch_zxing" />
+        app:layout_constraintRight_toLeftOf="@id/scannerSwitchZxing"
+        app:layout_constraintBottom_toBottomOf="@id/scannerSwitchZxing" />
 
     <com.google.android.material.materialswitch.MaterialSwitch
-        android:id="@+id/scanner_switch_zxing"
+        android:id="@+id/scannerSwitchZxing"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         app:thumbIcon="@drawable/camera2"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/scanner_switch_pause" />
+        app:layout_constraintBottom_toTopOf="@id/scannerSwitchPause" />
 
     <TextView
-        android:id="@+id/scanner_pause_text"
+        android:id="@+id/scannerPauseText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/activity_scan_pause_camera"
@@ -186,16 +186,16 @@
         android:layout_marginEnd="8dp"
         android:background="@drawable/text_background"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-        app:layout_constraintRight_toLeftOf="@id/scanner_switch_pause"
-        app:layout_constraintBottom_toBottomOf="@id/scanner_switch_pause" />
+        app:layout_constraintRight_toLeftOf="@id/scannerSwitchPause"
+        app:layout_constraintBottom_toBottomOf="@id/scannerSwitchPause" />
 
     <com.google.android.material.materialswitch.MaterialSwitch
-        android:id="@+id/scanner_switch_pause"
+        android:id="@+id/scannerSwitchPause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         app:thumbIcon="@drawable/pause_fill"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/scanner_card_scanner_status" />
+        app:layout_constraintBottom_toTopOf="@id/scannerCardScannerStatus" />
 </androidx.constraintlayout.widget.ConstraintLayout>

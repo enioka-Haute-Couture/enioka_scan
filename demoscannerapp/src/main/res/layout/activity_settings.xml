@@ -289,7 +289,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/linearLayoutIntentDevice">
 
                 <TextView
-                    android:id="@+id/textViewEnableLoging"
+                    android:id="@+id/textViewEnableLogging"
                     android:layout_width="0dp"
                     android:layout_weight="9"
                     android:layout_height="wrap_content"
@@ -368,7 +368,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/textViewAspectRatioMode">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_fill_crop"
+                    android:id="@+id/buttonFillCrop"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceCaption"
@@ -377,7 +377,7 @@
                     style="@style/Widget.Material3.Button.OutlinedButton"/>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_fill_black_bars"
+                    android:id="@+id/buttonFillBlackBars"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceCaption"
@@ -386,7 +386,7 @@
                     style="@style/Widget.Material3.Button.OutlinedButton"/>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_fill_stretch"
+                    android:id="@+id/buttonFillStretch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceCaption"
@@ -421,7 +421,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/dividerSettingsAllowedProvider" />
 
             <ImageButton
-                android:id="@+id/button_expand_provider_selection"
+                android:id="@+id/buttonExpandProviderSelection"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:scaleType="fitCenter"
@@ -446,21 +446,21 @@
                 app:layout_constraintTop_toBottomOf="@+id/textViewAllowedProviders">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_all"
+                    android:id="@+id/buttonAll"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/toogle_provider_button_all"
                     style="@style/Widget.Material3.Button.OutlinedButton"/>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_specific"
+                    android:id="@+id/buttonSpecific"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/toggle_provider_button_specific"
                     style="@style/Widget.Material3.Button.OutlinedButton"/>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_none"
+                    android:id="@+id/buttonNone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/toggle_provider_button_none"
@@ -520,21 +520,21 @@
                 app:layout_constraintTop_toBottomOf="@+id/textSymbologySelectionCaption">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_all_symbology"
+                    android:id="@+id/buttonAllSymbology"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/toogle_provider_button_all"
                     style="@style/Widget.Material3.Button.OutlinedButton"/>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_specific_symbology"
+                    android:id="@+id/buttonSpecificSymbology"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/toggle_provider_button_specific"
                     style="@style/Widget.Material3.Button.OutlinedButton"/>
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_none_symbology"
+                    android:id="@+id/buttonNoneSymbology"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/toggle_provider_button_none"
@@ -554,7 +554,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/textSymbologySelection" />
 
             <ImageButton
-                android:id="@+id/button_expand_symbology_selection"
+                android:id="@+id/buttonExpandSymbologySelection"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:scaleType="fitCenter"
@@ -582,7 +582,7 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_save"
+            android:id="@+id/buttonSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="33dp"

@@ -84,14 +84,14 @@ public class MainActivity extends ScannerCompatActivity {
             resetStatusCardStyle();
         }
 
-        TextView textLastScan = findViewById(com.enioka.scanner.R.id.scanner_text_last_scan);
+        TextView textLastScan = findViewById(com.enioka.scanner.R.id.scannerTextLastScan);
         if (textLastScan != null) {
             textLastScan.setText(Html.fromHtml(res.toString()));
             resizeScannerLastText(textLastScan);
         }
 
         // Disable the scannerSwitch when a barcode is found
-        MaterialSwitch scannerSwitch = (MaterialSwitch) findViewById(com.enioka.scanner.R.id.scanner_trigger_on);
+        MaterialSwitch scannerSwitch = (MaterialSwitch) findViewById(com.enioka.scanner.R.id.scannerTriggerOn);
         if (scannerSwitch != null) {
             scannerSwitch.setChecked(false);
         }
@@ -144,6 +144,6 @@ public class MainActivity extends ScannerCompatActivity {
             ViewSwitcher.switchLaserOrientation(this, view, flashlightViewId, orientation == Configuration.ORIENTATION_PORTRAIT);
         }
 
-        resizeScannerLastText((TextView) findViewById(com.enioka.scanner.R.id.scanner_text_last_scan));
+        resizeScannerLastText((TextView) findViewById(com.enioka.scanner.R.id.scannerTextLastScan));
     }
 }

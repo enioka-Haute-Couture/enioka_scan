@@ -1,0 +1,52 @@
+name: PlayStore release
+
+on:
+  push:
+    branches:
+      - playstore-cd
+
+jobs:
+  playstore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: "3.x"
+
+      - name: Setup fastlane
+        run: |
+          cd enioka_scan
+          bundle install
+          cd ..
+
+      - name: Restore json key # make sure that you restore the key in the correct directory (ref. fastlane/Appfile)
+        run: |
+          cd enioka_scan
+          cd fastlane
+          echo "${{ secrets.GOOGLE_API_PUB_JSON }}" | base64 --decode > service-account.json
+          cd ../..
+
+      - name: Restore keystore # make sure that you restore the key in the correct directory (same as app/gradle.properties)
+        run: |
+          cd enioka_scan/app
+          echo "${{ secrets.SIGN_KEY }}" > myKeystore.keystore.asc
+          gpg -d --passphrase ${{ secrets.SIGN_PASSWORD }} --batch myKeystore.keystore.asc > myKeystore.keystore
+          cd ../..
+
+      - name: Set up environment
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Upload app to Play Store (Internal track)
+        run: |
+          cd enioka_scan
+          bundle exec fastlane internal

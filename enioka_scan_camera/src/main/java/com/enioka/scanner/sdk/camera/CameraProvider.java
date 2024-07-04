@@ -87,9 +87,9 @@ public class CameraProvider implements CameraScannerProvider {
     }
 
     @Override
-    public void setPreviewRatioMode(View cameraView, int previewRatioMode) {
+    public void setPreviewRatioMode(View cameraView, AspectRatioMode mode) {
         if (cameraView instanceof CameraBarcodeScanView) {
-            ((CameraBarcodeScanView) cameraView).setPreviewRatioMode(previewRatioMode);
+            ((CameraBarcodeScanView) cameraView).setPreviewRatioMode(mode);
         } else {
             throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
         }

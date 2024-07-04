@@ -14,6 +14,37 @@ import java.util.Set;
  */
 public interface CameraScannerProvider {
     /**
+     * The aspect ratio mode enum of the camera preview.
+     * - FILL_WITH_CROP: The preview is cropped to fill the whole view, the aspect ratio is kept.
+     * - FILL_WITH_BLACK_BARS: The preview is not cropped, black bars are added to fill the whole view, the aspect ratio is kept.
+     * - FILL_WITH_STRETCH: The preview is stretched to fill the whole view, the aspect ratio may not be kept.
+     */
+    public enum AspectRatioMode {
+        FILL_WITH_CROP(0),
+        FILL_WITH_BLACK_BARS(1),
+        FILL_WITH_STRETCH(2);
+
+        private final int value;
+
+        AspectRatioMode(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static AspectRatioMode fromValue(int value) {
+            for (AspectRatioMode mode : AspectRatioMode.values()) {
+                if (mode.getValue() == value) {
+                    return mode;
+                }
+            }
+            throw new IllegalArgumentException("Invalid value for AspectRatioMode: " + value);
+        }
+    }
+
+    /**
      * Returns hashmap of the ID resources.
      * Contains the following keys:
      * - layout_id_camera: The ID of the layout containing the camera view.
@@ -70,7 +101,7 @@ public interface CameraScannerProvider {
     /**
      * Sets the preview ratio mode of the camera scanner.
      */
-    public void setPreviewRatioMode(View cameraView, int previewRatioMode);
+    public void setPreviewRatioMode(View cameraView, AspectRatioMode previewRatioMode);
 
     /**
      * Sets the reader engine of the camera scanner.

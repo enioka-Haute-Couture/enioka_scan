@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import com.enioka.scanner.activities.ScannerCompatActivity;
 import com.enioka.scanner.activities.ViewSwitcher;
 import com.enioka.scanner.data.Barcode;
+import com.enioka.scanner.sdk.camera.CameraScannerProvider;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
@@ -43,6 +44,30 @@ public class MainActivity extends ScannerCompatActivity {
                 });
             }
         }, TimeUnit.MILLISECONDS.toMillis(STATUS_CARD_RESET_DELAY));
+    }
+
+    @Override
+    public void initCamera() {
+        super.initCamera();
+
+        if (goToCamera && cameraScannerProvider != null) {
+            int modeId = getIntent().getIntExtra("enableKeepAspectRatio", -1);
+
+            if (modeId == -1) {
+                Log.i(LOG_TAG, "No aspect ratio mode extra found.");
+                return;
+            }
+
+            try {
+                CameraScannerProvider.AspectRatioMode mode = CameraScannerProvider.AspectRatioMode.fromValue(modeId);
+
+                Integer cameraViewId = cameraResources.get("camera_view_id");
+                View cameraView = cameraViewId != null ? findViewById(cameraViewId) : null;
+                cameraScannerProvider.setPreviewRatioMode(cameraView, mode);
+            } catch (IllegalArgumentException e) {
+                Log.e(LOG_TAG, "Invalid value for AspectRatioMode: " + modeId);
+            }
+        }
     }
 
     @Override

@@ -17,16 +17,17 @@ the device's properties.
 For most users, this is the class they will interact with if they need to interact with the Camera
 hardware and not just the [`Scanner` instance](scanner.md#the-scanner-interface).
 
-:::{method} setPreviewRatioMode(int mode) -> void
+:::{method} setPreviewRatioMode(AspectRatioMode mode) -> void
 
 Change the preview aspect ratio mode of the camera. This change will not take effect until the next
 view refresh. You can force a refresh by pausing and resuming the camera.
 
-:param int mode: The mode to use for filling the camera preview. Can be one of the following values:
-    - `0`: `fillWithCrop` (default): The preview will be scaled to fit the picture, cropping the
-        sides if needed. The aspect ratio of the preview will be kept.
-    - `1`: `fillWithBlackBars`: The preview will be scaled to fit the picture, with black bars on the
-        sides if needed. The aspect ratio of the preview will be kept.
+:param AspectRatioMode mode: The mode to use for filling the camera preview. Can be one of the
+following values:
+    - `0`: `fillWithCrop`: The preview will be scaled to fit the picture, cropping the sides if
+        needed. The aspect ratio of the preview will be kept.
+    - `1`: `fillWithBlackBars`: The preview will be scaled to fit the picture, with black bars on
+        the sides if needed. The aspect ratio of the preview will be kept.
     - `2`: `fillWithStretch`: The preview will fill the available space, by squashing or stretching
         the preview if needed. The aspect ratio of the preview can be altered.
 
@@ -193,12 +194,15 @@ The maximum vertical resolution of the camera preview, useful to limit performan
 :::{method} app:previewRatioMode
 
 The mode to use for filling the camera preview. Can be one of the following values:
-    - `0`: `fillWithCrop` (default)
-        sides if needed. The aspect ratio of the preview will be kept.
-    - `1`: `fillWithBlackBars`
-        sides if needed. The aspect ratio of the preview will be kept.
-    - `2`: `fillWithStretch`
-        the preview if needed.o of the preview will be kept.
+    - `0`: `fillWithCrop`: The preview will be scaled to fit the picture, cropping the sides if
+      needed. The aspect ratio of the preview will be kept.
+    - `1`: `fillWithBlackBars`: The preview will be scaled to fit the picture, with black bars on
+      the sides if needed. The aspect ratio of the preview will be kept.
+    - `2`: `fillWithStretch`: The preview will fill the available space, by squashing or stretching
+      the preview if needed. The aspect ratio of the preview can be altered.
+
+If the value of this attribute is not recognized or defined, the preview ratio mode will be set
+by default to `fillWithCrop`.
 :::
 
 :::{method} app:readerMode
@@ -241,6 +245,18 @@ part of the `com.enioka.scanner.sdk.camera` package, it is not directly accessib
 library.
 
 ### The `CameraScannerProvider` interface
+
+:::{enum} AspectRatioMode
+
+The mode to use for filling the camera preview. Can be one of the following values:
+- `FILL_WITH_CROP`: The preview will be scaled to fit the picture, cropping the sides if needed. The
+  aspect ratio of the preview will be kept.
+- `FILL_WITH_BLACK_BARS`: The preview will be scaled to fit the picture, with black bars on the
+  sides if needed. The aspect ratio of the preview will be kept.
+- `FILL_WITH_STRETCH`: The preview will fill the available space, by squashing or stretching the
+  preview if needed. The aspect ratio of the preview can be altered.
+
+:::
 
 :::{method} getIdResource() -> HashMap<String, Integer>
 

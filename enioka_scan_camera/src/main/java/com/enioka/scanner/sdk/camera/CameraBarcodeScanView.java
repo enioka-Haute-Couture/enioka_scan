@@ -1,5 +1,7 @@
 package com.enioka.scanner.sdk.camera;
 
+import static com.enioka.scanner.sdk.camera.CameraScannerProvider.AspectRatioMode;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.hardware.camera2.CameraAccessException;
@@ -127,7 +129,7 @@ public class CameraBarcodeScanView extends FrameLayout {
     /**
      * Set the camera preview ratio mode.
      */
-    public void setPreviewRatioMode(int mode) {
+    public void setPreviewRatioMode(AspectRatioMode mode) {
         this.proxiedView.setPreviewRatioMode(mode);
     }
 

@@ -184,10 +184,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * Define if the fallback to camera is allowed.
      */
     protected boolean allowCameraFallback = false;
-    /**
-     * Camera preview ratio mode.
-     */
-    protected int previewRatioMode = -1;
 
     /**
      * Define if the activity should go back to the scanner view or main view.
@@ -243,7 +239,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         // Get the intent extras
         loggingEnabled = getIntent().getBooleanExtra("enableLogging", false);
         allowCameraFallback = getIntent().getBooleanExtra("allowCameraFallback", false);
-        previewRatioMode = getIntent().getIntExtra("enableKeepAspectRatio", -1);
 
         // Init logging if enabled
         if (loggingEnabled) {
@@ -506,8 +501,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
 
         cameraScannerProvider.getCameraScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)), new ScannerStatusCallbackProxy(this), symbologies);
-        // Set the preview ratio mode
-        cameraScannerProvider.setPreviewRatioMode(cameraView, previewRatioMode);
 
         InitCopyClipBoard();
 

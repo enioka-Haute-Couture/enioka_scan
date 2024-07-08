@@ -39,6 +39,7 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
     implementation 'com.google.android.material:material:1.12.0'
     implementation "androidx.multidex:multidex:2.0.1"
+    implementation 'androidx.test.espresso:espresso-idling-resource:3.6.1'
 
 
     // ZBAR & ZXING (Zebra Crossing) = camera. From Maven Central.
@@ -51,7 +52,7 @@ dependencies {
     api 'com.google.zxing:core:3.5.1'
 
     // Test things (useless for now)
-    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.6.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     androidTestImplementation project(path: ':enioka_scan_mock')

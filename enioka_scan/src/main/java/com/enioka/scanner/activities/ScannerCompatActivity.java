@@ -765,8 +765,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
                     clipboard.setPrimaryClip(clip);
 
+                    SnackbarResource.increment();
                     Snackbar snackbar = Snackbar.make(v, R.string.last_scan_clipboard, Snackbar.LENGTH_SHORT);
-                    snackbar.show();
+                    snackbar.addCallback(SnackbarResource.getSnackbarCallback()).show();
                 }
             });
             scannerStatusCard.setClickable(false);
@@ -900,7 +901,9 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             cameraScannerProvider.setReaderMode(cameraView, isChecked);
 
             // Show snackbar message informing the user of the change
-            Snackbar.make(buttonView, isChecked ? R.string.snack_message_zxing : R.string.snack_message_zbar, Snackbar.LENGTH_SHORT).show();
+            Snackbar snackbar = Snackbar.make(buttonView, isChecked ? R.string.snack_message_zxing : R.string.snack_message_zbar, Snackbar.LENGTH_SHORT);
+            SnackbarResource.increment();
+            snackbar.addCallback(SnackbarResource.getSnackbarCallback()).show();
         });
     }
 

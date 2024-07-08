@@ -83,7 +83,9 @@ public class MainActivity extends ScannerCompatActivity {
             Log.d(LOG_TAG, "Received barcode from scanner: " + b.getBarcode() + " - " + b.getBarcodeType().code);
             res.append(buildBarcodeText(b.getBarcodeType().code, b.getBarcode()));
 
-            writeResultToLog(b);
+            if (loggingEnabled) {
+                writeResultToLog(b);
+            }
 
             try {
                 // Check if content is an URL

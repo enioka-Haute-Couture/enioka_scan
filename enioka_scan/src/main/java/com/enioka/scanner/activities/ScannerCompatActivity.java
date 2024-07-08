@@ -1010,6 +1010,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected synchronized void writeResultToLog(Barcode data) {
         if (logFileUri == null) {
             Log.i(LOG_TAG, "Log file URI is null, cannot write data to log file");
+            return;
         }
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss");

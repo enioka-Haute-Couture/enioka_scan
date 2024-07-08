@@ -46,7 +46,7 @@ public class MyScanningActivity extends ScannerCompatActivity {
 
 This creates an activity with a very simple layout, which displays status messages from the scanners
 as well as scanning results and some utility buttons: triggers for the scanner, a toggle for 
-illumination, and a beep trigger.
+illumination, a beep trigger, a trigger to the camera scanner and a trigger to show scanner logs.
 
 If the camera scanner SDK is included (`com.enioka.scanner.sdk.camera`), the default camera layout
 and view will also be available inside the activity.
@@ -136,7 +136,8 @@ The camera scanner can actually be used easily inside your own activities withou
 rest of the library (no need to use the scanner service, etc) by just adding the
 `CameraBarcodeScanView` to your layouts, and then registering a callback on this view using
 `CameraBarcodeScanView.setResultHandler`. Other APIs are available to enable the torch or pause
-scanning.
+scanning. You can also use the `CameraProvider` class to get a camera instance and control it,
+including the main functionalities of the camera scanner.
 
 The provided Camera activity will display a target rectangle, which can be moved or tapped to change
 or refresh the autofocus area.

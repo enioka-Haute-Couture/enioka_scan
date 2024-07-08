@@ -1,5 +1,7 @@
 package com.enioka.scanner.sdk.camera;
 
+import static com.enioka.scanner.sdk.camera.CameraScannerProvider.AspectRatioMode;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -19,7 +21,6 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -66,7 +67,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     protected SurfaceView camPreviewSurfaceView;
     protected TargetView targetView;
     protected final TypedArray styledAttributes;
-    protected int aspectRatioMode;
+    protected AspectRatioMode aspectRatioMode;
 
 
     public CameraBarcodeScanViewBase(@NonNull Context context) {
@@ -98,7 +99,8 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
         this.resolution.minResolutionY = styledAttributes.getInteger(R.styleable.CameraBarcodeScanView_minResolutionY, 720);
         this.resolution.maxResolutionY = styledAttributes.getInteger(R.styleable.CameraBarcodeScanView_maxResolutionY, 1080);
         this.resolution.maxDistortionRatio = styledAttributes.getFloat(R.styleable.CameraBarcodeScanView_maxDistortionRatio, 0.3f);
-        this.aspectRatioMode = styledAttributes.getInt(R.styleable.CameraBarcodeScanView_previewRatioMode, 0);
+        this.aspectRatioMode = AspectRatioMode.fromValue(styledAttributes.getInt(R.styleable.CameraBarcodeScanView_previewRatioMode, 0));
+
         initLayout();
     }
 
@@ -136,12 +138,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     // Public API, various setters
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void setPreviewRatioMode(int mode) {
-        // If preview ratio mode is not defined, use the default value
-        if (mode == -1) {
-            return;
-        }
-
+    public void setPreviewRatioMode(AspectRatioMode mode) {
         if (this.camPreviewSurfaceView == null) {
             aspectRatioMode = mode;
             return;

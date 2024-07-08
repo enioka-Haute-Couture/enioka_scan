@@ -29,7 +29,6 @@ import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Html;
-import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -126,15 +125,18 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     @Deprecated
     protected Integer zbarViewId = null;
     /**
-     * The ID of the ImageButton on which to press to manually switch to camera mode.
+     * The ID of the MaterialButton on which to press to manually switch to camera mode.
      */
     protected int cameraToggleId = R.id.scannerBtCamera;
 
     /**
-     * The ID of the optional ImageButton on which to press to toggle the flashlight/illumination.
+     * The ID of the optional MaterialButton on which to press to toggle the flashlight/illumination.
      */
     protected int flashlightViewId = R.id.scannerFlashlight;
 
+    /**
+     * The ID of the optional MaterialButton on which to press to launch the manual provider log dialog.
+     */
     protected int providerLogOpenViewId = R.id.scannerBtProviderLogs;
 
     /**
@@ -182,10 +184,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * Define if the fallback to camera is allowed.
      */
     protected boolean allowCameraFallback = false;
-    /**
-     * Camera preview ratio mode.
-     */
-    protected int previewRatioMode = -1;
 
     /**
      * Define if the activity should go back to the scanner view or main view.
@@ -234,13 +232,13 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         // Ascending compatibility
         if (zbarViewId != null) {
+            setCameraViewId();
             cameraResources.put("camera_view_id", zbarViewId);
         }
 
         // Get the intent extras
         loggingEnabled = getIntent().getBooleanExtra("enableLogging", false);
         allowCameraFallback = getIntent().getBooleanExtra("allowCameraFallback", false);
-        previewRatioMode = getIntent().getIntExtra("enableKeepAspectRatio", -1);
 
         // Init logging if enabled
         if (loggingEnabled) {
@@ -436,25 +434,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Configuration hooks
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @SuppressWarnings("unused")
-    public void setAutocompletion(List<String> autocompletion, int threshold) {
-        for (String item : autocompletion) {
-            this.autocompletionItems.add(new ManualInputItem(item, false));
-        }
-        this.threshold = threshold;
-    }
-
-    @SuppressWarnings("unused")
-    public void setAutocompletionItems(List<ManualInputItem> items, int threshold) {
-        this.autocompletionItems = items;
-        this.threshold = threshold;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // Camera
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -522,8 +501,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         }
 
         cameraScannerProvider.getCameraScanner(cameraView, new ScannerDataCallbackProxy((s, data) -> ScannerCompatActivity.this.onData(data)), new ScannerStatusCallbackProxy(this), symbologies);
-        // Set the preview ratio mode
-        cameraScannerProvider.setPreviewRatioMode(cameraView, previewRatioMode);
 
         InitCopyClipBoard();
 
@@ -632,8 +609,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             displayToggleLedButton();
             displaySwitchScanButton();
             displayBellButton();
-        } else {
-
         }
     }
 
@@ -1038,6 +1013,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected synchronized void writeResultToLog(Barcode data) {
         if (logFileUri == null) {
             Log.i(LOG_TAG, "Log file URI is null, cannot write data to log file");
+            return;
         }
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss");

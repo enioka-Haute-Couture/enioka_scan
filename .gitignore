@@ -9,5 +9,7 @@
 /.idea/libraries
 .DS_Store
 **/build/
+**/debug/
+**/release/
 /captures
 .externalNativeBuild

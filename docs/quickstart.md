@@ -15,7 +15,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation 'com.enioka.scanner:scanner:2.4.1:aar'
+    implementation 'com.enioka.scanner:enioka-scan-core:3.0.0:aar'
 }
 ```
 
@@ -121,7 +121,7 @@ help converting search parameters to and from those intent extras.
 
 * `com.enioka.scanner.sdk.camera` dependencies are required to use the camera scanner, check
   [library dependencies and compatibility matrix](dependencies.md).
-  :::
+:::
 
 When there is no laser scanner available, or when a button is clicked, the `ScannerCompatActivity` 
 activity will fallback to using the device camera (if any) to scan barcodes. This leverages two 

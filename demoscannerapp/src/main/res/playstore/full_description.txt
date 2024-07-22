@@ -1,0 +1,20 @@
+This application is a demo for enioka Scan, a library that makes the integration of all barcode scanners easy in any Android application, avoiding vendor lock-in and lowering the cost of advanced scanner integration.
+
+It is compatible with a wide variety of scanning devices, integrated or external, from different vendors such as Zebra, Honeywell, Athesi and more.
+
+When there are no compatible hardware devices available, the library provides a camera reader based on ZBar (default) or ZXing.
+
+Through a common abstraction, it provides access to the following methods (provided the hardware supports them):
+
+- press/release the scanner's trigger
+- pause/resume scanning abilities
+- disconnect/reconnect scanners
+- enable/disable illumination from the scanner
+- enable/disable colored LEDs
+- set scanner enabled symbologies
+
+Finally, it provides a ready to use Service that handles scanner lifecycles, as well as a template Activity, allowing you to use scanners in a matter of minutes.
+
+This app includes all of the library's compatibility modules.
+
+Check out the library and its source code on GitHub: https://github.com/enioka-Haute-Couture/enioka_scan

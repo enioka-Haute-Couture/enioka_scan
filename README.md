@@ -29,19 +29,19 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation 'com.enioka.scanner:scanner:2.4.1:aar'
+    implementation 'com.enioka.scanner:enioka-scan-core:3.0.0:aar'
 }
 ```
 
-More artefacts may be required depending on your devices, the full list and compatibility matrix are
-available in the documentation.
+More artefacts are be required to add compatibility to your devices, the full list and compatibility
+matrix are available in the documentation.
 
 ## Documentation
 
-You can learn more about **enioka Scan** by reading the [official documentation](https://enioka-scan.readthedocs.io/en/latest/).
+You can learn more about **enioka Scan** by reading the [official documentation](https://enioka-scan.readthedocs.io/en/stable/).
 
 Most notably:
-- [The quick-start guide](https://enioka-scan.readthedocs.io/en/latest/quickstart.html)
-- [Dependencies and compatible devices](https://enioka-scan.readthedocs.io/en/latest/dependencies.html)
-- [The API reference](https://enioka-scan.readthedocs.io/en/latest/api/index.html)
-- [How to develop for enioka Scan](https://enioka-scan.readthedocs.io/en/latest/develop.html)
+- [The quick-start guide](https://enioka-scan.readthedocs.io/en/stable/quickstart.html)
+- [Dependencies and compatible devices](https://enioka-scan.readthedocs.io/en/stable/dependencies.html)
+- [The API reference](https://enioka-scan.readthedocs.io/en/stable/api/index.html)
+- [How to develop for enioka Scan](https://enioka-scan.readthedocs.io/en/stable/develop.html)

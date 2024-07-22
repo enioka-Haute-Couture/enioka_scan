@@ -12,12 +12,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
-        debug {
-            storeFile file("debug.keystore")
-            storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias System.getenv("KEY_ALIAS")
-            keyPassword System.getenv("SIGNKEY_PASSWORD")
-        }
         release {
             storeFile file("debug.keystore")
             storePassword System.getenv("KEYSTORE_PASSWORD")
@@ -35,7 +29,6 @@ android {
             applicationIdSuffix ".release"
         }
         debug {
-            signingConfig signingConfigs.debug
             debuggable true
             applicationIdSuffix ".debug"
         }

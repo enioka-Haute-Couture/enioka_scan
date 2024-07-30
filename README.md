@@ -38,10 +38,10 @@ matrix are available in the documentation.
 
 ## Documentation
 
-You can learn more about **enioka Scan** by reading the [official documentation](https://enioka-scan.readthedocs.io/en/stable/).
+You can learn more about **enioka Scan** by reading the [official documentation](https://enioka-scan.readthedocs.io/en/latest/).
 
 Most notably:
-- [The quick-start guide](https://enioka-scan.readthedocs.io/en/stable/quickstart.html)
-- [Dependencies and compatible devices](https://enioka-scan.readthedocs.io/en/stable/dependencies.html)
-- [The API reference](https://enioka-scan.readthedocs.io/en/stable/api/index.html)
-- [How to develop for enioka Scan](https://enioka-scan.readthedocs.io/en/stable/develop.html)
+- [The quick-start guide](https://enioka-scan.readthedocs.io/en/latest/quickstart.html)
+- [Dependencies and compatible devices](https://enioka-scan.readthedocs.io/en/latest/dependencies.html)
+- [The API reference](https://enioka-scan.readthedocs.io/en/latest/api/index.html)
+- [How to develop for enioka Scan](https://enioka-scan.readthedocs.io/en/latest/develop.html)

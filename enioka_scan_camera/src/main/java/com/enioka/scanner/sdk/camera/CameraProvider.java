@@ -26,7 +26,7 @@ public class CameraProvider implements CameraScannerProvider {
         idResources.put("scanner_toggle_view_id", R.id.scannerSwitchZxing);
         idResources.put("scanner_toggle_pause_id", R.id.scannerSwitchPause);
         idResources.put("card_last_scan_id", R.id.cardCameraLastScan);
-        idResources.put("constraint_layout_id", R.id.constraint_layout_main_activity);
+        idResources.put("constraint_layout_id", R.id.constraintLayoutMainActivity);
         idResources.put("scanner_flashlight_id", R.id.scannerFlashlight);
         idResources.put("scanner_bt_provider_logs", R.id.scannerBtProviderLogs);
 

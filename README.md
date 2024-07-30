@@ -29,12 +29,12 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation 'com.enioka.scanner:scanner:2.4.1:aar'
+    implementation 'com.enioka.scanner:enioka-scan-core:3.0.0:aar'
 }
 ```
 
-More artefacts may be required depending on your devices, the full list and compatibility matrix are
-available in the documentation.
+More artefacts are be required to add compatibility to your devices, the full list and compatibility
+matrix are available in the documentation.
 
 ## Documentation
 

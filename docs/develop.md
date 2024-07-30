@@ -83,6 +83,12 @@ Once enough features or fixes are merged into `master`, a new version tag will b
 repository owner/maintainer. This will trigger a GitHub Action workflow to create a release with an
 artefact of the core library, and will upload all artefacts to Maven Central.
 
+Every tagged commit should include an increment to `demoscannerapp/build.gradle`'s `versionCode`
+value, even if the previous release was canceled. The Google Play Store console will not accept
+the re-publishing of an existing `versionCode` value, and fixing a denied version code will require
+the re-push of the release. The `versionName` value should just match the tag, and multiple releases
+can have the same `versionName`.
+
 :::{warning}
 
 The release tag ***must*** be pushed from the CLI, as a tag or release created from the

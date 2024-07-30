@@ -1,0 +1,1 @@
+Integration library for all your Android barcode scanner integration needs

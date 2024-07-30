@@ -42,8 +42,8 @@ jobs:
           LIB_VERSION: ${{ steps.get_version.outputs.VERSION }}
           GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
           GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
-      - name: Rename the AAR file for GitHub release upload
-        run: mv enioka_scan/build/outputs/aar/enioka_scan-release.aar enioka_scan/build/outputs/aar/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aar
+#      - name: Rename the AAR file for GitHub release upload
+#        run: mv enioka_scan/build/outputs/aar/enioka_scan-release.aar enioka_scan/build/outputs/aar/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aar
       - name: Restore json key
         run: echo "${{ secrets.GOOGLE_API_PUB_JSON_BASE64 }}" | base64 --decode >  ${{ github.workspace }}/service-account.json
       - name: Restore keystore
@@ -54,14 +54,13 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_KEYSTORE_PASSWORD }}
           SIGNKEY_PASSWORD: ${{ secrets.GOOGLE_SIGNKEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.GOOGLE_SIGNKEY_ALIAS }}
-      - name: Upload aab as artefact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release
-          path: ${{ github.workspace }}/demoscannerapp/build/outputs/bundle/release/demoscannerapp-release.aab
+      - name: Rename the AAB file for GitHub release upload
+        run: mv demoscannerapp/build/outputs/bundle/release/demoscannerapp-release.aab demoscannerapp/build/outputs/bundle/release/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aab
       - name: Create a GitHub release with the AAR file as an asset
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.get_version.outputs.VERSION }}
-          files: enioka_scan/build/outputs/aar/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aar
+          files: |
+#            enioka_scan/build/outputs/aar/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aar
+            demoscannerapp/build/outputs/bundle/release/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aab
           token: ${{ secrets.GITHUB_TOKEN }}

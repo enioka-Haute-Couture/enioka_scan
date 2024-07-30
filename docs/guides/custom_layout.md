@@ -29,19 +29,26 @@ To ensure activity is able to properly switch to the camera when needed, you sho
 following view block in the `<layout>.xml` file used by `layoutIdCamera`:
 
 ```xml
-<com.enioka.scanner.camera.CameraBarcodeScanView
-    android:id="@+id/camera_scan_view"
+<com.enioka.scanner.sdk.camera.CameraBarcodeScanView
+    android:id="@+id/cameraScanView"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
     app:forceCameraApiVersion="Auto"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
     app:maxDistortionRatio="0.3"
+    app:minResolutionY="720"
     app:maxResolutionY="1080"
-    app:previewRatioMode="fillAvailableSpace"
+    app:previewRatioMode="fillWithCrop"
     app:readerMode="Auto"
     app:storePreferredResolution="false"
-    app:targetColor="@color/colorRed"
+    app:targetColorActive="@color/colorRed"
     app:targetColorPaused="@color/defaultItemColor"
     app:targetIsFixed="false"
     app:targetStrokeWidth="5"
-    app:useAdaptiveResolution="true"  />
+    app:useAdaptiveResolution="true" />
 ```
 
 Should you choose a different ID for this view, remember to also change the value of the

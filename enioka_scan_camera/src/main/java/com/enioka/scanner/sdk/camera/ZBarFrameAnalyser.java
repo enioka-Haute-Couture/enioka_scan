@@ -38,8 +38,6 @@ class ZBarFrameAnalyser extends FrameAnalyser {
         barcodeTypeZBar2Lib.put(Symbol.UPCE, BarcodeType.UPCE);
         barcodeTypeZBar2Lib.put(Symbol.QRCODE, BarcodeType.QRCODE);
         barcodeTypeZBar2Lib.put(Symbol.PDF417, BarcodeType.PDF417);
-        // To be confirmed
-        barcodeTypeZBar2Lib.put(Symbol.ISBN13, BarcodeType.EAN13);
         barcodeTypeZBar2Lib.put(Symbol.ISBN10, BarcodeType.ISBN10);
         barcodeTypeZBar2Lib.put(Symbol.CODABAR, BarcodeType.CODABAR);
 

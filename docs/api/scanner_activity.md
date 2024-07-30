@@ -58,24 +58,23 @@ The hashmap containing the IDs of the views used by the camera scanner. May be r
 own.
 
 If the camera SDK is included, it will be set to a map containing the following values:
-- layout_id_camera: The ID of the layout containing the camera view
-:::{cpp:var}R.layout.activity_main_alt:::.
-- camera_view_id: The ID of the camera view in the layout :::{cpp:var}R.id.cameraScanView:::.
-  It is the ID of the [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the
-  `layout_id_camera` layout.
-  :::.
-- scanner_toggle_view_id: It is the ID of the optional ImageButton on which to press to toggle the 
-zxing/zbar camera scan library :::{cpp:var}R.id.scannerSwitchZxing:::.
-- scanner_toggle_pause_id: The ID of the optional toggle button on which to press to pause/unpause 
-the scanner :::{cpp:var}R.id.scannerSwitchPause:::.
-- card_last_scan_id: ID of the card view that displays the last scan
-:::{cpp:var}R.id.cardCameraLastScan:::.
-- constraint_layout_id: The ID of the constraint layout inside the camera layout
-:::{cpp:var}R.id.constraintLayoutMainActivity:::.
-- scanner_flashlight_id: The ID of the optional ImageButton on which to press to toggle the
-flashlight/illumination :::{cpp:var}R.id.scannerFlashlight:::.
-- scanner_bt_provider_logs: The ID of the optional ImageButton on which to press to manually access
-available providers logs :::{cpp:var}R.id.scannerBtProviderLogs:::.
+- `layout_id_camera`: The ID of the layout containing the camera view.
+  Defaults to `R.layout.activity_main_alt`.
+- `camera_view_id`: The ID of the
+  [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the `layout_id_camera`
+  layout. Defaults to `R.id.cameraScanView`.
+- `scanner_toggle_view_id`: The ID of the optional ImageButton on which to press to toggle the 
+  zxing/zbar camera scan library. Defaults to `R.id.scannerSwitchZxing`.
+- `scanner_toggle_pause_id`: The ID of the optional toggle button on which to press to pause/unpause 
+  the scanner. Defaults to `R.id.scannerSwitchPause`.
+- `card_last_scan_id`: The ID of the card view that displays the last scan.
+  Defaults to `R.id.cardCameraLastScan`.
+- `constraint_layout_id`: The ID of the constraint layout inside the camera layout.
+  Defaults to `R.id.constraintLayoutMainActivity`.
+- `scanner_flashlight_id`: The ID of the optional ImageButton on which to press to toggle the
+  flashlight/illumination. Defaults to `R.id.scannerFlashlight`.
+- `scanner_bt_provider_logs`: The ID of the optional ImageButton on which to press to manually access
+  available providers logs. Defaults to `R.id.scannerBtProviderLogs`.
 :::
 
 :::{cpp:var} int cameraToggleId = R.id.scannerBtCamera

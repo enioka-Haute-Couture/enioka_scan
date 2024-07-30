@@ -24,31 +24,33 @@ view refresh. You can force a refresh by pausing and resuming the camera.
 
 :param AspectRatioMode mode: The mode to use for filling the camera preview. Can be one of the
 following values:
-    - `0`: `fillWithCrop`: The preview will be scaled to fit the picture, cropping the sides if
-        needed. The aspect ratio of the preview will be kept.
-    - `1`: `fillWithBlackBars`: The preview will be scaled to fit the picture, with black bars on
-        the sides if needed. The aspect ratio of the preview will be kept.
-    - `2`: `fillWithStretch`: The preview will fill the available space, by squashing or stretching
-        the preview if needed. The aspect ratio of the preview can be altered.
+- `0`: `fillWithCrop`: The preview will be scaled to fit the picture, cropping the sides if
+    needed. The aspect ratio of the preview will be kept.
+- `1`: `fillWithBlackBars`: The preview will be scaled to fit the picture, with black bars on
+    the sides if needed. The aspect ratio of the preview will be kept.
+- `2`: `fillWithStretch`: The preview will fill the available space, by squashing or stretching
+    the preview if needed. The aspect ratio of the preview can be altered.
+:::
 
-.. image:: /pictures/crop.png
+Example of a preview with the `fillWithCrop` mode:
+
+:::{image} /pictures/crop.png
 :width: 400
-:alt: fillWithCrop
+:alt: Example of a preview with the `fillWithCrop` mode.
+:::
 
-Example of a preview with the `fillWithCrop` mode.
+Example of a preview with the `fillWithBlackBars` mode:
 
-.. image:: /pictures/black_bars.png
+:::{image} /pictures/black_bars.png
 :width: 400
-:alt: fillWithBlackBars
+:alt: Example of a preview with the `fillWithBlackBars` mode.
+:::
 
-Example of a preview with the `fillWithBlackBars` mode.
+Example of a preview with the `fillWithStretch` mode:
 
-.. image:: /pictures/stretch.png
+:::{image} /pictures/stretch.png
 :width: 400
-:alt: fillWithStretch
-
-Example of a preview with the `fillWithStretch` mode.
-
+:alt: Example of a preview with the `fillWithStretch` mode.
 :::
 
 :::{method} setReaderMode(CameraReader readerMode) -> void
@@ -143,8 +145,8 @@ To use this view in your own layout, you can add the following block to its XML 
 the attributes to your needs:
 
 ```xml
-<com.enioka.scanner.camera.CameraBarcodeScanView
-    android:id="@+id/camera_scan_view"
+<com.enioka.scanner.sdk.camera.CameraBarcodeScanView
+    android:id="@+id/cameraScanView"
     android:layout_width="0dp"
     android:layout_height="0dp"
     app:forceCameraApiVersion="Auto"
@@ -162,8 +164,7 @@ the attributes to your needs:
     app:targetColorPaused="@color/defaultItemColor"
     app:targetIsFixed="false"
     app:targetStrokeWidth="5"
-    app:useAdaptiveResolution="true" 
-/>
+    app:useAdaptiveResolution="true" />
 ```
 
 The main XML attributes are as follow:
@@ -194,12 +195,12 @@ The maximum vertical resolution of the camera preview, useful to limit performan
 :::{method} app:previewRatioMode
 
 The mode to use for filling the camera preview. Can be one of the following values:
-    - `0`: `fillWithCrop`: The preview will be scaled to fit the picture, cropping the sides if
-      needed. The aspect ratio of the preview will be kept.
-    - `1`: `fillWithBlackBars`: The preview will be scaled to fit the picture, with black bars on
-      the sides if needed. The aspect ratio of the preview will be kept.
-    - `2`: `fillWithStretch`: The preview will fill the available space, by squashing or stretching
-      the preview if needed. The aspect ratio of the preview can be altered.
+- `0`: `fillWithCrop`: The preview will be scaled to fit the picture, cropping the sides if
+  needed. The aspect ratio of the preview will be kept.
+- `1`: `fillWithBlackBars`: The preview will be scaled to fit the picture, with black bars on
+  the sides if needed. The aspect ratio of the preview will be kept.
+- `2`: `fillWithStretch`: The preview will fill the available space, by squashing or stretching
+  the preview if needed. The aspect ratio of the preview can be altered.
 
 If the value of this attribute is not recognized or defined, the preview ratio mode will be set
 by default to `fillWithCrop`.
@@ -263,17 +264,24 @@ The mode to use for filling the camera preview. Can be one of the following valu
 :returns: A map containing the IDs of the views used by the camera scanner. May be replaced with
 your own.
 
-Contains the following keys:
-- layout_id_camera: The ID of the layout containing the camera view.
-- camera_view_id: The ID of the camera view in the layout.
-- scanner_toggle_view_id: The ID of the view that toggles the scanner library reader.
-- scanner_toggle_pause_id: The ID of the view that toggles the pause of the scanner.
-- card_last_scan_id: ID of the card view that displays the last scan.
-- constraint_layout_id: The ID of the constraint layout inside the camera layout.
-- scanner_flashlight_id: The ID of the optional ImageButton on which to press to toggle the
-flashlight/illumination.
-- scanner_bt_provider_logs: The ID of the optional ImageButton on which to press to manually access 
-available providers logs
+It contains the following values:
+- `layout_id_camera`: The ID of the layout containing the camera view.
+  Set to `R.layout.activity_main_alt`.
+- `camera_view_id`: The ID of the
+  [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the `layout_id_camera`
+  layout. Set to `R.id.cameraScanView`.
+- `scanner_toggle_view_id`: The ID of the optional ImageButton on which to press to toggle the
+  zxing/zbar camera scan library. Set to `R.id.scannerSwitchZxing`.
+- `scanner_toggle_pause_id`: The ID of the optional toggle button on which to press to pause/unpause
+  the scanner. Set to `R.id.scannerSwitchPause`.
+- `card_last_scan_id`: The ID of the card view that displays the last scan.
+  Set to `R.id.cardCameraLastScan`.
+- `constraint_layout_id`: The ID of the constraint layout inside the camera layout.
+  Set to `R.id.constraintLayoutMainActivity`.
+- `scanner_flashlight_id`: The ID of the optional ImageButton on which to press to toggle the
+  flashlight/illumination. Set to `R.id.scannerFlashlight`.
+- `scanner_bt_provider_logs`: The ID of the optional ImageButton on which to press to manually access
+  available providers logs. Set to `R.id.scannerBtProviderLogs`.
 :::
 
 :::{method} getCameraScanner(Context ctx, ScannerConnectionHandler handler, ScannerSearchOptions options) -> void

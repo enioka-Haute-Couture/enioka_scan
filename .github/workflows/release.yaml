@@ -31,8 +31,11 @@ jobs:
           ruby-version: 3.0.2
           bundler-cache: true
       - name: Gradle build
-        run: ./gradlew build --stacktrace --no-build-cache
-        env:
+        run: ./gradlew build
+        env:  # demo app signingConfigs requires all its variables already or the build will fail
+          KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_KEYSTORE_PASSWORD }}  # For demo app AAB
+          SIGNKEY_PASSWORD: ${{ secrets.GOOGLE_SIGNKEY_PASSWORD }}    # For demo app AAB
+          KEY_ALIAS: ${{ secrets.GOOGLE_SIGNKEY_ALIAS }}              # For demo app AAB
           GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
           GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
       - name: Clean outputs before demo app build

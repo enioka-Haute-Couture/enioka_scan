@@ -2,8 +2,8 @@ name: Release
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - release-v3-fixes
 
 jobs:
   release:
@@ -31,32 +31,15 @@ jobs:
           ruby-version: 3.0.2
           bundler-cache: true
       - name: Gradle build
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace --no-build-cache
         env:
           GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
           GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
-      - name: Publish the library to MavenCentral
-        run: ./gradlew publish
-        env:
-          OSSRH_LOGIN: ${{ secrets.OSSRH_LOGIN }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          SIGN_KEYID: ${{ secrets.SIGN_KEYID }}
-          SIGN_KEY: ${{ secrets.SIGN_KEY }}
-          SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
-          LIB_VERSION: ${{ steps.get_version.outputs.VERSION }}
-          GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
-          GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
+      - name: Clean outputs before demo app build
+        run: ./gradlew clean
       - name: Fastlane build and upload
         run: bundle exec fastlane internal
         env:
           KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_KEYSTORE_PASSWORD }}
           SIGNKEY_PASSWORD: ${{ secrets.GOOGLE_SIGNKEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.GOOGLE_SIGNKEY_ALIAS }}
-      - name: Rename the AAB file for GitHub release upload
-        run: mv demoscannerapp/build/outputs/bundle/release/demoscannerapp-release.aab demoscannerapp/build/outputs/bundle/release/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aab
-      - name: Create a GitHub release with the AAR file as an asset
-        uses: softprops/action-gh-release@v2
-        with:
-          name: ${{ steps.get_version.outputs.VERSION }}
-          files: demoscannerapp/build/outputs/bundle/release/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aab
-          token: ${{ secrets.GITHUB_TOKEN }}

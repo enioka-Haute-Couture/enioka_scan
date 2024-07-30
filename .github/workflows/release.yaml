@@ -19,6 +19,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'zulu'
+      - name: Restore json key
+        run: echo "${{ secrets.GOOGLE_API_PUB_JSON_BASE64 }}" | base64 --decode >  ${{ github.workspace }}/service-account.json
+      - name: Restore keystore
+        run: echo "${{ secrets.GOOGLE_KEYSTORE_BASE64 }}" | base64 --decode > ${{ github.workspace }}/demoscannerapp/debug.keystore
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v3
       - name: Setup Ruby
@@ -42,12 +46,6 @@ jobs:
           LIB_VERSION: ${{ steps.get_version.outputs.VERSION }}
           GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
           GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
-#      - name: Rename the AAR file for GitHub release upload
-#        run: mv enioka_scan/build/outputs/aar/enioka_scan-release.aar enioka_scan/build/outputs/aar/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aar
-      - name: Restore json key
-        run: echo "${{ secrets.GOOGLE_API_PUB_JSON_BASE64 }}" | base64 --decode >  ${{ github.workspace }}/service-account.json
-      - name: Restore keystore
-        run: echo "${{ secrets.GOOGLE_KEYSTORE_BASE64 }}" | base64 --decode > ${{ github.workspace }}/demoscannerapp/debug.keystore
       - name: Fastlane build and upload
         run: bundle exec fastlane internal
         env:
@@ -60,7 +58,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.get_version.outputs.VERSION }}
-          files: |
-#            enioka_scan/build/outputs/aar/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aar
-            demoscannerapp/build/outputs/bundle/release/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aab
+          files: demoscannerapp/build/outputs/bundle/release/enioka_scan-${{ steps.get_version.outputs.VERSION }}.aab
           token: ${{ secrets.GITHUB_TOKEN }}

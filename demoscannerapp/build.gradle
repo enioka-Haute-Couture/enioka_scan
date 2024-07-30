@@ -4,7 +4,7 @@ android {
     compileSdk 34
     defaultConfig {
         applicationId "com.enioka.scanner.demoscannerapp"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 34
         versionCode 7
         versionName "3.0.0"
@@ -46,24 +46,6 @@ dependencies {
     // Reference our own library, directly compiled from its project
     implementation project(':enioka_scan');
     implementation project(':enioka_scan_camera');
-
-    if (gradle.ext.withHoneywell) {
-        implementation project(':enioka_scan_honeywell');
-        implementation fileTree(dir: '../enioka_scan_honeywell/libs', include: ['*.aar']);
-    }
-
-    if (gradle.ext.withKoamtac) {
-        implementation project(':enioka_scan_koamtac');
-    }
-
-    if (gradle.ext.withZebra) {
-        implementation project(':enioka_scan_zebra');
-        implementation fileTree(dir: '../enioka_scan_zebra/libs', include: ['*.aar'])
-    }
-
-    if (gradle.ext.withM3) {
-        implementation project(':enioka_scan_m3');
-    }
 
     // Implementation of the OSS providers
     implementation project(':enioka_scan_zebra_dw');

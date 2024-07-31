@@ -20,7 +20,8 @@ platform :android do
         upload_to_play_store(
             package_name: "com.enioka.scanner.demoscannerapp.release",
             track: 'internal',
-            release_status: "draft"
+            release_status: "draft",
+            skip_upload_apk: true
         )
     end
 end

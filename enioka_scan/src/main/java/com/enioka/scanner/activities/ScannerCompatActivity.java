@@ -176,6 +176,21 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     protected int scannerStatusCardViewId = R.id.scannerCardLastScan;
 
     /**
+     * Material card view for the provider status.
+     */
+    protected int providerStatusCardViewId = R.id.scannerProviderStatusCard;
+
+    /**
+     * TextView containing the name of the active provider
+     */
+    protected int providerNameTextViewId = R.id.scannerProviderText;
+
+    /**
+     * TextView containing the status of the active provider
+     */
+    protected int providerStatusTextViewId = R.id.scannerProviderStatusText;
+
+    /**
      * Define if the log is enabled or not.
      */
     protected boolean loggingEnabled = false;
@@ -570,10 +585,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             providerLogs += scanner.getProviderKey() + " " + newStatus + "\n";
         }
 
-        TextView providerText = findViewById(R.id.scannerProviderText);
-        TextView providerStatusText = findViewById(R.id.scannerProviderStatusText);
-
-        if (scanner != null && providerText != null && providerStatusText != null && (newStatus == Status.CONNECTED || newStatus == Status.DISCONNECTED)) {
+        if (scanner != null && (newStatus == Status.CONNECTED || newStatus == Status.DISCONNECTED)) {
             String provider = scanner.getProviderKey();
 
             if (newStatus == Status.CONNECTED) {
@@ -1066,11 +1078,7 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void updateProviderStatusCard() {
-        TextView providerText = findViewById(R.id.scannerProviderText);
-        TextView providerStatusText = findViewById(R.id.scannerProviderStatusText);
-
         StringBuilder textConnectedProviders = new StringBuilder();
-
         if (!goToCamera) {
             for (String provider : connectedProviders) {
                 textConnectedProviders.append((textConnectedProviders.length() == 0) ? "" : "\n").append(provider);
@@ -1079,31 +1087,40 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             textConnectedProviders.append(connectedProviders.get(connectedProviders.size() - 1));
         }
 
+        // Update visibility of the scanner status card
+        MaterialCardView scannerNameStatusCardView = findViewById(providerStatusCardViewId);
+        if (scannerNameStatusCardView != null) {
+            scannerNameStatusCardView.setCardBackgroundColor(getResources().getColor(R.color.cardBackgroundDone));
+            scannerNameStatusCardView.setVisibility(View.VISIBLE);
+        }
+
         // Update connected providers text
-        providerText.setText(textConnectedProviders.toString());
+        TextView providerNameTextView = findViewById(providerNameTextViewId);
+        if (providerNameTextView != null) {
+            providerNameTextView.setText(textConnectedProviders.toString());
+        }
 
         // Set status
-        providerStatusText.setText(Status.CONNECTED.toString());
-
-        // Update visibility of the scanner status card
-        MaterialCardView scannerStatusCard = findViewById(R.id.scannerProviderStatusCard);
-        scannerStatusCard.setCardBackgroundColor(getResources().getColor(R.color.cardBackgroundDone));
-        scannerStatusCard.setVisibility(View.VISIBLE);
+        TextView providerStatusTextView = findViewById(providerStatusTextViewId);
+        if (providerStatusTextView != null) {
+            providerStatusTextView.setText(Status.CONNECTED.toString());
+        }
     }
 
     private void resetProviderStatusCard(boolean showCard) {
-        MaterialCardView scannerStatusCard = findViewById(R.id.scannerProviderStatusCard);
-        scannerStatusCard.setVisibility(showCard ? View.VISIBLE : View.GONE);
-
-        TextView providerText = findViewById(R.id.scannerProviderText);
-        TextView providerStatusText = findViewById(R.id.scannerProviderStatusText);
-
-        if (providerText != null) {
-            providerText.setText("");
+        MaterialCardView scannerNameStatusCardView = findViewById(providerStatusCardViewId);
+        if (scannerNameStatusCardView != null) {
+            scannerNameStatusCardView.setVisibility(showCard ? View.VISIBLE : View.GONE);
         }
 
-        if (providerStatusText != null) {
-            providerStatusText.setText("");
+        TextView providerNameTextView = findViewById(providerNameTextViewId);
+        if (providerNameTextView != null) {
+            providerNameTextView.setText("");
+        }
+
+        TextView providerStatusTextView = findViewById(providerStatusTextViewId);
+        if (providerStatusTextView != null) {
+            providerStatusTextView.setText("");
         }
     }
 }

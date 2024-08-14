@@ -137,6 +137,21 @@ Initialized by the [`initCamera()`](#scannercompatactivity-methods) method.
 The ID of the optional card view that displays the last scan.
 :::
 
+:::{cpp:var} int providerNameText = R.id.scannerProviderText;
+
+The ID of the optional text view that displays the name of the active provider.
+:::
+
+:::{cpp:var} int providerStatusCardViewId = R.id.scannerProviderStatusCard;
+
+The ID of the optional card view that contains the status of the active provider.
+:::
+
+:::{cpp:var} int providerStatusText = R.id.scannerProviderStatusText;
+
+The ID of the optional text view that displays the status of the active provider.
+:::
+
 :::{cpp:var} boolean loggingEnabled = false;
 
 If true, the activity will log all scanner service events to the define log file.

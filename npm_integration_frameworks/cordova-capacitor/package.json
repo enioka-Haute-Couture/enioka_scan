@@ -14,8 +14,10 @@
       "enioka-scan",
       "scanner",
       "integration-layer",
-      "capacitor"
+      "capacitor",
+      "cordova",
+      "plugin"
     ],
     "author": "enioka",
-    "license": "MIT"
+    "license": "Apache-2.0"
   }

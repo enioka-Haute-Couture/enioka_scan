@@ -1,0 +1,21 @@
+{
+    "name": "@enioka/enioka-scan-cordova-capacitor-integration",
+    "version": "0.1.0",
+    "description": "enioka scan plugin cordova",
+    "main": "main.js",
+    "cordova": {
+      "id": "enioka-scan-cordova-capacitor-integration",
+      "platforms": [
+        "android"
+      ]
+    },
+    "keywords": [
+      "enioka",
+      "enioka-scan",
+      "scanner",
+      "integration-layer",
+      "capacitor"
+    ],
+    "author": "enioka",
+    "license": "MIT"
+  }

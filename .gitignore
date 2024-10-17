@@ -13,3 +13,11 @@
 **/release/
 /captures
 .externalNativeBuild
+
+npm_integration_frameworks/reactnative/android/.settings
+npm_integration_frameworks/reactnative/android/.classpath
+npm_integration_frameworks/reactnative/lib
+
+**/node_modules
+**/.yarn/cache
+**/.yarn/install-state.gz

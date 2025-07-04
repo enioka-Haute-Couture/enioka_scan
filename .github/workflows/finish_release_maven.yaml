@@ -1,0 +1,67 @@
+name: Finalize Maven Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  finish_release_to_maven_central:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Get tag version
+        id: get_version
+        run: echo "VERSION=3.0.2" >> $GITHUB_OUTPUT
+      - name: Set up environment
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+      - name: Restore json key
+        run: echo "${{ secrets.GOOGLE_API_PUB_JSON_BASE64 }}" | base64 --decode >  ${{ github.workspace }}/service-account.json
+      - name: Restore keystore
+        run: echo "${{ secrets.GOOGLE_KEYSTORE_BASE64 }}" | base64 --decode > ${{ github.workspace }}/demoscannerapp/debug.keystore
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0.2
+          bundler-cache: true
+      - name: Gradle build
+        run: ./gradlew build
+        env:  # demo app signingConfigs requires all its variables already or the build will fail
+          KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_KEYSTORE_PASSWORD }}  # For demo app AAB
+          SIGNKEY_PASSWORD: ${{ secrets.GOOGLE_SIGNKEY_PASSWORD }}    # For demo app AAB
+          KEY_ALIAS: ${{ secrets.GOOGLE_SIGNKEY_ALIAS }}              # For demo app AAB
+          GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
+          GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
+      - name: Publish the library to MavenCentral
+        run: ./gradlew publish
+        env:
+          OSSRH_LOGIN: ${{ secrets.OSSRH_LOGIN }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          SIGN_KEYID: ${{ secrets.SIGN_KEYID }}
+          SIGN_KEY: ${{ secrets.SIGN_KEY }}
+          SIGN_PASSWORD: ${{ secrets.SIGN_PASSWORD }}
+          LIB_VERSION: ${{ steps.get_version.outputs.VERSION }}
+          GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
+          GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
+      - name: Find repository created by publish
+        id: list_repositories
+        run: |
+          set -e
+          export TOKEN=`printf "${{ secrets.OSSRH_LOGIN }}:${{ secrets.OSSRH_PASSWORD }}" | base64`
+          content=`curl --fail-with-body 'https://ossrh-staging-api.central.sonatype.com/manual/search/repositories' -H 'accept: */*' -H "Authorization: Bearer $TOKEN"`
+          # the following lines are only required for multi line json
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          # end of optional handling for multi line json
+          echo "::set-output name=repositories::$content"
+      - name: Finish pushing the release to maven central
+        run: |
+          set -e
+          export TOKEN=`printf "${{ secrets.OSSRH_LOGIN }}:${{ secrets.OSSRH_PASSWORD }}" | base64`
+          export REPO=${{fromJson(steps.list_repositories.outputs.repositories).repositories[0].key}}
+          curl --fail-with-body -X POST "https://ossrh-staging-api.central.sonatype.com/manual/upload/repository/$REPO?publishing_type=user_managed" -H 'accept: */*' -H "Authorization: Bearer $TOKEN" -d ''

@@ -38,7 +38,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.GOOGLE_SIGNKEY_ALIAS }}              # For demo app AAB
           GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
           GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
-      - name: Publish the library to MavenCentral
+      - name: Publish the library to MavenCentral as a repository
         run: ./gradlew publish
         env:
           OSSRH_LOGIN: ${{ secrets.OSSRH_LOGIN }}
@@ -49,6 +49,24 @@ jobs:
           LIB_VERSION: ${{ steps.get_version.outputs.VERSION }}
           GH_DRIVER_REPOSITORY_USERNAME: ${{ secrets.GH_DRIVER_REPOSITORY_USERNAME }}
           GH_DRIVER_REPOSITORY_TOKEN: ${{ secrets.GH_DRIVER_REPOSITORY_TOKEN }}
+      - name: Find the MavenCentral repository created by publish
+        id: list_repositories
+        run: |
+          set -e
+          export TOKEN=`printf "${{ secrets.OSSRH_LOGIN }}:${{ secrets.OSSRH_PASSWORD }}" | base64`
+          content=`curl --fail-with-body 'https://ossrh-staging-api.central.sonatype.com/manual/search/repositories' -H 'accept: */*' -H "Authorization: Bearer $TOKEN"`
+          # the following lines are only required for multi line json
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          # end of optional handling for multi line json
+          echo "::set-output name=repositories::$content"
+      - name: Finish publishing the release for MavenCentral
+        run: |
+          set -e
+          export TOKEN=`printf "${{ secrets.OSSRH_LOGIN }}:${{ secrets.OSSRH_PASSWORD }}" | base64`
+          export REPO=${{fromJson(steps.list_repositories.outputs.repositories).repositories[0].key}}
+          curl --fail-with-body -X POST "https://ossrh-staging-api.central.sonatype.com/manual/upload/repository/$REPO?publishing_type=user_managed" -H 'accept: */*' -H "Authorization: Bearer $TOKEN" -d ''
       - name: Fastlane build and upload
         run: bundle exec fastlane internal
         env:

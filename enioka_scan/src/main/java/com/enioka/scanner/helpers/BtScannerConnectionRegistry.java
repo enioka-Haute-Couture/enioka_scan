@@ -1,10 +1,12 @@
 package com.enioka.scanner.helpers;
 
+import static android.content.Context.RECEIVER_EXPORTED;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.Closeable;
@@ -34,7 +36,12 @@ public class BtScannerConnectionRegistry extends BroadcastReceiver implements Cl
         filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        ctx.registerReceiver(this, filter);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ctx.registerReceiver(this, filter, RECEIVER_EXPORTED);
+        } else {
+            ctx.registerReceiver(this, filter);
+        }
     }
 
     @Override

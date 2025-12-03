@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import android.util.Log;
@@ -48,7 +49,8 @@ public class BluebirdScanner extends IntentScanner<Integer> {
         IntentFilter requestFilter = new IntentFilter();
         requestFilter.addAction("kr.co.bluebird.android.bbapi.action.BARCODE_CALLBACK_REQUEST_SUCCESS");
         requestFilter.addAction("kr.co.bluebird.android.bbapi.action.BARCODE_CALLBACK_REQUEST_FAILED");
-        ctx.registerReceiver(new BroadcastReceiver() {
+
+        BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 int requestId = intent.getIntExtra("EXTRA_INT_DATA3", -1);
@@ -59,7 +61,13 @@ public class BluebirdScanner extends IntentScanner<Integer> {
                     Log.d(LOG_TAG, "Action " + requestId + " was executed OK");
                 }
             }
-        }, requestFilter);
+        };
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ctx.registerReceiver(receiver, requestFilter, Context.RECEIVER_EXPORTED);
+        } else {
+            ctx.registerReceiver(receiver, requestFilter);
+        }
     }
 
 

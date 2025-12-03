@@ -1,10 +1,12 @@
 package com.enioka.scanner.helpers.intent;
 
+import static android.content.Context.RECEIVER_EXPORTED;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import androidx.annotation.Nullable;
+import android.os.Build;
 import android.util.Log;
 
 import com.enioka.scanner.api.Scanner;
@@ -97,7 +99,12 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
             intentFilter.addAction(f);
         }
         intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-        ctx.registerReceiver(this, intentFilter);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ctx.registerReceiver(this, intentFilter, RECEIVER_EXPORTED);
+        } else {
+            ctx.registerReceiver(this, intentFilter);
+        }
     }
 
     /**

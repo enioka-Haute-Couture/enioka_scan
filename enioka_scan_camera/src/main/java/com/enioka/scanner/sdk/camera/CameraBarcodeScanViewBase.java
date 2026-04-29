@@ -471,10 +471,10 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             float xRatio = (float) dataWidth / camViewMeasuredHeight;
 
             // Boundaries
-            int realY1 = (int) ((camViewMeasuredWidth - cropRect.right) * yRatio);
-            int realY3 = (int) ((camViewMeasuredWidth - cropRect.left) * yRatio);
-            int realX1 = (int) (cropRect.top * xRatio);
-            int realX3 = (int) (cropRect.bottom * xRatio);
+            int realY1 = (int) (cropRect.left * yRatio);
+            int realY3 = (int) (cropRect.right * yRatio);
+            int realX1 = (int) ((camViewMeasuredHeight - cropRect.bottom) * xRatio);
+            int realX3 = (int) ((camViewMeasuredHeight - cropRect.top) * xRatio);
 
             if (realY1 < 1) {
                 realY1 = 1;
@@ -490,8 +490,8 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             }
 
             // Cropped barcode data buffer
-            res.croppedDataHeight = (1 + realX3 - realX1);
-            res.croppedDataWidth = (1 + realY3 - realY1);
+            res.croppedDataWidth = (1 + realX3 - realX1);
+            res.croppedDataHeight = (1 + realY3 - realY1);
             if (res.croppedDataHeight * res.croppedDataWidth < 0) {
                 // Ignore - Happens when the orientation has just changed and we analyze an horizontal buffer
                 Log.w(TAG, "Corrupted buffer");
@@ -500,11 +500,11 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             }
             res.barcode = getCroppedImageBuffer(res.croppedDataWidth * res.croppedDataHeight);
 
-            // Copy and rotate the buffer
+            // Copy data without rotation
             int i = 0;
-            for (int w = realX1; w <= realX3; w++) {
-                for (int h = realY3; h > realY1 + 10; h--) {
-                    res.barcode[i++] = frame[(h - 1) * (dataWidth) + w];
+            for (int h = realY1; h <= realY3; h++) {
+                for (int w = realX1; w <= realX3; w++) {
+                    res.barcode[i++] = frame[h * dataWidth + w];
                     res.lumaSum += res.barcode[i - 1] & 0xff;
                 }
             }

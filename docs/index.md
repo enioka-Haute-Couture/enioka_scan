@@ -31,6 +31,7 @@ quickstart
 dependencies
 guides/index
 api/index
+enioka-scan-compat-package
 develop
 :::
 

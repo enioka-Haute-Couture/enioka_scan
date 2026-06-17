@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">EniokaScan</string>
+    <string name="activity_description">Barebones scanning activity to use as-is or extend</string>
     <string name="service_description">Helper service for scanner management</string>
 
     <!-- Scanner status -->

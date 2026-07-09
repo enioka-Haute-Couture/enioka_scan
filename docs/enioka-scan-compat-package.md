@@ -10,7 +10,7 @@ Currently, plugins exist for the following Frameworks:
 ## For all frameworks
 
 The npm plugins only facilitate the integration of the provided UI, however you still need to add
-the Maven Central dependencies in the `android/app/build.gradle` of your project:
+the Maven Central dependencies in the `build.gradle` file of the android-specific part of your project:
 
 ```groovy
 dependencies {

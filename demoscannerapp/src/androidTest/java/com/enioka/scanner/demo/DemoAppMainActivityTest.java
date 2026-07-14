@@ -133,7 +133,7 @@ public class DemoAppMainActivityTest {
 
             // Wait that camera layout is correctly displayed
             activityScenarioRule.onActivity(activity -> {
-                viewVisibleIdlingResource = new ViewVisibleIdlingResource(activity.findViewById(com.enioka.scanner.sdk.camera.R.id.scannerZxingText));
+                viewVisibleIdlingResource = new ViewVisibleIdlingResource(activity.findViewById(com.enioka.scanner.sdk.camera.R.id.scannerPauseText));
                 IdlingRegistry.getInstance().register(viewVisibleIdlingResource);
             });
 
@@ -162,62 +162,13 @@ public class DemoAppMainActivityTest {
     }
 
     @Test
-    public void testCameraReaderMode() {
-        // Portrait mode
-        // Go to camera mode
-        onView(withId(com.enioka.scanner.R.id.scannerBtCamera)).perform(click());
-
-        activityScenarioRule.getScenario().onActivity(activity -> {
-            viewVisibleIdlingResource = new ViewVisibleIdlingResource(activity.findViewById(com.enioka.scanner.sdk.camera.R.id.scannerZxingText));
-            IdlingRegistry.getInstance().register(viewVisibleIdlingResource);
-        });
-
-
-        onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerZxingText)).check(matches(withText(com.enioka.scanner.R.string.activity_scan_use_zxing)));
-
-        // Should switch from ZXing to ZBar and show a snackbar
-        onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerSwitchZxing)).check(matches(allOf(isDisplayed(), isEnabled()))).perform(click());
-
-        onView(withText(com.enioka.scanner.R.string.snack_message_zxing)).check(matches(isDisplayed()));
-        // Should switch from ZBar to ZXing and show a snackbar
-        onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerSwitchZxing)).check(matches(allOf(isDisplayed(), isEnabled()))).perform(click());
-        onView(withText(com.enioka.scanner.R.string.snack_message_zbar)).check(matches(isDisplayed()));
-
-        onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerPauseText)).check(matches(withText(com.enioka.scanner.R.string.activity_scan_pause_camera)));
-
-        // Landscape mode
-        UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
-        uiAutomation.setRotation(UiAutomation.ROTATION_FREEZE_90);
-
-        activityScenarioRule.getScenario().onActivity(activity -> {
-            viewVisibleIdlingResource = new ViewVisibleIdlingResource(activity.findViewById(com.enioka.scanner.sdk.camera.R.id.scannerZxingText));
-            IdlingRegistry.getInstance().register(viewVisibleIdlingResource);
-        });
-
-        onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerZxingText)).check(matches(withText(com.enioka.scanner.R.string.activity_scan_use_zxing)));
-
-        // Should switch from ZXing to ZBar and show a snackbar
-        onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerSwitchZxing)).check(matches(allOf(isDisplayed(), isEnabled()))).perform(click());
-
-        onView(withText(com.enioka.scanner.R.string.snack_message_zxing)).check(matches(isDisplayed()));
-        // Should switch from ZBar to ZXing and show a snackbar
-        onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerSwitchZxing)).check(matches(allOf(isDisplayed(), isEnabled()))).perform(click());
-        onView(withText(com.enioka.scanner.R.string.snack_message_zbar)).check(matches(isDisplayed()));
-
-        onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerPauseText)).check(matches(withText(com.enioka.scanner.R.string.activity_scan_pause_camera)));
-
-        // Reset to portrait mode
-        uiAutomation.setRotation(UiAutomation.ROTATION_FREEZE_0);
-    }
-
-    @Test
     public void testCameraActivityButtons() {
         // Go to camera mode
         onView(withId(com.enioka.scanner.R.id.scannerBtCamera)).perform(click());
 
         // Wait that camera layout is correctly displayed
         activityScenarioRule.getScenario().onActivity(activity -> {
-            viewVisibleIdlingResource = new ViewVisibleIdlingResource(activity.findViewById(com.enioka.scanner.sdk.camera.R.id.scannerZxingText));
+            viewVisibleIdlingResource = new ViewVisibleIdlingResource(activity.findViewById(com.enioka.scanner.sdk.camera.R.id.scannerPauseText));
             IdlingRegistry.getInstance().register(viewVisibleIdlingResource);
         });
 
@@ -227,8 +178,6 @@ public class DemoAppMainActivityTest {
         onView(withId(com.enioka.scanner.R.id.scannerFlashlight)).check(matches(isDisplayed()));
         // Scanner provider logs
         onView(withId(com.enioka.scanner.R.id.scannerBtProviderLogs)).check(matches(isDisplayed()));
-        // Scanner reader mode switch
-        onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerSwitchZxing)).check(matches(isDisplayed()));
         // Scanner camera pause / resume
         onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerPauseText)).check(matches(isDisplayed()));
         // Scanner provider status
@@ -241,7 +190,7 @@ public class DemoAppMainActivityTest {
 
         // Wait that camera layout is correctly displayed
         activityScenarioRule.getScenario().onActivity(activity -> {
-            viewVisibleIdlingResource = new ViewVisibleIdlingResource(activity.findViewById(com.enioka.scanner.sdk.camera.R.id.scannerZxingText));
+            viewVisibleIdlingResource = new ViewVisibleIdlingResource(activity.findViewById(com.enioka.scanner.sdk.camera.R.id.scannerPauseText));
             IdlingRegistry.getInstance().register(viewVisibleIdlingResource);
         });
 
@@ -249,8 +198,6 @@ public class DemoAppMainActivityTest {
         onView(withId(com.enioka.scanner.R.id.scannerFlashlight)).check(matches(isDisplayed()));
         // Scanner provider logs
         onView(withId(com.enioka.scanner.R.id.scannerBtProviderLogs)).check(matches(isDisplayed()));
-        // Scanner reader mode switch
-        onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerSwitchZxing)).check(matches(isDisplayed()));
         // Scanner camera pause / resume
         onView(withId(com.enioka.scanner.sdk.camera.R.id.scannerPauseText)).check(matches(isDisplayed()));
         // Scanner provider status

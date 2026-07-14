@@ -2,7 +2,7 @@ This application is a demo for enioka Scan, a library that makes the integration
 
 It is compatible with a wide variety of scanning devices, integrated or external, from different vendors such as Zebra, Honeywell, Athesi and more.
 
-When there are no compatible hardware devices available, the library provides a camera reader based on ZBar (default) or ZXing.
+When there are no compatible hardware devices available, the library provides a camera reader based on ZXing.
 
 Through a common abstraction, it provides access to the following methods (provided the hardware supports them):
 

@@ -24,7 +24,7 @@
     <!-- Scanner status (Others) -->
     <string name="scanner_status_no_camera">No camera available</string>
 
-    <!-- ZBar specific -->
+    <!-- Camera errors -->
     <string name="scanner_camera_open_error_title">Cannot connect to camera service</string>
     <string name="scanner_camera_open_error">"Please check that no other applications (including scan helpers like ScanWedge) are using the camera. Also check if the Android camera app is working.\nApplication will now crash."</string>
     <string name="scanner_camera_no_camera">No fallback camera available on device. Please plugin your laser barcode scanner and restart application. Application will now crash.</string>
@@ -35,9 +35,6 @@
     <string name="activity_scan_scanner_not_initialized">Scanner initialization not started</string>
     <string name="scanner_using_bt_keyboard">Using Bluetooth scanner or keyboard</string>
     <string name="activity_scan_no_compatible_sdk">There are no compatible scanners on this device</string>
-    <string name="activity_scan_use_zxing">Zbar / ZXing</string>
-    <string name="snack_message_zxing">Using ZXing camera reader !</string>
-    <string name="snack_message_zbar">Using ZBar camera reader !</string>
     <string name="activity_scan_pause_camera">Pause</string>
     <string name="camera_mode_button">Camera</string>
     <string name="last_scan_clipboard">Last scan successfully copied to clipboard !</string>

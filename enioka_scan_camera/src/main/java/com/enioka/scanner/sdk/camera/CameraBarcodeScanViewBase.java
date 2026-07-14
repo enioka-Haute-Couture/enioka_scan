@@ -39,7 +39,6 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
     protected List<BarcodeType> symbologies = new ArrayList<>();
     protected CameraBarcodeScanView.ResultHandler handler;
     protected boolean allowTargetDrag = true;
-    protected CameraReader readerMode = CameraReader.ZBAR;
 
     ////////////////////////////////
     // State
@@ -83,16 +82,6 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
                 R.styleable.CameraBarcodeScanView,
                 0, 0);
 
-        int rm = styledAttributes.getInt(R.styleable.CameraBarcodeScanView_readerMode, 0);
-        switch (rm) {
-            case 1:
-                readerMode = CameraReader.ZXING;
-                break;
-            default:
-                readerMode = CameraReader.ZBAR;
-                break;
-        }
-
         this.allowTargetDrag = !styledAttributes.getBoolean(R.styleable.CameraBarcodeScanView_targetIsFixed, false);
         this.resolution.useAdaptiveResolution = styledAttributes.getBoolean(R.styleable.CameraBarcodeScanView_useAdaptiveResolution, true);
         this.resolution.storePreferredResolution = styledAttributes.getBoolean(R.styleable.CameraBarcodeScanView_storePreferredResolution, true);
@@ -121,7 +110,7 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
             this.frameAnalyser.close();
         }
 
-        this.frameAnalyser = new FrameAnalyserManager(this, resolution, readerMode);
+        this.frameAnalyser = new FrameAnalyserManager(this, resolution);
 
         for (BarcodeType symbology : this.symbologies) {
             this.frameAnalyser.addSymbology(symbology);
@@ -145,11 +134,6 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
         }
 
         ((CameraPreviewSurfaceView) this.camPreviewSurfaceView).setPreviewRatioMode(mode);
-    }
-
-    public void setReaderMode(CameraReader readerMode) {
-        this.readerMode = readerMode;
-        reinitialiseFrameAnalyser();
     }
 
 
@@ -235,12 +219,6 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
         }
 
         Log.d(TAG, "Creating camera view layout");
-
-        if (!this.isInEditMode()) {
-            // ZBar is a native library
-            System.loadLibrary("iconv");
-            reinitialiseFrameAnalyser();
-        }
 
         // If the preview does not take all the space
         this.setBackgroundColor(Color.BLACK);

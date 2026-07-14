@@ -23,7 +23,6 @@ public class CameraProvider implements CameraScannerProvider {
         HashMap<String, Integer> idResources = new HashMap<>();
         idResources.put("camera_view_id", R.id.cameraScanView);
         idResources.put("layout_id_camera", R.layout.activity_camera);
-        idResources.put("scanner_toggle_view_id", R.id.scannerSwitchZxing);
         idResources.put("scanner_toggle_pause_id", R.id.scannerSwitchPause);
         idResources.put("card_last_scan_id", R.id.cardCameraLastScan);
         idResources.put("constraint_layout_id", R.id.constraintLayoutMainActivity);
@@ -90,15 +89,6 @@ public class CameraProvider implements CameraScannerProvider {
     public void setPreviewRatioMode(View cameraView, AspectRatioMode mode) {
         if (cameraView instanceof CameraBarcodeScanView) {
             ((CameraBarcodeScanView) cameraView).setPreviewRatioMode(mode);
-        } else {
-            throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
-        }
-    }
-
-    @Override
-    public void setReaderMode(View cameraView, boolean readerMode) {
-        if (cameraView instanceof CameraBarcodeScanView) {
-            ((CameraBarcodeScanView) cameraView).setReaderMode(readerMode ? CameraReader.ZXING : CameraReader.ZBAR);
         } else {
             throw new IllegalArgumentException("cameraView must be an instance of CameraBarcodeScanView");
         }

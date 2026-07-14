@@ -53,14 +53,6 @@ Example of a preview with the `fillWithStretch` mode:
 :alt: Example of a preview with the `fillWithStretch` mode.
 :::
 
-:::{method} setReaderMode(CameraReader readerMode) -> void
-
-Change the library used to read barcodes from the camera feed.
-
-:param CameraReader readerMode: The library to use, between `CameraReader.ZBAR` and 
-    `CameraReader.ZXing`
-:::
-
 :::{method} addSymbology(BarcodeType barcodeType) -> void
 
 Add a symbology to detect. By default, only `CODE_128` is used.
@@ -206,11 +198,6 @@ If the value of this attribute is not recognized or defined, the preview ratio m
 by default to `fillWithCrop`.
 :::
 
-:::{method} app:readerMode
-
-"1" for ZXING, any other value for ZBAR.
-:::
-
 :::{method} app:storePreferredResolution
 
 If true, the app will persists the most used preview resolution to the application's preference.
@@ -270,8 +257,6 @@ It contains the following values:
 - `camera_view_id`: The ID of the
   [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the `layout_id_camera`
   layout. Set to `R.id.cameraScanView`.
-- `scanner_toggle_view_id`: The ID of the optional ImageButton on which to press to toggle the
-  zxing/zbar camera scan library. Set to `R.id.scannerSwitchZxing`.
 - `scanner_toggle_pause_id`: The ID of the optional toggle button on which to press to pause/unpause
   the scanner. Set to `R.id.scannerSwitchPause`.
 - `card_last_scan_id`: The ID of the card view that displays the last scan.
@@ -327,14 +312,6 @@ Resumes the camera scanner.
 :::{method} setPreviewRatioMode(View cameraView, int previewRatioMode) -> void
 
 See [setPreviewRatioMode](camera.md#the-camerabarcodescanview-class) for more information.
-:::
-
-:::{method} setReaderMode(View cameraView, boolean readerMode) -> void
-
-:param View cameraView: The camera view to change the reader mode of.
-:param boolean readerMode: false for ZBar, true for ZXing.
-
-Change the library used to read barcodes from the camera feed.
 :::
 
 :::{method} orientationChanged(View cameraView) -> void

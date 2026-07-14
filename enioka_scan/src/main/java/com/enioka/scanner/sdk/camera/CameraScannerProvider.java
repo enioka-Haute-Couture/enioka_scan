@@ -49,7 +49,6 @@ public interface CameraScannerProvider {
      * Contains the following keys:
      * - layout_id_camera: The ID of the layout containing the camera view.
      * - camera_view_id: The ID of the camera view in the layout.
-     * - scanner_toggle_view_id: The ID of the view that toggles the scanner library reader.
      * - scanner_toggle_pause_id: The ID of the view that toggles the pause of the scanner.
      * - card_last_scan_id: ID of the card view that displays the last scan.
      * - constraint_layout_id: The ID of the constraint layout inside the camera layout.
@@ -102,11 +101,6 @@ public interface CameraScannerProvider {
      * Sets the preview ratio mode of the camera scanner.
      */
     public void setPreviewRatioMode(View cameraView, AspectRatioMode previewRatioMode);
-
-    /**
-     * Sets the reader engine of the camera scanner.
-     */
-    public void setReaderMode(View cameraView, boolean readerMode);
 
     /**
      * Some scanner devices get trouble with the camera when the orientation changes.

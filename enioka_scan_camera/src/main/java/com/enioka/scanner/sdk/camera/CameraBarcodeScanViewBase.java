@@ -442,92 +442,59 @@ abstract class CameraBarcodeScanViewBase<T> extends FrameLayout implements Scann
 
         // Rotate and crop the scan area. (only keep Y in the YUV image)
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            // French (vertical) - crop & rotate
-
-            // The rectangle is in view coordinates.
-            float yRatio = (float) dataHeight / camViewMeasuredWidth;  // Photo pixels per preview surface pixel. Width because: 90° rotated.
-            float xRatio = (float) dataWidth / camViewMeasuredHeight;
-
-            // Boundaries
-            int realY1 = (int) (cropRect.left * yRatio);
-            int realY3 = (int) (cropRect.right * yRatio);
-            int realX1 = (int) ((camViewMeasuredHeight - cropRect.bottom) * xRatio);
-            int realX3 = (int) ((camViewMeasuredHeight - cropRect.top) * xRatio);
-
-            if (realY1 < 1) {
-                realY1 = 1;
-            }
-            if (realY3 > dataHeight) {
-                realY3 = dataHeight;
-            }
-            if (realX1 < 0) {
-                realX1 = 1;
-            }
-            if (realX3 > dataWidth) {
-                realX3 = dataWidth;
-            }
-
-            // Cropped barcode data buffer
-            res.croppedDataWidth = (1 + realX3 - realX1);
-            res.croppedDataHeight = (1 + realY3 - realY1);
-            if (res.croppedDataHeight * res.croppedDataWidth < 0) {
-                // Ignore - Happens when the orientation has just changed and we analyze an horizontal buffer
-                Log.w(TAG, "Corrupted buffer");
-                res.barcode = new byte[0];
-                return res;
-            }
-            res.barcode = getCroppedImageBuffer(res.croppedDataWidth * res.croppedDataHeight);
-
-            // Copy data without rotation
-            int i = 0;
-            for (int h = realY1; h <= realY3; h++) {
-                for (int w = realX1; w <= realX3; w++) {
-                    res.barcode[i++] = frame[h * dataWidth + w];
-                    res.lumaSum += res.barcode[i - 1] & 0xff;
+            // Rotate 90 degrees clockwise before cropping
+            byte[] tmp = new byte[length];
+            for (int w = 0; w < dataWidth; w++) {
+                for (int h = dataHeight - 1; h >= 0; h--) {
+                    tmp[w * dataHeight + (dataHeight - h - 1)] = frame[h * dataWidth + w];
                 }
             }
-        } else {
-            // Italian (horizontal). No need to rotate - just crop.
-            float yRatio = (float) dataHeight / camViewMeasuredHeight;  // Photo pixels per preview surface pixel.
-            float xRatio = (float) dataWidth / camViewMeasuredWidth;
+            System.arraycopy(tmp, 0, frame, 0, length);
 
-            // Boundaries
-            int realY1 = (int) (cropRect.top * yRatio);
-            int realY3 = (int) (cropRect.bottom * yRatio);
-            int realX1 = (int) (cropRect.left * xRatio);
-            int realX3 = (int) (cropRect.right * xRatio);
+            // Update width and height accordingly
+            dataWidth = resolution.currentPreviewResolution.y;
+            dataHeight = resolution.currentPreviewResolution.x;
+        }
 
-            if (realY1 < 1) {
-                realY1 = 1;
-            }
-            if (realY3 > dataHeight) {
-                realY3 = dataHeight;
-            }
-            if (realX1 < 0) {
-                realX1 = 1;
-            }
-            if (realX3 > dataWidth) {
-                realX3 = dataWidth;
-            }
+        float yRatio = (float) dataHeight / camViewMeasuredHeight;  // Photo pixels per preview surface pixel.
+        float xRatio = (float) dataWidth / camViewMeasuredWidth;
 
-            // Cropped barcode data buffer
-            res.croppedDataWidth = (1 + realX3 - realX1);
-            res.croppedDataHeight = (1 + realY3 - realY1);
-            if (res.croppedDataHeight * res.croppedDataWidth < 0) {
-                // Ignore - Happens when the orientation has just changed and we analyze a vertical buffer
-                Log.w(TAG, "Corrupted buffer");
-                res.barcode = new byte[0];
-                return res;
-            }
-            res.barcode = getCroppedImageBuffer(res.croppedDataWidth * res.croppedDataHeight);
+        // Boundaries
+        int realY1 = (int) (cropRect.top * yRatio);
+        int realY3 = (int) (cropRect.bottom * yRatio);
+        int realX1 = (int) (cropRect.left * xRatio);
+        int realX3 = (int) (cropRect.right * xRatio);
 
-            // Copy data without rotation.
-            int i = 0;
-            for (int h = realY1; h <= realY3; h++) {
-                for (int w = realX1; w <= realX3; w++) {
-                    res.barcode[i++] = frame[h * dataWidth + w];
-                    res.lumaSum += res.barcode[i - 1] & 0xff;
-                }
+        if (realY1 < 1) {
+            realY1 = 1;
+        }
+        if (realY3 > dataHeight) {
+            realY3 = dataHeight;
+        }
+        if (realX1 < 1) {
+            realX1 = 1;
+        }
+        if (realX3 > dataWidth) {
+            realX3 = dataWidth;
+        }
+
+        // Cropped barcode data buffer
+        res.croppedDataWidth = (1 + realX3 - realX1);
+        res.croppedDataHeight = (1 + realY3 - realY1);
+        if (res.croppedDataHeight * res.croppedDataWidth < 0) {
+            // Ignore - Happens when the orientation has just changed and we analyze a buffer from the wrong orientation
+            Log.w(TAG, "Corrupted buffer");
+            res.barcode = new byte[0];
+            return res;
+        }
+        res.barcode = getCroppedImageBuffer(res.croppedDataWidth * res.croppedDataHeight);
+
+        // Copy data without rotation.
+        int i = 0;
+        for (int h = realY1; h <= realY3; h++) {
+            for (int w = realX1; w <= realX3; w++) {
+                res.barcode[i++] = frame[h * dataWidth + w];
+                res.lumaSum += res.barcode[i - 1] & 0xff;
             }
         }
 

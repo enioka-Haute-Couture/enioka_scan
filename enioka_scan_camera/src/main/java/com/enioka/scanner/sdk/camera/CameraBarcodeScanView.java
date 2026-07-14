@@ -18,7 +18,7 @@ import com.enioka.scanner.R;
 import com.enioka.scanner.data.BarcodeType;
 
 /**
- * Helper view that encapsulates the ZBar (default) and ZXing (option) barcode analysis engines.
+ * Helper view that encapsulates the ZXing barcode analysis engine.
  * To be directly reused in layouts.
  * This view either uses Camera 1 or Camera 2 API according to the Android version.
  */
@@ -131,10 +131,6 @@ public class CameraBarcodeScanView extends FrameLayout {
      */
     public void setPreviewRatioMode(AspectRatioMode mode) {
         this.proxiedView.setPreviewRatioMode(mode);
-    }
-
-    public void setReaderMode(CameraReader readerMode) {
-        this.proxiedView.setReaderMode(readerMode);
     }
 
     /**

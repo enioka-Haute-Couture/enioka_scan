@@ -38,7 +38,7 @@ class ZXingFrameAnalyser extends FrameAnalyser {
         barcodeTypeZXing2Lib.put(BarcodeFormat.EAN_8, BarcodeType.EAN8);
         barcodeTypeZXing2Lib.put(BarcodeFormat.EAN_13, BarcodeType.EAN13);
         // To be tested
-        barcodeTypeZXing2Lib.put(BarcodeFormat.UPC_EAN_EXTENSION, BarcodeType.EAN13);
+        //barcodeTypeZXing2Lib.put(BarcodeFormat.UPC_EAN_EXTENSION, BarcodeType.EAN13); // Conflicts with regular EAN13 above in the opposite map
         barcodeTypeZXing2Lib.put(BarcodeFormat.QR_CODE, BarcodeType.QRCODE);
         barcodeTypeZXing2Lib.put(BarcodeFormat.DATA_MATRIX, BarcodeType.DATAMATRIX);
         barcodeTypeZXing2Lib.put(BarcodeFormat.AZTEC, BarcodeType.AZTEC);
@@ -71,8 +71,6 @@ class ZXingFrameAnalyser extends FrameAnalyser {
         symbologies.add(BarcodeFormat.CODE_128);
         hints = new HashMap<>(3);
         hints.put(DecodeHintType.POSSIBLE_FORMATS, symbologies);
-
-        hints.put(DecodeHintType.PURE_BARCODE, Boolean.TRUE);
         hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
 
         this.scanner.setHints(hints);

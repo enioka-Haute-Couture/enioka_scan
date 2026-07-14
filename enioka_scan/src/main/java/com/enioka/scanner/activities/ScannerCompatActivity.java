@@ -111,7 +111,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * Contains the following keys:
      * - layout_id_camera: The ID of the layout containing the camera view.
      * - camera_view_id: The ID of the camera view in the layout.
-     * - scanner_toggle_view_id: The ID of the view that toggles the scanner library reader.
      * - scanner_toggle_pause_id: The ID of the view that toggles the pause of the scanner.
      * - card_last_scan_id: ID of the card view that displays the last scan.
      * - constraint_layout_id: The ID of the constraint layout inside the camera layout.
@@ -119,11 +118,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
      * - scanner_bt_provider_logs: The ID of the optional ImageButton on which to press to manually access available providers logs
      */
     protected HashMap<String, Integer> cameraResources = null;
-    /**
-     * Use camera_view_id inside the {@link #cameraResources} instead.
-     */
-    @Deprecated
-    protected Integer zbarViewId = null;
     /**
      * The ID of the MaterialButton on which to press to manually switch to camera mode.
      */
@@ -244,12 +238,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
         // Set content immediately - that way our callbacks can draw on the layout.
         setViewContent();
         linkBackCallback();
-
-        // Ascending compatibility
-        if (zbarViewId != null) {
-            setCameraViewId();
-            cameraResources.put("camera_view_id", zbarViewId);
-        }
 
         // Get the intent extras
         loggingEnabled = getIntent().getBooleanExtra("enableLogging", false);
@@ -530,7 +518,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
 
         displayTorch();
         displayManualProviderLogButton();
-        displayCameraReaderToggle();
         displayCameraPauseToggle();
     }
 
@@ -872,26 +859,6 @@ public class ScannerCompatActivity extends AppCompatActivity implements ScannerC
             }
             cameraButtonView.setOnClickListener(view -> initCamera());
         }
-    }
-
-    private void displayCameraReaderToggle() {
-        Integer scannerToggleViewId = cameraResources.get("scanner_toggle_view_id");
-        final SwitchCompat toggle = scannerToggleViewId != null ? findViewById(scannerToggleViewId) : null;
-        if (toggle == null) {
-            return;
-        }
-
-        toggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Log.i(LOG_TAG, "Changing reader mode");
-            Integer cameraViewId = cameraResources.get("camera_view_id");
-            View cameraView = cameraViewId != null ? findViewById(cameraViewId) : null;
-            cameraScannerProvider.setReaderMode(cameraView, isChecked);
-
-            // Show snackbar message informing the user of the change
-            Snackbar snackbar = Snackbar.make(buttonView, isChecked ? R.string.snack_message_zxing : R.string.snack_message_zbar, Snackbar.LENGTH_SHORT);
-            SnackbarResource.increment();
-            snackbar.addCallback(SnackbarResource.getSnackbarCallback()).show();
-        });
     }
 
     private void displayCameraPauseToggle() {

@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Helper view that encapsulates the ZBar (default) and ZXing (option) barcode analysis engines.
+ * Helper view that encapsulates the ZXing barcode analysis engine.
  * To be directly reused in layouts.
  * We are using deprecated Camera API because old Android.
  */

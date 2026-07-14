@@ -66,7 +66,7 @@ class FrameAnalyserManager {
     private final BlockingQueue<FrameAnalysisContext> queue = new ArrayBlockingQueue<>(NUMBER_OF_CORES, false);
 
 
-    FrameAnalyserManager(ScannerCallback parent, Resolution bag, CameraReader readerToUse) {
+    FrameAnalyserManager(ScannerCallback parent, Resolution bag) {
         this.parent = parent;
         this.resolution = bag;
 
@@ -79,11 +79,7 @@ class FrameAnalyserManager {
         // Create threads
         FrameAnalyser frameAnalyser;
         for (int i = 0; i < workerCount(); i++) {
-            if (readerToUse == CameraReader.ZBAR) {
-                frameAnalyser = new ZBarFrameAnalyser(queue, this);
-            } else {
-                frameAnalyser = new ZXingFrameAnalyser(queue, this);
-            }
+            frameAnalyser = new ZXingFrameAnalyser(queue, this);
             new Thread(frameAnalyser).start();
             analysers.add(frameAnalyser);
         }

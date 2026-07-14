@@ -7,6 +7,7 @@
             <enum name="V2" value="2" />
         </attr>
         <attr name="readerMode" format="enum">
+            <!-- Deprecated, kept for compatibility but unused now that only ZXing is available -->
             <enum name="ZBar" value="0" />
             <enum name="ZXing" value="1" />
             <enum name="Auto" value="0" />

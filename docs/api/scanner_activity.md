@@ -63,8 +63,6 @@ If the camera SDK is included, it will be set to a map containing the following 
 - `camera_view_id`: The ID of the
   [`CameraBarcodeScanView`](camera.md#the-camerabarcodescanview-class) inside the `layout_id_camera`
   layout. Defaults to `R.id.cameraScanView`.
-- `scanner_toggle_view_id`: The ID of the optional ImageButton on which to press to toggle the 
-  zxing/zbar camera scan library. Defaults to `R.id.scannerSwitchZxing`.
 - `scanner_toggle_pause_id`: The ID of the optional toggle button on which to press to pause/unpause 
   the scanner. Defaults to `R.id.scannerSwitchPause`.
 - `card_last_scan_id`: The ID of the card view that displays the last scan.

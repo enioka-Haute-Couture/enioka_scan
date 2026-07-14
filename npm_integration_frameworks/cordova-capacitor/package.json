@@ -1,23 +1,47 @@
 {
-    "name": "@enioka/enioka-scan-cordova-capacitor-integration",
-    "version": "0.1.0",
-    "description": "enioka scan plugin cordova",
-    "main": "main.js",
-    "cordova": {
-      "id": "enioka-scan-cordova-capacitor-integration",
-      "platforms": [
-        "android"
-      ]
-    },
-    "keywords": [
-      "enioka",
-      "enioka-scan",
-      "scanner",
-      "integration-layer",
-      "capacitor",
-      "cordova",
-      "plugin"
-    ],
-    "author": "enioka",
-    "license": "Apache-2.0"
+  "name": "@enioka/cordova-plugin-enioka-scan",
+  "version": "1.0.0",
+  "description": "enioka Scan integration plugin for Cordova and Capacitor",
+  "cordova": {
+    "id": "@enioka/cordova-plugin-enioka-scan",
+    "platforms": [
+      "android"
+    ]
+  },
+  "engines": {
+    "cordovaDependencies": {
+      "1.0.0": {
+        "cordova-android": ">=12.0.0"
+      }
+    }
+  },
+  "keywords": [
+    "enioka",
+    "enioka-scan",
+    "android",
+    "barcode",
+    "qrcode",
+    "scanner",
+    "integration-layer",
+    "plugin",
+    "ecosystem:cordova",
+    "cordova",
+    "cordova-android",
+    "ecosystem:capacitor",
+    "capacitor",
+    "capacitor-android"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/enioka-Haute-Couture/enioka_scan"
+  },
+  "author": "enioka",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/enioka-Haute-Couture/enioka_scan/issues"
+  },
+  "homepage": "https://enioka-scan.readthedocs.io/en/latest/",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   }
+}

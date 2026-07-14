@@ -33,6 +33,7 @@
     <string name="fragment_scan_manual_ok">Envoyer</string>
     <string name="fragment_scan_manual_title">Saisie manuelle</string>
     <string name="activity_scan_no_compatible_sdk">Aucun scanner compatible n\'est disponible sur cet appareil</string>
+    <string name="activity_description">Activité de scan basique, utilisable telle-quelle ou étendable dans le code</string>
     <string name="service_description">Service d\'assistance à la gestion des scanners</string>
     <string name="activity_scan_use_zxing">Zbar / ZXing</string>
     <string name="snack_message_zxing">Utilisation du lecteur ZXing !</string>

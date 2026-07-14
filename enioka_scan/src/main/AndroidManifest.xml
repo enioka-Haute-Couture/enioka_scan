@@ -8,6 +8,12 @@
         android:hardwareAccelerated="true"
         android:theme="@style/AppTheme">
 
+        <activity
+            android:name="com.enioka.scanner.activities.ScannerCompatActivity"
+            android:description="@string/activity_description"
+            android:configChanges="orientation|screenSize"
+            android:exported="false" />
+
         <service
             android:name=".service.ScannerService"
             android:description="@string/service_description"

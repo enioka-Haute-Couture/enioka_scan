@@ -12,7 +12,7 @@
             android:name="com.enioka.scanner.activities.ScannerCompatActivity"
             android:description="@string/activity_description"
             android:configChanges="orientation|screenSize"
-            android:exported="false" />
+            android:exported="true" />
 
         <service
             android:name=".service.ScannerService"

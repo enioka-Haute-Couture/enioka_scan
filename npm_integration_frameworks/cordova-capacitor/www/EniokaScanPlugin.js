@@ -8,7 +8,7 @@ function EniokaScanPlugin() {}
  */
 EniokaScanPlugin.prototype.startActivityByName = function (targetActivity, intentExtras, successCallback, errorCallback) {
     var params = [{ targetActivity, intentExtras }]
-    exec(successCallback, errorCallback, "ActivityStarterPlugin", "startActivityByName", params);
+    exec(successCallback, errorCallback, "EniokaScanPlugin", "startActivityByName", params);
 }
 
 /**

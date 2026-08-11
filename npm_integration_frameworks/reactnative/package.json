@@ -1,6 +1,6 @@
 {
   "name": "@enioka/react-native-plugin-enioka-scan",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "enioka Scan integration plugin for React Native",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",

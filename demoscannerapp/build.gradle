@@ -6,8 +6,8 @@ android {
         applicationId "com.enioka.scanner.demoscannerapp"
         minSdkVersion 21
         targetSdkVersion 36
-        versionCode 13
-        versionName "3.1.0-rc2"
+        versionCode 14
+        versionName "3.1.0"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

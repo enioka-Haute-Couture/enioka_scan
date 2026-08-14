@@ -1,11 +1,14 @@
 # Compatibility plugins for various frameworks
 
-enioka-scan provides npm packages that facilitate its integration with non-java applications by
-allowing you to use the provided activities.
+Starting with version 3.1.0, enioka-scan provides npm packages that facilitate its integration with
+non-java applications by allowing you to use the provided activities.
 
 Currently, plugins exist for the following Frameworks:
 - React Native
 - Cordova / Capacitor
+
+As their release cycle will become decoupled from the main library, all compatibility plugins will
+have individual version numbers on npm. It is recommended to always use the latest version available.
 
 ## For all frameworks
 
@@ -121,13 +124,17 @@ sure the following properties match the ones used in enioka Scan (which are not 
 - in AndroidManifest.xml:
   `android.allowBackup=true`
 
+If your app is unable to launch the ScannerCompatActivity, make sure your theme in the
+`res/values/styles.xml` of the Android platform files is compatible with `Theme.MaterialComponents`,
+as our activity uses `Theme.Material3.Light.NoActionBar`.
+
 ## Improvements
 
-As of enioka scan 3.1.0, these plugins (both in version 1.0.0 on NPM) only let you launch the
-default implementation of the ScannerCompatActivity.
+In their current version 1.X.X, these plugins will only let you launch the default implementation of
+the ScannerCompatActivity.
 
-In upcoming updates, a passthrough to the underlying ScannerService will be made available, allowing
-you to subscribe to scan updates and manipulate the scanner.
+In their upcoming version 2.X.X, a passthrough to the underlying ScannerService will be made
+available, allowing you to subscribe to scan updates and manipulate the scanner.
 
 However, there is no plan to add ways to extend or manipulate the default UI provided alongside the
 ScannerCompatActivity. For such use cases, you will need to write your own Java/Kotlin Activity.

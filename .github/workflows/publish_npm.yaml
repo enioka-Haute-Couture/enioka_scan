@@ -10,20 +10,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - run: cd npm_integration_packages/reactnative
-
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: .nvmrc
+          node-version-file: ./npm_integration_frameworks/reactnative/.nvmrc
 
       - name: Restore dependencies
         id: yarn-cache
         uses: actions/cache/restore@v4.2.3
         with:
           path: |
-            **/node_modules
-            .yarn/install-state.gz
+            ./npm_integration_frameworks/reactnative/**/node_modules
+            ./npm_integration_frameworks/reactnative/.yarn/install-state.gz
           key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}-${{ hashFiles('**/package.json', '!node_modules/**') }}
           restore-keys: |
             ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
@@ -31,6 +29,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
+        working-directory: ./npm_integration_frameworks/reactnative
         run: yarn install --immutable
         shell: bash
 
@@ -39,11 +38,12 @@ jobs:
         uses: actions/cache/save@v4.2.3
         with:
           path: |
-            **/node_modules
-            .yarn/install-state.gz
+            ./npm_integration_frameworks/reactnative/**/node_modules
+            ./npm_integration_frameworks/reactnative/.yarn/install-state.gz
           key: ${{ steps.yarn-cache.outputs.cache-primary-key }}
 
       - name: Publish to NPM
+        working-directory: ./npm_integration_frameworks/reactnative
         run: yarn publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -54,14 +54,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - run: cd npm_integration_packages/cordova-capacitor
-
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: .nvmrc
+          node-version-file: ./npm_integration_frameworks/cordova-capacitor/.nvmrc
 
       - name: Publish to NPM
+        working-directory: ./npm_integration_frameworks/cordova-capacitor
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -71,7 +71,11 @@ public class BtScannerConnectionRegistry extends BroadcastReceiver implements Cl
     @Override
     public void close() {
         if (ctx != null) {
-            ctx.unregisterReceiver(this);
+            try {
+                ctx.unregisterReceiver(this);
+            } catch (IllegalArgumentException e) {
+                // Receiver already unregistered, ignore
+            }
         }
         connectedDevices.clear();
     }

@@ -16,7 +16,7 @@ compatible during use.
 
 ## enioka Scan artefacts
 
-Each artefact can be imported to your project as `com.enioka.scanner:<artefact>:<version>:aar`.
+Each artefact can be imported to your project as `com.enioka.scanner:<artefact>:<version>`.
 
 ### `enioka-scan-core`
 

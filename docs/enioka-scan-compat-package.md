@@ -4,16 +4,17 @@ Starting with version 3.1.0, enioka-scan provides npm packages that facilitate i
 non-java applications by allowing you to use the provided activities.
 
 Currently, plugins exist for the following Frameworks:
-- React Native
-- Cordova / Capacitor
+- React Native (version 1.0.1, requires enioka-scan version 3.1.0 or above)
+- Cordova / Capacitor (version 2.0.0, requires enioka-scan version 3.1.0 or above)
 
 As their release cycle will become decoupled from the main library, all compatibility plugins will
 have individual version numbers on npm. It is recommended to always use the latest version available.
 
-## For all frameworks
+## Requirements for all frameworks
 
-The npm plugins only facilitate the integration of the provided UI, however you still need to add
-the Maven Central dependencies in the `build.gradle` file of the android-specific part of your project:
+The npm plugins only facilitate the integration of the enioka Scan library. However, you still need
+to add the Maven Central dependencies in the `build.gradle` file of the android-specific part of
+your project:
 
 ```groovy
 dependencies {
@@ -25,7 +26,12 @@ dependencies {
 }
 ```
 
-The plugin exposes 3 functions:
+## Exposed API
+
+### Version 1.0.1
+
+Version 1.0.1 only lets you start the provided ScannerCompatActivity. It exposes the following
+functions:
 
 :::{method} startActivityByName(string name, Record<string, boolean | string[]> intentExtras) -> void
 
@@ -48,7 +54,76 @@ In the Cordova/Capacitor version of the plugin, the "startActivityByName" and
 "startScannerCompatActivity" functions take two extra parameters: a successCallback and
 errorCallback.
 
-## React Native
+### Version 2.0.0 (only available for Cordova for now)
+
+Version 2.0.0 adds the ability to connect to the Scanner Service directly.
+
+While there is still no direct control on individual scanners (for example, it is still not possible
+to trigger their scan or LED), this lets you have full control on the Scanner Service: updating
+search parameters, see available providers, restart the scanner search, and pause or resume scanning.
+
+On top of the functions already available from version 1, the following functions have been added:
+
+:::{method} bindToScannerService(Record<string, boolean | string[]> intentExtras) -> void
+
+Starts and binds eniokaScan's ScannerService with the given intent extras.
+
+In Cordova, the successCallback will be used to forward scan results in the form of an array of
+objects containing two string values: 'barcode' and 'symbology'. The errorCallback will be called
+if the service gets disconnected.
+:::
+
+:::{method} bindToScannerService() -> void
+
+Unbinds eniokaScan's ScannerService.
+:::
+
+:::{method} restartScannerDiscovery() -> void
+
+Disconnects all currently-connected scanners then starts the initialization process all over again.
+:::
+
+:::{method} restartProviderDiscovery() -> void
+
+Clears the cache of discovered scanner providers and re-starts their discovery. This is a costly
+operation.
+:::
+
+:::{method} getAvailableProviders() -> void
+
+Returns the list of keys of currently-available scanner providers, useful to tune scanner search
+options at runtime.
+
+In Cordova, the successCallback will be used to forward scan results in the form of an array of
+string, with each entry being a provider's key.
+:::
+
+:::{method} updateScannerSearchOptions(Record<string, boolean | string[]> intentExtras) -> void
+
+Updates the service's scanner search options using the provided intent extras.
+:::
+
+:::{method} pause() -> void
+
+The service keeps the scanners for itself but does not need it immediately. It may free whatever
+resources it has, or ignore this call. Idempotent.
+:::
+
+:::{method} resume() -> void
+
+Reverse the effects of pause(). The scanners are once again ready to scan after this call.
+Idempotent.
+:::
+
+:::{method} disconnect() -> void
+
+Disconnect all scanners from the service (the app does not need the scanner anymore).
+In case scanners are needed again, restartScannerDiscovery() will need to be called first.
+:::
+
+## Installation and use
+
+### React Native
 
 The React Native integration dependency can be installed with the following command:
 
@@ -87,7 +162,7 @@ import { startScannerCompatActivity, getDefaultExtras } from '@enioka/enioka-sca
 </Button>
 ```
 
-## Cordova and Capacitor
+### Cordova and Capacitor
 
 Cordova has its own plugin system. You can add the integration dependency using:
 
@@ -106,10 +181,21 @@ You can then instantiate the scanner activity in any .js file after your app was
 ```js
 function foo() 
 {
-    EniokaScanPlugin.startScannerCompatActivity(
+    EniokaScanPlugin.bindToScannerService(
         EniokaScanPlugin.getDefaultExtras(),
-        function(res){}, // success callback
-        function(res){}, // error callback
+        function(res){
+            // success callback -> called with barcode scan results
+            let asString = '';
+            for (const result of res) {
+                asString += (result?.symbology ?? 'None') + ': ' + (result?.barcode ?? 'None') + '\n';
+            }
+            document.getElementById('scanresult').innerText = asString;
+        },
+        function(res){
+            // error callback -> called when the service is no longer available
+            console.log('Scan Service disconnected');
+            document.getElementById('scanresult').innerText = 'Scanner disconnected';
+        },
     );
 }
 ```

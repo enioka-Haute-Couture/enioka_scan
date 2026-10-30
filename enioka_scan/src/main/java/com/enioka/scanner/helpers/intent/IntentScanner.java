@@ -134,7 +134,11 @@ public abstract class IntentScanner<BarcodeTypeClass> extends BroadcastReceiver 
     @Override
     public void disconnect(@Nullable ScannerCommandCallbackProxy cb) {
         Log.d(getProviderKey(), "Removing subscription to scanner service");
-        ctx.unregisterReceiver(this);
+        try {
+            ctx.unregisterReceiver(this);
+        } catch (IllegalArgumentException e) {
+            // Receiver already unregistered, ignore
+        }
         if (cb != null) {
             cb.onSuccess();
         }

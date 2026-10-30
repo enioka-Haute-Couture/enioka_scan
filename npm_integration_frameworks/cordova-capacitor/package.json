@@ -1,6 +1,6 @@
 {
   "name": "@enioka/cordova-plugin-enioka-scan",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "enioka Scan integration plugin for Cordova and Capacitor",
   "cordova": {
     "id": "@enioka/cordova-plugin-enioka-scan",
